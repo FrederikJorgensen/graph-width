@@ -1,0 +1,19 @@
+{
+  "nodes": [
+    { "id": "GHD", "graphNodes": ["G", "H", "D"] },
+    { "id": "DEH", "graphNodes": ["D", "E", "H"] },
+    { "id": "HIE", "graphNodes": ["H", "I", "E"] },
+    { "id": "EIF", "graphNodes": ["E", "I", "F"] },
+    { "id": "CDE", "graphNodes": ["C", "D", "E"] },
+    { "id": "BCD", "graphNodes": ["B", "C", "D"] },
+    { "id": "ABC", "graphNodes": ["A", "B", "C"] }
+  ],
+  "links": [
+    { "source": "GHD", "target": "DEH" },
+    { "source": "DEH", "target": "HIE" },
+    { "source": "HIE", "target": "EIF" },
+    { "source": "DEH", "target": "CDE" },
+    { "source": "CDE", "target": "BCD" },
+    { "source": "BCD", "target": "ABC" }
+  ]
+}

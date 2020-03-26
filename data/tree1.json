@@ -1,0 +1,11 @@
+{
+  "nodes": [
+    { "id": "123", "graphNodes": ["1", "2", "3"] },
+    { "id": "234", "graphNodes": ["2", "3", "4"] },
+    { "id": "345", "graphNodes": ["3", "4", "5"] }
+  ],
+  "links": [
+    { "source": "123", "target": "234" },
+    { "source": "234", "target": "345" }
+  ]
+}

@@ -1,0 +1,27 @@
+{
+  "nodes": [
+    { "id": "G" },
+    { "id": "H" },
+    { "id": "D" },
+    { "id": "B" },
+    { "id": "A" },
+    { "id": "C" },
+    { "id": "E" },
+    { "id": "F" },
+    { "id": "I" }
+  ],
+  "links": [
+    { "source": "G", "target": "H" },
+    { "source": "G", "target": "D" },
+    { "source": "D", "target": "B" },
+    { "source": "B", "target": "A" },
+    { "source": "B", "target": "C" },
+    { "source": "C", "target": "D" },
+    { "source": "C", "target": "E" },
+    { "source": "E", "target": "F" },
+    { "source": "F", "target": "I" },
+    { "source": "I", "target": "H" },
+    { "source": "H", "target": "E" },
+    { "source": "H", "target": "D" }
+  ]
+}
