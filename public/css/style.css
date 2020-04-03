@@ -18,28 +18,48 @@
   vertical-align: middle;
 }
 
-.container {
+.flex-container {
   display: flex;
+  flex: 1;
+  flex-direction: row;
 }
 
-#graph-container {
-  display: flex;
+.graphStyle {
   flex: 0.5;
+  text-align: center;
+  justify-content: center;
   height: 800px;
 }
 
-#tree-container {
-  display: flex;
+.treeStyle {
   flex: 0.5;
-  height: 800px;
+  text-align: center;
+  justify-content: center;
 }
 
+.graphSvg {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+.treeSvg {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
 .node {
-  fill: red;
+  fill: #eb4034
 }
 
 .link {
   fill: #ccc;
   stroke: #333;
   stroke-width: 1.5px;
+}
+
+.label {
+  font-size: 12px;
+  fill: white;
+  font-weight: 1000;
 }
