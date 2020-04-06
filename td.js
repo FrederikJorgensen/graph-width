@@ -222,7 +222,7 @@ function resetHighlight() {
 
 
 /* eslint-disable no-param-reassign */
-function drawTree(graph) {
+function drawTree(tree) {
   // Get height and width of the specified container
   const width = document.getElementById('tree-container').offsetWidth;
   const height = document.getElementById('tree-container').offsetHeight;
@@ -253,7 +253,7 @@ function drawTree(graph) {
       .on('end', dragended);
   };
 
-  const root = d3.hierarchy(graph);
+  const root = d3.hierarchy(tree);
   const links = root.links();
   const nodes = root.descendants();
 
