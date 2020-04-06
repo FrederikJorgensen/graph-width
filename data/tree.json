@@ -1,1 +1,75 @@
-{"nodes":[{"id":"AB","graphNodes":["A","B"]},{"id":"BCE","graphNodes":["B","C","E"]},{"id":"CD","graphNodes":["C","D"]},{"id":"CEH","graphNodes":["C","E","H"]},{"id":"EFH","graphNodes":["E","F","H"]},{"id":"CGH","graphNodes":["C","G","H"]}],"links":[{"source":"AB","target":"BCE"},{"source":"BCE","target":"CD"},{"source":"BCE","target":"CEH"},{"source":"CEH","target":"EFH"},{"source":"CEH","target":"CGH"}]}
+{
+    "name": "b, d, g",
+    "vertices": [
+        "b",
+        "d",
+        "g"
+    ],
+    "children": [
+        {
+            "name": "a, b, d",
+            "vertices": [
+                "a",
+                "b",
+                "d"
+            ],
+            "children": [
+                {
+                    "name": "a",
+                    "vertices": [
+                        "a"
+                    ]
+                },
+                {
+                    "name": "bd",
+                    "vertices": [
+                        "b",
+                        "d"
+                    ],
+                    "children": [
+                        {
+                            "name": "b",
+                            "vertices": [
+                                "b"
+                            ]
+                        }
+                    ]
+                }
+            ]
+        },
+        {
+            "name": "d, f, g",
+            "vertices": [
+                "d",
+                "f",
+                "g"
+            ],
+            "children": [
+                {
+                    "name": "cdf",
+                    "vertices": [
+                        "c",
+                        "d",
+                        "f"
+                    ]
+                },
+                {
+                    "name": "efg",
+                    "vertices": [
+                        "e",
+                        "f",
+                        "g"
+                    ]
+                },
+                {
+                    "name": "fgh",
+                    "vertices": [
+                        "f",
+                        "g",
+                        "h"
+                    ]
+                }
+            ]
+        }
+    ]
+}

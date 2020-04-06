@@ -49,13 +49,12 @@
   overflow: hidden;
 }
 .node {
-  fill: #eb4034
+  fill:#1a7532
 }
 
 .link {
-  fill: #ccc;
   stroke: #333;
-  stroke-width: 1.5px;
+  stroke-width: 2px;
 }
 
 .label {
