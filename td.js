@@ -222,7 +222,7 @@ function resetHighlight() {
 
 
 /* eslint-disable no-param-reassign */
-function drawTree(data) {
+function drawTree(graph) {
   // Get height and width of the specified container
   const width = document.getElementById('tree-container').offsetWidth;
   const height = document.getElementById('tree-container').offsetHeight;
@@ -253,70 +253,68 @@ function drawTree(data) {
       .on('end', dragended);
   };
 
-  d3.json(data).then((graph) => {
-    const root = d3.hierarchy(graph);
-    const links = root.links();
-    const nodes = root.descendants();
+  const root = d3.hierarchy(graph);
+  const links = root.links();
+  const nodes = root.descendants();
 
 
-    const simulation = d3.forceSimulation(nodes)
-      .force('link', d3.forceLink(links).id((d) => d.id).distance(2).strength(0.5))
-      .force('charge', d3.forceManyBody().strength(-1500))
-      .force('x', d3.forceX())
-      .force('y', d3.forceY());
+  const simulation = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(links).id((d) => d.id).distance(2).strength(0.5))
+    .force('charge', d3.forceManyBody().strength(-1500))
+    .force('x', d3.forceX())
+    .force('y', d3.forceY());
 
-    svg = d3.selectAll('#tree')
-      .attr('viewBox', [-width / 2, -height / 2, width, height]);
+  svg = d3.selectAll('#tree')
+    .attr('viewBox', [-width / 2, -height / 2, width, height]);
 
-    const link = svg.append('g')
-      .attr('stroke', '#999')
-      .attr('stroke-opacity', 0.6)
-      .selectAll('line')
-      .data(links)
-      .join('line');
+  const link = svg.append('g')
+    .attr('stroke', '#999')
+    .attr('stroke-opacity', 0.6)
+    .selectAll('line')
+    .data(links)
+    .join('line');
 
-    const node = svg.append('g')
-      .selectAll('circle')
-      .data(nodes)
-      .join('circle')
-      .attr('r', 20)
-      .attr('fill', '#1a7532')
-      .call(drag(simulation));
+  const node = svg.append('g')
+    .selectAll('circle')
+    .data(nodes)
+    .join('circle')
+    .attr('r', 20)
+    .attr('fill', '#1a7532')
+    .call(drag(simulation));
 
-    const label = svg
-      .append('g')
-      .selectAll('text')
-      .data(nodes)
-      .enter()
-      .append('text')
-      .attr('text-anchor', 'middle')
-      .attr('class', 'label')
-      .text((d) => d.data.name);
+  const label = svg
+    .append('g')
+    .selectAll('text')
+    .data(nodes)
+    .enter()
+    .append('text')
+    .attr('text-anchor', 'middle')
+    .attr('class', 'label')
+    .text((d) => d.data.name);
 
-    node.on('mouseover', highlightNodes);
-    node.on('mouseout', resetHighlight);
+  node.on('mouseover', highlightNodes);
+  node.on('mouseout', resetHighlight);
 
-    simulation.on('tick', () => {
-      const ky = 1.2 * simulation.alpha();
-      links.forEach((d) => {
-        d.target.y += (d.target.depth * 120 - d.target.y) * ky;
-      });
-
-      link
-        .attr('x1', (d) => d.source.x)
-        .attr('y1', (d) => d.source.y)
-        .attr('x2', (d) => d.target.x)
-        .attr('y2', (d) => d.target.y);
-
-      node
-        .attr('cx', (d) => d.x)
-        .attr('cy', (d) => d.y);
-
-
-      label
-        .attr('x', (d) => d.x)
-        .attr('y', (d) => d.y);
+  simulation.on('tick', () => {
+    const ky = 1.2 * simulation.alpha();
+    links.forEach((d) => {
+      d.target.y += (d.target.depth * 120 - d.target.y) * ky;
     });
+
+    link
+      .attr('x1', (d) => d.source.x)
+      .attr('y1', (d) => d.source.y)
+      .attr('x2', (d) => d.target.x)
+      .attr('y2', (d) => d.target.y);
+
+    node
+      .attr('cx', (d) => d.x)
+      .attr('cy', (d) => d.y);
+
+
+    label
+      .attr('x', (d) => d.x)
+      .attr('y', (d) => d.y);
   });
 }
 
@@ -412,5 +410,81 @@ const graphin = {
   ],
 };
 
+const tree = {
+  name: 'b, d, g',
+  vertices: [
+    'b',
+    'd',
+    'g',
+  ],
+  children: [
+    {
+      name: 'a, b, d',
+      vertices: [
+        'a',
+        'b',
+        'd',
+      ],
+      children: [
+        {
+          name: 'a',
+          vertices: [
+            'a',
+          ],
+        },
+        {
+          name: 'bd',
+          vertices: [
+            'b',
+            'd',
+          ],
+          children: [
+            {
+              name: 'b',
+              vertices: [
+                'b',
+              ],
+            },
+          ],
+        },
+      ],
+    },
+    {
+      name: 'd, f, g',
+      vertices: [
+        'd',
+        'f',
+        'g',
+      ],
+      children: [
+        {
+          name: 'cdf',
+          vertices: [
+            'c',
+            'd',
+            'f',
+          ],
+        },
+        {
+          name: 'efg',
+          vertices: [
+            'e',
+            'f',
+            'g',
+          ],
+        },
+        {
+          name: 'fgh',
+          vertices: [
+            'f',
+            'g',
+            'h',
+          ],
+        },
+      ],
+    },
+  ],
+};
+
 drawGraph(graphin);
-drawTree('../../data/tree.json');
+drawTree(tree);
