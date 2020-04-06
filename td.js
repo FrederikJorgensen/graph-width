@@ -247,10 +247,7 @@ function drawTree(tree) {
       d.fy = null;
     }
 
-    return d3.drag()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended);
+    return d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended);
   };
 
   const root = d3.hierarchy(tree);
@@ -485,6 +482,7 @@ const tree = {
     },
   ],
 };
+
 
 drawGraph(graphin);
 drawTree(tree);
