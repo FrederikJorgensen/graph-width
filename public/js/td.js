@@ -45,7 +45,6 @@ function randomGraph(n, m) {
   return graph;
 }
 
-
 /* eslint-disable no-param-reassign */
 function drawGraph(graph) {
   const width = document.getElementById('graph-container').offsetWidth;
