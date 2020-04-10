@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Graph Width Visualizer</title>
+</head>
+
+<body>
+  <div id="sidenav">
+    <p>Input graph:</p>
+    <input type="file" id="fileUpload" />
+    <!--     <form action="/" enctype="multipart/form-data" method="post">
+      <input type="file" name="file-to-upload">
+      <input type="submit" value="Upload">
+    </form> -->
+    <p>Input tree decomposition:</p>
+    <input type="file" id="tree-input" />
+    <p>reload a random graph</p>
+    <div id="reload">↺</div>
+    <p>Vertices</p>
+    <p>Edges</p>
+    <p>Treewidth</p>
+    <p>Nice tree decomposition</p>
+    <p>Best decomposition</p>
+  </div>
+  <div class="flex-container">
+    <div id="graph-container" class="graphStyle">
+      <svg id="graph" class="graphSvg"></svg>
+    </div>
+    <div id="tree-container" class="treeStyle">
+      <svg id="tree" class="treeSvg"></svg>
+    </div>
+  </div>
+  <svg id="viz"></svg>
+  <script type="text/javascript" src="td.js"></script>
+</body>
+
+</html>
