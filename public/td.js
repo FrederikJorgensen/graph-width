@@ -546,7 +546,6 @@ function readTreeInput(input) {
   const allNodes = [];
   const nodesWithChildren = [];
   const edgesArray = [];
-  console.log(lines);
 
   for (let line = 0; line < lines.length; line++) {
     const textLine = lines[line];
@@ -598,6 +597,12 @@ function readTreeInput(input) {
   // 2->4
   // 2->5
 
+  function findTreeBagLabel(nodeId) {
+    for (let i = 0; i < treeBags.length; i++) {
+      if (treeBags[i].bagId === nodeId) return treeBags[i].bagLabel;
+    }
+  }
+
   function checkIfLinkExists(parent, child) {
     for (let i = 0; i < edgesArray.length; i++) {
       if (edgesArray[i].source === parent && edgesArray[i].target === child) return true;
@@ -620,13 +625,13 @@ function readTreeInput(input) {
         st = `
           {
             "id": ${temp[i]},
-            "name": ${temp[i]}
+            "name": ${findTreeBagLabel(temp[i])}
           }`;
       } else {
         st = `
           {
             "id": ${temp[i]},
-            "name": ${temp[i]}
+            "name": ${findTreeBagLabel(temp[i])}
           },`;
       }
       result += st;
@@ -634,49 +639,99 @@ function readTreeInput(input) {
     return result;
   }
 
-  for (let i = 0; i < 1; i++) {
-    stc = `{
-              "id":${nodesWithChildren[i]},
-              "name":${nodesWithChildren[i]},
-              "children":[`;
-    result += stc;
-    for (let j = 0; j < allNodes.length; j++) {
-      const currentParent = nodesWithChildren[i];
-      const currentChild = allNodes[j];
-
-
-      if (checkIfLinkExists(currentParent, currentChild)) {
-        /*           if ((j + 1) === allNodes.length) {
-            console.log('here');
-            console.log(currentChild);
-            st = `{"id":${currentChild},"name":${currentChild}}`;
-            result += st;
-            continue;
-          } */
-
-        // check if the child has children as well..
-        if (nodesWithChildren.includes(currentChild)) {
-          st = `{
-                  "id":${currentChild},
-                  "name":${currentChild},
-                  "children":[${findChildren(currentChild)}]},`;
-          result += st;
-        } else {
-          st = `{"id":${currentChild},"name":${currentChild}}`;
-          result += st;
-        }
+  function howManyChildren(node) {
+    const temp = [];
+    for (let i = 0; i < edgesArray.length; i++) {
+      if (edgesArray[i].source === node) {
+        temp.push(edgesArray[i].target);
       }
     }
-    const endOfString = ']}';
-    result += endOfString;
+    return temp;
   }
-  const newstring = result.replace(/,(?=[^,]*$)/, '');
-  const newobj = JSON.parse(newstring);
-  console.log(newstring);
+
+  function findParentNode(childNode) {
+    for (let i = 0; i < edgesArray.length; i++) {
+      if (edgesArray[i].target === childNode) {
+        return edgesArray[i].source;
+      }
+    }
+    return 0;
+  }
+
+
+  stc = `{
+              "id":${nodesWithChildren[0]},
+              "name":${findTreeBagLabel(nodesWithChildren[0])},
+              "children":[`;
+
+  result += stc;
+
+  for (let j = 0; j < allNodes.length; j++) {
+    const currentChild = allNodes[j];
+    const currentParent = findParentNode(currentChild);
+
+
+    if (checkIfLinkExists(currentParent, currentChild)) {
+      // check if the child has children as well..
+      if (nodesWithChildren.includes(currentChild)) {
+        const allChildren = howManyChildren(currentParent);
+        if (currentChild === allChildren[allChildren.length - 1]) {
+          st = `{
+              "id":${currentChild},
+              "name":${findTreeBagLabel(currentChild)},
+              "children":[${findChildren(currentChild)}]}`;
+          result += st;
+        } else {
+          st = `{
+              "id":${currentChild},
+              "name":${findTreeBagLabel(currentChild)},
+              "children":[${findChildren(currentChild)}]},`;
+          result += st;
+        }
+      } else if ((j + 1) === allNodes.length) {
+        st = `{"id":${currentChild},"name":${findTreeBagLabel(currentChild)}}`;
+        result += st;
+      } else {
+        st = `{"id":${currentChild},"name":${findTreeBagLabel(currentChild)}},`;
+        result += st;
+      }
+    }
+  }
+  const endOfString = ']}';
+  result += endOfString;
+
+
+  // const newstring = result.replace(/,(?=[^,]*$)/, '');
+  console.log(result);
+  const newobj = JSON.parse(result);
   removeExistingTree();
   drawTree(newobj);
 }
 
+
+const newttt = {
+  id: 1,
+  name: 469,
+  children: [
+    {
+      id: 2,
+      name: 169,
+      children: [
+        {
+          id: 4,
+          name: 161,
+        },
+      ],
+    },
+    {
+      id: 6,
+      name: 5,
+    },
+    {
+      id: 7,
+      name: 7,
+    }],
+};
 
 const tree = {
   id: 1,
@@ -705,7 +760,6 @@ const logFileText = async (file) => {
   readTreeInput(newnew);
 };
 
-
 const handleImageUpload = (event) => {
   const files = event.target.files;
   const formData = new FormData();
@@ -717,7 +771,7 @@ const handleImageUpload = (event) => {
     body: formData,
   })
     .then((response) => response.json())
-    .then((data) => {
+    .then(() => {
       const pathtotree = `./treedecompositions/${treename}.td`;
       logFileText(pathtotree);
     })
@@ -730,8 +784,37 @@ document.querySelector('#fileUpload').addEventListener('change', (event) => {
   handleImageUpload(event);
 });
 
+/* {
+  "id":1,
+  "name":12,
+  "children":[
+    {
+      "id":2,
+      "name":13,
+      "children":[
+                    {
+                      "id": 5,
+                      "name": 36
+                    }]
+    },]
+} */
+
+const newew = {
+  id: 1,
+  name: 12,
+  children: [{
+    id: 2,
+    name: 13,
+    children: [
+      {
+        id: 5,
+        name: 36,
+      }],
+  }],
+};
+
 
 // document.getElementById('graph-input').addEventListener('change', uploadGraph);
 document.getElementById('tree-input').addEventListener('change', readTreeInput);
 document.getElementById('reload').addEventListener('click', create);
-drawTree(tree);
+// drawTree(tree);

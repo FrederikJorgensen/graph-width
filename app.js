@@ -1,13 +1,12 @@
 /* eslint linebreak-style: ["error", "windows"] */
 const express = require('express');
 const path = require('path');
-const fs = require('fs');
 
 const app = express();
 const port = 3000;
 const bodyParser = require('body-parser');
 const fileupload = require('express-fileupload');
-const { exec } = require('child_process');
+// const child = require('child_process');
 
 
 app.use(bodyParser.urlencoded({ extended: false }));
@@ -24,6 +23,7 @@ app.get('/', (req, res) => {
 
 app.use(express.static(path.join(__dirname, 'public')));
 
+
 app.post('/upload', (req, res) => {
   if (req.files) {
     const file = req.files.myFile;
@@ -32,22 +32,17 @@ app.post('/upload', (req, res) => {
 
     const command = `bash scriptsample.sh ${filename} ${treename}.td`;
 
-    exec(command,
-      (error, stdout, stderr) => {
-        console.log(`stdout: ${stdout}`);
-        console.log(`stderr: ${stderr}`);
-        if (error !== null) {
-          console.log(`exec error: ${error}`);
+    const child = require('child_process').exec(command);
+    child.stdout.pipe(process.stdout);
+    child.on('exit', () => {
+      console.log('DONE!');
+      file.mv(`./uploads/${filename}`, (err) => {
+        if (err) {
+          res.send({ success: false });
+        } else {
+          res.send({ success: true });
         }
       });
-
-
-    file.mv(`./uploads/${filename}`, (err) => {
-      if (err) {
-        res.send({ success: false });
-      } else {
-        res.send({ success: true });
-      }
     });
   }
 });
