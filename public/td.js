@@ -12,13 +12,7 @@ const adjlist = [];
 let selected = [];
 let graph1;
 let currentGraph;
-// let finalGraph;
 
-/** Sample a random graph G(n,m)
-  * @param {Number} n vertices
-  * @param {Number} m edges
-  * @return {Graph}
-  */
 function randomGraph(n, m) {
   const maxNumEdges = n * (n - 1) / 2;
   if (n < 0 || m < 0 || m > maxNumEdges) return undefined;
@@ -56,10 +50,13 @@ function randomGraph(n, m) {
 function drawGraph(graph) {
   const width = document.getElementById('graph-container').offsetWidth;
   const height = document.getElementById('graph-container').offsetHeight;
-  const svg = d3.select('#graph');
+  const svg = d3.select('#graph').call(d3.zoom().on('zoom', () => {
+    svg.attr('transform', d3.event.transform);
+  }));
 
   const { nodes } = graph;
   const { links } = graph;
+
 
   graphLink = svg.append('g')
     .selectAll('line')
@@ -103,7 +100,7 @@ function drawGraph(graph) {
   const simulation = d3.forceSimulation(nodes)
     .force('charge', d3.forceManyBody().strength(-500))
     .force('center', d3.forceCenter(width / 2, height / 2))
-    .force('link', d3.forceLink(links).id((d) => d.id).distance(70).strength(1.5))
+    .force('link', d3.forceLink(links).id((d) => d.id).distance(50).strength(0.9))
     .on('tick', ticked);
 
 
@@ -241,7 +238,7 @@ function drawTree(tree) {
     .selectAll('circle')
     .data(nodes)
     .join('circle')
-    .attr('r', 20)
+    .attr('r', 30)
     .attr('fill', '#1a7532')
     .call(drag(simulation));
 
@@ -297,40 +294,63 @@ function removeExistingTree() {
   }
 }
 
-function readGraphFile(evt) {
+const testgraph2 = {
+  nodes: [
+    {
+      id: 1,
+      label: 1,
+    },
+    {
+      id: 2,
+      label: 2,
+    },
+  ],
+  links: [
+    {
+      source: 1,
+      target: 2,
+    },
+  ],
+};
+
+function newReadGraphFile(evt) {
   const f = evt.target.files[0];
-
-  const edges = [];
-
   const r = new FileReader();
+  const newGraph = {};
+  const nodes = [];
+  const links = [];
   r.onload = function onLoad() {
     const lines = this.result.split('\n');
-    const list = [];
-    for (let line = 0; line < lines.length; line++) {
-      const textLine = lines[line];
-      if (textLine.startsWith('c') || textLine.startsWith('p') || textLine.length < 1) {
-        continue;
-      } else {
-        const firstNode = parseInt(textLine[0], 10);
-        const secondNode = parseInt(textLine[2], 10);
-        list.push(firstNode);
-        list.push(secondNode);
-        edges.push({ source: firstNode, target: secondNode });
+
+    function nodeExists(node) {
+      for (let i = 0; i < nodes.length; i++) {
+        if (nodes[i].id === node) return true;
       }
+      return false;
     }
-    const sortedList = [...new Set(list)];
-    const finalList = [];
-    for (let i = 0; i < sortedList.length; i++) {
-      finalList.push({ id: sortedList[i], label: sortedList[i] });
+
+    for (let i = 0; i < lines.length; i++) {
+      const textLine = lines[i];
+      if (textLine.startsWith('c') || textLine.startsWith('p') || textLine.length < 1) continue;
+      const splitted = textLine.split(' ');
+      const firstNode = parseInt(splitted[0], 10);
+      const secondNode = parseInt(splitted[1], 10);
+
+      if (!nodeExists(firstNode)) {
+        nodes.push({ id: firstNode, label: firstNode });
+      }
+
+      if (!nodeExists(secondNode)) {
+        nodes.push({ id: secondNode, label: secondNode });
+      }
+
+      links.push({ source: firstNode, target: secondNode });
     }
-    const verticesAsString = JSON.stringify(finalList);
-    const edgesAsString = JSON.stringify(edges);
-    const nodes = `${'"nodes"' + ': '}${verticesAsString}`;
-    const links = `${'"links"' + ': '}${edgesAsString}`;
-    const finalGraph = `{${nodes},${links}}`;
-    const jsonGraph = JSON.parse(finalGraph);
+    newGraph.nodes = nodes;
+    newGraph.links = links;
     removeExistingGraph();
-    drawGraph(jsonGraph);
+    currentGraph = newGraph;
+    drawGraph(newGraph);
   };
   r.readAsText(f);
 }
@@ -349,9 +369,6 @@ function tree(nodes) {
   nodes.forEach((d) => {
     nodeById[d.id] = d;
   });
-
-  console.log(nodes);
-  console.log(nodeById);
 
   nodes.forEach((d) => {
     if ('parent' in d) {
@@ -381,38 +398,65 @@ function readTreeInput(input) {
 
   for (let line = 0; line < lines.length; line++) {
     const textLine = lines[line];
-    const bagId = parseInt(textLine[2], 10);
-    const firstNode = textLine[4];
-    const secondNode = textLine[6];
-    const thirdNode = textLine[8];
 
-    let bagLabel;
-    let vertices;
-
+    let bagId;
+    let firstNode;
+    let secondNode;
+    let thirdNode;
+    let fourthNode;
+    let fifthNode;
+    let bagLabel = '';
 
     if (textLine.startsWith('b')) {
-      if (secondNode === undefined) {
-        bagLabel = firstNode;
-        vertices = [firstNode];
-      } else if (thirdNode === undefined) {
-        bagLabel = firstNode + secondNode;
-        vertices = [firstNode, secondNode];
-      } else {
-        bagLabel = firstNode + secondNode + thirdNode;
-        vertices = [firstNode, secondNode, thirdNode];
+      const splitted = textLine.split(' ');
+      bagId = parseInt(splitted[1], 10);
+      firstNode = parseInt(splitted[2], 10);
+      secondNode = parseInt(splitted[3], 10);
+      thirdNode = parseInt(splitted[4], 10);
+      fourthNode = parseInt(splitted[5], 10);
+      fifthNode = parseInt(splitted[6], 10);
+
+      const l = splitted.length;
+
+      if (l === 4) {
+        bagLabel += `${firstNode}, `;
+        bagLabel += secondNode;
       }
-      treeBags.push({ bagId, bagLabel, vertices });
+
+      if (l === 5) {
+        bagLabel += `${firstNode}, `;
+        bagLabel += `${secondNode}, `;
+        bagLabel += thirdNode;
+      }
+
+      if (l === 6) {
+        bagLabel += `${firstNode}, `;
+        bagLabel += `${secondNode}, `;
+        bagLabel += `${thirdNode}, `;
+        bagLabel += fourthNode;
+      }
+
+      if (l === 7) {
+        bagLabel += `${firstNode}, `;
+        bagLabel += `${secondNode}, `;
+        bagLabel += `${thirdNode}, `;
+        bagLabel += `${fourthNode}, `;
+        bagLabel += fifthNode;
+      }
+
+      treeBags.push({ bagId, bagLabel });
     } else {
-      const sourceNode = parseInt(textLine[0], 10);
-      const targetNode = parseInt(textLine[2], 10);
+      const splitted = textLine.split(' ');
+      const sourceNode = parseInt(splitted[0], 10);
+      const targetNode = parseInt(splitted[1], 10);
+
       if (line === lines.length - 1) {
-        const rootNode = parseInt(textLine[2], 10);
+        const rootNode = parseInt(splitted[1], 10);
         forTree.unshift({
           id: rootNode,
           name: findTreeBagLabel(rootNode),
         });
       }
-
 
       if (targetNode !== undefined && sourceNode !== undefined) {
         forTree.push({
@@ -423,7 +467,6 @@ function readTreeInput(input) {
       }
     }
   }
-  // console.log(forTree);
   const jsonTree = tree(forTree);
   removeExistingTree();
   drawTree(jsonTree);
@@ -436,28 +479,29 @@ const logFileText = async (file) => {
   readTreeInput(newnew);
 };
 
-const handleImageUpload = (event) => {
+const handleGraphUpload = (event) => {
   const files = event.target.files;
-  readGraphFile(event);
-  const formData = new FormData();
-  formData.append('myFile', files[0]);
-  const treename = files[0].name.replace('.gr', '');
+  newReadGraphFile(event);
+  /*   const formData = new FormData();
+    formData.append('myFile', files[0]);
+    const treename = files[0].name.replace('.gr', '');
 
-  fetch('/upload', {
-    method: 'POST',
-    body: formData,
-  })
-    .then((response) => response.json())
-    .then(() => {
-      const pathtotree = `./treedecompositions/${treename}.td`;
-      logFileText(pathtotree);
+    fetch('/upload', {
+      method: 'POST',
+      body: formData,
     })
-    .catch((error) => {
-      console.error(error);
-    });
+      .then((response) => response.json())
+      .then(() => {
+        const pathtotree = `./treedecompositions/${treename}.td`;
+        logFileText(pathtotree);
+      })
+      .catch((error) => {
+        console.error(error);
+      }); */
 };
 
 function computeTreeDecomposition() {
+  removeExistingTree();
   const temp = [];
   currentGraph.links.forEach((link) => {
     temp.push([link.source.id, link.target.id]);
@@ -478,7 +522,7 @@ function computeTreeDecomposition() {
   });
 }
 
-const testgraph1 = {
+const testGraph1 = {
   nodes: [
     {
       id: 1,
@@ -508,42 +552,66 @@ const testgraph1 = {
       id: 7,
       label: 7,
     },
+    {
+      id: 8,
+      label: 8,
+    },
+    {
+      id: 9,
+      label: 9,
+    },
+    {
+      id: 10,
+      label: 10,
+    },
   ],
   links: [
+    {
+      source: 1,
+      target: 9,
+    },
     {
       source: 1,
       target: 2,
     },
     {
       source: 2,
-      target: 7,
-    },
-    {
-      source: 7,
-      target: 3,
-    },
-    {
-      source: 3,
-      target: 5,
-    },
-    {
-      source: 5,
       target: 4,
     },
     {
-      source: 5,
-      target: 2,
+      source: 4,
+      target: 5,
     },
     {
       source: 4,
       target: 6,
     },
+    {
+      source: 5,
+      target: 10,
+    },
+    {
+      source: 10,
+      target: 6,
+    },
+    {
+      source: 6,
+      target: 3,
+    },
+    {
+      source: 6,
+      target: 8,
+    },
+    {
+      source: 8,
+      target: 7,
+    },
   ],
 };
 
-currentGraph = testgraph1;
-drawGraph(testgraph1);
+currentGraph = testGraph1;
+drawGraph(testGraph1);
 
-document.querySelector('#fileUpload').addEventListener('change', handleImageUpload);
+document.querySelector('#fileUpload').addEventListener('change', handleGraphUpload);
 document.getElementById('compute').addEventListener('click', computeTreeDecomposition);
 document.getElementById('reload').addEventListener('click', create);
