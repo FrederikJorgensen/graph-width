@@ -1,4 +1,5 @@
-* git clone https://github.com/FrederikJorgensen/graph-width-visualizer.git
-* cd graph-width-visualizer
-* npm install
-* npm run dev
+# Graph Width Visualizer
+* `git clone https://github.com/FrederikJorgensen/graph-width-visualizer.git`
+* `cd graph-width-visualizer`
+* `npm install`
+* `npm run dev`
