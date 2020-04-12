@@ -238,7 +238,7 @@ function drawTree(tree) {
     .selectAll('circle')
     .data(nodes)
     .join('circle')
-    .attr('r', 30)
+    .attr('r', 40)
     .attr('fill', '#1a7532')
     .call(drag(simulation));
 
@@ -294,27 +294,8 @@ function removeExistingTree() {
   }
 }
 
-const testgraph2 = {
-  nodes: [
-    {
-      id: 1,
-      label: 1,
-    },
-    {
-      id: 2,
-      label: 2,
-    },
-  ],
-  links: [
-    {
-      source: 1,
-      target: 2,
-    },
-  ],
-};
-
-function newReadGraphFile(evt) {
-  const f = evt.target.files[0];
+function newReadGraphFile(file) {
+  const f = file;
   const r = new FileReader();
   const newGraph = {};
   const nodes = [];
@@ -355,6 +336,7 @@ function newReadGraphFile(evt) {
   r.readAsText(f);
 }
 
+
 function create() {
   removeExistingTree();
   removeExistingGraph();
@@ -363,7 +345,7 @@ function create() {
   drawGraph(graph);
 }
 
-function tree(nodes) {
+function buildTree(nodes) {
   const nodeById = {};
 
   nodes.forEach((d) => {
@@ -388,6 +370,7 @@ function readTreeInput(input) {
   lines.pop();
   const treeBags = [];
   const forTree = [];
+  let isFirstRound = true;
 
   function findTreeBagLabel(nodeId) {
     for (let i = 0; i < treeBags.length; i++) {
@@ -396,9 +379,84 @@ function readTreeInput(input) {
     return 'NO NAME';
   }
 
+  function getNodeById(nodeId) {
+    for (let i = 0; i < forTree.length; i++) {
+      if (forTree[i].id === nodeId) return forTree[i];
+    }
+    return null;
+  }
+
+
+  function setRootNode(node) {
+    forTree.forEach((obj) => {
+      if (obj.id === node) {
+        obj.id = node;
+        obj.name = findTreeBagLabel(node);
+        obj.hasParent = true;
+      }
+    });
+  }
+
+  function setChildOfRootNode(sourceNode, targetNode) {
+    forTree.forEach((obj) => {
+      if (obj.id === targetNode) {
+        obj.id = targetNode;
+        obj.name = findTreeBagLabel(targetNode);
+        obj.parent = sourceNode;
+        obj.hasParent = true;
+      }
+    });
+  }
+
+  function setSourceNodeAsChild(sourceNode, targetNode) {
+    forTree.forEach((obj) => {
+      if (obj.id === sourceNode) {
+        obj.id = sourceNode;
+        obj.name = findTreeBagLabel(sourceNode);
+        obj.parent = targetNode;
+        obj.hasParent = true;
+      }
+    });
+  }
+
+  function setTargetNodeAsChild(sourceNode, targetNode) {
+    forTree.forEach((obj) => {
+      if (obj.id === targetNode) {
+        obj.id = targetNode;
+        obj.name = findTreeBagLabel(targetNode);
+        obj.parent = sourceNode;
+        obj.hasParent = true;
+      }
+    });
+  }
+
+
+  function nodeHasParent(nodeId) {
+    const node = getNodeById(nodeId);
+
+    if (node !== null) {
+      return node.hasParent;
+    }
+  }
+
+  function alterNode(sourceNode, targetNode) {
+    // create a copy of summer fruits.
+    const summerFruitsCopy = [...forTree];
+
+    // find index of item to be replaced
+    const targetIndex = summerFruits.findIndex((f) => f.id === nodeId);
+
+    // replace the object with a new one.
+    summerFruitsCopy[targetIndex] = {
+      id: 777,
+      name: 777,
+      hasParent: true,
+    };
+  }
+
+
   for (let line = 0; line < lines.length; line++) {
     const textLine = lines[line];
-
     let bagId;
     let firstNode;
     let secondNode;
@@ -415,28 +473,32 @@ function readTreeInput(input) {
       thirdNode = parseInt(splitted[4], 10);
       fourthNode = parseInt(splitted[5], 10);
       fifthNode = parseInt(splitted[6], 10);
+      const sixthNode = parseInt(splitted[7], 10);
+      const seventhNode = parseInt(splitted[8], 10);
+      const eighthNode = parseInt(splitted[9], 10);
+      const ninthNode = parseInt(splitted[10], 10);
 
-      const l = splitted.length;
+      const numberOfNodes = splitted.length - 2;
 
-      if (l === 4) {
+      if (numberOfNodes === 2) {
         bagLabel += `${firstNode}, `;
         bagLabel += secondNode;
       }
 
-      if (l === 5) {
+      if (numberOfNodes === 3) {
         bagLabel += `${firstNode}, `;
         bagLabel += `${secondNode}, `;
         bagLabel += thirdNode;
       }
 
-      if (l === 6) {
+      if (numberOfNodes === 4) {
         bagLabel += `${firstNode}, `;
         bagLabel += `${secondNode}, `;
         bagLabel += `${thirdNode}, `;
         bagLabel += fourthNode;
       }
 
-      if (l === 7) {
+      if (numberOfNodes === 5) {
         bagLabel += `${firstNode}, `;
         bagLabel += `${secondNode}, `;
         bagLabel += `${thirdNode}, `;
@@ -444,30 +506,95 @@ function readTreeInput(input) {
         bagLabel += fifthNode;
       }
 
+      if (numberOfNodes === 6) {
+        bagLabel += `${firstNode}, `;
+        bagLabel += `${secondNode}, `;
+        bagLabel += `${thirdNode}, `;
+        bagLabel += `${fourthNode}, `;
+        bagLabel += `${fifthNode}, `;
+        bagLabel += sixthNode;
+      }
+
+      if (numberOfNodes === 7) {
+        bagLabel += `${firstNode}, `;
+        bagLabel += `${secondNode}, `;
+        bagLabel += `${thirdNode}, `;
+        bagLabel += `${fourthNode}, `;
+        bagLabel += `${fifthNode}, `;
+        bagLabel += `${sixthNode}, `;
+        bagLabel += seventhNode;
+      }
+
+      if (numberOfNodes === 8) {
+        bagLabel += `${firstNode}, `;
+        bagLabel += `${secondNode}, `;
+        bagLabel += `${thirdNode}, `;
+        bagLabel += `${fourthNode}, `;
+        bagLabel += `${fifthNode}, `;
+        bagLabel += `${sixthNode}, `;
+        bagLabel += `${seventhNode}, `;
+        bagLabel += eighthNode;
+      }
+
+      if (numberOfNodes === 9) {
+        bagLabel += `${firstNode}, `;
+        bagLabel += `${secondNode}, `;
+        bagLabel += `${thirdNode}, `;
+        bagLabel += `${fourthNode}, `;
+        bagLabel += `${fifthNode}, `;
+        bagLabel += `${sixthNode}, `;
+        bagLabel += `${seventhNode}, `;
+        bagLabel += `${eighthNode}, `;
+        bagLabel += ninthNode;
+      }
+
+      if (lines.length === 1) {
+        forTree.push({
+          id: bagId,
+          name: bagLabel,
+        });
+      }
+
+      forTree.push(
+        {
+          id: bagId,
+          name: bagLabel,
+          hasParent: false,
+        },
+      );
+
       treeBags.push({ bagId, bagLabel });
     } else {
       const splitted = textLine.split(' ');
       const sourceNode = parseInt(splitted[0], 10);
       const targetNode = parseInt(splitted[1], 10);
 
-      if (line === lines.length - 1) {
-        const rootNode = parseInt(splitted[1], 10);
-        forTree.unshift({
-          id: rootNode,
-          name: findTreeBagLabel(rootNode),
-        });
+
+      if (isFirstRound) {
+        setRootNode(sourceNode);
+        setChildOfRootNode(sourceNode, targetNode);
+        isFirstRound = false;
       }
 
       if (targetNode !== undefined && sourceNode !== undefined) {
-        forTree.push({
-          id: sourceNode,
-          name: findTreeBagLabel(sourceNode),
-          parent: targetNode,
-        });
+        // If the source node does not have a parent, we set it as a child of the target node
+        if (!nodeHasParent(sourceNode)) {
+          if (sourceNode === 2) console.log('YEP');
+          setSourceNodeAsChild(sourceNode, targetNode);
+        } else {
+          setTargetNodeAsChild(sourceNode, targetNode);
+        }
+
+        /*         // if the target node does not have a parent, we set it as a child of the source node
+        if (!nodeHasParent(targetNode)) {
+          if (sourceNode === 2) console.log('YEP');
+          setTargetNodeAsChild(sourceNode, targetNode);
+        } */
       }
     }
   }
-  const jsonTree = tree(forTree);
+  console.log(forTree);
+  const jsonTree = buildTree(forTree);
   removeExistingTree();
   drawTree(jsonTree);
 }
@@ -475,29 +602,14 @@ function readTreeInput(input) {
 const logFileText = async (file) => {
   const response = await fetch(file);
   const text = await response.text();
+  console.log(text);
   const newnew = text.split('\n');
   readTreeInput(newnew);
 };
 
 const handleGraphUpload = (event) => {
-  const files = event.target.files;
-  newReadGraphFile(event);
-  /*   const formData = new FormData();
-    formData.append('myFile', files[0]);
-    const treename = files[0].name.replace('.gr', '');
-
-    fetch('/upload', {
-      method: 'POST',
-      body: formData,
-    })
-      .then((response) => response.json())
-      .then(() => {
-        const pathtotree = `./treedecompositions/${treename}.td`;
-        logFileText(pathtotree);
-      })
-      .catch((error) => {
-        console.error(error);
-      }); */
+  const file = event.target.files[0];
+  newReadGraphFile(file);
 };
 
 function computeTreeDecomposition() {
@@ -506,16 +618,17 @@ function computeTreeDecomposition() {
   currentGraph.links.forEach((link) => {
     temp.push([link.source.id, link.target.id]);
   });
+  console.log(temp);
 
   $.ajax({
     url: '/compute',
     type: 'POST',
     data: JSON.stringify(temp),
     processData: false,
-    success(data) {
-      console.log(data);
+    success() {
+      // console.log(data);
     },
-    complete(data) {
+    complete() {
       const pathtotree = './treedecompositions/tree.td';
       logFileText(pathtotree);
     },
