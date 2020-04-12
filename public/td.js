@@ -433,27 +433,8 @@ function readTreeInput(input) {
 
   function nodeHasParent(nodeId) {
     const node = getNodeById(nodeId);
-
-    if (node !== null) {
-      return node.hasParent;
-    }
+    return node.hasParent;
   }
-
-  function alterNode(sourceNode, targetNode) {
-    // create a copy of summer fruits.
-    const summerFruitsCopy = [...forTree];
-
-    // find index of item to be replaced
-    const targetIndex = summerFruits.findIndex((f) => f.id === nodeId);
-
-    // replace the object with a new one.
-    summerFruitsCopy[targetIndex] = {
-      id: 777,
-      name: 777,
-      hasParent: true,
-    };
-  }
-
 
   for (let line = 0; line < lines.length; line++) {
     const textLine = lines[line];
@@ -479,6 +460,10 @@ function readTreeInput(input) {
       const ninthNode = parseInt(splitted[10], 10);
 
       const numberOfNodes = splitted.length - 2;
+
+      if (numberOfNodes === 1) {
+        bagLabel += firstNode;
+      }
 
       if (numberOfNodes === 2) {
         bagLabel += `${firstNode}, `;
@@ -577,23 +562,14 @@ function readTreeInput(input) {
       }
 
       if (targetNode !== undefined && sourceNode !== undefined) {
-        // If the source node does not have a parent, we set it as a child of the target node
         if (!nodeHasParent(sourceNode)) {
-          if (sourceNode === 2) console.log('YEP');
           setSourceNodeAsChild(sourceNode, targetNode);
         } else {
           setTargetNodeAsChild(sourceNode, targetNode);
         }
-
-        /*         // if the target node does not have a parent, we set it as a child of the source node
-        if (!nodeHasParent(targetNode)) {
-          if (sourceNode === 2) console.log('YEP');
-          setTargetNodeAsChild(sourceNode, targetNode);
-        } */
       }
     }
   }
-  console.log(forTree);
   const jsonTree = buildTree(forTree);
   removeExistingTree();
   drawTree(jsonTree);
@@ -602,7 +578,6 @@ function readTreeInput(input) {
 const logFileText = async (file) => {
   const response = await fetch(file);
   const text = await response.text();
-  console.log(text);
   const newnew = text.split('\n');
   readTreeInput(newnew);
 };
@@ -618,7 +593,6 @@ function computeTreeDecomposition() {
   currentGraph.links.forEach((link) => {
     temp.push([link.source.id, link.target.id]);
   });
-  console.log(temp);
 
   $.ajax({
     url: '/compute',

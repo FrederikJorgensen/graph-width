@@ -44,11 +44,7 @@ function writeGraphFile(graph) {
       largest = array[i];
     }
   }
-
-
   const numberOfVertices = largest;
-  console.log(numberOfEdges);
-  console.log(numberOfVertices);
   file.on('error', (err) => { console.log(err); });
   file.write(`p tw ${numberOfVertices} ${numberOfEdges}\n`);
   newestg.forEach((v) => { file.write(`${v.join(' ')}\n`); });
