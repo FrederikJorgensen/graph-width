@@ -3,3 +3,7 @@
 * `cd graph-width-visualizer`
 * `npm install`
 * `npm run dev`
+
+Then go to:
+
+[http://localhost:3000/index.html](http://localhost:3000/index.html)
