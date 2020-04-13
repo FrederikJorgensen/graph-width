@@ -238,7 +238,7 @@ function drawTree(tree) {
     .selectAll('circle')
     .data(nodes)
     .join('circle')
-    .attr('r', 40)
+    .attr('r', 25)
     .attr('fill', '#1a7532')
     .call(drag(simulation));
 

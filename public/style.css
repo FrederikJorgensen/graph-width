@@ -1,40 +1,57 @@
-.header {
-  width: 100%;
-  height: 80px;
+body {
+  display: flex;
+  flex-direction: row;
+  font-family: 'Segoe UI', 'Helvetica', sans-serif;
+}
+
+/* The navigation menu links */
+.sidenav a {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
   display: block;
-  margin: 0 auto;
-  background-color: #19285e;
 }
 
-.logo_container {
-  height: 100%;
-  display: table;
-  float: left;
+.sidenav p {
+  color: black;
 }
 
-.logo_container h1 {
-  font-size: 30px;
-  color: white;
-  vertical-align: middle;
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+  .sidenav {padding-top: 15px;}
+  .sidenav a {font-size: 18px;}
+}
+
+#reload {
+  font-size: 50px;
+  color: black;
+}
+
+.sidenav > div:hover {
+  background-color: #cecef6;
+  cursor: pointer;
 }
 
 .flex-container {
   display: flex;
-  flex: 1;
-  flex-direction: row;
+  width: 100%;
+  height: 1000px;
 }
 
 .graphStyle {
   flex: 0.5;
-  text-align: center;
-  justify-content: center;
-  height: 1200px;
+  border: 2px solid yellow;
 }
 
 .treeStyle {
   flex: 0.5;
-  text-align: center;
-  justify-content: center;
+  border: 2px solid yellow;
 }
 
 .graphSvg {
@@ -63,55 +80,9 @@
   font-weight: 1000;
 }
 
-/* The sidebar menu */
-#sidenav {
-  height: 100%; /* Full-height: remove this if you want "auto" height */
-  width: 260px; /* Set the width of the sidebar */
-  position: fixed; /* Fixed Sidebar (stay in place on scroll) */
-  z-index: 1; /* Stay on top */
-  top: 0; /* Stay at the top */
-  left: 0;
-  background-color: #e8e8e8; /* Black */
-  overflow-x: hidden; /* Disable horizontal scroll */
-  padding-top: 20px;
+.sidenav {
+  flex-shrink: 0;
+  background-color: #eee;
+  overflow-x: hidden;
 }
 
-/* The navigation menu links */
-#sidenav a {
-  padding: 6px 8px 6px 16px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-}
-
-#sidenav p {
-  color: black;
-}
-
-/* When you mouse over the navigation links, change their color */
-#sidenav a:hover {
-  color: #f1f1f1;
-}
-
-/* Style page content */
-.main {
-  margin-left: 160px; /* Same as the width of the sidebar */
-  padding: 0px 10px;
-}
-
-/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
-@media screen and (max-height: 450px) {
-  .sidenav {padding-top: 15px;}
-  .sidenav a {font-size: 18px;}
-}
-
-#reload {
-  font-size: 50px;
-  color: black;
-}
-
-#sidenav > div:hover {
-  background-color: #cecef6;
-  cursor: pointer;
-}
