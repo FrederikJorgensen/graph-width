@@ -57,13 +57,11 @@ body {
 .graphSvg {
   height: 100%;
   width: 100%;
-  overflow: hidden;
 }
 
 .treeSvg {
   height: 100%;
   width: 100%;
-  overflow: hidden;
 }
 .node {
   fill:#1a7532

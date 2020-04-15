@@ -5,6 +5,8 @@
 let graphNode;
 let graphLink;
 let graphLabel;
+let treeSvg;
+let force;
 let treeNode;
 let treeLink;
 let treeLabel;
@@ -50,9 +52,7 @@ function randomGraph(n, m) {
 function drawGraph(graph) {
   const width = document.getElementById('graph-container').offsetWidth;
   const height = document.getElementById('graph-container').offsetHeight;
-  const svg = d3.select('#graph').call(d3.zoom().on('zoom', () => {
-    svg.attr('transform', d3.event.transform);
-  }));
+  const svg = d3.select('#graph');
 
   const { nodes } = graph;
   const { links } = graph;
@@ -98,7 +98,7 @@ function drawGraph(graph) {
   }
 
   const simulation = d3.forceSimulation(nodes)
-    .force('charge', d3.forceManyBody().strength(-500))
+    .force('charge', d3.forceManyBody().strength(-180))
     .force('center', d3.forceCenter(width / 2, height / 2))
     .force('link', d3.forceLink(links).id((d) => d.id).distance(50).strength(0.9))
     .on('tick', ticked);
@@ -184,14 +184,12 @@ function resetHighlight() {
   selected = [];
 }
 
-
 /* eslint-disable no-param-reassign */
 function drawTree(tree) {
-  // Get height and width of the specified container
   const width = document.getElementById('tree-container').offsetWidth;
   const height = document.getElementById('tree-container').offsetHeight;
 
-  let svg = d3.select('#tree');
+  treeSvg = d3.select('#tree');
 
   const drag = (simulation) => {
     function dragstarted(d) {
@@ -219,30 +217,31 @@ function drawTree(tree) {
   const nodes = root.descendants();
 
   const simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink(links).id((d) => d.id).distance(2).strength(0.5))
-    .force('charge', d3.forceManyBody().strength(-1500))
+    .force('link', d3.forceLink(links).id((d) => d.id).distance(0.5).strength(0.5))
+    .force('charge', d3.forceManyBody().strength(-1000))
     .force('x', d3.forceX())
     .force('y', d3.forceY());
 
-  svg = d3.selectAll('#tree')
+
+  treeSvg = d3.selectAll('#tree')
     .attr('viewBox', [-width / 2, -height / 2, width, height]);
 
-  treeLink = svg.append('g')
+  treeLink = treeSvg.append('g')
     .attr('stroke', '#999')
     .attr('stroke-opacity', 0.6)
     .selectAll('line')
     .data(links)
     .join('line');
 
-  treeNode = svg.append('g')
+  treeNode = treeSvg.append('g')
     .selectAll('circle')
     .data(nodes)
     .join('circle')
-    .attr('r', 25)
+    .attr('r', 20)
     .attr('fill', '#1a7532')
     .call(drag(simulation));
 
-  treeLabel = svg
+  treeLabel = treeSvg
     .append('g')
     .selectAll('text')
     .data(nodes)
@@ -254,7 +253,6 @@ function drawTree(tree) {
 
   treeNode.on('mouseover', highlightNodes);
   treeNode.on('mouseout', resetHighlight);
-
   simulation.on('tick', () => {
     const ky = 1.2 * simulation.alpha();
     links.forEach((d) => {
@@ -603,101 +601,11 @@ function computeTreeDecomposition() {
       // console.log(data);
     },
     complete() {
-      const pathtotree = './treedecompositions/tree.td';
+      const pathtotree = '../treedecompositions/tree.td';
       logFileText(pathtotree);
     },
   });
 }
-
-const testGraph1 = {
-  nodes: [
-    {
-      id: 1,
-      label: 1,
-    },
-    {
-      id: 2,
-      label: 2,
-    },
-    {
-      id: 3,
-      label: 3,
-    },
-    {
-      id: 4,
-      label: 4,
-    },
-    {
-      id: 5,
-      label: 5,
-    },
-    {
-      id: 6,
-      label: 6,
-    },
-    {
-      id: 7,
-      label: 7,
-    },
-    {
-      id: 8,
-      label: 8,
-    },
-    {
-      id: 9,
-      label: 9,
-    },
-    {
-      id: 10,
-      label: 10,
-    },
-  ],
-  links: [
-    {
-      source: 1,
-      target: 9,
-    },
-    {
-      source: 1,
-      target: 2,
-    },
-    {
-      source: 2,
-      target: 4,
-    },
-    {
-      source: 4,
-      target: 5,
-    },
-    {
-      source: 4,
-      target: 6,
-    },
-    {
-      source: 5,
-      target: 10,
-    },
-    {
-      source: 10,
-      target: 6,
-    },
-    {
-      source: 6,
-      target: 3,
-    },
-    {
-      source: 6,
-      target: 8,
-    },
-    {
-      source: 8,
-      target: 7,
-    },
-  ],
-};
-
-currentGraph = testGraph1;
-drawGraph(testGraph1);
 
 document.querySelector('#fileUpload').addEventListener('change', handleGraphUpload);
 document.getElementById('compute').addEventListener('click', computeTreeDecomposition);

@@ -13,15 +13,11 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 app.use(fileupload());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, '../public')));
 app.set('view engine', 'ejs');
 
-app.get('/', (req, res) => {
-  res.render('index');
-});
-
 function writeGraphFile(graph) {
-  const file = fs.createWriteStream('./uploads/graph.gr');
+  const file = fs.createWriteStream('src/graphs/graph.gr');
   const newg = graph.replace('{', '').replace('"', '').replace('"', '').replace(':', '')
     .replace('}', '')
     .replace('"', '')
@@ -51,39 +47,19 @@ function writeGraphFile(graph) {
   file.end();
 }
 
+app.get('/', (req, res) => {
+  res.render('index');
+});
+
 app.post('/compute', (req, res) => {
   const graph = JSON.stringify(req.body);
   writeGraphFile(graph);
-  const command = 'bash scriptsample.sh graph.gr tree.td';
+  const command = 'cd src && bash runtreealgo.sh graph.gr tree.td';
   const child = require('child_process').exec(command);
   child.stdout.pipe(process.stdout);
   child.on('exit', () => {
     res.send({ success: true });
   });
-});
-
-app.post('/upload', (req, res) => {
-  console.log('IT WORKED LOL ');
-  if (req.files) {
-    const file = req.files.myFile;
-    const filename = file.name;
-    const treename = filename.replace('.gr', '');
-
-    const command = `bash scriptsample.sh ${filename} ${treename}.td`;
-
-    const child = require('child_process').exec(command);
-    child.stdout.pipe(process.stdout);
-    child.on('exit', () => {
-      console.log('DONE!');
-      file.mv(`./uploads/${filename}`, (err) => {
-        if (err) {
-          res.send({ success: false });
-        } else {
-          res.send({ success: true });
-        }
-      });
-    });
-  }
 });
 
 app.listen(port, () => console.log(`Example app listening on port ${port}!`));
