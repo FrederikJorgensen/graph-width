@@ -3,7 +3,7 @@ const express = require('express');
 const path = require('path');
 
 const app = express();
-const port = 3000;
+const PORT = 3000;
 const bodyParser = require('body-parser');
 const fileupload = require('express-fileupload');
 const fs = require('fs');
@@ -18,7 +18,11 @@ app.set('view engine', 'ejs');
 
 function writeGraphFile(graph) {
   const file = fs.createWriteStream('src/graphs/graph.gr');
-  const newg = graph.replace('{', '').replace('"', '').replace('"', '').replace(':', '')
+  const newg = graph
+    .replace('{', '')
+    .replace('"', '')
+    .replace('"', '')
+    .replace(':', '')
     .replace('}', '')
     .replace('"', '')
     .replace('"', '');
@@ -41,9 +45,13 @@ function writeGraphFile(graph) {
     }
   }
   const numberOfVertices = largest;
-  file.on('error', (err) => { console.log(err); });
+  file.on('error', (err) => {
+    console.log(err);
+  });
   file.write(`p tw ${numberOfVertices} ${numberOfEdges}\n`);
-  newestg.forEach((v) => { file.write(`${v.join(' ')}\n`); });
+  newestg.forEach((v) => {
+    file.write(`${v.join(' ')}\n`);
+  });
   file.end();
 }
 
@@ -62,4 +70,4 @@ app.post('/compute', (req, res) => {
   });
 });
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+app.listen(PORT);

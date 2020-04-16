@@ -1,3 +1,7 @@
+/* eslint-disable prettier/prettier */
+/* eslint-disable space-infix-ops */
+/* eslint-disable operator-linebreak */
+/* eslint-disable comma-dangle */
 /* eslint-disable no-useless-concat */
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-continue */
@@ -6,7 +10,6 @@ let graphNode;
 let graphLink;
 let graphLabel;
 let treeSvg;
-let force;
 let treeNode;
 let treeLink;
 let treeLabel;
@@ -16,7 +19,7 @@ let graph1;
 let currentGraph;
 
 function randomGraph(n, m) {
-  const maxNumEdges = n * (n - 1) / 2;
+  const maxNumEdges = (n * (n - 1)) / 2;
   if (n < 0 || m < 0 || m > maxNumEdges) return undefined;
 
   const graph = { nodes: [], links: [] };
@@ -36,7 +39,7 @@ function randomGraph(n, m) {
 
   function unpair(k) {
     const z = Math.floor((-1 + Math.sqrt(1 + 8 * k)) / 2);
-    return [k - z * (1 + z) / 2, z * (3 + z) / 2 - k];
+    return [k - (z * (1 + z)) / 2, (z * (3 + z)) / 2 - k];
   }
 
   for (let i = 0; i < m; i++) {
@@ -57,15 +60,16 @@ function drawGraph(graph) {
   const { nodes } = graph;
   const { links } = graph;
 
-
-  graphLink = svg.append('g')
+  graphLink = svg
+    .append('g')
     .selectAll('line')
     .data(links)
     .enter()
     .append('line')
     .attr('class', 'link');
 
-  graphNode = svg.append('g')
+  graphNode = svg
+    .append('g')
     .selectAll('g')
     .data(nodes)
     .enter()
@@ -84,25 +88,31 @@ function drawGraph(graph) {
     .text((d) => d.label);
 
   function ticked() {
-    graphNode.attr('cx', (d) => d.x)
-      .attr('cy', (d) => d.y);
+    graphNode.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
 
-    graphLink.attr('x1', (d) => d.source.x)
+    graphLink
+      .attr('x1', (d) => d.source.x)
       .attr('y1', (d) => d.source.y)
       .attr('x2', (d) => d.target.x)
       .attr('y2', (d) => d.target.y);
 
-    graphLabel
-      .attr('x', (d) => d.x)
-      .attr('y', (d) => d.y);
+    graphLabel.attr('x', (d) => d.x).attr('y', (d) => d.y);
   }
 
-  const simulation = d3.forceSimulation(nodes)
+  const simulation = d3
+    .forceSimulation(nodes)
     .force('charge', d3.forceManyBody().strength(-180))
     .force('center', d3.forceCenter(width / 2, height / 2))
-    .force('link', d3.forceLink(links).id((d) => d.id).distance(50).strength(0.9))
+    .force(
+      'link',
+      d3
+        .forceLink(links)
+        .id((d) => d.id)
+        .distance(50)
+        // eslint-disable-next-line comma-dangle
+        .strength(0.9)
+    )
     .on('tick', ticked);
-
 
   function dragstarted(d) {
     d3.event.sourceEvent.stopPropagation();
@@ -127,26 +137,32 @@ function drawGraph(graph) {
   });
 
   graphNode.call(
-    d3.drag()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended),
+    d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended)
   );
 
   graph1 = graph;
 }
 
 function nodeShouldBeVisible(nodeIndex, vertices) {
-  return vertices.some((vertix) => adjlist[`${vertix}-${nodeIndex}`] || adjlist[`${nodeIndex}-${vertix}`] || vertix === nodeIndex);
+  return vertices.some(
+    (vertix) =>
+      // eslint-disable-next-line implicit-arrow-linebreak
+      adjlist[`${vertix}-${nodeIndex}`] ||
+      adjlist[`${nodeIndex}-${vertix}`] ||
+      vertix === nodeIndex
+  );
 }
 
 function linkShouldBeVisible(sourceIndex, targetIndex, indexes) {
   if (targetIndex !== undefined) {
-    return nodeShouldBeVisible(sourceIndex, indexes)
-      && nodeShouldBeVisible(targetIndex, indexes);
+    return (
+      nodeShouldBeVisible(sourceIndex, indexes) &&
+      nodeShouldBeVisible(targetIndex, indexes)
+    );
   }
-  return indexes.some((d) => adjlist[`${sourceIndex}-${d}`]
-    + adjlist[`${d}-${sourceIndex}`]);
+  return indexes.some(
+    (d) => adjlist[`${sourceIndex}-${d}`] + adjlist[`${d}-${sourceIndex}`]
+  );
 }
 
 function getVerticesIndexes(vertices) {
@@ -162,13 +178,12 @@ function highlightNodes(hoveredNode) {
   const verticesToHighlight = hoveredNode.data.vertices;
   const indexes = getVerticesIndexes(verticesToHighlight);
 
-  graphNode
-    .attr('opacity', (o) => {
-      if (nodeShouldBeVisible(o.index, indexes)) {
-        return 1;
-      }
-      return 0.1;
-    });
+  graphNode.attr('opacity', (o) => {
+    if (nodeShouldBeVisible(o.index, indexes)) {
+      return 1;
+    }
+    return 0.1;
+  });
 
   graphLink.attr('opacity', (o) => {
     if (linkShouldBeVisible(o.source.index, o.target.index, indexes)) {
@@ -209,31 +224,45 @@ function drawTree(tree) {
       d.fy = null;
     }
 
-    return d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended);
+    return d3
+      .drag()
+      .on('start', dragstarted)
+      .on('drag', dragged)
+      .on('end', dragended);
   };
 
   const root = d3.hierarchy(tree);
   const links = root.links();
   const nodes = root.descendants();
 
-  const simulation = d3.forceSimulation(nodes)
-    .force('link', d3.forceLink(links).id((d) => d.id).distance(0.5).strength(0.5))
+  const simulation = d3
+    .forceSimulation(nodes)
+    .force(
+      'link',
+      d3
+        .forceLink(links)
+        .id((d) => d.id)
+        .distance(0.5)
+        .strength(0.5)
+    )
     .force('charge', d3.forceManyBody().strength(-1000))
     .force('x', d3.forceX())
     .force('y', d3.forceY());
 
-
-  treeSvg = d3.selectAll('#tree')
+  treeSvg = d3
+    .selectAll('#tree')
     .attr('viewBox', [-width / 2, -height / 2, width, height]);
 
-  treeLink = treeSvg.append('g')
+  treeLink = treeSvg
+    .append('g')
     .attr('stroke', '#999')
     .attr('stroke-opacity', 0.6)
     .selectAll('line')
     .data(links)
     .join('line');
 
-  treeNode = treeSvg.append('g')
+  treeNode = treeSvg
+    .append('g')
     .selectAll('circle')
     .data(nodes)
     .join('circle')
@@ -265,14 +294,9 @@ function drawTree(tree) {
       .attr('x2', (d) => d.target.x)
       .attr('y2', (d) => d.target.y);
 
-    treeNode
-      .attr('cx', (d) => d.x)
-      .attr('cy', (d) => d.y);
+    treeNode.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
 
-
-    treeLabel
-      .attr('x', (d) => d.x)
-      .attr('y', (d) => d.y);
+    treeLabel.attr('x', (d) => d.x).attr('y', (d) => d.y);
   });
 }
 
@@ -310,7 +334,7 @@ function newReadGraphFile(file) {
 
     for (let i = 0; i < lines.length; i++) {
       const textLine = lines[i];
-      if (textLine.startsWith('c') || textLine.startsWith('p') || textLine.length < 1) continue;
+      if (textLine.startsWith('c')|| textLine.startsWith('p')|| textLine.length < 1) continue;
       const splitted = textLine.split(' ');
       const firstNode = parseInt(splitted[0], 10);
       const secondNode = parseInt(splitted[1], 10);
@@ -333,7 +357,6 @@ function newReadGraphFile(file) {
   };
   r.readAsText(f);
 }
-
 
 function create() {
   removeExistingTree();
@@ -384,7 +407,6 @@ function readTreeInput(input) {
     return null;
   }
 
-
   function setRootNode(node) {
     forTree.forEach((obj) => {
       if (obj.id === node) {
@@ -427,7 +449,6 @@ function readTreeInput(input) {
       }
     });
   }
-
 
   function nodeHasParent(nodeId) {
     const node = getNodeById(nodeId);
@@ -538,20 +559,17 @@ function readTreeInput(input) {
         });
       }
 
-      forTree.push(
-        {
-          id: bagId,
-          name: bagLabel,
-          hasParent: false,
-        },
-      );
+      forTree.push({
+        id: bagId,
+        name: bagLabel,
+        hasParent: false,
+      });
 
       treeBags.push({ bagId, bagLabel });
     } else {
       const splitted = textLine.split(' ');
       const sourceNode = parseInt(splitted[0], 10);
       const targetNode = parseInt(splitted[1], 10);
-
 
       if (isFirstRound) {
         setRootNode(sourceNode);
@@ -607,6 +625,10 @@ function computeTreeDecomposition() {
   });
 }
 
-document.querySelector('#fileUpload').addEventListener('change', handleGraphUpload);
-document.getElementById('compute').addEventListener('click', computeTreeDecomposition);
+document
+  .querySelector('#fileUpload')
+  .addEventListener('change', handleGraphUpload);
+document
+  .getElementById('compute')
+  .addEventListener('click', computeTreeDecomposition);
 document.getElementById('reload').addEventListener('click', create);
