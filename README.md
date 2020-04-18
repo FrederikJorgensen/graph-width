@@ -21,6 +21,4 @@ npm run dev
 ```
 
 The app is then running at: 
-```bash
 [http://localhost:3000/index.html](http://localhost:3000/index.html)
-```

@@ -4,7 +4,7 @@ module.exports = {
     es6: true,
     jquery: true,
   },
-  extends: ['prettier', 'airbnb-base'],
+  extends: ['airbnb-base'],
   globals: {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',
@@ -16,7 +16,7 @@ module.exports = {
   },
   rules: {
     'no-plusplus': 'off',
-    'prettier/prettier': ['error', { singleQuote: true }],
+    "prefer-destructuring": ["error", { "object": true, "array": false }],
+    "no-param-reassign": 0
   },
-  plugins: ['prettier'],
 };

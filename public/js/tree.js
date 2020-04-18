@@ -1,183 +1,16 @@
-/* eslint-disable prettier/prettier */
-/* eslint-disable space-infix-ops */
-/* eslint-disable operator-linebreak */
-/* eslint-disable comma-dangle */
-/* eslint-disable no-useless-concat */
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-continue */
-/* eslint-disable no-mixed-operators */
-let graphNode;
-let graphLink;
-let graphLabel;
+import * as graph from './graph.js';
+
 let treeSvg;
 let treeNode;
 let treeLink;
 let treeLabel;
-const adjlist = [];
-let currentGraph;
-let currentTree;
-let isLetterGraph = false;
+
+const isLetterGraph = false;
 
 const a = 97;
-const charArray = {};
-for (let i = 0; i<26; i++) charArray[String.fromCharCode(a + i)] = i + 1;
-
 const charArray2 = {};
-for (let i = 0; i<26; i++) charArray2[i+1] = String.fromCharCode(a + i);
+for (let i = 0; i < 26; i++) charArray2[i + 1] = String.fromCharCode(a + i);
 
-
-function randomGraph(n, m, type) {
-  const maxNumEdges = (n * (n - 1)) / 2;
-  if (n < 0 || m < 0 || m > maxNumEdges) return undefined;
-
-  const graph = { nodes: [], links: [] };
-
-  if (type === 'letters') {
-    for (let i = 0; i < n; i++) {
-      graph.nodes[i] = { id: i + 1, label: charArray2[i+1] };
-    }
-  } else {
-    for (let i = 0; i < n; i++) {
-      graph.nodes[i] = { id: i + 1, label: i + 1 };
-    }
-  }
-
-  const randomInt = (min, max) => Math.floor(Math.random() * (max - min) + min);
-
-  const state = {};
-  for (let i = 0; i < m; i++) {
-    const j = randomInt(i, maxNumEdges);
-    if (!(i in state)) state[i] = i;
-    if (!(j in state)) state[j] = j;
-    [state[i], state[j]] = [state[j], state[i]];
-  }
-
-  function unpair(k) {
-    const z = Math.floor((-1 + Math.sqrt(1 + 8 * k)) / 2);
-    return [k - (z * (1 + z)) / 2, (z * (3 + z)) / 2 - k];
-  }
-
-  for (let i = 0; i < m; i++) {
-    const [x, y] = unpair(state[i]);
-    const u = graph.nodes[x];
-    const v = graph.nodes[n - 1 - y];
-    graph.links.push({ source: u, target: v });
-  }
-  console.log(graph);
-  return graph;
-}
-
-/* eslint-disable no-param-reassign */
-function drawGraph(graph) {
-  const width = document.getElementById('graph-container').offsetWidth;
-  const height = document.getElementById('graph-container').offsetHeight;
-  const svg = d3.select('#graph');
-
-  const { nodes } = graph;
-  const { links } = graph;
-
-  graphLink = svg
-    .append('g')
-    .selectAll('line')
-    .data(links)
-    .enter()
-    .append('line')
-    .attr('class', 'link');
-
-  graphNode = svg
-    .append('g')
-    .selectAll('g')
-    .data(nodes)
-    .enter()
-    .append('circle')
-    .attr('r', 18)
-    .attr('class', 'node');
-
-  graphLabel = svg
-    .append('g')
-    .selectAll('text')
-    .data(nodes)
-    .enter()
-    .append('text')
-    .attr('class', 'label')
-    .attr('text-anchor', 'middle')
-    .text((d) => d.label);
-
-  function ticked() {
-    graphNode.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
-
-    graphLink
-      .attr('x1', (d) => d.source.x)
-      .attr('y1', (d) => d.source.y)
-      .attr('x2', (d) => d.target.x)
-      .attr('y2', (d) => d.target.y);
-
-    graphLabel.attr('x', (d) => d.x).attr('y', (d) => d.y);
-  }
-
-  const simulation = d3
-    .forceSimulation(nodes)
-    .force('charge', d3.forceManyBody().strength(-180))
-    .force('center', d3.forceCenter(width / 2, height / 2))
-    .force(
-      'link',
-      d3
-        .forceLink(links)
-        .id((d) => d.id)
-        .distance(50)
-        // eslint-disable-next-line comma-dangle
-        .strength(0.9)
-    )
-    .on('tick', ticked);
-
-  function dragstarted(d) {
-    d3.event.sourceEvent.stopPropagation();
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-    d.fx = d.x;
-    d.fy = d.y;
-  }
-
-  function dragged(d) {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
-  }
-
-  function dragended(d) {
-    if (!d3.event.active) simulation.alphaTarget(0);
-    d.fx = null;
-    d.fy = null;
-  }
-
-  links.forEach((d) => {
-    adjlist[`${d.source.index}-${d.target.index}`] = true;
-  });
-
-  graphNode.call(
-    d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended)
-  );
-}
-
-
-function highlightNodes(hoveredNode) {
-  const vertices = hoveredNode.data.vertices;
-
-  graphNode.attr('opacity', (currentNode) => {
-    if (vertices.includes(currentNode.id)) return 0;
-    return 1;
-  });
-
-  graphLink.attr('opacity', (currentLink) => {
-    if (vertices.includes(currentLink.source.id)
-    ||
-    vertices.includes(currentLink.target.id)) return 0;
-    return 1;
-  });
-}
-
-function resetHighlight() {
-  graphNode.attr('opacity', 1);
-  graphLink.attr('opacity', 1);
-}
 
 function resetTreeHighlight() {
   treeNode.attr('opacity', 1);
@@ -215,8 +48,6 @@ function highlightSubTrees(d) {
 function drawTree(tree) {
   const width = document.getElementById('tree-container').offsetWidth;
   const height = document.getElementById('tree-container').offsetHeight;
-
-  currentTree = tree;
 
   treeSvg = d3.select('#tree');
 
@@ -257,7 +88,7 @@ function drawTree(tree) {
         .forceLink(links)
         .id((d) => d.id)
         .distance(0.5)
-        .strength(0.5)
+        .strength(0.5),
     )
     .force('charge', d3.forceManyBody().strength(-1000))
     .force('x', d3.forceX())
@@ -280,7 +111,8 @@ function drawTree(tree) {
     .selectAll('circle')
     .data(nodes)
     .join('circle')
-    .attr('r', 20)
+    // .attr('c', (d) => 10 *d.data.vertices.length)
+    .attr('r', (d) => 10 * d.data.vertices.length)
     .attr('fill', '#1a7532')
     .call(drag(simulation));
 
@@ -294,8 +126,8 @@ function drawTree(tree) {
     .attr('class', 'label')
     .text((d) => d.data.name);
 
-  treeNode.on('mouseover', highlightNodes);
-  treeNode.on('mouseout', resetHighlight);
+  treeNode.on('mouseover', graph.highlightNodes);
+  treeNode.on('mouseout', graph.resetHighlight);
   treeNode.on('click', highlightSubTrees);
   treeNode.on('dblclick', resetTreeHighlight);
 
@@ -317,89 +149,12 @@ function drawTree(tree) {
   });
 }
 
-function removeExistingGraph() {
-  if (graphNode && graphLink && graphLabel) {
-    graphNode.remove();
-    graphLink.remove();
-    graphLabel.remove();
-  }
-}
-
 function removeExistingTree() {
   if (treeNode && treeLink && treeLabel) {
     treeNode.remove();
     treeLink.remove();
     treeLabel.remove();
   }
-}
-
-function newReadGraphFile(file) {
-  const f = file;
-  const r = new FileReader();
-  const newGraph = {};
-  const nodes = [];
-  const links = [];
-  r.onload = function onLoad() {
-    const lines = this.result.split('\n');
-    lines.shift();
-
-    function nodeExists(node) {
-      for (let i = 0; i < nodes.length; i++) {
-        if (nodes[i].id === node) return true;
-      }
-      return false;
-    }
-
-
-    for (let i = 0; i < lines.length; i++) {
-      const textLine = lines[i];
-      const splitted = textLine.split(' ');
-
-      if (isNaN(splitted[0])) isLetterGraph = true;
-
-
-      const firstNodeLabel = splitted[0].trim();
-      const secondNodeLabel = splitted[1].trim();
-
-      const firstNode = charArray[firstNodeLabel];
-      const secondNode = charArray[secondNodeLabel];
-
-      if (!nodeExists(firstNode)) {
-        nodes.push({ id: firstNode, label: firstNodeLabel });
-      }
-
-      if (!nodeExists(secondNode)) {
-        nodes.push({ id: secondNode, label: secondNodeLabel });
-      }
-
-      links.push({ source: firstNode, target: secondNode });
-    }
-    newGraph.nodes = nodes;
-    newGraph.links = links;
-    removeExistingGraph();
-    currentGraph = newGraph;
-    drawGraph(newGraph);
-  };
-  r.readAsText(f);
-}
-
-function create() {
-  removeExistingTree();
-  removeExistingGraph();
-  const numberOfVertices = parseInt(document.getElementById('numberOfVertices').value, 10);
-  const numberOfEdges = parseInt(document.getElementById('numberOfEdges').value, 10);
-  let graph;
-
-  if (document.getElementById('letters').checked) {
-    isLetterGraph = true;
-    graph = randomGraph(numberOfVertices, numberOfEdges, 'letters');
-  } else {
-    isLetterGraph = false;
-    graph = randomGraph(numberOfVertices, numberOfEdges, 'numbers');
-  }
-
-  currentGraph = graph;
-  drawGraph(graph);
 }
 
 function buildTree(nodes) {
@@ -621,7 +376,8 @@ function readTreeInput(input) {
         bagLabel += `${sixthNodeLabel}, `;
         bagLabel += seventhNodeLabel;
         bagLabel += fifthNodeLabel;
-        vertices.push(firstNode, secondNode, thirdNode, fourthNode, fifthNode, sixthNode, seventhNode);
+        vertices.push(firstNode, secondNode, thirdNode,
+          fourthNode, fifthNode, sixthNode, seventhNode);
       }
 
       if (numberOfNodes === 8) {
@@ -634,7 +390,8 @@ function readTreeInput(input) {
         bagLabel += `${seventhNodeLabel}, `;
         bagLabel += eighthNodeLabel;
         bagLabel += fifthNodeLabel;
-        vertices.push(firstNode, secondNode, thirdNode, fourthNode, fifthNode, sixthNode, seventhNode, eighthNode);
+        vertices.push(firstNode, secondNode, thirdNode, fourthNode,
+          fifthNode, sixthNode, seventhNode, eighthNode);
       }
 
       if (numberOfNodes === 9) {
@@ -647,14 +404,15 @@ function readTreeInput(input) {
         bagLabel += `${seventhNodeLabel}, `;
         bagLabel += `${eighthNodeLabel}, `;
         bagLabel += ninthNodeLabel;
-        vertices.push(firstNode, secondNode, thirdNode, fourthNode, fifthNode, sixthNode, seventhNode, eighthNode, ninthNode);
+        vertices.push(firstNode, secondNode, thirdNode, fourthNode, fifthNode,
+          sixthNode, seventhNode, eighthNode, ninthNode);
       }
 
       if (lines.length === 1) {
         forTree.push({
           id: bagId,
           name: bagLabel,
-          vertices
+          vertices,
         });
       }
 
@@ -700,36 +458,17 @@ const logFileText = async (file) => {
   readTreeInput(newnew);
 };
 
-const handleGraphUpload = (event) => {
-  const file = event.target.files[0];
-  newReadGraphFile(file);
-};
 
-function convertNumberGraph() {
-  const convertedArray = [];
-
-  currentGraph.links.forEach((link) => {
-    convertedArray.push([charArray[link.source.label], charArray[link.target.label]]);
-  });
-  return convertedArray;
-}
-
-function getAllEdges() {
-  const convertedArray = [];
-  currentGraph.links.forEach((link) => {
-    convertedArray.push([link.source.id, link.target.id]);
-  });
-  return convertedArray;
-}
-
-function computeTreeDecomposition() {
+export function computeTreeDecomposition() {
   removeExistingTree();
+
+  $('.text_container').removeClass('hidden').addClass('visible');
 
   let edges = [];
   if (isLetterGraph) {
-    edges = convertNumberGraph();
+    edges = graph.convertNumberGraph();
   } else {
-    edges = getAllEdges();
+    edges = graph.getAllEdges();
   }
 
   $.ajax({
@@ -741,161 +480,9 @@ function computeTreeDecomposition() {
       // console.log(data);
     },
     complete() {
+      $('.text_container').removeClass('visible').addClass('hidden');
       const pathtotree = '../treedecompositions/tree.td';
       logFileText(pathtotree);
     },
   });
 }
-
-const tester1 = {
-  nodes: [
-    {
-      id: 1,
-      label: 1
-    },
-    {
-      id: 2,
-      label: 2
-    },
-    {
-      id: 3,
-      label: 3
-    },
-    {
-      id: 4,
-      label: 4
-    },
-    {
-      id: 5,
-      label: 5
-    }
-  ],
-  links: [
-    {
-      source: 1,
-      target: 2
-    },
-    {
-      source: 1,
-      target: 3
-    },
-    {
-      source: 3,
-      target: 4
-    },
-    {
-      source: 3,
-      target: 1
-    },
-    {
-      source: 3,
-      target: 5
-    },
-    {
-      source: 5,
-      target: 2
-    },
-  ]
-};
-
-const testtree = {
-  id: 1,
-  name: '3, 4',
-  vertices: [
-    3,
-    4
-  ],
-  hasParent: true,
-  children: [
-    {
-      id: 4,
-      name: '3, 5',
-      vertices: [
-        3,
-        5
-      ],
-      hasParent: true,
-      parent: 1,
-      children: [
-        {
-          id: 3,
-          name: '2, 3, 5',
-          vertices: [
-            2,
-            3,
-            5
-          ],
-          hasParent: true,
-          parent: 4,
-          children: [
-            {
-              id: 2,
-              name: '1, 2, 3',
-              vertices: [
-                1,
-                2,
-                3
-              ],
-              hasParent: true,
-              parent: 3
-            }
-          ]
-        }
-      ]
-    }
-  ]
-};
-
-currentGraph = tester1;
-drawGraph(tester1);
-drawTree(testtree);
-
-function incrementVerticesCounter() {
-  let value = parseInt(document.getElementById('numberOfVertices').value, 10);
-  value = isNaN(value) ? 0 : value;
-  value++;
-  document.getElementById('numberOfVertices').value = value;
-}
-
-function decrementVerticesCounter() {
-  let value = parseInt(document.getElementById('numberOfVertices').value, 10);
-  value = isNaN(value) ? 0 : value;
-  if (value > 0) {
-    value--;
-  }
-  document.getElementById('numberOfVertices').value = value;
-}
-
-function incrementEdgesCounter() {
-  let value = parseInt(document.getElementById('numberOfEdges').value, 10);
-  value = isNaN(value) ? 0 : value;
-  value++;
-  document.getElementById('numberOfEdges').value = value;
-}
-
-function decrementEdgesCounter() {
-  let value = parseInt(document.getElementById('numberOfEdges').value, 10);
-  value = isNaN(value) ? 0 : value;
-  if (value > 0) {
-    value--;
-  }
-  document.getElementById('numberOfEdges').value = value;
-}
-
-const verticesLeftArrow = $('#verticesLeftArrow');
-const verticesRightArrow = $('#verticesRightArrow');
-verticesLeftArrow.click('click', decrementVerticesCounter);
-verticesRightArrow.click('click', incrementVerticesCounter);
-
-const edgesLeftArrow = $('#edgesLeftArrow');
-const edgesRightArrow = $('#edgesRightArrow');
-edgesLeftArrow.click('click', decrementEdgesCounter);
-edgesRightArrow.click('click', incrementEdgesCounter);
-
-document
-  .querySelector('#fileUpload')
-  .addEventListener('change', handleGraphUpload);
-document
-  .getElementById('compute')
-  .addEventListener('click', computeTreeDecomposition);
-document.getElementById('reload').addEventListener('click', create);

@@ -1,52 +1,66 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <link rel="stylesheet" href="css/style.css" />
-    <script src="https://d3js.org/d3.v5.min.js"></script>
-    <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Graph Width Visualizer</title>
-  </head>
 
-  <body>
-    <div class="sidenav">
-      <p>Generate random graph:</p>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://d3js.org/d3.v5.min.js"></script>
+  <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+  <script type="module" src="js/tree.js"></script>
+  <script type="module" src="js/graph.js"></script>
+  <title>Graph Width Visualizer</title>
+</head>
 
-      <div class="number-of-vertices">
-        <p># of vertices</p>
-        <span id="verticesLeftArrow">⯇</span>
-        <input type="text" id="numberOfVertices" value="10" />
-        <span id="verticesRightArrow">⯈</span>
-      </div>
-      <div class="number-of-links">
-        <p># of edges</p>
-        <span id="edgesLeftArrow">⯇</span>
-        <input type="text" id="numberOfEdges" value="10" />
-        <span id="edgesRightArrow">⯈</span>
-      </div>
-      <br />
-      <div>
-        <input type="radio" id="letters" name="type" />
-        <label for="letters">Letters</label><br />
-        <input type="radio" id="numbers" name="type" />
-        <label for="numbers">Numbers</label><br />
-      </div>
-      <br />
-      <span id="reload">↺</span>
-      <p>Input graph:</p>
-      <input type="file" id="fileUpload" />
-      <br />
-      <button id="compute" name="compute">Compute tree decomposition</button>
+<body>
+  <div class="sidenav">
+    <p>Generate random graph:</p>
+
+    <div class="number-of-vertices">
+      <p># of vertices</p>
+      <span id="verticesLeftArrow">⯇</span>
+      <input type="text" id="numberOfVertices" value="10" />
+      <span id="verticesRightArrow">⯈</span>
     </div>
-    <div class="flex-container">
-      <div id="graph-container" class="graphStyle">
-        <svg id="graph" class="graphSvg"></svg>
-      </div>
-      <div id="tree-container" class="treeStyle">
-        <svg id="tree" class="treeSvg"></svg>
-      </div>
+    <div class="number-of-links">
+      <p># of edges</p>
+      <span id="edgesLeftArrow">⯇</span>
+      <input type="text" id="numberOfEdges" value="10" />
+      <span id="edgesRightArrow">⯈</span>
     </div>
-    <script type="text/javascript" src="js/td.js"></script>
-  </body>
+    <br />
+    <div>
+      <input type="radio" id="letters" name="type" />
+      <label for="letters">Letters</label><br />
+      <input type="radio" id="numbers" name="type" />
+      <label for="numbers">Numbers</label><br />
+    </div>
+    <br />
+    <span id="reload">↺</span>
+    <p>Input graph:</p>
+    <input type="file" id="fileUpload" />
+    <br />
+    <button id="compute" name="compute">Compute tree decomposition</button>
+    <div>
+      <button id="drawgraph" name="drawgraph">Draw graph</button>
+    </div>
+  </div>
+  <div class="flex-container">
+    <div id="graph-container" class="graphStyle">
+      <svg id="graph" class="graphSvg"></svg>
+    </div>
+    <div id="tree-container" class="treeStyle">
+      <div class="text_container hidden">
+        <div>
+          <div class="loader"></div>
+        </div>
+      </div>
+
+      <svg id="tree" class="treeSvg"></svg>
+    </div>
+  </div>
+
+</body>
+
 </html>
