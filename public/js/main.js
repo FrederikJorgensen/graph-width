@@ -1,5 +1,7 @@
 import * as graph from './graph.js';
-import * as tree from './tree.js';
+import startanimation from './animation.js';
+import * as drawGraph from './drawGraph.js';
+import computeTreeDecomposition from './tree.js';
 
 function incrementVerticesCounter() {
   let value = parseInt(document.getElementById('numberOfVertices').value, 10);
@@ -43,15 +45,25 @@ const edgesRightArrow = $('#edgesRightArrow');
 edgesLeftArrow.click('click', decrementEdgesCounter);
 edgesRightArrow.click('click', incrementEdgesCounter);
 
-document
-  .getElementById('drawgraph')
-  .addEventListener('click', graph.handleDrawGraph);
 
 document
   .querySelector('#fileUpload')
   .addEventListener('change', graph.handleGraphUpload);
 document
   .getElementById('compute')
-  .addEventListener('click', tree.computeTreeDecomposition);
+  .addEventListener('click', computeTreeDecomposition);
 
-document.getElementById('reload').addEventListener('click', graph.create);
+document
+  .getElementById('reloadRandomGraph')
+  .addEventListener('click', graph.create);
+
+document
+  .getElementById('startanimation')
+  .addEventListener('click', startanimation);
+
+document
+  .getElementById('drawGraphButton')
+  .addEventListener('click', drawGraph.resetDrawingGraph);
+
+document
+  .addEventListener('contextmenu', (event) => event.preventDefault());

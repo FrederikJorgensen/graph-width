@@ -1,10 +1,10 @@
+import * as dg from './drawGraph.js';
 import * as graph from './graph.js';
 
 let treeSvg;
 let treeNode;
 let treeLink;
 let treeLabel;
-
 const isLetterGraph = false;
 
 const a = 97;
@@ -47,9 +47,10 @@ function highlightSubTrees(d) {
 /* eslint-disable no-param-reassign */
 function drawTree(tree) {
   const width = document.getElementById('tree-container').offsetWidth;
-  const height = document.getElementById('tree-container').offsetHeight;
+  // const height = document.getElementById('tree-container').offsetHeight;
+  const height = 2000;
 
-  treeSvg = d3.select('#tree');
+  treeSvg = d3.select('#tree').append('svg').attr('id', 'treeSvg').attr('viewBox', [-width / 2, -height / 2, width, height]);
 
   const drag = (simulation) => {
     function dragstarted(d) {
@@ -94,10 +95,6 @@ function drawTree(tree) {
     .force('x', d3.forceX())
     .force('y', d3.forceY());
 
-  treeSvg = d3
-    .selectAll('#tree')
-    .attr('viewBox', [-width / 2, -height / 2, width, height]);
-
   treeLink = treeSvg
     .append('g')
     .attr('stroke', '#999')
@@ -111,8 +108,7 @@ function drawTree(tree) {
     .selectAll('circle')
     .data(nodes)
     .join('circle')
-    // .attr('c', (d) => 10 *d.data.vertices.length)
-    .attr('r', (d) => 10 * d.data.vertices.length)
+    .attr('r', (d) => 10)
     .attr('fill', '#1a7532')
     .call(drag(simulation));
 
@@ -179,10 +175,11 @@ function buildTree(nodes) {
 function readTreeInput(input) {
   const lines = input;
   lines.splice(0, 3);
-  lines.pop();
   const treeBags = [];
   const forTree = [];
-  let isFirstRound = true;
+  const isFirstRound = true;
+  const edges1 = {};
+  let edgePairs = [];
 
   function findTreeBagLabel(nodeId) {
     for (let i = 0; i < treeBags.length; i++) {
@@ -204,7 +201,7 @@ function readTreeInput(input) {
         obj.id = node;
         obj.name = findTreeBagLabel(node);
         obj.vertices = vertices;
-        obj.hasParent = true;
+        obj.hasParent = false;
       }
     });
   }
@@ -254,6 +251,7 @@ function readTreeInput(input) {
     const node = getNodeById(nodeId);
     return node.vertices;
   }
+
 
   for (let line = 0; line < lines.length; line++) {
     const textLine = lines[line];
@@ -320,6 +318,9 @@ function readTreeInput(input) {
       eighthNode = parseInt(splitted[9], 10);
       ninthNode = parseInt(splitted[10], 10);
 
+      if (numberOfNodes === 0) {
+        bagLabel = 'empty';
+      }
 
       if (numberOfNodes === 1) {
         bagLabel += firstNodeLabel;
@@ -408,13 +409,6 @@ function readTreeInput(input) {
           sixthNode, seventhNode, eighthNode, ninthNode);
       }
 
-      if (lines.length === 1) {
-        forTree.push({
-          id: bagId,
-          name: bagLabel,
-          vertices,
-        });
-      }
 
       forTree.push({
         id: bagId,
@@ -422,31 +416,113 @@ function readTreeInput(input) {
         vertices,
         hasParent: false,
       });
-
       treeBags.push({ bagId, bagLabel });
     } else {
       const splitted = textLine.split(' ');
       const sourceNode = parseInt(splitted[0], 10);
       const targetNode = parseInt(splitted[1], 10);
-      const verticesOfSourceNode = getVertices(sourceNode);
+      const newnew = [];
+      newnew.push(sourceNode, targetNode);
+      edgePairs.push(newnew);
+      /*       const verticesOfSourceNode = getVertices(sourceNode);
       const verticesOfTargetNode = getVertices(targetNode);
 
-      if (isFirstRound) {
-        setRootNode(sourceNode, verticesOfSourceNode);
-        setChildOfRootNode(sourceNode, targetNode, verticesOfTargetNode);
-        isFirstRound = false;
+      if (edges1[sourceNode] === undefined) {
+        const temp = [];
+        temp.push(targetNode);
+        edges1[sourceNode] = temp;
+      } else {
+        const oldArray = edges1[sourceNode];
+        oldArray.push(targetNode);
+        edges1[sourceNode] = oldArray;
       }
 
-      if (targetNode !== undefined && sourceNode !== undefined) {
+      if (sourceNode === 6) {
+        setRootNode(sourceNode, verticesOfSourceNode);
+        setChildOfRootNode(sourceNode, targetNode, verticesOfTargetNode);
+        // isFirstRound = false;
+      } else if (targetNode !== undefined && sourceNode !== undefined) {
         if (!nodeHasParent(sourceNode)) {
           setSourceNodeAsChild(sourceNode, targetNode, verticesOfSourceNode);
         } else {
           setTargetNodeAsChild(sourceNode, targetNode, verticesOfTargetNode);
         }
-      }
+      } */
     }
   }
-  const jsonTree = buildTree(forTree);
+
+  const root = 6;
+  let children;
+  const ft = [];
+  ft.push({ id: root });
+
+  function getChildren(root) {
+    const children = [];
+    for (let i = 0; i < edgePairs.length; i++) {
+      if (edgePairs[i][0] === root) children.push(edgePairs[i][1]);
+      if (edgePairs[i][1] === root) children.push(edgePairs[i][0]);
+    }
+    return children;
+  }
+
+  function filtering(array, item) {
+    const filtered = [];
+
+    for (let i = 0; i < array.length; i++) {
+      if (array[i][0] === item[0] && array[i][1] === item[1]) {
+        continue;
+      }
+      filtered.push(array[i]);
+    }
+    return filtered;
+  }
+
+  function buildSomething(root) {
+    children = getChildren(root);
+    const child1 = children[0];
+    const child2 = children[1];
+    if (children.length === 2) {
+      const childObj1 = { id: child1, name: child1, parent: root };
+      const childObj2 = { id: child2, name: child1, parent: root };
+      ft.push(childObj1, childObj2);
+      const temp1 = [];
+      const temp2 = [];
+      const temp3 = [];
+      const temp4 = [];
+      temp1.push(child1, root);
+      temp2.push(root, child1);
+      temp3.push(child2, root);
+      temp4.push(root, child2);
+      edgePairs = filtering(edgePairs, temp1);
+      edgePairs = filtering(edgePairs, temp2);
+      edgePairs = filtering(edgePairs, temp3);
+      edgePairs = filtering(edgePairs, temp4);
+
+      buildSomething(child1);
+      buildSomething(child2);
+    } if (children.length === 1) {
+      const childObj1 = { id: child1, name: child1, parent: root };
+      ft.push(childObj1);
+      const temp1 = [];
+      const temp2 = [];
+      temp1.push(child1, root);
+      temp2.push(root, child1);
+      edgePairs = filtering(edgePairs, temp1);
+      edgePairs = filtering(edgePairs, temp2);
+      buildSomething(child1);
+    }
+    return ft;
+  }
+
+
+  for (let i = 0; i < edgePairs.length; i++) {
+    buildSomething(root);
+  }
+
+  console.log(ft);
+
+  const jsonTree = buildTree(ft);
+  console.log(jsonTree);
   removeExistingTree();
   drawTree(jsonTree);
 }
@@ -458,19 +534,28 @@ const logFileText = async (file) => {
   readTreeInput(newnew);
 };
 
+logFileText('../treedecompositions/tree.td');
 
-export function computeTreeDecomposition() {
+export default function computeTreeDecomposition() {
+  if (d3.select('#treeSvg')) d3.select('#treeSvg').remove();
   removeExistingTree();
 
-  $('.text_container').removeClass('hidden').addClass('visible');
-
   let edges = [];
-  if (isLetterGraph) {
+
+  if (dg.isDrawing()) {
+    edges = dg.convertLinks();
+  } else if (isLetterGraph) {
     edges = graph.convertNumberGraph();
   } else {
     edges = graph.getAllEdges();
   }
 
+  if (edges.length === 0) {
+    alert('MUST HAVE AT LEAST 1 EDGE');
+    return;
+  }
+
+  $('.text_container').removeClass('hidden').addClass('visible');
   $.ajax({
     url: '/compute',
     type: 'POST',

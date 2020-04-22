@@ -17,6 +17,7 @@ module.exports = {
   rules: {
     'no-plusplus': 'off',
     "prefer-destructuring": ["error", { "object": true, "array": false }],
-    "no-param-reassign": 0
+    "no-param-reassign": 0,
+    "import/extensions": 'off'
   },
 };

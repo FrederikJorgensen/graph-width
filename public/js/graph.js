@@ -1,24 +1,22 @@
 const adjlist = [];
 let currentGraph;
-let link;
-let node;
-let label;
-
+let graphLinks;
+let graphNodes;
+let graphLabels;
+const width = document.getElementById('graph-container').offsetWidth;
+const height = document.getElementById('graph-container').offsetHeight;
 const a = 97;
 const charArray = {};
 for (let i = 0; i < 26; i++) charArray[String.fromCharCode(a + i)] = i + 1;
-
 const charArray2 = {};
 for (let i = 0; i < 26; i++) charArray2[i + 1] = String.fromCharCode(a + i);
 
 export default function drawGraph(graph) {
-  const width = document.getElementById('graph-container').offsetWidth;
-  const height = document.getElementById('graph-container').offsetHeight;
-  const svg = d3.select('#graph');
+  const svg = d3.select('#graph').append('svg').attr('viewBox', [-width / 2, -height / 2, width, height]);
   const { nodes } = graph;
   const { links } = graph;
 
-  link = svg
+  graphLinks = svg
     .append('g')
     .selectAll('line')
     .data(links)
@@ -26,7 +24,7 @@ export default function drawGraph(graph) {
     .append('line')
     .attr('class', 'link');
 
-  node = svg
+  graphNodes = svg
     .append('g')
     .selectAll('g')
     .data(nodes)
@@ -35,7 +33,7 @@ export default function drawGraph(graph) {
     .attr('r', 18)
     .attr('class', 'node');
 
-  label = svg
+  graphLabels = svg
     .append('g')
     .selectAll('text')
     .data(nodes)
@@ -46,21 +44,21 @@ export default function drawGraph(graph) {
     .text((d) => d.label);
 
   function ticked() {
-    node.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
+    graphNodes.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
 
-    link
+    graphLinks
       .attr('x1', (d) => d.source.x)
       .attr('y1', (d) => d.source.y)
       .attr('x2', (d) => d.target.x)
       .attr('y2', (d) => d.target.y);
 
-    label.attr('x', (d) => d.x).attr('y', (d) => d.y);
+    graphLabels.attr('x', (d) => d.x).attr('y', (d) => d.y);
   }
 
   const simulation = d3
     .forceSimulation(nodes)
     .force('charge', d3.forceManyBody().strength(-180))
-    .force('center', d3.forceCenter(width / 2, height / 2))
+    // .force('center', d3.forceCenter(width / 2, height / 2))
     .force(
       'link',
       d3
@@ -94,16 +92,16 @@ export default function drawGraph(graph) {
     adjlist[`${d.source.index}-${d.target.index}`] = true;
   });
 
-  node.call(
+  graphNodes.call(
     d3.drag().on('start', dragstarted).on('drag', dragged).on('end', dragended),
   );
 }
 
 function removeExistingGraph() {
-  if (node && link && label) {
-    node.remove();
-    link.remove();
-    label.remove();
+  if (graphNodes && graphLinks && graphLabels) {
+    graphNodes.remove();
+    graphLinks.remove();
+    graphLabels.remove();
   }
 }
 
@@ -115,7 +113,6 @@ function newReadGraphFile(file) {
   const links = [];
   r.onload = function onLoad() {
     const lines = this.result.split('\n');
-    lines.shift();
 
     function nodeExists(node) {
       for (let i = 0; i < nodes.length; i++) {
@@ -126,13 +123,27 @@ function newReadGraphFile(file) {
 
     for (let i = 0; i < lines.length; i++) {
       const textLine = lines[i];
+      if (textLine.startsWith('p') || textLine.startsWith('c')) continue;
       const splitted = textLine.split(' ');
 
-      const firstNodeLabel = splitted[0].trim();
-      const secondNodeLabel = splitted[1].trim();
+      let firstNode;
+      let secondNode;
+      let firstNodeLabel;
+      let secondNodeLabel;
 
-      const firstNode = charArray[firstNodeLabel];
-      const secondNode = charArray[secondNodeLabel];
+      if (Number.isNaN(splitted[0].trim())) {
+        firstNode = charArray[firstNodeLabel];
+        secondNode = charArray[secondNodeLabel];
+        firstNodeLabel = splitted[0].trim();
+        secondNodeLabel = splitted[1].trim();
+      } else {
+        firstNode = parseInt(splitted[0], 10);
+        secondNode = parseInt(splitted[1], 10);
+        firstNodeLabel = splitted[0];
+        secondNodeLabel = splitted[1];
+      }
+
+
 
       if (!nodeExists(firstNode)) {
         nodes.push({ id: firstNode, label: firstNodeLabel });
@@ -219,6 +230,7 @@ function randomGraph(n, m, type) {
 
 export function create() {
   removeExistingGraph();
+  d3.select('svg').remove();
   const numberOfVertices = parseInt(
     document.getElementById('numberOfVertices').value,
     10,
@@ -262,8 +274,4 @@ export function getAllEdges() {
 export function handleGraphUpload(event) {
   const file = event.target.files[0];
   newReadGraphFile(file);
-}
-
-export function handleDrawGraph() {
-  removeExistingGraph();
 }
