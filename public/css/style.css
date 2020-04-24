@@ -6,63 +6,40 @@ body {
   display: flex;
   flex-direction: row;
   font-family: 'Segoe UI', 'Helvetica', sans-serif;
-  height: 100%;
-}
-
-/* The navigation menu links */
-.sidenav a {
-  padding: 6px 8px 6px 16px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-}
-
-.sidenav p {
-  color: black;
-}
-
-/* When you mouse over the navigation links, change their color */
-.sidenav a:hover {
-  color: #f1f1f1;
-}
-
-/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
-@media screen and (max-height: 450px) {
-  .sidenav {
-    padding-top: 15px;
-  }
-  .sidenav a {
-    font-size: 18px;
-  }
-}
-
-#reloadRandomGraph {
-  font-size: 50px;
-  color: black;
+  height: calc(100% - 3em);
 }
 
 .flex-container {
   display: flex;
   width: 100%;
-  height: 1000px;
-}
-
-.graphStyle {
-  flex: 0.5;
-}
-
-.treeStyle {
-  flex: 0.5;
-}
-
-.graphSvg {
   height: 100%;
-  width: 100%;
+  text-align: center;
 }
+
+.left-container {
+  flex: 0.5;
+}
+
+#graph-container {
+  height: 50%;
+}
+
+#td-container {
+  height: 50%;
+}
+
+.right-container {
+  flex: 0.5;
+}
+
+#nice-td-container {
+  width: 100%;
+  height: 100%;
+}
+
 
 .drawGraphSvg {
-  height: 100%;
+  height: 50%;
   width: 100%;
 }
 
@@ -70,21 +47,10 @@ body {
   height: 100%;
   width: 100%;
 }
-.node {
-  cursor: grabbing;
-  fill: #1a7532;
-}
 
-.link {
-  stroke: #333;
-  stroke-width: 1.5px;
-} 
-
-.label {
-  pointer-events: none;
-  font-size: 8px;
-  fill: black;
-  font-weight: 1000;
+#reloadRandomGraph {
+  font-size: 50px;
+  color: black;
 }
 
 .sidenav {
@@ -133,8 +99,8 @@ body {
 } 
 
 text {
-  font-family: sans-serif;
-  font-size: 10px;
+  font-size: 6px;
+  pointer-events: none;
 }
 
 path.link {
@@ -152,16 +118,6 @@ path.link.hidden {
   stroke-width: 0;
 }
 
-svg {
-  border: 1px solid grey;
-}
-
-line {
-  stroke: steelblue;
-  stroke-width: 2px;
-  stroke-linecap: round;
-}
-
 .drag_line {
   stroke: 	#FF0000;
   stroke-width: 5;
@@ -172,12 +128,57 @@ line {
   stroke-width: 0;
 }
 
-.link {
-  stroke: #595;
-  stroke-width: 5;
-  cursor: crosshair;
+/* The navigation menu links */
+.sidenav a {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
 }
 
-.link_selected {
-  stroke: #ff7f0e;
+.sidenav p {
+  color: black;
 }
+
+/* When you mouse over the navigation links, change their color */
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+/* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+@media screen and (max-height: 450px) {
+  .sidenav {
+    padding-top: 15px;
+  }
+  .sidenav a {
+    font-size: 18px;
+  }
+}
+
+/* Node styling here */
+.graphNode {
+  fill: #eb4034;
+}
+
+.treeDecompositionNode {
+  fill: #9ceb34
+}
+
+.niceTreeDecompositionNode {
+  fill: #3483eb;
+}
+
+line {
+  stroke: #333;
+  stroke-width: 2px;
+  stroke-linecap: round;
+} 
+
+.label {
+  pointer-events: none;
+  font-size: 9px;
+  fill: black;
+  font-weight: 800;
+}
+

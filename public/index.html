@@ -8,10 +8,11 @@
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
   <script type="module" src="js/main.js"></script>
-  <script type="module" src="js/tree.js"></script>
-  <script type="module" src="js/graph.js"></script>
-  <script type="module" src="js/drawGraph.js"></script>
-  <script src="https://unpkg.com/jeezy@1.11.2/lib/jeezy.min.js"></script>
+  <script type="module" src="js/niceTreeDecomposition.js"></script>
+  <script type="module" src="js/graphFactory.js"></script>
+  <script type="module" src="js/readGraph.js"></script>
+  <script type="module" src="js/readTree.js"></script>
+  <script type="module" src="js/createGraph.js"></script>
   <title>Graph Width Visualizer</title>
 </head>
 
@@ -22,13 +23,13 @@
     <div class="number-of-vertices">
       <p># of vertices</p>
       <span id="verticesLeftArrow">⯇</span>
-      <input type="text" id="numberOfVertices" value="10" />
+      <input type="text" id="numberOfVertices" value="5" />
       <span id="verticesRightArrow">⯈</span>
     </div>
     <div class="number-of-links">
       <p># of edges</p>
       <span id="edgesLeftArrow">⯇</span>
-      <input type="text" id="numberOfEdges" value="10" />
+      <input type="text" id="numberOfEdges" value="5" />
       <span id="edgesRightArrow">⯈</span>
     </div>
     <br />
@@ -39,32 +40,40 @@
       <label for="numbers">Numbers</label><br />
     </div>
     <br />
-    <span id="reloadRandomGraph">↺</span>
+    <span id="reload">↺</span>
     <p>Input graph:</p>
     <input type="file" id="fileUpload" />
+    <div>
+      <!-- <button id="drawGraphButton">Draw graph</button> -->
+    </div>
     <br />
-    <button id="compute" name="compute">Compute tree decomposition</button>
     <div>
-      <button id="startanimation" name="startanimation">Start Animation</button>
+      <button id="compute" name="compute">Compute tree decomposition</button>
     </div>
     <div>
-      <button id="drawGraphButton">Draw graph</button>
+      <button id="computeNiceTree">Compute nice tree decomposition</button>
     </div>
+
   </div>
   <div class="flex-container">
-    <div id="graph-container" class="graphStyle">
-      <div id="drawGraph" class="drawGraph"></div>
-      <div id="graph" class="graphSvg"></div>
-      <!-- <svg id="drawGraph" class="drawGraphSvg"></svg> -->
-      <!-- <svg id="graph" class="graphSvg"></svg> -->
+    <div class="left-container">
+      <!-- <div id="drawGraph" class="drawGraph"></div> -->
+      <div id="graph-container">
+        <svg id="graphSvg"></svg>
+      </div>
+      <div id="td-container">
+        <svg id="tdSvg"></svg>
+      </div>
     </div>
-    <div id="tree-container" class="treeStyle">
+    <div class="right-container">
       <div class="text_container hidden">
         <div>
           <div class="loader"></div>
         </div>
       </div>
-      <div id="tree" class="treeSvg"></div>
+      <div id="nice-td-container">
+        <svg id="nice-td-svg"></svg>
+      </div>
     </div>
   </div>
 
