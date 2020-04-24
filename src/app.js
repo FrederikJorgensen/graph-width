@@ -22,7 +22,7 @@ app.get('/', (req, res) => {
 app.post('/compute', (req, res) => {
   const graph = JSON.stringify(req.body);
   writeGraph.writeGraphFile(graph);
-  const command = 'cd src && java -jar tree-algo.jar graph.gr';
+  const command = 'cd src && java -jar src.jar graph.gr';
   const child = require('child_process').exec(command);
   let treeInput = '';
   child.stdout.on('data', (data) => {

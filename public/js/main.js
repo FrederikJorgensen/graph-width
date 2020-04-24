@@ -141,8 +141,6 @@ function computeTreeDecomposition() {
     return;
   }
 
-  console.log(edges);
-
   $('.text_container').removeClass('hidden').addClass('visible');
   $.ajax({
     url: '/compute',
@@ -184,7 +182,7 @@ document
   .addEventListener('click', computeTreeDecomposition);
 
 document
-  .getElementById('reload')
+  .getElementById('reloadRandomGraph')
   .addEventListener('click', reload);
 
 /* document

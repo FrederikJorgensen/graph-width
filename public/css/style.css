@@ -49,7 +49,7 @@ body {
 }
 
 #reloadRandomGraph {
-  font-size: 50px;
+  font-size: 120px;
   color: black;
 }
 
@@ -159,14 +159,20 @@ path.link.hidden {
 /* Node styling here */
 .graphNode {
   fill: #eb4034;
+  stroke: black;
+  stroke-width: 2px;
 }
 
 .treeDecompositionNode {
-  fill: #9ceb34
+  fill: #9ceb34;
+  stroke: black;
+  stroke-width: 2px;
 }
 
 .niceTreeDecompositionNode {
   fill: #3483eb;
+  stroke: black;
+  stroke-width: 2px;
 }
 
 line {

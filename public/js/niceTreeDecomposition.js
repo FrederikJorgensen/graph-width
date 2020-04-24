@@ -46,7 +46,8 @@ export default function loadNiceTreeDecomposition(treeData) {
   const width = document.getElementById('nice-td-container').offsetWidth;
   const height = document.getElementById('nice-td-container').offsetHeight;
 
-  treeSvg = d3.select('#nice-td-svg').attr('viewBox', [-width / 2, -height / 2, width, height]);
+  treeSvg = d3.select('#nice-td-svg').attr('width', width).attr('height', height);
+  // .attr('viewBox', [-width / 2, -height / 2, width, height]);
 
   const drag = (simulation) => {
     function dragstarted(d) {
@@ -79,10 +80,11 @@ export default function loadNiceTreeDecomposition(treeData) {
 
   const simulation = d3
     .forceSimulation(nodes)
-    .force('link', d3.forceLink(links).id((d) => d.id).distance(2).strength(1))
-    .force('charge', d3.forceManyBody().strength(-145))
-    .force('x', d3.forceX())
-    .force('y', d3.forceY(-400).strength(0.9));
+    .force('link', d3.forceLink(links).id((d) => d.id).distance(20).strength(1))
+    .force('charge', d3.forceManyBody().strength(-500))
+    .force('y', d3.forceY(300))
+    .force('x', d3.forceX(width / 2));
+    // .force('y', d3.forceY(-400).strength(0.9));
 
   niceTreeLink = treeSvg
     .append('g')
@@ -114,11 +116,20 @@ export default function loadNiceTreeDecomposition(treeData) {
   niceTreeNode.on('mouseout', graph.resetHighlight);
   niceTreeNode.on('click', highlightSubTrees);
   niceTreeNode.on('dblclick', resetTreeHighlight);
+
+  console.log(links);
   simulation.on('tick', () => {
-    const ky = 1.2 * simulation.alpha();
+    /*     const k = 0.5 * simulation.alpha();
 
     links.forEach((d) => {
-      d.target.y += (d.target.depth * 70 - d.target.y) * ky;
+      d.target.y += ((4 - d.group) * 100 - d.y) * k;
+    }); */
+
+
+    const ky = 0.5 * simulation.alpha();
+
+    links.forEach((d) => {
+      d.target.y += ((d.target.depth) * 100 - d.target.y) * ky;
     });
 
     niceTreeLink
