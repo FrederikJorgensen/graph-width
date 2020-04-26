@@ -87,6 +87,7 @@ function readNiceTreeDecomposition(treeData) {
       id: String(root),
       label: allBagLabels[root],
       vertices: verticesInBag[root],
+      liss: 0,
     };
 
     if (children.length !== 0) { // if there are any children,

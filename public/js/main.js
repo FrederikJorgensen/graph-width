@@ -165,11 +165,6 @@ function handleComputeNiceTree() {
   readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
 }
 
-function threeColor() {
-
-}
-
-
 const verticesLeftArrow = $('#verticesLeftArrow');
 const verticesRightArrow = $('#verticesRightArrow');
 verticesLeftArrow.click('click', decrementVerticesCounter);
@@ -203,3 +198,5 @@ document
   .addEventListener('click', handleComputeNiceTree);
 
 document.getElementById('bfs').addEventListener('click', ntd.bfs);
+
+document.getElementById('mis').addEventListener('click', ntd.runMis);

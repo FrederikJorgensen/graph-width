@@ -152,12 +152,10 @@ function visitElement(element, animX) {
     .style('fill', 'red');
 }
 
-
 export function bfs() {
   const queue = [];
   queue.push(newRoot);
   let animX = 0;
-  console.log(newRoot);
   while (queue.length !== 0) {
     const element = queue.shift();
     visitElement(element, animX);
@@ -168,4 +166,44 @@ export function bfs() {
       }
     }
   }
+}
+
+export function maxIndependentSet(newRoot) {
+  if (newRoot === undefined) return 0;
+
+  let animX = 0;
+  visitElement(newRoot, animX);
+  animX += 1;
+
+  if (newRoot.liss !== 0) return newRoot.liss;
+
+  if ('children' in newRoot === false) {
+    d3.select(`#node-${newRoot.id}`).style('fill', 'green');
+    root.liss = 1;
+    return root.liss;
+  }
+
+  const lissExcl = maxIndependentSet(newRoot.children[0]) + maxIndependentSet(newRoot.children[1]);
+  let lissIncl = 1;
+
+  if ('children' in newRoot) {
+    if (newRoot.children[0] !== undefined) {
+      if ('children' in newRoot.children[0] === false) {
+        maxIndependentSet(undefined);
+      } else {
+        lissIncl += (maxIndependentSet(newRoot.children[0].children[0])) + (maxIndependentSet(newRoot.children[0].children[1]));
+      }
+    }
+
+    if (newRoot.children[1] !== undefined) {
+      lissIncl += (maxIndependentSet(newRoot.children[1].children[0])) + (maxIndependentSet(newRoot.children[1].children[1]));
+    }
+  }
+  newRoot.liss = Math.max(lissExcl, lissIncl);
+  console.log(newRoot.liss);
+  return newRoot.liss;
+}
+
+export function runMis() {
+  maxIndependentSet(newRoot);
 }
