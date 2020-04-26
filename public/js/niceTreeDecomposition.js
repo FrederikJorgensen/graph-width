@@ -4,6 +4,8 @@ let treeSvg;
 let niceTreeNode;
 let niceTreeLink;
 let niceTreeLabel;
+let root;
+let newRoot;
 
 const a = 97;
 const charArray2 = {};
@@ -12,6 +14,7 @@ for (let i = 0; i < 26; i++) charArray2[i + 1] = String.fromCharCode(a + i);
 
 function resetTreeHighlight() {
   niceTreeNode.attr('opacity', 1);
+  niceTreeLabel.attr('opacity', 1);
   niceTreeLink.attr('opacity', 1);
 }
 
@@ -26,12 +29,16 @@ function highlightSubTrees(d) {
     wat.push(currentLink.source.data, currentLink.target.data);
   });
 
-
   descendants.forEach((currentNode) => {
     des.push(currentNode.data.id);
   });
 
   niceTreeNode.attr('opacity', (currentNode) => {
+    if (des.includes(currentNode.data.id)) return 1;
+    return 0;
+  });
+
+  niceTreeLabel.attr('opacity', (currentNode) => {
     if (des.includes(currentNode.data.id)) return 1;
     return 0;
   });
@@ -43,6 +50,7 @@ function highlightSubTrees(d) {
 }
 
 export default function loadNiceTreeDecomposition(treeData) {
+  newRoot = treeData;
   const width = document.getElementById('nice-td-container').offsetWidth;
   const height = document.getElementById('nice-td-container').offsetHeight;
 
@@ -74,9 +82,10 @@ export default function loadNiceTreeDecomposition(treeData) {
       .on('end', dragended);
   };
 
-  const root = d3.hierarchy(treeData);
+  root = d3.hierarchy(treeData);
   const links = root.links();
   const nodes = root.descendants();
+
 
   const simulation = d3
     .forceSimulation(nodes)
@@ -84,7 +93,7 @@ export default function loadNiceTreeDecomposition(treeData) {
     .force('charge', d3.forceManyBody().strength(-500))
     .force('y', d3.forceY(300))
     .force('x', d3.forceX(width / 2));
-    // .force('y', d3.forceY(-400).strength(0.9));
+  // .force('y', d3.forceY(-400).strength(0.9));
 
   niceTreeLink = treeSvg
     .append('g')
@@ -100,6 +109,7 @@ export default function loadNiceTreeDecomposition(treeData) {
     .attr('r', 18)
     .attr('class', 'niceTreeDecompositionNode')
     .attr('fill', '#1a7532')
+    .attr('id', (d) => `node-${d.data.id}`)
     .call(drag(simulation));
 
   niceTreeLabel = treeSvg
@@ -117,15 +127,7 @@ export default function loadNiceTreeDecomposition(treeData) {
   niceTreeNode.on('click', highlightSubTrees);
   niceTreeNode.on('dblclick', resetTreeHighlight);
 
-  console.log(links);
   simulation.on('tick', () => {
-    /*     const k = 0.5 * simulation.alpha();
-
-    links.forEach((d) => {
-      d.target.y += ((4 - d.group) * 100 - d.y) * k;
-    }); */
-
-
     const ky = 0.5 * simulation.alpha();
 
     links.forEach((d) => {
@@ -142,4 +144,28 @@ export default function loadNiceTreeDecomposition(treeData) {
 
     niceTreeLabel.attr('x', (d) => d.x).attr('y', (d) => d.y);
   });
+}
+
+function visitElement(element, animX) {
+  d3.select(`#node-${element.id}`)
+    .transition().duration(1000).delay(1000 * animX)
+    .style('fill', 'red');
+}
+
+
+export function bfs() {
+  const queue = [];
+  queue.push(newRoot);
+  let animX = 0;
+  console.log(newRoot);
+  while (queue.length !== 0) {
+    const element = queue.shift();
+    visitElement(element, animX);
+    animX += 1;
+    if (element.children !== undefined) {
+      for (let i = 0; i < element.children.length; i++) {
+        queue.push(element.children[i]);
+      }
+    }
+  }
 }

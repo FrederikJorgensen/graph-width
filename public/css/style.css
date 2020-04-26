@@ -1,35 +1,179 @@
 html {
   height: 100%;
+  padding: 0;
+  margin: 0;
 }
 
 body {
   display: flex;
   flex-direction: row;
-  font-family: 'Segoe UI', 'Helvetica', sans-serif;
-  height: calc(100% - 3em);
+  font-family: 'Inter', sans-serif;
+  /* height: calc(100% - 3em); */
+  /* height: 100%; */
+  height:100vh;
+  padding: 0;
+  margin: 0;
+}
+
+/* Sidenav */
+.sidenav a {
+  padding: 6px 8px 6px 16px;
+  text-decoration: none;
+  font-size: 25px;
+  color: white;
+  display: block;
+}
+
+.sidenav p {
+  color:white;
+  font-size: 15px;
+  font-weight: 800;
+}
+
+.sidenav {
+  flex-shrink: 0;
+  background-color: #161e2e;
+  color: white;
+  text-align: center;
+  overflow-x: hidden;
+}
+
+.sidenav button:hover {
+  cursor: pointer;
+  background: tomato;
+}
+
+#compute:hover {
+  cursor: pointer;
+  background: tomato;
+  transition: background-color .3s;
+}
+
+#computeNiceTree:hover {
+  cursor: pointer;
+  background: tomato;
+  transition: background-color .3s;
+}
+
+#bfs:hover {
+  cursor: pointer;
+  background: tomato;
+  transition: background-color .3s;
+}
+
+.sidenav span:hover {
+  cursor: pointer;
+  background-color: tomato;
+  transition: background-color .3s;
+}
+
+#reloadRandomGraph {
+  font-size: 80px;
+  color: white;
+}
+
+.buttons {
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 10px;
+}
+
+file {
+  font-size: 10px;
+}
+
+.buttons {
+  text-align: left;
+}
+
+.random-style {
+  font-family: 'Inter', sans-serif;
+  font-weight: 700;
+}
+
+.number-of-vertices {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+}
+
+.number-of-links {
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.random-generator input, textarea {
+  font    : .9em/1.5em "handwriting", 'Inter';
+  border  : none;
+  padding : 0px;
+  margin  : 0;
+  width   : 30px;
+  background: none;
+  color: white;
+  font-weight: 600; 
+  font-size: x-large; 
+  text-align: center; 
+}
+
+.algorithms-title {
+  margin-top: 100px;
+}
+
+textarea:focus, input:focus{
+  outline: none;
 }
 
 .flex-container {
+  /* box-sizing: border-box; */
+  overflow: hidden;
+  height:100vh;
+  padding: 0px;
   display: flex;
   width: 100%;
-  height: 100%;
+  /* height: 100%; */
   text-align: center;
 }
 
 .left-container {
+  /* box-sizing: border-box; */
+  height: 100%;
   flex: 0.5;
-}
-
-#graph-container {
-  height: 50%;
-}
-
-#td-container {
-  height: 50%;
 }
 
 .right-container {
+  height: 100%;
   flex: 0.5;
+  border: 10px solid #161e2e
+  /* outline: 10px solid #161e2e; */
+  /* outline-offset: -10px; */
+}
+
+#graph-container {
+  /* box-sizing: border-box; */
+  height: 50%;
+  /* outline: 10px solid #161e2e; */
+  /* outline-offset: -10px; */
+}
+
+#td-container {
+  /* box-sizing: border-box; */
+  /* border-top: 10px solid #161e2e; */
+  /* border: 10px solid #161e2e */
+  height: 50%;
+  /* outline: 10px solid #161e2e; */
+  /* outline-offset: -10px; */
+}
+
+#tdSvg{
+  border: 10px solid #161e2e
+}
+
+#graphSvg {
+  border: 10px solid #161e2e
 }
 
 #nice-td-container {
@@ -37,39 +181,19 @@ body {
   height: 100%;
 }
 
-
 .drawGraphSvg {
   height: 50%;
   width: 100%;
 }
 
 .treeSvg {
-  height: 100%;
-  width: 100%;
+  height: 100vh;
+  width: 100vh;
 }
 
-#reloadRandomGraph {
-  font-size: 120px;
-  color: black;
-}
-
-.sidenav {
-  flex-shrink: 0;
-  background-color: #eee;
-  text-align: center;
-  overflow-x: hidden;
-}
-
-#arrows {
-  font-size: 25px;
-}
-
-.sidenav button:hover {
-  cursor: pointer;
-}
-
-.sidenav span:hover {
-  cursor: pointer;
+.material-icons.md-36 { 
+  font-size: 50px;
+  padding: 0px; 
 }
 
 .loader {
@@ -126,19 +250,6 @@ path.link.hidden {
 
 .drag_line_hidden {
   stroke-width: 0;
-}
-
-/* The navigation menu links */
-.sidenav a {
-  padding: 6px 8px 6px 16px;
-  text-decoration: none;
-  font-size: 25px;
-  color: #818181;
-  display: block;
-}
-
-.sidenav p {
-  color: black;
 }
 
 /* When you mouse over the navigation links, change their color */

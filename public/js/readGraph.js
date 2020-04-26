@@ -6,7 +6,7 @@ for (let i = 0; i < 26; i++) charArray[String.fromCharCode(a + i)] = i + 1;
 const charArray2 = {};
 for (let i = 0; i < 26; i++) charArray2[i + 1] = String.fromCharCode(a + i);
 
-export default function newReadGraphFile(event) {
+export default function newReadGraphFile(file) {
   const f = event.target.files[0];
   const r = new FileReader();
   const newGraph = {};
@@ -14,6 +14,9 @@ export default function newReadGraphFile(event) {
   const links = [];
   r.onload = function onLoad() {
     const lines = this.result.split('\n');
+    lines.shift();
+
+    const filtered = lines.filter((el) => el !== '');
 
     function nodeExists(node) {
       for (let i = 0; i < nodes.length; i++) {
@@ -22,11 +25,10 @@ export default function newReadGraphFile(event) {
       return false;
     }
 
-    for (let i = 0; i < lines.length; i++) {
+    for (let i = 0; i < filtered.length; i++) {
       const textLine = lines[i];
-      if (!textLine.startsWith('p') || !textLine.startsWith('c')) {
-        const splitted = textLine.split(' ');
-
+      const splitted = textLine.split(' ');
+      if (!textLine.startsWith('c')) {
         let firstNode;
         let secondNode;
         let firstNodeLabel;
@@ -57,7 +59,7 @@ export default function newReadGraphFile(event) {
     }
     newGraph.nodes = nodes;
     newGraph.links = links;
-    graphFactory.loadGraph(newGraph);
+    graphFactory.loadGraph(newGraph, '#graphSvg');
   };
   r.readAsText(f);
 }

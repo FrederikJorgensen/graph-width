@@ -1,6 +1,7 @@
 import * as graphFactory from './graphFactory.js';
 import readGraphFile from './readGraph.js';
 import readLocalTreeFile from './readTree.js';
+import * as ntd from './niceTreeDecomposition.js';
 
 const a = 97;
 const charArray = {};
@@ -116,14 +117,10 @@ function reload() {
   graphFactory.loadGraph(randomGraph, '#graphSvg');
 }
 
-/* async function readLocalGraphFile(file) {
-  const response = await fetch(file);
-  const text = await response.text();
-  const newnew = text.split('\n');
-  readGraphFile(newnew);
-} */
 
 function computeTreeDecomposition() {
+  removeTreeDecomposition();
+  removeNiceTreeDecomposition();
   let edges = [];
 
   /*   if (createGraph.isDrawing()) {
@@ -158,9 +155,18 @@ function computeTreeDecomposition() {
   });
 }
 
+const treeDecompositionPath = 'td.td';
+readLocalTreeFile(treeDecompositionPath, 'treeDecomposition');
+const niceTreeDecompositionPath = 'nicetd.td';
+readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
+
 function handleComputeNiceTree() {
-  const niceTreeDecompositionPath = 'nicetd.td';
+  // const niceTreeDecompositionPath = 'nicetd.td';
   readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
+}
+
+function threeColor() {
+
 }
 
 
@@ -195,3 +201,5 @@ document
 document
   .getElementById('computeNiceTree')
   .addEventListener('click', handleComputeNiceTree);
+
+document.getElementById('bfs').addEventListener('click', ntd.bfs);

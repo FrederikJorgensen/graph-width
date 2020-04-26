@@ -40,6 +40,7 @@ function readNiceTreeDecomposition(treeData) {
   treeData.splice(0, 3);
   const edgePairs = [];
   const allBagLabels = {};
+  const verticesInBag = {};
   let root;
 
   for (let line = 0; line < treeData.length; line++) {
@@ -53,11 +54,15 @@ function readNiceTreeDecomposition(treeData) {
       break;
     } else if (textLine.startsWith('b')) {
       bagId = parseInt(splitted[1], 10);
+      const vertices = [];
       for (let i = 2; i < splitted.length; i++) {
         baglabel += `${splitted[i]}, `;
+        const currentNode = parseInt(splitted[i], 10);
+        vertices.push(currentNode);
       }
       baglabel = baglabel.replace(/,\s*$/, '');
       allBagLabels[bagId] = baglabel;
+      verticesInBag[bagId] = vertices;
     } else {
       const sourceNode = parseInt(splitted[0], 10);
       const targetNode = parseInt(splitted[1], 10);
@@ -81,6 +86,7 @@ function readNiceTreeDecomposition(treeData) {
     const tree = {
       id: String(root),
       label: allBagLabels[root],
+      vertices: verticesInBag[root],
     };
 
     if (children.length !== 0) { // if there are any children,
