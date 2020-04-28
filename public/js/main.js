@@ -192,8 +192,8 @@ document
   .getElementById('computeNiceTree')
   .addEventListener('click', handleComputeNiceTree);
 
-document.getElementById('bfs').addEventListener('click', ntd.bfs);
+// document.getElementById('bfs').addEventListener('click', ntd.bfs);
 
-document.getElementById('mis').addEventListener('click', ntd.runMis);
+// document.getElementById('mis').addEventListener('click', ntd.runMis);
 document.getElementById('three-color').addEventListener('click', ntd.runThreeColor);
-document.getElementById('graph-coloring').addEventListener('click', graphFactory.runGraphColoring);
+// document.getElementById('graph-coloring').addEventListener('click', graphFactory.runGraphColoring);

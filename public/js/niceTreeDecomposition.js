@@ -244,9 +244,16 @@ export function runMis() {
   maxIndependentSet(newRoot);
 }
 
+let animX = 0;
 export function threeColor(root) {
+  d3.select(`#node-${root.id}`).transition().duration(1000).delay(1000 * animX)
+    .style('fill', 'red');
+  animX++;
+
+  console.log(root);
+
   if (root.children === undefined) {
-    d3.select(`#node-${root.id}`).style('fill', 'green');
+    // d3.select(`#node-${root.id}`).style('fill', 'green');
     root.colorable = true;
     return;
   }
@@ -257,22 +264,33 @@ export function threeColor(root) {
   }
 
   if (root.children[0].vertices === undefined) {
+    root.colorable = true;
     return;
   }
 
   if (root.vertices !== undefined) {
     if (root.vertices.length > root.children[0].vertices.length) {
-      d3.select(`#node-${root.id}`).style('fill', 'pink');
+      if (root.vertices < 2) {
+        root.colorable = true;
+        return;
+      }
+      root.colorable = graph.isGraphColorable(root.vertices);
+      // d3.select(`#node-${root.id}`).style('fill', 'pink');
     }
   }
 
+
+  // Forget node
   if (root.vertices !== undefined) {
+    if (root.vertices < 2) {
+      root.colorable = true;
+      return;
+    }
     if (root.vertices.length < root.children[0].vertices.length) {
-      d3.select(`#node-${root.id}`).style('fill', 'yellow');
-      // graph.isGraphColorable(root.vertices);
+      // d3.select(`#node-${root.id}`).style('fill', 'yellow');
+      root.colorable = graph.isGraphColorable(root.vertices);
     }
   }
-
 
   if (root.children.length === 2) {
     if (root.children[0].colorable && root.children[1].colorable) {
