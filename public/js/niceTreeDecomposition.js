@@ -1,4 +1,5 @@
 import * as graph from './graphFactory.js';
+import BinarySearchTree from './binarySearchTree.js';
 
 let treeSvg;
 let niceTreeNode;
@@ -49,10 +50,20 @@ function highlightSubTrees(d) {
   });
 }
 
+class Node {
+  constructor(value) {
+    this.value = value;
+    this.left = null;
+    this.right = null;
+    this.parent = null;
+  }
+}
+
 export default function loadNiceTreeDecomposition(treeData) {
   newRoot = treeData;
   const width = document.getElementById('nice-td-container').offsetWidth;
   const height = document.getElementById('nice-td-container').offsetHeight;
+
 
   treeSvg = d3.select('#nice-td-svg').attr('width', width).attr('height', height);
   // .attr('viewBox', [-width / 2, -height / 2, width, height]);
@@ -83,8 +94,32 @@ export default function loadNiceTreeDecomposition(treeData) {
   };
 
   root = d3.hierarchy(treeData);
+
+  root.eachBefore((node) => {
+    const left = [];
+    const right = [];
+
+    if (node.children !== undefined) {
+      if (node.children.length === 1) {
+        left.push(node.children[0]);
+      }
+
+      if (node.children.length === 2) {
+        left.push(node.children[0]);
+        right.push(node.children[1]);
+      }
+    }
+
+    node.left = left;
+    node.right = right;
+  });
+
+
   const links = root.links();
   const nodes = root.descendants();
+
+  const nnode = new Node(5);
+  const ttree = new BinarySearchTree(nnode);
 
 
   const simulation = d3
@@ -122,7 +157,7 @@ export default function loadNiceTreeDecomposition(treeData) {
     .attr('class', 'label')
     .text((d) => d.data.label);
 
-  niceTreeNode.on('mouseover', graph.highlightNodes);
+  niceTreeNode.on('mouseover', graph.subgraph);
   niceTreeNode.on('mouseout', graph.resetHighlight);
   niceTreeNode.on('click', highlightSubTrees);
   niceTreeNode.on('dblclick', resetTreeHighlight);
@@ -172,13 +207,15 @@ export function maxIndependentSet(newRoot) {
   if (newRoot === undefined) return 0;
 
   let animX = 0;
-  visitElement(newRoot, animX);
+  // visitElement(newRoot, animX);
   animX += 1;
+
 
   if (newRoot.liss !== 0) return newRoot.liss;
 
   if ('children' in newRoot === false) {
     d3.select(`#node-${newRoot.id}`).style('fill', 'green');
+    d3.select(`#node-${newRoot.id}`).text('d');
     root.liss = 1;
     return root.liss;
   }
@@ -200,10 +237,53 @@ export function maxIndependentSet(newRoot) {
     }
   }
   newRoot.liss = Math.max(lissExcl, lissIncl);
-  console.log(newRoot.liss);
   return newRoot.liss;
 }
 
 export function runMis() {
   maxIndependentSet(newRoot);
+}
+
+export function threeColor(root) {
+  if (root.children === undefined) {
+    d3.select(`#node-${root.id}`).style('fill', 'green');
+    root.colorable = true;
+    return;
+  }
+
+  if (root !== null) {
+    threeColor(root.children[0]);
+    if (root.children.length === 2) threeColor(root.children[1]);
+  }
+
+  if (root.children[0].vertices === undefined) {
+    return;
+  }
+
+  if (root.vertices !== undefined) {
+    if (root.vertices.length > root.children[0].vertices.length) {
+      d3.select(`#node-${root.id}`).style('fill', 'pink');
+    }
+  }
+
+  if (root.vertices !== undefined) {
+    if (root.vertices.length < root.children[0].vertices.length) {
+      d3.select(`#node-${root.id}`).style('fill', 'yellow');
+      // graph.isGraphColorable(root.vertices);
+    }
+  }
+
+
+  if (root.children.length === 2) {
+    if (root.children[0].colorable && root.children[1].colorable) {
+      d3.select(`#node-${root.id}`).style('fill', 'green');
+      root.colorable = true;
+    } else {
+      d3.select(`#node-${root.id}`).style('fill', 'red');
+    }
+  }
+}
+
+export function runThreeColor() {
+  threeColor(newRoot);
 }

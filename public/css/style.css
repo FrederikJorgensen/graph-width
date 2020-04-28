@@ -43,19 +43,13 @@ body {
   background: tomato;
 }
 
-#compute:hover {
+#compute:hover, #computeNiceTree:hover, #bfs:hover, #mis:hover, #three-color:hover {
   cursor: pointer;
   background: tomato;
   transition: background-color .3s;
 }
 
-#computeNiceTree:hover {
-  cursor: pointer;
-  background: tomato;
-  transition: background-color .3s;
-}
-
-#bfs:hover {
+#3color:hover {
   cursor: pointer;
   background: tomato;
   transition: background-color .3s;
@@ -269,7 +263,7 @@ path.link.hidden {
 
 /* Node styling here */
 .graphNode {
-  fill: #eb4034;
+  fill: yellow;
   stroke: black;
   stroke-width: 2px;
 }

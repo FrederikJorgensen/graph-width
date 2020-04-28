@@ -155,13 +155,8 @@ function computeTreeDecomposition() {
   });
 }
 
-const treeDecompositionPath = 'td.td';
-readLocalTreeFile(treeDecompositionPath, 'treeDecomposition');
-const niceTreeDecompositionPath = 'nicetd.td';
-readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
-
 function handleComputeNiceTree() {
-  // const niceTreeDecompositionPath = 'nicetd.td';
+  const niceTreeDecompositionPath = 'nicetd.td';
   readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
 }
 
@@ -200,3 +195,5 @@ document
 document.getElementById('bfs').addEventListener('click', ntd.bfs);
 
 document.getElementById('mis').addEventListener('click', ntd.runMis);
+document.getElementById('three-color').addEventListener('click', ntd.runThreeColor);
+document.getElementById('graph-coloring').addEventListener('click', graphFactory.runGraphColoring);

@@ -1,3 +1,4 @@
+
 import loadNiceTreeDecomposition from './niceTreeDecomposition.js';
 import loadTreeDecomposition from './treeDecomposition.js';
 
@@ -25,6 +26,7 @@ export function readTreeDecomposition(treeData) {
         bagLabel += `${splitted[j]}, `;
       }
       bagLabel = bagLabel.replace(/,\s*$/, '');
+      bagLabel = `{${bagLabel}}`;
       nodes.push({ id: bagId, label: bagLabel });
     } else {
       const splitted = textLine.split(' ');
@@ -37,7 +39,6 @@ export function readTreeDecomposition(treeData) {
 }
 
 function readNiceTreeDecomposition(treeData) {
-  treeData.splice(0, 3);
   const edgePairs = [];
   const allBagLabels = {};
   const verticesInBag = {};
@@ -61,6 +62,7 @@ function readNiceTreeDecomposition(treeData) {
         vertices.push(currentNode);
       }
       baglabel = baglabel.replace(/,\s*$/, '');
+      baglabel = `{${baglabel}}`;
       allBagLabels[bagId] = baglabel;
       verticesInBag[bagId] = vertices;
     } else {
@@ -72,6 +74,7 @@ function readNiceTreeDecomposition(treeData) {
     }
   }
 
+  // https://stackoverflow.com/questions/61374720/build-tree-from-edge-pairs-and-root?noredirect=1#comment108574565_61374720
   function createTree(root, nodes) {
     const children = [];
     for (let i = 0; i < nodes.length; i++) {

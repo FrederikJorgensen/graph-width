@@ -8,7 +8,6 @@ for (let i = 0; i < 26; i++) charArray[String.fromCharCode(a + i)] = i + 1;
 for (let i = 0; i < 26; i++) charArray2[i + 1] = String.fromCharCode(a + i);
 
 let isRepeling = false;
-const adjlist = [];
 let currentGraph;
 let graphNodes = [];
 let graphLinks = [];
@@ -43,7 +42,8 @@ export function loadGraph(graph) {
     .enter()
     .append('circle')
     .attr('r', 18)
-    .attr('class', 'graphNode');
+    .attr('class', 'graphNode')
+    .attr('id', (d) => `graphNode-${d.id}`);
 
   graphLabelSvg = svg
     .append('g')
@@ -53,11 +53,13 @@ export function loadGraph(graph) {
     .append('text')
     .attr('class', 'label')
     .attr('text-anchor', 'middle')
-    .text((d) => d.label);
+    .text((d) => d.id);
 
-  graphLinks.forEach((d) => {
+  /*   graphLinks.forEach((d) => {
     adjlist[`${d.source.index}-${d.target.index}`] = true;
   });
+  console.log(adjlist);
+ */
 
   function ticked() {
     graphNodeSvg
@@ -178,57 +180,105 @@ export function getAllEdges() {
   return convertedArray;
 }
 
-const testGraph = {
-  nodes: [
-    {
-      id: 1,
-      label: 1,
-    },
-    {
-      id: 2,
-      label: 2,
-    },
-    {
-      id: 3,
-      label: 3,
-    },
-    {
-      id: 4,
-      label: 4,
-    },
-    {
-      id: 5,
-      label: 5,
-    },
-    {
-      id: 6,
-      label: 6,
-    },
-    {
-      id: 7,
-      label: 7,
-    },
-    {
-      id: 9,
-      label: 9,
-    },
-    {
-      id: 10,
-      label: 10,
-    },
-  ],
-  links: [
-    { source: 1, target: 2 },
-    { source: 2, target: 3 },
-    { source: 3, target: 7 },
-    { source: 7, target: 6 },
-    { source: 6, target: 2 },
-    { source: 6, target: 10 },
-    { source: 6, target: 9 },
-    { source: 4, target: 9 },
-    { source: 4, target: 5 },
-    { source: 5, target: 10 },
-  ],
-};
+const numberOfColors = 3;
+let result = [];
+let adjlist = [];
 
-loadGraph(testGraph, '#graphSvg');
+function isSafe(k, color) {
+  for (let i = 0; i < graphNodes.length; i++) {
+    if (adjlist[`${k}-${i + 1}`] && color === result[i + 1]) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function getColor(colorNumber) {
+  if (colorNumber === 1) {
+    return 'red';
+  } if (colorNumber === 2) {
+    return 'green';
+  } if (colorNumber === 3) {
+    return 'blue';
+  }
+}
+
+export function graphColoring(graph, k) {
+  // debugger;
+  for (let color = 1; color <= numberOfColors; color++) {
+    if (isSafe(k, color)) {
+      result[k] = color;
+      d3.select(`#graphNode-${k}`).style('fill', (d) => {
+        d.color = getColor(color);
+        return getColor(color);
+      });
+
+
+      if ((k + 1) < graphNodes.length) {
+        graphColoring(k + 1);
+      } else {
+        console.log(result);
+        return;
+      }
+    }
+  }
+}
+
+export function isGraphColorable(subGraph) {
+  console.log(subGraph);
+  result = [];
+  adjlist = [];
+  graphLinks.forEach((d) => {
+    adjlist[`${d.source.id}-${d.target.id}`] = true;
+    adjlist[`${d.source.id}-${d.source.id}`] = true;
+    adjlist[`${d.target.id}-${d.target.id}`] = true;
+  });
+
+  graphColoring(1);
+
+  // eslint-disable-next-line no-restricted-syntax
+  for (const link of graphLinks) {
+    if (link.source.color === link.target.color) {
+      console.log('This graph is not 3 colorable');
+      return false;
+    }
+  }
+  console.log('This graph is colorable');
+  return true;
+}
+
+export function subgraph(d) {
+  // console.log(d.data.vertices);
+
+  const { vertices } = d.data;
+
+  const bigv = vertices;
+  // console.log(currentGraph);
+
+  function checkNode(node) {
+    return !vertices.includes(node.id);
+  }
+
+  const result = graphNodes.filter(checkNode);
+  console.log(result);
+
+  const newVertices = [];
+  result.forEach((node) => {
+    newVertices.push(node.id);
+  });
+
+  graphLinkSvg.attr('opacity', (link) => {
+    if (vertices.includes(link.source.id) && !newVertices.includes(link.target.id)) return 1;
+    return 0;
+  });
+
+  graphNodeSvg.attr('opacity', (node) => {
+    if (vertices.includes(node.id)) return 1;
+    return 0;
+  });
+
+  graphLabelSvg.attr('opacity', (node) => {
+    if (vertices.includes(node.id)) return 1;
+    return 0;
+  });
+}
