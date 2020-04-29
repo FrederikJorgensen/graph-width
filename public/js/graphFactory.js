@@ -14,7 +14,6 @@ let graphLinks = [];
 let graphLinkSvg;
 let graphNodeSvg;
 let graphLabelSvg;
-let startGraphLinks;
 let simulation;
 
 export function loadGraph(graph) {
@@ -23,7 +22,6 @@ export function loadGraph(graph) {
   const { links } = graph;
   graphNodes = nodes;
   graphLinks = links;
-  startGraphLinks = links;
 
   const svg = d3.select('#graphSvg').attr('viewBox', [-graphWidth / 2, -graphHeight / 2, graphWidth, graphHeight]);
 
@@ -89,7 +87,7 @@ export function loadGraph(graph) {
 
   simulation = d3.forceSimulation(graphNodes)
     .force('link', d3.forceLink(graphLinks).id((d) => d.id).distance(0).strength(0.9))
-    .force('charge', d3.forceManyBody().strength(-600))
+    .force('charge', d3.forceManyBody().strength(-1000))
     .force('x', d3.forceX())
     .force('y', d3.forceY())
     .on('tick', ticked)
@@ -157,7 +155,7 @@ export function resetHighlight() {
   graphNodeSvg.attr('opacity', 1);
   graphNodeSvg.style('fill', 'yellow');
   graphLabelSvg.attr('opacity', 1);
-  resetGraph(startGraphLinks);
+  // resetGraph(startGraphLinks);
 }
 
 export function convertNumberGraph() {
@@ -201,6 +199,7 @@ function getColor(colorNumber) {
   } if (colorNumber === 3) {
     return 'blue';
   }
+  return 'pink';
 }
 
 export function graphColoring(k, subGraphNodes) {
@@ -223,9 +222,41 @@ export function graphColoring(k, subGraphNodes) {
   }
 }
 
-export function isGraphColorable(subGraphNodes, subGraphLinks) {
+function highlightSubgraph(vertices, filteredNodesById) {
+  graphLinkSvg.attr('opacity', (link) => {
+    if (vertices.includes(link.source.id) && !filteredNodesById.includes(link.target.id)) return 1;
+    return 0.2;
+  });
+
+  graphNodeSvg.attr('opacity', (node) => {
+    if (vertices.includes(node.id)) return 1;
+    return 0.2;
+  });
+
+  graphLabelSvg.attr('opacity', (node) => {
+    if (vertices.includes(node.id)) return 1;
+    return 0.2;
+  });
+}
+
+export function createSubGraph(currentTreeNode) {
+  const { vertices } = currentTreeNode;
+  const filteredNodes = graphNodes.filter((node) => !vertices.includes(node.id));
+  const filteredNodesById = [];
   result = [];
   adjlist = [];
+
+  filteredNodes.forEach((node) => {
+    filteredNodesById.push(node.id);
+  });
+
+  const subGraphNodes = graphNodes.filter((node) => vertices.includes(node.id));
+
+  for (let i = 0; i < subGraphNodes.length; i++) {
+    subGraphNodes[i].index = i;
+  }
+
+  const subGraphLinks = graphLinks.filter((link) => vertices.includes(link.source.id) && !filteredNodesById.includes(link.target.id));
 
   if (subGraphLinks !== undefined) {
     subGraphLinks.forEach((d) => {
@@ -239,6 +270,8 @@ export function isGraphColorable(subGraphNodes, subGraphLinks) {
   }
 
 
+  resetHighlight();
+  highlightSubgraph(vertices, filteredNodesById);
   graphColoring(0, subGraphNodes);
 
   // eslint-disable-next-line no-restricted-syntax
@@ -248,41 +281,4 @@ export function isGraphColorable(subGraphNodes, subGraphLinks) {
     }
   }
   return true;
-}
-
-export function subgraph(d) {
-  const { vertices } = d.data;
-  const result = graphNodes.filter((node) => !vertices.includes(node.id));
-  const subGraphNodes = graphNodes.filter((node) => vertices.includes(node.id));
-  const newVertices = [];
-  result.forEach((node) => {
-    newVertices.push(node.id);
-  });
-
-  const subGraphLinks = graphLinks.filter((link) => vertices.includes(link.source.id) && !newVertices.includes(link.target.id));
-
-  subGraphNodes.forEach((node) => {
-
-  });
-
-  for (let i = 0; i < subGraphNodes.length; i++) {
-    subGraphNodes[i].index = i;
-  }
-
-  graphLinkSvg.attr('opacity', (link) => {
-    if (vertices.includes(link.source.id) && !newVertices.includes(link.target.id)) return 1;
-    return 0;
-  });
-
-  graphNodeSvg.attr('opacity', (node) => {
-    if (vertices.includes(node.id)) return 1;
-    return 0;
-  });
-
-  graphLabelSvg.attr('opacity', (node) => {
-    if (vertices.includes(node.id)) return 1;
-    return 0;
-  });
-
-  isGraphColorable(subGraphNodes, subGraphLinks);
 }

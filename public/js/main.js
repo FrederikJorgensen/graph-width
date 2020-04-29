@@ -109,11 +109,8 @@ function reload() {
 
   let randomGraph;
 
-  if (document.getElementById('letters').checked) {
-    randomGraph = generateRandomGraph(numberOfVertices, numberOfEdges, 'letters');
-  } else {
-    randomGraph = generateRandomGraph(numberOfVertices, numberOfEdges, 'numbers');
-  }
+  randomGraph = generateRandomGraph(numberOfVertices, numberOfEdges, 'numbers');
+
   graphFactory.loadGraph(randomGraph, '#graphSvg');
 }
 
@@ -194,6 +191,5 @@ document
 
 // document.getElementById('bfs').addEventListener('click', ntd.bfs);
 
-// document.getElementById('mis').addEventListener('click', ntd.runMis);
 document.getElementById('three-color').addEventListener('click', ntd.runThreeColor);
 // document.getElementById('graph-coloring').addEventListener('click', graphFactory.runGraphColoring);

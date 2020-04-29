@@ -1,12 +1,10 @@
 import * as graph from './graphFactory.js';
-import BinarySearchTree from './binarySearchTree.js';
 
 let treeSvg;
 let niceTreeNode;
 let niceTreeLink;
 let niceTreeLabel;
 let root;
-let newRoot;
 
 const a = 97;
 const charArray2 = {};
@@ -50,87 +48,55 @@ function highlightSubTrees(d) {
   });
 }
 
-class Node {
-  constructor(value) {
-    this.value = value;
-    this.left = null;
-    this.right = null;
-    this.parent = null;
-  }
-}
-
 export default function loadNiceTreeDecomposition(treeData) {
-  newRoot = treeData;
   const width = document.getElementById('nice-td-container').offsetWidth;
   const height = document.getElementById('nice-td-container').offsetHeight;
 
-
   treeSvg = d3.select('#nice-td-svg').attr('width', width).attr('height', height);
-  // .attr('viewBox', [-width / 2, -height / 2, width, height]);
-
-  const drag = (simulation) => {
-    function dragstarted(d) {
-      if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
-    }
-
-    function dragged(d) {
-      d.fx = d3.event.x;
-      d.fy = d3.event.y;
-    }
-
-    function dragended(d) {
-      if (!d3.event.active) simulation.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
-    }
-
-    return d3
-      .drag()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended);
-  };
 
   root = d3.hierarchy(treeData);
-
-  root.eachBefore((node) => {
-    const left = [];
-    const right = [];
-
-    if (node.children !== undefined) {
-      if (node.children.length === 1) {
-        left.push(node.children[0]);
-      }
-
-      if (node.children.length === 2) {
-        left.push(node.children[0]);
-        right.push(node.children[1]);
-      }
-    }
-
-    node.left = left;
-    node.right = right;
-  });
-
-
-  const links = root.links();
-  const nodes = root.descendants();
-
-  const nnode = new Node(5);
-  const ttree = new BinarySearchTree(nnode);
-
-
-  const simulation = d3
-    .forceSimulation(nodes)
-    .force('link', d3.forceLink(links).id((d) => d.id).distance(20).strength(1))
-    .force('charge', d3.forceManyBody().strength(-500))
-    .force('y', d3.forceY(300))
-    .force('x', d3.forceX(width / 2));
-  // .force('y', d3.forceY(-400).strength(0.9));
+  const treeLayout = d3.tree();
+  treeLayout.size([width, height]);
+  treeLayout(root);
 
   niceTreeLink = treeSvg
+    .append('g')
+    .selectAll('line.link')
+    .data(root.links())
+    .enter()
+    .append('line')
+    .classed('link', true)
+    .attr('x1', (d) => d.source.x)
+    .attr('y1', (d) => d.source.y)
+    .attr('x2', (d) => d.target.x)
+    .attr('y2', (d) => d.target.y);
+
+  // Nodes
+  niceTreeNode = treeSvg
+    .append('g')
+    .selectAll('circle.node')
+    .data(root.descendants())
+    .enter()
+    .append('circle')
+    .attr('class', 'niceTreeDecompositionNode')
+    .attr('id', (d) => `node-${d.data.id}`)
+    .attr('cx', (d) => d.x)
+    .attr('cy', (d) => d.y)
+    .attr('r', 20);
+
+  niceTreeLabel = treeSvg
+    .append('g')
+    .selectAll('text')
+    .data(root.descendants())
+    .enter()
+    .append('text')
+    .attr('text-anchor', 'middle')
+    .attr('class', 'label')
+    .text((d) => d.data.label)
+    .attr('x', (d) => d.x)
+    .attr('y', (d) => d.y);
+
+  /*   niceTreeLink = treeSvg
     .append('g')
     .selectAll('line')
     .data(links)
@@ -145,8 +111,8 @@ export default function loadNiceTreeDecomposition(treeData) {
     .attr('class', 'niceTreeDecompositionNode')
     .attr('fill', '#1a7532')
     .attr('id', (d) => `node-${d.data.id}`)
-    .call(drag(simulation));
-
+    .call(drag(simulation)); */
+  /*
   niceTreeLabel = treeSvg
     .append('g')
     .selectAll('text')
@@ -155,14 +121,14 @@ export default function loadNiceTreeDecomposition(treeData) {
     .append('text')
     .attr('text-anchor', 'middle')
     .attr('class', 'label')
-    .text((d) => d.data.label);
+    .text((d) => d.data.label); */
 
-  niceTreeNode.on('mouseover', graph.subgraph);
-  niceTreeNode.on('mouseout', graph.resetHighlight);
-  niceTreeNode.on('click', highlightSubTrees);
-  niceTreeNode.on('dblclick', resetTreeHighlight);
+  // niceTreeNode.on('mouseover', graph.createSubGraph);
+  // niceTreeNode.on('mouseout', graph.resetHighlight);
+  // niceTreeNode.on('click', highlightSubTrees);
+  // niceTreeNode.on('dblclick', resetTreeHighlight);
 
-  simulation.on('tick', () => {
+/*   simulation.on('tick', () => {
     const ky = 0.5 * simulation.alpha();
 
     links.forEach((d) => {
@@ -178,7 +144,7 @@ export default function loadNiceTreeDecomposition(treeData) {
     niceTreeNode.attr('cx', (d) => d.x).attr('cy', (d) => d.y);
 
     niceTreeLabel.attr('x', (d) => d.x).attr('y', (d) => d.y);
-  });
+  }); */
 }
 
 function visitElement(element, animX) {
@@ -203,105 +169,83 @@ export function bfs() {
   }
 }
 
-export function maxIndependentSet(newRoot) {
-  if (newRoot === undefined) return 0;
-
-  let animX = 0;
-  // visitElement(newRoot, animX);
-  animX += 1;
-
-
-  if (newRoot.liss !== 0) return newRoot.liss;
-
-  if ('children' in newRoot === false) {
-    d3.select(`#node-${newRoot.id}`).style('fill', 'green');
-    d3.select(`#node-${newRoot.id}`).text('d');
-    root.liss = 1;
-    return root.liss;
-  }
-
-  const lissExcl = maxIndependentSet(newRoot.children[0]) + maxIndependentSet(newRoot.children[1]);
-  let lissIncl = 1;
-
-  if ('children' in newRoot) {
-    if (newRoot.children[0] !== undefined) {
-      if ('children' in newRoot.children[0] === false) {
-        maxIndependentSet(undefined);
-      } else {
-        lissIncl += (maxIndependentSet(newRoot.children[0].children[0])) + (maxIndependentSet(newRoot.children[0].children[1]));
-      }
-    }
-
-    if (newRoot.children[1] !== undefined) {
-      lissIncl += (maxIndependentSet(newRoot.children[1].children[0])) + (maxIndependentSet(newRoot.children[1].children[1]));
-    }
-  }
-  newRoot.liss = Math.max(lissExcl, lissIncl);
-  return newRoot.liss;
-}
-
-export function runMis() {
-  maxIndependentSet(newRoot);
-}
-
 let animX = 0;
+
+function mergeUnique(arr1, arr2) {
+  return arr1.concat(arr2.filter((item) => arr1.indexOf(item) === -1));
+}
+
+
 export function threeColor(root) {
-  d3.select(`#node-${root.id}`).transition().duration(1000).delay(1000 * animX)
-    .style('fill', 'red');
-  animX++;
-
-  console.log(root);
-
-  if (root.children === undefined) {
-    // d3.select(`#node-${root.id}`).style('fill', 'green');
-    root.colorable = true;
-    return;
-  }
-
-  if (root !== null) {
-    threeColor(root.children[0]);
-    if (root.children.length === 2) threeColor(root.children[1]);
-  }
-
-  if (root.children[0].vertices === undefined) {
-    root.colorable = true;
-    return;
-  }
-
-  if (root.vertices !== undefined) {
-    if (root.vertices.length > root.children[0].vertices.length) {
-      if (root.vertices < 2) {
-        root.colorable = true;
+  console.log(root.data.id);
+  const rootId = root.data.id;
+  const cops = root.copy().sum((currentNode) => {
+    setTimeout(() => {
+      if (currentNode.id === root.data.id) {
+        console.log('you have reached the root!');
         return;
       }
-      root.colorable = graph.isGraphColorable(root.vertices);
-      // d3.select(`#node-${root.id}`).style('fill', 'pink');
-    }
-  }
 
+      if (currentNode.vertices.length === 0) {
+        console.log("This node is empty, so it's always true!");
+        d3.select(`#node-${currentNode.id}`).style('fill', 'green').transition().duration(1000);
+        currentNode.colorable = true;
+        return;
+      }
 
-  // Forget node
-  if (root.vertices !== undefined) {
-    if (root.vertices < 2) {
-      root.colorable = true;
-      return;
-    }
-    if (root.vertices.length < root.children[0].vertices.length) {
-      // d3.select(`#node-${root.id}`).style('fill', 'yellow');
-      root.colorable = graph.isGraphColorable(root.vertices);
-    }
-  }
+      if ('children' in currentNode === false) {
+        console.log('This is a leaf they are always true!');
+        d3.select(`#node-${currentNode.id}`).style('fill', 'green').transition().duration(1000);
+        currentNode.colorable = true;
+        return;
+      }
 
-  if (root.children.length === 2) {
-    if (root.children[0].colorable && root.children[1].colorable) {
-      d3.select(`#node-${root.id}`).style('fill', 'green');
-      root.colorable = true;
-    } else {
-      d3.select(`#node-${root.id}`).style('fill', 'red');
-    }
-  }
+      if (currentNode.children.length === 2) {
+        const child1 = currentNode.children[0];
+        const child2 = currentNode.children[1];
+        if (child1.colorable && child2.colorable) {
+          console.log('Since both children are colorable this JOIN node is also colorable.');
+          currentNode.colorable = true;
+          d3.select(`#node-${currentNode.id}`).style('fill', 'green').transition().duration(1000);
+        } else {
+          d3.select(`#node-${currentNode.id}`).style('fill', 'red').transition().duration(1000);
+        }
+      }
+
+      if (currentNode.vertices.length < currentNode.children[0].vertices.length) {
+        console.log('This is a forget node. We must extend the vertices of this node to the child node and if a K-coloring exists then this node is colorable.');
+        const forgetNodeVertices = currentNode.vertices;
+        const childsVertices = currentNode.children[0].vertices;
+        const mergedVertices = mergeUnique(childsVertices, forgetNodeVertices);
+        const tempNode = { ...currentNode };
+        tempNode.vertices = mergedVertices;
+        currentNode.colorable = graph.createSubGraph(tempNode);
+        if (currentNode.colorable) {
+          d3.select(`#node-${currentNode.id}`).style('fill', 'green').transition().duration(1000);
+        } else {
+          d3.select(`#node-${currentNode.id}`).style('fill', 'red').transition().duration(1000);
+        }
+      }
+
+      if (currentNode.vertices.length > currentNode.children[0].vertices.length) {
+        console.log('This is an introduce node.');
+        const introduceNodeVertices = currentNode.vertices;
+        const childsVertices = currentNode.children[0].vertices;
+        const mergedVertices = mergeUnique(introduceNodeVertices, childsVertices);
+        const tempNode = { ...currentNode };
+        tempNode.vertices = mergedVertices;
+        currentNode.colorable = graph.createSubGraph(tempNode);
+        if (currentNode.colorable) {
+          d3.select(`#node-${currentNode.id}`).style('fill', 'green').transition().duration(1000);
+        } else {
+          d3.select(`#node-${currentNode.id}`).style('fill', 'red').transition().duration(1000);
+        }
+      }
+    }, animX * 500);
+    animX++;
+  });
 }
 
 export function runThreeColor() {
-  threeColor(newRoot);
+  threeColor(root);
 }
