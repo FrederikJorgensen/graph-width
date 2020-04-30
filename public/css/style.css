@@ -201,10 +201,13 @@ textarea:focus, input:focus{
 
 #graph-container {
   height: 50%;
+  border-right: solid 8px #161e2e;
+  border-bottom: solid 8px #161e2e;
 }
 
 #td-container {
   height: 50%;
+  border-right: solid 8px #161e2e;
 }
 
 #tdSvg{

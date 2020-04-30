@@ -9,6 +9,8 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/intro.min.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/introjs.min.css">
   <script type="module" src="js/main.js"></script>
   <script type="module" src="js/niceTreeDecomposition.js"></script>
   <script type="module" src="js/graphFactory.js"></script>
@@ -20,34 +22,43 @@
 
 <body>
   <div class="sidenav">
-    <h2 class="random-style">GRAPH WIDTH <br /> VISUALIZER</h2>
+    <h2 class="random-style" data-step='1'
+      data-intro='Welcome to Graph Width Visualizer. The first step is to create a graph. You can create a graph in 3 different ways.'
+      data-position='right'>GRAPH
+      WIDTH <br /> VISUALIZER
+    </h2>
     <h3 class="step1">Step 1</h3>
-    <div class="random-generator">
-      <p>vertices</p>
-      <div class="number-of-vertices">
-        <i id="verticesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
-        <input type="text" id="numberOfVertices" value="10" />
-        <i id="verticesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
-      </div>
-      <p>edges</p>
-      <div class="number-of-links">
-        <i id="edgesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
-        <input type="text" id="numberOfEdges" value="10" />
-        <i id="edgesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
+    <div>
+      <div class="random-generator">
+        <p>vertices</p>
+        <div class="number-of-vertices">
+          <i id="verticesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
+          <input type="text" id="numberOfVertices" value="10" />
+          <i id="verticesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
+        </div>
+        <p>edges</p>
+        <div class="number-of-links">
+          <i id="edgesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
+          <input type="text" id="numberOfEdges" value="10" />
+          <i id="edgesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
+        </div>
       </div>
     </div>
-    <br />
-    <div id="reloadRandomGraph" class="reload-container hoverable">
+    <div data-step='2' data-intro='1. Reload a random graph using the generator.' id="reloadRandomGraph"
+      data-position='right' class="reload-container hoverable">
       <i class="material-icons md-36">replay</i>
       <p>Reload a random graph</p>
     </div>
 
-    <div id="draw-graph-button" class="draw-graph-container hoverable">
+    <div data-step='3'
+      data-intro='2. Draw your own graph by clicking anywhere on the graph canvas. Add edges between vertices by holding down right click from 1 vertix to another vertix.'
+      data-position='right' id="draw-graph-button" class="draw-graph-container hoverable">
       <i class="material-icons md-36">palette</i>
       <p>Draw your own graph</p>
     </div>
 
-    <div class="upload-graph-container hoverable">
+    <div data-step='4' data-intro='3. Upload your own graph using the PACE .gr format of a graph.' data-position='right'
+      class="upload-graph-container hoverable">
       <i class="material-icons md-36">attach_file</i>
       <p>Upload graph</p>
     </div>
@@ -55,17 +66,41 @@
 
     <h3 class=step2>Step 2</h3>
     <div class=buttons>
-      <div id="compute">
-        <p>Tree Decomposition</p>
+      <div id="compute" data-step='5'
+        data-intro='In graph theory, a tree decomposition is a mapping of a graph into a tree that can be used to define the treewidth of the graph and speed up solving <strong>certain</strong> computational problems on the graph.'
+        data-position='right'>
+        <p data-step='6' data-position="right" data-intro="There is a polynomial-time algorithm that finds a tree decomposition of width
+        O
+        (
+        w
+        √log
+        w
+        ), if the treewidth of the graph is at most
+        w. <-- Click here to run the algorithm on the current graph.">Tree Decomposition</p>
       </div>
-      <div id="computeNiceTree">
+      <div data-step='6' data-position="right" data-intro="A tree decomposition of width
+      w and
+      n nodes can be turned into a nice tree
+      decomposition of width
+      w and
+      O
+      (wn
+      ) nodes in time
+      O
+      (
+      w
+      2
+      n
+      )." id="computeNiceTree">
         <p>
           Nice Tree Decomposition
         </p>
       </div>
     </div>
 
-    <h3 class="step3">Step 3</h3>
+    <h3 data-step='7' data-position="right"
+      data-intro='Run the algorithms on the nice tree decomposition using dynamic programming with any of the algorithms below'
+      class="step3">Step 3</h3>
     <div class="buttons">
       <div id="three-color">
         <p>3-Coloring</p>
@@ -80,9 +115,11 @@
     <div class="left-container">
       <!-- <div id="drawGraph" class="drawGraph"></div> -->
       <div id="graph-container">
+        Graph
         <svg id="graphSvg"></svg>
       </div>
       <div id="td-container">
+        Tree Decomposition
         <div class="text_container hidden">
           <div>
             <div class="loader"></div>
@@ -93,6 +130,7 @@
     </div>
     <div class="right-container">
       <div id="nice-td-container">
+        Nice Tree Decomposition
         <!-- <svg id="nice-td-svg"></svg> -->
       </div>
     </div>

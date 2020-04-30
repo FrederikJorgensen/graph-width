@@ -192,5 +192,14 @@ document
 
 // document.getElementById('bfs').addEventListener('click', ntd.bfs);
 
+document.getElementById('max-independent-set').addEventListener('click', () => alert('Not working atm...'));
+
 document.getElementById('three-color').addEventListener('click', ntd.runThreeColor);
-// document.getElementById('graph-coloring').addEventListener('click', graphFactory.runGraphColoring);
+
+introJs().start();
+
+introJs().addStep({
+  element: document.querySelectorAll('#step2')[0],
+  intro: "Ok, wasn't that fun?",
+  position: 'right',
+});
