@@ -35,4 +35,5 @@ app.post('/compute', (req, res) => {
   });
 });
 
+console.log(PORT);
 app.listen(PORT);
