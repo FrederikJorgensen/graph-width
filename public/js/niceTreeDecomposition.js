@@ -126,10 +126,10 @@ export default function loadNiceTreeDecomposition(treeData) {
     .attr('class', 'label')
     .text((d) => d.data.label); */
 
-  // niceTreeNode.on('mouseover', graph.createSubGraph);
-  // niceTreeNode.on('mouseout', graph.resetHighlight);
-  // niceTreeNode.on('click', highlightSubTrees);
-  // niceTreeNode.on('dblclick', resetTreeHighlight);
+  niceTreeNode.on('mouseover', graph.highlightNodes);
+  niceTreeNode.on('mouseout', graph.resetHighlight);
+  niceTreeNode.on('click', highlightSubTrees);
+  niceTreeNode.on('dblclick', resetTreeHighlight);
 
 /*   simulation.on('tick', () => {
     const ky = 0.5 * simulation.alpha();

@@ -1,5 +1,4 @@
 import * as graphFactory from './graphFactory.js';
-import readGraphFile from './readGraph.js';
 import readLocalTreeFile from './readTree.js';
 import * as ntd from './niceTreeDecomposition.js';
 import * as drawGraph from './drawGraph.js';
@@ -91,13 +90,14 @@ function removeTreeDecomposition() {
 }
 
 function removeNiceTreeDecomposition() {
-  d3.select('#nice-td-svg').selectAll('g').remove();
+  d3.select('#nice-td-container').selectAll('g').remove();
 }
 
 function reload() {
   removeGraph();
   removeTreeDecomposition();
   removeNiceTreeDecomposition();
+  d3.select('#nice-td-container').select('svg').remove();
 
   const numberOfVertices = parseInt(
     document.getElementById('numberOfVertices').value,
@@ -121,15 +121,11 @@ function computeTreeDecomposition() {
   removeNiceTreeDecomposition();
   let edges = [];
 
-  /*   if (createGraph.isDrawing()) {
-    edges = createGraph.convertLinks();
-  } else if (isLetterGraph) {
-    edges = graphFactory.convertNumberGraph();
+  if (drawGraph.isDrawing()) {
+    edges = drawGraph.convertLinks();
   } else {
-  } */
-
-  edges = graphFactory.getAllEdges();
-
+    edges = graphFactory.getAllEdges();
+  }
 
   if (edges.length === 0) {
     alert('graph too small.');
@@ -189,8 +185,6 @@ document
 document
   .getElementById('computeNiceTree')
   .addEventListener('click', handleComputeNiceTree);
-
-// document.getElementById('bfs').addEventListener('click', ntd.bfs);
 
 document.getElementById('max-independent-set').addEventListener('click', () => alert('Not working atm...'));
 

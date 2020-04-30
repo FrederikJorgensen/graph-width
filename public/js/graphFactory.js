@@ -15,6 +15,7 @@ let graphLinkSvg;
 let graphNodeSvg;
 let graphLabelSvg;
 let simulation;
+let startGraphLinks;
 
 export function loadGraph(graph) {
   currentGraph = graph;
@@ -22,6 +23,8 @@ export function loadGraph(graph) {
   const { links } = graph;
   graphNodes = nodes;
   graphLinks = links;
+
+  startGraphLinks = links;
 
   const svg = d3.select('#graphSvg').attr('viewBox', [-graphWidth / 2, -graphHeight / 2, graphWidth, graphHeight]);
 
@@ -52,12 +55,6 @@ export function loadGraph(graph) {
     .attr('class', 'label')
     .attr('text-anchor', 'middle')
     .text((d) => d.id);
-
-  /*   graphLinks.forEach((d) => {
-    adjlist[`${d.source.index}-${d.target.index}`] = true;
-  });
-  console.log(adjlist);
- */
 
   function ticked() {
     graphNodeSvg
@@ -158,7 +155,7 @@ export function resetHighlight() {
     graphLabelSvg.attr('opacity', 1);
   }
 
-  // resetGraph(startGraphLinks);
+  resetGraph(startGraphLinks);
 }
 
 export function convertNumberGraph() {

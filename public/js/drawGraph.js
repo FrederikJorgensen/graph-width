@@ -172,7 +172,6 @@ function beginDraw() {
       .on('mousedown', mousedown)
       .on('mouseup', mouseup);
 
-    confirm.log(nodes);
     simulation.nodes(nodes);
     simulation.force('link').links(drawLinks);
     simulation.alpha(1).restart();
