@@ -14,43 +14,65 @@
   <script type="module" src="js/graphFactory.js"></script>
   <script type="module" src="js/readGraph.js"></script>
   <script type="module" src="js/readTree.js"></script>
-  <script type="module" src="js/createGraph.js"></script>
+  <script type="module" src="js/drawGraph.js"></script>
   <title>Graph Width Visualizer</title>
 </head>
 
 <body>
   <div class="sidenav">
     <h2 class="random-style">GRAPH WIDTH <br /> VISUALIZER</h2>
-    <p>vertices</p>
+    <h3 class="step1">Step 1</h3>
     <div class="random-generator">
+      <p>vertices</p>
       <div class="number-of-vertices">
-        <span id="verticesLeftArrow"><i class="material-icons md-36">keyboard_arrow_left</i></span>
+        <i id="verticesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
         <input type="text" id="numberOfVertices" value="10" />
-        <span id="verticesRightArrow"><i class="material-icons md-36">keyboard_arrow_right</i></span>
+        <i id="verticesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
       </div>
       <p>edges</p>
       <div class="number-of-links">
-        <span id="edgesLeftArrow"><i class="material-icons md-36">keyboard_arrow_left</i></span>
+        <i id="edgesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
         <input type="text" id="numberOfEdges" value="10" />
-        <span id="edgesRightArrow"><i class="material-icons md-36">keyboard_arrow_right</i></span>
+        <i id="edgesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
       </div>
     </div>
     <br />
-    <span id="reloadRandomGraph">↺</span>
-
-
-    <p>Input graph:</p>
-    <input type="file" id="fileUpload" />
-
-    <div>
-      <!-- <button id="drawGraphButton">Draw graph</button> -->
+    <div id="reloadRandomGraph" class="reload-container hoverable">
+      <i class="material-icons md-36">replay</i>
+      <p>Reload a random graph</p>
     </div>
-    <div class="algorithms-title">Algorithms:</div>
-    <br />
+
+    <div id="draw-graph-button" class="draw-graph-container hoverable">
+      <i class="material-icons md-36">palette</i>
+      <p>Draw your own graph</p>
+    </div>
+
+    <div class="upload-graph-container hoverable">
+      <i class="material-icons md-36">attach_file</i>
+      <p>Upload graph</p>
+    </div>
+    <!-- <input type="file" id="file-upload" /> -->
+
+    <h3 class=step2>Step 2</h3>
+    <div class=buttons>
+      <div id="compute">
+        <p>Tree Decomposition</p>
+      </div>
+      <div id="computeNiceTree">
+        <p>
+          Nice Tree Decomposition
+        </p>
+      </div>
+    </div>
+
+    <h3 class="step3">Step 3</h3>
     <div class="buttons">
-      <div id="compute">Tree Decomposition</div>
-      <div id="computeNiceTree">Nice Tree Decomposition</div>
-      <div id="three-color">3-Coloring</div>
+      <div id="three-color">
+        <p>3-Coloring</p>
+      </div>
+      <div id="max-independent-set">
+        <p>Max Independent Set</p>
+      </div>
     </div>
 
   </div>
@@ -61,15 +83,15 @@
         <svg id="graphSvg"></svg>
       </div>
       <div id="td-container">
+        <div class="text_container hidden">
+          <div>
+            <div class="loader"></div>
+          </div>
+        </div>
         <svg id="tdSvg"></svg>
       </div>
     </div>
     <div class="right-container">
-      <div class="text_container hidden">
-        <div>
-          <div class="loader"></div>
-        </div>
-      </div>
       <div id="nice-td-container">
         <!-- <svg id="nice-td-svg"></svg> -->
       </div>

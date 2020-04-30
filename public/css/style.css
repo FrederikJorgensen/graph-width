@@ -31,8 +31,8 @@ body {
 
 .sidenav p {
   color:white;
-  font-size: 15px;
-  font-weight: 800;
+  font-size: 13px;
+  font-weight: 600;
 }
 
 .sidenav {
@@ -48,7 +48,22 @@ body {
   background: tomato;
 }
 
-#compute:hover, #computeNiceTree:hover, #bfs:hover, #mis:hover, #three-color:hover {
+.step1 {
+  background-color: #212d45;
+  padding: 20px;
+}
+
+.step2 {
+  background-color: #212d45;
+  padding: 20px;
+}
+
+.step3 {
+  background-color: #212d45;
+  padding: 20px;
+}
+
+#compute:hover, #computeNiceTree:hover, #bfs:hover, #mis:hover, #three-color:hover, #max-independent-set:hover {
   cursor: pointer;
   background: tomato;
   transition: background-color .3s;
@@ -67,23 +82,56 @@ body {
 }
 
 #reloadRandomGraph {
-  font-size: 80px;
+  font-size: 40px;
   color: white;
+}
+
+.reload-container {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+}
+
+.draw-graph-container {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+}
+
+.upload-graph-container {
+  display: flex;
+  align-items: center;
+  padding: 20px;
+}
+
+.upload-btn-wrapper {
+  position: relative;
+  overflow: hidden;
+  display: inline-block;
+}
+
+.upload-btn-wrapper input[type=file] {
+  font-size: 100px;
+  position: absolute;
+  left: 0;
+  top: 0;
+  opacity: 0;
+}
+
+.hoverable:hover {
+  background-color: tomato;
+  cursor: pointer;
+  transition: background-color .2s;
 }
 
 .buttons {
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
+}
+
+.buttons p {
   padding: 10px;
-}
-
-file {
-  font-size: 10px;
-}
-
-.buttons {
-  text-align: left;
 }
 
 .random-style {
@@ -93,7 +141,7 @@ file {
 
 .number-of-vertices {
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
   align-items: center;
   user-select: none;
 }
@@ -101,7 +149,13 @@ file {
 .number-of-links {
   user-select: none;
   display: flex;
-  justify-content: space-between;
+  /* justify-content: space-between; */
+  align-items: center;
+}
+
+.random-generator {
+  display: flex;
+  flex-direction: column;
   align-items: center;
 }
 
@@ -127,18 +181,15 @@ textarea:focus, input:focus{
 }
 
 .flex-container {
-  /* box-sizing: border-box; */
   overflow: hidden;
   height:100vh;
   padding: 0px;
   display: flex;
   width: 100%;
-  /* height: 100%; */
   text-align: center;
 }
 
 .left-container {
-  /* box-sizing: border-box; */
   height: 100%;
   flex: 0.5;
 }
@@ -146,33 +197,24 @@ textarea:focus, input:focus{
 .right-container {
   height: 100%;
   flex: 0.5;
-  border: 10px solid #161e2e
-  /* outline: 10px solid #161e2e; */
-  /* outline-offset: -10px; */
 }
 
 #graph-container {
-  /* box-sizing: border-box; */
   height: 50%;
-  /* outline: 10px solid #161e2e; */
-  /* outline-offset: -10px; */
 }
 
 #td-container {
-  /* box-sizing: border-box; */
-  /* border-top: 10px solid #161e2e; */
-  /* border: 10px solid #161e2e */
   height: 50%;
-  /* outline: 10px solid #161e2e; */
-  /* outline-offset: -10px; */
 }
 
 #tdSvg{
-  border: 10px solid #161e2e
+  width: 100%;
+  height: 100%;
 }
 
 #graphSvg {
-  border: 10px solid #161e2e
+  width: 100%;
+  height: 100%;
 }
 
 #nice-td-container {
@@ -191,8 +233,7 @@ textarea:focus, input:focus{
 }
 
 .material-icons.md-36 { 
-  font-size: 50px;
-  padding: 0px; 
+  font-size: 30px;
 }
 
 .loader {
@@ -202,6 +243,7 @@ textarea:focus, input:focus{
   width: 120px;
   height: 120px;
   animation: spin 2s linear infinite;
+  /* align-items: center; */
 }
 
 @keyframes spin {
@@ -222,7 +264,7 @@ textarea:focus, input:focus{
 } 
 
 text {
-  font-size: 6px;
+  font-size: 10px;
   pointer-events: none;
 }
 

@@ -151,10 +151,13 @@ export function highlightNodes(hoveredNode) {
 }
 
 export function resetHighlight() {
-  graphLinkSvg.attr('opacity', 1);
-  graphNodeSvg.attr('opacity', 1);
-  graphNodeSvg.style('fill', 'yellow');
-  graphLabelSvg.attr('opacity', 1);
+  if (graphLinkSvg && graphNodeSvg && graphLabelSvg) {
+    graphLinkSvg.attr('opacity', 1);
+    graphNodeSvg.attr('opacity', 1);
+    graphNodeSvg.style('fill', 'yellow');
+    graphLabelSvg.attr('opacity', 1);
+  }
+
   // resetGraph(startGraphLinks);
 }
 

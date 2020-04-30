@@ -56,7 +56,7 @@ export default function loadNiceTreeDecomposition(treeData) {
 
   root = d3.hierarchy(treeData);
   const treeLayout = d3.tree();
-  treeLayout.size([width - 20, height - 20]);
+  treeLayout.size([width, height - 200]);
   treeLayout(root);
 
   niceTreeLink = treeSvg

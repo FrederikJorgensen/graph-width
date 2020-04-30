@@ -2,6 +2,7 @@ import * as graphFactory from './graphFactory.js';
 import readGraphFile from './readGraph.js';
 import readLocalTreeFile from './readTree.js';
 import * as ntd from './niceTreeDecomposition.js';
+import * as drawGraph from './drawGraph.js';
 
 const a = 97;
 const charArray = {};
@@ -167,9 +168,9 @@ const edgesRightArrow = $('#edgesRightArrow');
 edgesLeftArrow.click('click', decrementEdgesCounter);
 edgesRightArrow.click('click', incrementEdgesCounter);
 
-document
-  .querySelector('#fileUpload')
-  .addEventListener('change', readGraphFile);
+/* document
+  .querySelector('#file-upload')
+  .addEventListener('change', readGraphFile); */
 document
   .getElementById('compute')
   .addEventListener('click', computeTreeDecomposition);
@@ -178,9 +179,9 @@ document
   .getElementById('reloadRandomGraph')
   .addEventListener('click', reload);
 
-/* document
-  .getElementById('drawGraphButton')
-  .addEventListener('click', drawGraph.resetDrawingGraph); */
+document
+  .getElementById('draw-graph-button')
+  .addEventListener('click', drawGraph.resetDrawingGraph);
 
 document
   .addEventListener('contextmenu', (event) => event.preventDefault());

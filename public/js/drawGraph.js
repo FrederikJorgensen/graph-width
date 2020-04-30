@@ -1,3 +1,5 @@
+import * as graphFactory from './graphFactory.js';
+
 const width = document.getElementById('graph-container').offsetWidth;
 const height = document.getElementById('graph-container').offsetHeight;
 let node;
@@ -13,11 +15,10 @@ function beginDraw() {
   let mouseUpNode;
   let hoveringANode = false;
 
-  let svg = d3.select('#drawGraph').append('svg')
+  let svg = d3.select('#graphSvg')
     .property('value', { nodes, drawLinks })
     .attr('viewBox', [-width / 2, -height / 2, width, height])
     .attr('cursor', 'crosshair');
-
 
   function mouseleft() {
     mouse = null;
@@ -43,8 +44,7 @@ function beginDraw() {
         .forceLink(drawLinks)
         .id((d) => d.id)
         .distance(120)
-      // eslint-disable-next-line comma-dangle
-        .strength(0.7)
+        .strength(0.7),
     )
     .force('x', d3.forceX())
     .force('y', d3.forceY())
@@ -105,10 +105,8 @@ function beginDraw() {
     .attr('stroke', '#999')
     .selectAll('line');
 
-
   node = svg.append('g').selectAll('circle');
   label = svg.append('g').selectAll('text');
-
 
   function handleMouseOver() {
     hoveringANode = true;
@@ -164,7 +162,7 @@ function beginDraw() {
     node = node
       .data(nodes)
       .join(
-        (enter) => enter.append('circle').attr('r', 15).attr('class', 'node')
+        (enter) => enter.append('circle').attr('r', 15).attr('class', 'graphNode')
           .call(dragger),
         (update) => update,
         (exit) => exit.remove(),
@@ -200,7 +198,7 @@ function beginDraw() {
 }
 
 export function resetDrawingGraph() {
-  d3.select('svg').remove();
+  d3.select('#graphSvg').selectAll('g').remove();
   if (node && label && link) {
     node.remove();
     label.remove();
