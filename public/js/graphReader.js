@@ -1,4 +1,4 @@
-import * as graphFactory from './graphFactory.js';
+import * as graph from './graph.js';
 
 const a = 97;
 const charArray = {};
@@ -6,7 +6,9 @@ for (let i = 0; i < 26; i++) charArray[String.fromCharCode(a + i)] = i + 1;
 const charArray2 = {};
 for (let i = 0; i < 26; i++) charArray2[i + 1] = String.fromCharCode(a + i);
 
-export default function newReadGraphFile(file) {
+export default function readGraphFile(event) {
+  console.log('yep cock');
+  console.log(event);
   const f = event.target.files[0];
   const r = new FileReader();
   const newGraph = {};
@@ -28,7 +30,7 @@ export default function newReadGraphFile(file) {
     for (let i = 0; i < filtered.length; i++) {
       const textLine = lines[i];
       const splitted = textLine.split(' ');
-      if (!textLine.startsWith('c')) {
+      if (!textLine.startsWith('c') && !textLine.startsWith('p')) {
         let firstNode;
         let secondNode;
         let firstNodeLabel;

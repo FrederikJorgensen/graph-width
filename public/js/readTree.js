@@ -23,10 +23,10 @@ export function readTreeDecomposition(treeData) {
       splitted.shift();
       splitted.shift();
       for (let j = 0; j < splitted.length; j++) {
-        bagLabel += `${splitted[j]}, `;
+        bagLabel += `${splitted[j]} `;
       }
       bagLabel = bagLabel.replace(/,\s*$/, '');
-      bagLabel = `{${bagLabel}}`;
+      bagLabel = `${bagLabel}`;
       nodes.push({ id: bagId, label: bagLabel });
     } else {
       const splitted = textLine.split(' ');
@@ -57,12 +57,12 @@ function readNiceTreeDecomposition(treeData) {
       bagId = parseInt(splitted[1], 10);
       const vertices = [];
       for (let i = 2; i < splitted.length; i++) {
-        baglabel += `${splitted[i]}, `;
+        baglabel += `${splitted[i]} `;
         const currentNode = parseInt(splitted[i], 10);
         vertices.push(currentNode);
       }
       baglabel = baglabel.replace(/,\s*$/, '');
-      baglabel = `{${baglabel}}`;
+      baglabel = `${baglabel}`;
       allBagLabels[bagId] = baglabel;
       verticesInBag[bagId] = vertices;
     } else {

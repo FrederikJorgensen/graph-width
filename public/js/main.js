@@ -1,7 +1,8 @@
-import * as graphFactory from './graphFactory.js';
+import * as graph from './graph.js';
 import readLocalTreeFile from './readTree.js';
 import * as ntd from './niceTreeDecomposition.js';
 import * as drawGraph from './drawGraph.js';
+import readGraphFile from './graphReader.js';
 
 const a = 97;
 const charArray = {};
@@ -97,7 +98,6 @@ function reload() {
   removeGraph();
   removeTreeDecomposition();
   removeNiceTreeDecomposition();
-  d3.select('#nice-td-container').select('svg').remove();
 
   const numberOfVertices = parseInt(
     document.getElementById('numberOfVertices').value,
@@ -112,7 +112,7 @@ function reload() {
 
   randomGraph = generateRandomGraph(numberOfVertices, numberOfEdges, 'numbers');
 
-  graphFactory.loadGraph(randomGraph, '#graphSvg');
+  graph.loadGraph(randomGraph, '#graphSvg');
 }
 
 
@@ -124,7 +124,7 @@ function computeTreeDecomposition() {
   if (drawGraph.isDrawing()) {
     edges = drawGraph.convertLinks();
   } else {
-    edges = graphFactory.getAllEdges();
+    edges = graph.getAllEdges();
   }
 
   if (edges.length === 0) {
@@ -143,16 +143,22 @@ function computeTreeDecomposition() {
     },
     complete() {
       $('.text_container').removeClass('visible').addClass('hidden');
-      const treeDecompositionPath = 'td.td';
-      readLocalTreeFile(treeDecompositionPath, 'treeDecomposition');
+      /*       const treeDecompositionPath = 'td.td';
+      readLocalTreeFile(treeDecompositionPath, 'treeDecomposition'); */
     },
   });
 }
 
 function handleComputeNiceTree() {
+  d3.select('#nice-td-container').select('svg').remove();
   const niceTreeDecompositionPath = 'nicetd.td';
   readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
 }
+
+const treeDecompositionPath = 'td.td';
+readLocalTreeFile(treeDecompositionPath, 'treeDecomposition');
+
+handleComputeNiceTree();
 
 const verticesLeftArrow = $('#verticesLeftArrow');
 const verticesRightArrow = $('#verticesRightArrow');
@@ -164,9 +170,10 @@ const edgesRightArrow = $('#edgesRightArrow');
 edgesLeftArrow.click('click', decrementEdgesCounter);
 edgesRightArrow.click('click', incrementEdgesCounter);
 
-/* document
-  .querySelector('#file-upload')
-  .addEventListener('change', readGraphFile); */
+document
+  .getElementById('file-upload')
+  .addEventListener('change', readGraphFile);
+
 document
   .getElementById('compute')
   .addEventListener('click', computeTreeDecomposition);
@@ -190,7 +197,7 @@ document.getElementById('max-independent-set').addEventListener('click', () => a
 
 document.getElementById('three-color').addEventListener('click', ntd.runThreeColor);
 
-introJs().start();
+// introJs().start();
 
 introJs().addStep({
   element: document.querySelectorAll('#step2')[0],

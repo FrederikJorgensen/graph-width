@@ -10,11 +10,12 @@
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/intro.min.js"></script>
+  <script type="text/javascript" src="https://unpkg.com/force-in-a-box/dist/forceInABox.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/introjs.min.css">
   <script type="module" src="js/main.js"></script>
   <script type="module" src="js/niceTreeDecomposition.js"></script>
-  <script type="module" src="js/graphFactory.js"></script>
-  <script type="module" src="js/readGraph.js"></script>
+  <script type="module" src="js/graph.js"></script>
+  <script type="module" src="js/graphReader.js"></script>
   <script type="module" src="js/readTree.js"></script>
   <script type="module" src="js/drawGraph.js"></script>
   <title>Graph Width Visualizer</title>
@@ -57,12 +58,10 @@
       <p>Draw your own graph</p>
     </div>
 
-    <div data-step='4' data-intro='3. Upload your own graph using the PACE .gr format of a graph.' data-position='right'
-      class="upload-graph-container hoverable">
-      <i class="material-icons md-36">attach_file</i>
-      <p>Upload graph</p>
+    <div class="fileUpload btn btn-primary">
+      <span>Upload</span>
+      <input type="file" id="file-upload" class="upload" />
     </div>
-    <!-- <input type="file" id="file-upload" /> -->
 
     <h3 class=step2>Step 2</h3>
     <div class=buttons>
@@ -113,13 +112,10 @@
   </div>
   <div class="flex-container">
     <div class="left-container">
-      <!-- <div id="drawGraph" class="drawGraph"></div> -->
       <div id="graph-container">
-        Graph
         <svg id="graphSvg"></svg>
       </div>
       <div id="td-container">
-        Tree Decomposition
         <div class="text_container hidden">
           <div>
             <div class="loader"></div>
@@ -129,10 +125,14 @@
       </div>
     </div>
     <div class="right-container">
-      <div id="nice-td-container">
-        Nice Tree Decomposition
-        <!-- <svg id="nice-td-svg"></svg> -->
+      <div class="nice-td-info">
+        <p>Root node is <span class="root-node-color">orange</span></p>
+        <p>Join nodes are <span class="join-node-color">blue</span></p>
+        <p>Introduce nodes are <span class="introduce-node-color">green</span></p>
+        <p>Forget nodes are <span class="forget-node-color">red</span></p>
+        <p>Leaf nodes are <span class="leaf-node-color">black</span></p>
       </div>
+      <div id="nice-td-container"></div>
     </div>
   </div>
 

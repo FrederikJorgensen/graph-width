@@ -1,5 +1,3 @@
-import * as graphFactory from './graphFactory.js';
-
 const width = document.getElementById('graph-container').offsetWidth;
 const height = document.getElementById('graph-container').offsetHeight;
 let node;

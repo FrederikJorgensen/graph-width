@@ -3,18 +3,12 @@ html {
   padding: 0;
   margin: 0;
   user-select: none; /* supported by Chrome and Opera */
-  -webkit-user-select: none; /* Safari */
-  -khtml-user-select: none; /* Konqueror HTML */
-  -moz-user-select: none; /* Firefox */
-  -ms-user-select: none; /* Internet Explorer/Edge */
 }
 
 body {
   display: flex;
   flex-direction: row;
   font-family: 'Inter', sans-serif;
-  /* height: calc(100% - 3em); */
-  /* height: 100%; */
   height:100vh;
   padding: 0;
   margin: 0;
@@ -43,9 +37,27 @@ body {
   overflow-x: hidden;
 }
 
-.sidenav button:hover {
+.fileUpload {
+  position: relative;
+  overflow: hidden;
+  margin: 10px;
+}
+
+.fileUpload input.upload {
+  position: absolute;
+  top: 0;
+  right: 0;
+  margin: 0;
+  padding: 0;
+  font-size: 20px;
   cursor: pointer;
-  background: tomato;
+  opacity: 0;
+  filter: alpha(opacity=0);
+}
+
+.btn {
+  padding: 10px;
+  border: solid 2px white;
 }
 
 .step1 {
@@ -98,26 +110,6 @@ body {
   padding: 20px;
 }
 
-.upload-graph-container {
-  display: flex;
-  align-items: center;
-  padding: 20px;
-}
-
-.upload-btn-wrapper {
-  position: relative;
-  overflow: hidden;
-  display: inline-block;
-}
-
-.upload-btn-wrapper input[type=file] {
-  font-size: 100px;
-  position: absolute;
-  left: 0;
-  top: 0;
-  opacity: 0;
-}
-
 .hoverable:hover {
   background-color: tomato;
   cursor: pointer;
@@ -141,7 +133,6 @@ body {
 
 .number-of-vertices {
   display: flex;
-  /* justify-content: space-between; */
   align-items: center;
   user-select: none;
 }
@@ -149,7 +140,6 @@ body {
 .number-of-links {
   user-select: none;
   display: flex;
-  /* justify-content: space-between; */
   align-items: center;
 }
 
@@ -170,14 +160,6 @@ body {
   font-weight: 600; 
   font-size: x-large; 
   text-align: center; 
-}
-
-.algorithms-title {
-  margin-top: 100px;
-}
-
-textarea:focus, input:focus{
-  outline: none;
 }
 
 .flex-container {
@@ -246,7 +228,6 @@ textarea:focus, input:focus{
   width: 120px;
   height: 120px;
   animation: spin 2s linear infinite;
-  /* align-items: center; */
 }
 
 @keyframes spin {
@@ -296,11 +277,6 @@ path.link.hidden {
   stroke-width: 0;
 }
 
-/* When you mouse over the navigation links, change their color */
-.sidenav a:hover {
-  color: #f1f1f1;
-}
-
 /* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
 @media screen and (max-height: 450px) {
   .sidenav {
@@ -313,33 +289,57 @@ path.link.hidden {
 
 /* Node styling here */
 .graphNode {
-  fill: yellow;
+  fill: steelblue;
   stroke: black;
-  stroke-width: 2px;
+  stroke-width: 2.5px;
+  vertical-align: center;
 }
 
 .treeDecompositionNode {
-  fill: #9ceb34;
-  stroke: black;
-  stroke-width: 2px;
+  fill: slateblue;
 }
 
 .niceTreeDecompositionNode {
   fill: #3483eb;
-  stroke: black;
-  stroke-width: 2px;
 }
 
 line {
-  stroke: #333;
-  stroke-width: 2px;
+  stroke: rgb(128, 128, 128);
+  stroke-width: 2.5px;
   stroke-linecap: round;
 } 
 
 .label {
   pointer-events: none;
-  font-size: 9px;
-  fill: black;
+  font-size: 10px;
+  fill: white;
   font-weight: 800;
+}
+
+.root-node-color {
+  color: orange;
+}
+
+.join-node-color {
+  color: blue;
+}
+
+.introduce-node-color {
+  color: green;
+}
+
+.forget-node-color {
+  color: red;
+}
+
+.leaf-node-color {
+  color: black
+}
+
+.nice-td-info {
+  position: absolute;
+  text-align: left;
+  margin-left: 10px;
+  font-weight: 500;
 }
 
