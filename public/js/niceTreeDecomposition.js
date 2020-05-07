@@ -1,3 +1,4 @@
+/* eslint-disable no-restricted-syntax */
 import * as graph from './graph.js';
 
 let treeSvg;
@@ -46,10 +47,6 @@ function highlightSubTrees(d) {
     if (wat.includes(currentLink.source.data)) return 1;
     return 0;
   });
-}
-
-function showSummedVertices(d) {
-  console.log(d.data.summedVertices);
 }
 
 export default function loadNiceTreeDecomposition(treeData) {
@@ -127,11 +124,6 @@ export default function loadNiceTreeDecomposition(treeData) {
     .attr('x', (d) => d.x)
     .attr('y', (d) => d.y)
     .attr('transform', `translate(${0}, ${40})`);
-
-  // niceTreeNode.on('mouseover', graph.highlightNodes);
-  // niceTreeNode.on('mouseout', graph.resetHighlight);
-  niceTreeNode.on('click', graph.highlightSeperator);
-  // niceTreeNode.on('dblclick', resetTreeHighlight);
 }
 
 function visitElement(element, animX) {
@@ -247,4 +239,109 @@ export function threeColor(root) {
 
 export function runThreeColor() {
   threeColor(root);
+}
+
+function getSubTree(root, currentNode) {
+  let subTree;
+  root.each((d) => {
+    if (d.data.id === currentNode.id) subTree = d.descendants();
+  });
+  return subTree;
+}
+
+const getAllSubsets = (theArray) => theArray.reduce(
+  (subsets, value) => subsets.concat(
+    subsets.map((set) => [value, ...set]),
+  ),
+  [[]],
+);
+
+export function mis() {
+  root.copy().sum((currentNode) => {
+    // Initiliaze table for this node
+    currentNode.table = {};
+
+    // Get all the subsets of the current vertices in this tree node
+    const allSubsets = getAllSubsets(currentNode.vertices);
+
+    // Get the subtree rooted at this node
+    const subTree = getSubTree(root, currentNode);
+
+    // Leaf node
+    if ('children' in currentNode === false) {
+      currentNode.table = {};
+      if (currentNode.vertices.length === 0) {
+        currentNode.table[''] = 0;
+      } else {
+        const vertex = currentNode.vertices[0];
+        currentNode.table[vertex] = 1;
+      }
+      console.log(currentNode.table);
+      return;
+    }
+
+    // Join node
+    if (currentNode.children.length === 2) {
+      // Get child 1's table
+      const child1 = currentNode.children[0];
+      const child1Clone = JSON.parse(JSON.stringify(child1));
+      const child1Table = child1Clone.table;
+
+      // Get child 2's table
+      const child2 = currentNode.children[1];
+      const child2Clone = JSON.parse(JSON.stringify(child2));
+      const child2Table = child2Clone.table;
+
+      for (const set of allSubsets) {
+        const currentNodeValue = graph.runMis(subTree, set);
+        const child1value = child1Table[set];
+        const child2value = child2Table[set];
+        currentNode.table[set] = child1value + child2value - currentNodeValue;
+      }
+    }
+
+    // Forget node
+    if (currentNode.vertices.length < currentNode.children[0].vertices.length) {
+      // Get the forgotten vertex
+      const forgottenVertex = currentNode.children[0].vertices.filter((x) => !currentNode.vertices.includes(x));
+
+      for (const set of allSubsets) {
+        const setWithV = JSON.parse(JSON.stringify(set));
+        setWithV.push(forgottenVertex);
+        // debugger;
+        currentNode.table[set] = Math.max(graph.runMis(subTree, set), graph.runMis(subTree, setWithV));
+      }
+    }
+
+    // Introduce node
+    if (currentNode.vertices.length > currentNode.children[0].vertices.length) {
+      // Get the child's table
+      const child = currentNode.children[0];
+      const childClone = JSON.parse(JSON.stringify(child));
+      const childsTable = childClone.table;
+
+      // Set the current node's table
+      currentNode.table = childsTable;
+
+      // Find the introduced vertex
+      const difference = currentNode.vertices.filter((x) => !currentNode.children[0].vertices.includes(x));
+      const introducedVertex = difference[0];
+
+      // debugger;
+
+      for (const set of allSubsets) {
+        // Only run MIS if the introduced vertex is in the current set
+        if (set.includes(introducedVertex)) {
+          const mis = graph.runMis(subTree, set);
+
+          if (currentNode.table[set]) {
+            currentNode.table[set]++;
+          } else {
+            currentNode.table[set] = mis;
+          }
+        }
+      }
+    }
+    console.log(currentNode.table);
+  });
 }

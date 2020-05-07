@@ -193,7 +193,7 @@ document
   .getElementById('computeNiceTree')
   .addEventListener('click', handleComputeNiceTree);
 
-document.getElementById('max-independent-set').addEventListener('click', () => alert('Not working atm...'));
+document.getElementById('max-independent-set').addEventListener('click', ntd.mis);
 
 document.getElementById('three-color').addEventListener('click', ntd.runThreeColor);
 

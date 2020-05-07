@@ -29,8 +29,6 @@ export default function loadTreeDecomposition(tree, canvas) {
     .attr('word-spacing', 10)
     .attr('class', 'treeDecompositionNode');
 
-  console.log(nodes);
-
   treeLabels = svg
     .append('g')
     .selectAll('text')

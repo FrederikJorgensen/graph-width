@@ -281,8 +281,8 @@ export function getAllEdges() {
 }
 
 const numberOfColors = 3;
-let result = [];
-let adjlist = [];
+const result = [];
+// let adjlist = [];
 
 function isSafe(k, subGraphNodes, color) {
   for (let i = 0; i < subGraphNodes.length; i++) {
@@ -304,7 +304,7 @@ function getColor(colorNumber) {
   return 'pink';
 }
 
-let coloredNodes = {};
+const coloredNodes = {};
 
 function colorNode(nodeToColor, color) {
   d3.select(`#graphNode-${nodeToColor}`).style('fill', (d) => {
@@ -315,7 +315,7 @@ function colorNode(nodeToColor, color) {
   });
 }
 
-export function graphColoring(k, subGraphNodes) {
+/* export function graphColoring(k, subGraphNodes) {
   for (let color = 1; color <= numberOfColors; color++) {
     if (isSafe(k, subGraphNodes, color)) {
       result[k] = color;
@@ -392,7 +392,7 @@ export function createSubGraph(currentTreeNode) {
     }
   }
   return { isColorable: true, coloredNodes };
-}
+} */
 
 const testGraph = {
   nodes: [
@@ -470,3 +470,141 @@ const testGraph = {
 };
 
 loadGraph(testGraph);
+
+const getAllSubsets = (theArray) => theArray.reduce(
+  (subsets, value) => subsets.concat(
+    subsets.map((set) => [value, ...set]),
+  ),
+  [[]],
+);
+
+function subset(array, n) {
+  const arr = getAllSubsets(array);
+  // debugger;
+  const newArray = [];
+  for (const a of arr) {
+    if (a.length === n && a.length <= n) newArray.push(a);
+  }
+  return newArray;
+}
+
+export function newSubGraph(subTree) {
+  const subGraphNodeIds = [];
+
+  subTree.forEach((node) => {
+    for (const v of node.data.vertices) {
+      if (!subGraphNodeIds.includes(v)) subGraphNodeIds.push(v);
+    }
+  });
+
+  const subGraphNodes = graphNodes.filter((currentNode) => subGraphNodeIds.includes(currentNode.id));
+  const subGraphLinks = graphLinks.filter((currentLink) => subGraphNodeIds.includes(currentLink.source.id) && subGraphNodeIds.includes(currentLink.target.id));
+
+  graphLinkSvg.classed('highlighted-link', (link) => {
+    if (subGraphNodeIds.includes(link.source.id) && subGraphNodeIds.includes(link.target.id)) {
+      return true;
+    }
+    return false;
+  });
+
+  graphNodeSvg.attr('stroke', (node) => {
+    if (subGraphNodeIds.includes(node.id)) {
+      return 'orange';
+    }
+  });
+
+  graphNodeSvg.attr('stroke-width', (node) => {
+    if (subGraphNodeIds.includes(node.id)) {
+      return '5px';
+    }
+  });
+
+  return { nodes: subGraphNodes, links: subGraphLinks };
+}
+
+export function buildAdjacencyList(links) {
+  const adjacencyList = [];
+  links.forEach((d) => {
+    adjacencyList[`${d.source.id}-${d.target.id}`] = true;
+    adjacencyList[`${d.target.id}-${d.source.id}`] = true;
+    // adjacencyList[`${d.source.id}-${d.source.id}`] = true;
+    // adjacencyList[`${d.target.id}-${d.target.id}`] = true;
+  });
+  return adjacencyList;
+}
+
+function maximumIndependentSet(verticesInSubGraph, adj, set) {
+  let maximumSet = 0;
+  let maximumIndependentSet = [];
+  let candidato = true;
+
+  for (let i = 2; i < verticesInSubGraph.length + 1; i++) {
+    const conjunto = subset(verticesInSubGraph, i);
+
+    for (const c of conjunto) {
+      candidato = true;
+
+      const pares = subset(c, 2);
+
+      for (const par of pares) {
+        const test1 = par[0];
+        const test2 = par[1];
+
+        if (adj[`${test1}-${set}`]) {
+          candidato = false;
+          break;
+        }
+
+        if (adj[`${test2}-${set}`]) {
+          candidato = false;
+          break;
+        }
+
+        if (adj[`${test1}-${test2}`]) {
+          candidato = false;
+          break;
+        }
+      }
+
+      if (candidato && c.length > maximumSet) {
+        maximumSet = c.length;
+        maximumIndependentSet = c;
+      }
+    }
+  }
+  if (set !== undefined && set.length > 0) maximumIndependentSet.push(set);
+  return maximumIndependentSet;
+}
+
+function isNeighboring(set, introducedVertex, adjacencyList) {
+  for (const s of set) {
+    if (adjacencyList[`${s}-${introducedVertex}`]) return true;
+  }
+  return false;
+}
+
+function isNeighborInSet(set, adjacencyList) {
+  for (let i = 0; i < set.length; i++) {
+    const vertex1 = set[i];
+    for (let j = 0; j < set.length; j++) {
+      const vertex2 = set[j];
+      if (vertex1 !== vertex2 && adjacencyList[`${vertex1}-${vertex2}`]) return true;
+    }
+  }
+  return false;
+}
+
+export function runMis(subTree, set) {
+  const subGraph = newSubGraph(subTree);
+
+  const verticesInSubGraph = [];
+  subGraph.nodes.forEach((node) => {
+    verticesInSubGraph.push(node.id);
+  });
+
+  const adjacencyList = buildAdjacencyList(subGraph.links);
+  // if (isNeighboring(set, introducedVertex, adjacencyList)) return Number.NEGATIVE_INFINITY;
+  if (isNeighborInSet(set, adjacencyList)) return Number.NEGATIVE_INFINITY;
+  const mis = maximumIndependentSet(verticesInSubGraph, adjacencyList, set);
+  return mis.length;
+}
