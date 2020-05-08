@@ -1,5 +1,5 @@
-const width = document.getElementById('graph-container').offsetWidth;
-const height = document.getElementById('graph-container').offsetHeight;
+const width = document.getElementById('graph-svg-container').offsetWidth;
+const height = document.getElementById('graph-svg-container').offsetHeight;
 let node;
 let link;
 let label;
@@ -133,6 +133,7 @@ function beginDraw() {
   function mouseup(d) {
     mouseUpNode = d;
     dragLine.attr('class', 'drag_line_hidden');
+
     drawLinks.push({ source: mouseDownNode, target: mouseUpNode });
 
     link = link
@@ -146,13 +147,26 @@ function beginDraw() {
     resetMouseVars();
   }
 
+  function addNode() {
+    const e = d3.event;
+    if (e.button == 0) {
+      const coords = d3.mouse(e.currentTarget);
+      const newNode = {
+        x: coords[0], y: coords[1], id: ++lastNodeId, degree: 0,
+      };
+      nodes.push(newNode);
+      restart();
+    }
+  }
+
   function spawn(source) {
     nodes.push(source);
 
     label = label
       .data(nodes)
       .join(
-        (enter) => enter.append('text').attr('class', 'label').attr('text-anchor', 'middle').text((d) => d.id),
+        (enter) => enter.append('text').attr('class', 'label').attr('text-anchor', 'middle').text((d) => d.id)
+          .attr('dy', '.2em'),
         (update) => update,
         (exit) => exit.remove(),
       );
@@ -160,7 +174,7 @@ function beginDraw() {
     node = node
       .data(nodes)
       .join(
-        (enter) => enter.append('circle').attr('r', 15).attr('class', 'graphNode')
+        (enter) => enter.append('circle').attr('r', 20).attr('class', 'node').attr('dy', '.2em')
           .call(dragger),
         (update) => update,
         (exit) => exit.remove(),

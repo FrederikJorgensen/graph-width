@@ -1,7 +1,7 @@
 /* eslint-disable no-restricted-syntax */
 
-const graphWidth = document.getElementById('graph-container').offsetWidth;
-const graphHeight = document.getElementById('graph-container').offsetHeight;
+const graphWidth = document.getElementById('graph-svg-container').offsetWidth;
+const graphHeight = document.getElementById('graph-svg-container').offsetHeight;
 let currentGraph;
 let graphNodes = [];
 let graphLinks = [];
@@ -66,8 +66,8 @@ export function loadGraph(graph) {
     .data(graphNodes)
     .enter()
     .append('circle')
-    .attr('r', (d) => d.radius)
-    // .attr('class', 'graphNode')
+    .attr('r', 20)
+    .attr('class', 'node')
     .attr('id', (d) => `graphNode-${d.id}`)
     .attr('fill', (d) => color(d.cluster));
 
@@ -77,6 +77,7 @@ export function loadGraph(graph) {
     .data(graphNodes)
     .enter()
     .append('text')
+    .attr('dy', '.2em')
     .attr('class', 'label')
     .attr('text-anchor', 'middle')
     .text((d) => d.id);

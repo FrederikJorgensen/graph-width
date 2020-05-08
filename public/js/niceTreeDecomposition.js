@@ -7,57 +7,17 @@ let niceTreeLink;
 let niceTreeLabel;
 let root;
 let animX = 0;
-const animationDuration = 1000;
-
-function resetTreeHighlight() {
-  niceTreeNode.attr('opacity', 1);
-  niceTreeLabel.attr('opacity', 1);
-  niceTreeLink.attr('opacity', 1);
-}
-
-function highlightSubTrees(d) {
-  const descendants = d.descendants();
-  const des = [];
-
-  const desLinks = d.links();
-  const wat = [];
-
-  desLinks.forEach((currentLink) => {
-    wat.push(currentLink.source.data, currentLink.target.data);
-  });
-
-  descendants.forEach((currentNode) => {
-    des.push(currentNode.data.id);
-  });
-
-  niceTreeNode.attr('opacity', (currentNode) => {
-    if (des.includes(currentNode.data.id)) return 1;
-    return 0;
-  });
-
-  niceTreeLabel.attr('opacity', (currentNode) => {
-    if (des.includes(currentNode.data.id)) return 1;
-    return 0;
-  });
-
-  niceTreeLink.attr('opacity', (currentLink) => {
-    if (wat.includes(currentLink.source.data)) return 1;
-    return 0;
-  });
-}
 
 export default function loadNiceTreeDecomposition(treeData) {
-  const width = document.getElementById('nice-td-container').offsetWidth;
-  const height = document.getElementById('nice-td-container').offsetHeight;
+  const width = document.getElementById('td-container').offsetWidth;
+  const height = document.getElementById('td-container').offsetHeight;
 
-  treeSvg = d3.select('#nice-td-container').append('svg').attr('viewBox', [0, 0, width, height]);
+  treeSvg = d3.select('#nice-td-svg').attr('viewBox', [0, 0, width, height]);
 
   root = d3.hierarchy(treeData);
   const treeLayout = d3.tree();
-  treeLayout.size([width / 2, height - 200]);
+  treeLayout.size([width, height - 100]);
   treeLayout(root);
-
-  const rootId = root.data.id;
 
   niceTreeLink = treeSvg
     .append('g')
@@ -65,8 +25,7 @@ export default function loadNiceTreeDecomposition(treeData) {
     .data(root.links())
     .enter()
     .append('line')
-    .attr('class', 'niceTreeLink')
-    // .attr('id', (d) => `parent-link-${d.source.data.id}`)
+    .attr('class', 'link')
     .attr('x1', (d) => d.source.x)
     .attr('y1', (d) => d.source.y)
     .attr('x2', (d) => d.target.x)
@@ -80,18 +39,18 @@ export default function loadNiceTreeDecomposition(treeData) {
     .data(root.descendants())
     .enter()
     .append('circle')
-    .attr('class', 'niceTreeDecompositionNode')
-    .style('fill', (d) => {
+    .attr('class', 'node')
+  /*     .style('fill', (d) => {
       if (d.data.id === rootId) return 'orange';
       if ('children' in d.data === false) return 'black';
       if (d.data.children.length === 2) return 'blue';
       if (d.data.vertices.length > d.data.children[0].vertices.length) return 'green';
       if (d.data.vertices.length < d.data.children[0].vertices.length) return 'red';
-    })
+    }) */
     .attr('id', (d) => `node-${d.data.id}`)
     .attr('cx', (d) => d.x)
     .attr('cy', (d) => d.y)
-    .attr('r', (d) => (d.data.vertices.length * 2) + 17)
+    .attr('r', 20)
     .attr('transform', `translate(${0}, ${40})`);
 
   niceTreeLabel = treeSvg
@@ -100,25 +59,10 @@ export default function loadNiceTreeDecomposition(treeData) {
     .data(root.descendants())
     .enter()
     .append('text')
-    .attr('dy', '-.5em')
+    .attr('dy', '.2em')
     .attr('text-anchor', 'middle')
     .attr('class', 'label')
-    .text((d) => d.data.label.split(' ').slice(0, 2).toString().replace(',', ' '))
-    .attr('word-spacing', 10)
-    .attr('x', (d) => d.x)
-    .attr('y', (d) => d.y)
-    .attr('transform', `translate(${0}, ${40})`);
-
-  niceTreeLabel = treeSvg
-    .append('g')
-    .selectAll('text')
-    .data(root.descendants())
-    .enter()
-    .append('text')
-    .attr('dy', '1.5em')
-    .attr('text-anchor', 'middle')
-    .attr('class', 'label')
-    .text((d) => d.data.label.split(' ').slice(2).toString().replace(/,\s*$/, ''))
+    .text((d) => d.data.id)
     .attr('x', (d) => d.x)
     .attr('y', (d) => d.y)
     .attr('transform', `translate(${0}, ${40})`);

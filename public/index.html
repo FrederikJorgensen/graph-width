@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/style.css" />
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/intro.min.js"></script>
@@ -22,105 +23,95 @@
 </head>
 
 <body>
-  <div class="sidenav">
-    <h2 class="random-style" data-step='1'
-      data-intro='Welcome to Graph Width Visualizer. The first step is to create a graph. You can create a graph in 3 different ways.'
-      data-position='right'>GRAPH
-      WIDTH <br /> VISUALIZER
-    </h2>
-    <h3 class="step1">Step 1</h3>
-    <div>
-      <div class="random-generator">
-        <p>vertices</p>
-        <div class="number-of-vertices">
-          <i id="verticesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
-          <input type="text" id="numberOfVertices" value="10" />
-          <i id="verticesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
-        </div>
-        <p>edges</p>
-        <div class="number-of-links">
-          <i id="edgesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
-          <input type="text" id="numberOfEdges" value="10" />
-          <i id="edgesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
-        </div>
+  <div class="topnav" id="myTopnav">
+    <a class="active">Graph Width Visualizer</a>
+    <a id="draw-graph-button">Draw Graph</a>
+    <a id="reload-graph-button">Reload Graph</a>
+    <div class="dropdown">
+      <button class="dropbtn">Algorithms
+        <i class="fa fa-caret-down"></i>
+      </button>
+      <div class="dropdown-content">
+        <a id="tree-decomposition-button">Tree Decomposition</a>
+        <a id="nice-tree-decomposition-button">Nice Tree Decomposition</a>
+        <a id="max-independent-set-button">Max Independent Set</a>
       </div>
     </div>
-    <div data-step='2' data-intro='1. Reload a random graph using the generator.' id="reloadRandomGraph"
-      data-position='right' class="reload-container hoverable">
-      <i class="material-icons md-36">replay</i>
-      <p>Reload a random graph</p>
-    </div>
-
-    <div data-step='3'
-      data-intro='2. Draw your own graph by clicking anywhere on the graph canvas. Add edges between vertices by holding down right click from 1 vertix to another vertix.'
-      data-position='right' id="draw-graph-button" class="draw-graph-container hoverable">
-      <i class="material-icons md-36">palette</i>
-      <p>Draw your own graph</p>
-    </div>
-
-    <div class="fileUpload btn btn-primary">
-      <span>Upload</span>
-      <input type="file" id="file-upload" class="upload" />
-    </div>
-
-    <h3 class=step2>Step 2</h3>
-    <div class=buttons>
-      <div id="compute" data-step='5'
-        data-intro='In graph theory, a tree decomposition is a mapping of a graph into a tree that can be used to define the treewidth of the graph and speed up solving <strong>certain</strong> computational problems on the graph.'
-        data-position='right'>
-        <p data-step='6' data-position="right" data-intro="There is a polynomial-time algorithm that finds a tree decomposition of width
-        O
-        (
-        w
-        √log
-        w
-        ), if the treewidth of the graph is at most
-        w. <-- Click here to run the algorithm on the current graph.">Tree Decomposition</p>
-      </div>
-      <div data-step='6' data-position="right" data-intro="A tree decomposition of width
-      w and
-      n nodes can be turned into a nice tree
-      decomposition of width
-      w and
-      O
-      (wn
-      ) nodes in time
-      O
-      (
-      w
-      2
-      n
-      )." id="computeNiceTree">
-        <p>
-          Nice Tree Decomposition
-        </p>
-      </div>
-    </div>
-
-    <h3 data-step='7' data-position="right"
-      data-intro='Run the algorithms on the nice tree decomposition using dynamic programming with any of the algorithms below'
-      class="step3">Step 3</h3>
-    <div class="buttons">
-      <div id="max-independent-set">
-        <p>Max Independent Set</p>
-      </div>
-    </div>
-
+    <a href="javascript:void(0);" class="icon" onclick="myFunction()">&#9776;</a>
   </div>
+
   <div class="flex-container">
-    <div class="left-container">
-      <div id="graph-container">
-        <svg id="graphSvg"></svg>
+    <div class="center-container">
+      <div id="left-container">
+        <div id="graph-svg-container">
+          <svg id="graphSvg"></svg>
+        </div>
       </div>
-      <div id="td-container">
-        <!--         <table class="table">
+      <div id="right-container">
+        <div id="td-container">
+          <svg id='nice-td-svg'></svg>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+</html>
+
+<!-- <div class="sidenav">
+  <div class="random-generator">
+    <p>v</p>
+    <div class="number-of-vertices">
+      <i id="verticesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
+      <input type="text" id="numberOfVertices" value="10" />
+      <i id="verticesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
+    </div>
+    <p>e</p>
+    <div class="number-of-links">
+      <i id="edgesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
+      <input type="text" id="numberOfEdges" value="10" />
+      <i id="edgesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
+    </div>
+  </div>
+</div>
+<div id="reload-graph" class="reload-container hoverable">
+  <i class="material-icons md-36">replay</i>
+</div>
+
+<div id="draw-graph-button" class="draw-graph-container hoverable">
+  <i class="material-icons md-36">palette</i>
+</div>
+
+<div class="fileUpload btn btn-primary">
+  <span>U</span>
+  <input type="file" id="file-upload" class="upload" />
+</div> -->
+
+<!-- <div class=buttons>
+  <div id="compute">TD</p>
+  </div>
+  <div id="computeNiceTree">
+    <p>
+      NTD
+    </p>
+  </div>
+</div>
+<div class="buttons">
+  <div id="max-independent-set">
+    <p>MIS</p>
+  </div>
+</div>
+</div>  -->
+
+<!--       <div id="td-container">
+                 <table class="table">
           <tr>
             <th>Set</th>
             <th>MIS</th>
           </tr>
           <tbody id="tbody">
           </tbody>
-        </table> -->
+        </table> 
         <div id="output-text"></div>
         <div class="text_container hidden">
           <div>
@@ -129,19 +120,11 @@
         </div>
         <svg id="tdSvg"></svg>
       </div>
-    </div>
-    <div class="right-container">
-      <div class="nice-td-info">
-        <!--         <p>Root node is <span class="root-node-color">orange</span></p>
+    </div> -->
+
+<!-- <div class="nice-td-info"> -->
+<!--         <p>Root node is <span class="root-node-color">orange</span></p>
         <p>Join nodes are <span class="join-node-color">blue</span></p>
         <p>Introduce nodes are <span class="introduce-node-color">green</span></p>
         <p>Forget nodes are <span class="forget-node-color">red</span></p>
         <p>Leaf nodes are <span class="leaf-node-color">black</span></p> -->
-      </div>
-      <div id="nice-td-container"></div>
-    </div>
-  </div>
-
-</body>
-
-</html>

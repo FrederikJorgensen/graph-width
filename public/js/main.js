@@ -150,7 +150,8 @@ function computeTreeDecomposition() {
 }
 
 function handleComputeNiceTree() {
-  d3.select('#nice-td-container').select('svg').remove();
+  d3.select('#nice-td-svg').selectAll('g').remove();
+
   const niceTreeDecompositionPath = 'nicetd.td';
   readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
 }
@@ -170,16 +171,16 @@ const edgesRightArrow = $('#edgesRightArrow');
 edgesLeftArrow.click('click', decrementEdgesCounter);
 edgesRightArrow.click('click', incrementEdgesCounter);
 
-document
+/* document
   .getElementById('file-upload')
-  .addEventListener('change', readGraphFile);
+  .addEventListener('change', readGraphFile); */
 
 document
-  .getElementById('compute')
+  .getElementById('tree-decomposition-button')
   .addEventListener('click', computeTreeDecomposition);
 
 document
-  .getElementById('reloadRandomGraph')
+  .getElementById('reload-graph-button')
   .addEventListener('click', reload);
 
 document
@@ -190,17 +191,7 @@ document
   .addEventListener('contextmenu', (event) => event.preventDefault());
 
 document
-  .getElementById('computeNiceTree')
+  .getElementById('nice-tree-decomposition-button')
   .addEventListener('click', handleComputeNiceTree);
 
-document.getElementById('max-independent-set').addEventListener('click', ntd.mis);
-
-document.getElementById('three-color').addEventListener('click', ntd.runThreeColor);
-
-// introJs().start();
-
-introJs().addStep({
-  element: document.querySelectorAll('#step2')[0],
-  intro: "Ok, wasn't that fun?",
-  position: 'right',
-});
+document.getElementById('max-independent-set-button').addEventListener('click', ntd.mis);
