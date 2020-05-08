@@ -155,8 +155,8 @@ function handleComputeNiceTree() {
   readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
 }
 
-const treeDecompositionPath = 'td.td';
-readLocalTreeFile(treeDecompositionPath, 'treeDecomposition');
+// const treeDecompositionPath = 'td.td';
+// readLocalTreeFile(treeDecompositionPath, 'treeDecomposition');
 
 handleComputeNiceTree();
 

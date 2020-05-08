@@ -550,14 +550,16 @@ function maximumIndependentSet(verticesInSubGraph, adj, set) {
         const test1 = par[0];
         const test2 = par[1];
 
-        if (adj[`${test1}-${set}`]) {
-          candidato = false;
-          break;
-        }
+        for (const s of set) {
+          if (adj[`${test1}-${s}`]) {
+            candidato = false;
+            break;
+          }
 
-        if (adj[`${test2}-${set}`]) {
-          candidato = false;
-          break;
+          if (adj[`${test2}-${s}`]) {
+            candidato = false;
+            break;
+          }
         }
 
         if (adj[`${test1}-${test2}`]) {
@@ -572,7 +574,9 @@ function maximumIndependentSet(verticesInSubGraph, adj, set) {
       }
     }
   }
-  if (set !== undefined && set.length > 0) maximumIndependentSet.push(set);
+  // if (set !== undefined && set.length > 0) maximumIndependentSet.push(set);
+  const v = parseInt(set[0], 10);
+  if (!Number.isNaN(v) && v !== undefined && !maximumIndependentSet.includes(v)) maximumIndependentSet.push(v);
   return maximumIndependentSet;
 }
 
@@ -594,7 +598,7 @@ function isNeighborInSet(set, adjacencyList) {
   return false;
 }
 
-export function runMis(subTree, set) {
+export function runMis(subTree, set, introducedVertex) {
   const subGraph = newSubGraph(subTree);
 
   const verticesInSubGraph = [];
@@ -603,8 +607,8 @@ export function runMis(subTree, set) {
   });
 
   const adjacencyList = buildAdjacencyList(subGraph.links);
-  // if (isNeighboring(set, introducedVertex, adjacencyList)) return Number.NEGATIVE_INFINITY;
-  if (isNeighborInSet(set, adjacencyList)) return Number.NEGATIVE_INFINITY;
+  if (isNeighboring(set, introducedVertex, adjacencyList)) return -9999;
+  if (isNeighborInSet(set, adjacencyList)) return -9999;
   const mis = maximumIndependentSet(verticesInSubGraph, adjacencyList, set);
   return mis.length;
 }

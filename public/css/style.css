@@ -287,6 +287,20 @@ path.link.hidden {
   }
 }
 
+.table {
+  margin: auto;
+  width: 50%;
+  border: 3px solid green;
+  padding: 20px;
+  margin-top: 20px;
+
+}
+
+.niceTreeLink {
+  stroke: black;
+  stroke-width: 2.5px;
+}
+
 /* Node styling here */
 .graphNode {
   fill: steelblue;
@@ -305,11 +319,11 @@ path.link.hidden {
   stroke-width: 3px;
 }
 
-.link {
+ .link {
   stroke: black;
   stroke-width: 3px;
   stroke-linecap: round;
-}
+} 
 
 .highlighted-link {
   stroke: orange;

@@ -62,18 +62,21 @@ export default function loadNiceTreeDecomposition(treeData) {
 
   const rootId = root.data.id;
 
+
   niceTreeLink = treeSvg
     .append('g')
-    .selectAll('line.link')
+    .selectAll('line')
     .data(root.links())
     .enter()
     .append('line')
-    .classed('link', true)
+    .attr('class', 'niceTreeLink')
+    // .attr('id', (d) => `parent-link-${d.source.data.id}`)
     .attr('x1', (d) => d.source.x)
     .attr('y1', (d) => d.source.y)
     .attr('x2', (d) => d.target.x)
     .attr('y2', (d) => d.target.y)
     .attr('transform', `translate(${0}, ${40})`);
+
 
   // Nodes
   niceTreeNode = treeSvg
@@ -156,8 +159,7 @@ function mergeUnique(arr1, arr2) {
 
 export function threeColor(root) {
   const rootId = root.data.id;
-  const cops = root.copy().sum((currentNode) => {
-    console.log(currentNode.state);
+  root.copy().sum((currentNode) => {
     setTimeout(() => {
       if (currentNode.id === root.data.id) {
         if (currentNode.children[0].colorable) {
@@ -256,92 +258,153 @@ const getAllSubsets = (theArray) => theArray.reduce(
   [[]],
 );
 
-export function mis() {
-  root.copy().sum((currentNode) => {
+function readKey() {
+  return new Promise((resolve) => {
+    window.addEventListener('keypress', resolve, { once: true });
+  });
+}
+
+
+export async function mis() {
+  root.copy().eachAfter((currentNode) => {
+    setTimeout(() => {
     // Initiliaze table for this node
-    currentNode.table = {};
+      currentNode.data.table = {};
 
-    // Get all the subsets of the current vertices in this tree node
-    const allSubsets = getAllSubsets(currentNode.vertices);
+      // d3.select(`#node-${currentNode.data.id}`).style('stroke', 'orange').transition().duration(1000);
+      // d3.select(`#node-${currentNode.data.id}`).style('stroke-width', '5px').transition().duration(1000);
 
-    // Get the subtree rooted at this node
-    const subTree = getSubTree(root, currentNode);
+      const desLinks = currentNode.links();
+      const descendants = currentNode.descendants();
+      const wat = [];
+      const des = [];
 
-    // Leaf node
-    if ('children' in currentNode === false) {
-      currentNode.table = {};
-      if (currentNode.vertices.length === 0) {
-        currentNode.table[''] = 0;
-      } else {
-        const vertex = currentNode.vertices[0];
-        currentNode.table[vertex] = 1;
+      descendants.forEach((currentNode) => {
+        des.push(currentNode.data.id);
+      });
+
+      desLinks.forEach((currentLink) => {
+        wat.push(currentLink.source.data, currentLink.target.data);
+      });
+
+      niceTreeLink.style('stroke', (currentLink) => {
+        if (wat.includes(currentLink.source.data)) return 'orange';
+        return 'black';
+      });
+
+      niceTreeLink.style('stroke-width', (currentLink) => {
+        if (wat.includes(currentLink.source.data)) return '5px';
+        return '3px';
+      });
+
+      niceTreeNode.style('stroke', (currentNode) => {
+        if (des.includes(currentNode.data.id)) return 'orange';
+        return 'black';
+      });
+
+      niceTreeNode.style('stroke-width', (currentNode) => {
+        if (des.includes(currentNode.data.id)) return '5px';
+        return '3px';
+      });
+
+
+      // Get all the subsets of the current vertices in this tree node
+      const allSubsets = getAllSubsets(currentNode.data.vertices);
+
+      // Get the subtree rooted at this node
+      const subTree = getSubTree(root, currentNode.data);
+
+      // Leaf node
+      if ('children' in currentNode.data === false) {
+        currentNode.data.table = {};
+        if (currentNode.data.vertices.length === 0) {
+          currentNode.data.table[''] = 0;
+        } else {
+          const vertex = currentNode.data.vertices[0];
+          currentNode.data.table[vertex] = 1;
+        }
+        return;
       }
-      console.log(currentNode.table);
-      return;
-    }
 
-    // Join node
-    if (currentNode.children.length === 2) {
+      // Join node
+      if (currentNode.data.children.length === 2) {
       // Get child 1's table
-      const child1 = currentNode.children[0];
-      const child1Clone = JSON.parse(JSON.stringify(child1));
-      const child1Table = child1Clone.table;
+        const child1 = currentNode.data.children[0];
+        const child1Clone = JSON.parse(JSON.stringify(child1));
+        const child1Table = child1Clone.table;
 
-      // Get child 2's table
-      const child2 = currentNode.children[1];
-      const child2Clone = JSON.parse(JSON.stringify(child2));
-      const child2Table = child2Clone.table;
+        // Get child 2's table
+        const child2 = currentNode.data.children[1];
+        const child2Clone = JSON.parse(JSON.stringify(child2));
+        const child2Table = child2Clone.table;
 
-      for (const set of allSubsets) {
-        const currentNodeValue = graph.runMis(subTree, set);
-        const child1value = child1Table[set];
-        const child2value = child2Table[set];
-        currentNode.table[set] = child1value + child2value - currentNodeValue;
+        for (const set of allSubsets) {
+          const currentNodeValue = graph.runMis(subTree, set);
+          const child1value = child1Table[set];
+          const child2value = child2Table[set];
+          currentNode.data.table[set] = child1value + child2value - currentNodeValue;
+        }
       }
-    }
 
-    // Forget node
-    if (currentNode.vertices.length < currentNode.children[0].vertices.length) {
+      // Forget node
+      if (currentNode.data.vertices.length < currentNode.data.children[0].vertices.length) {
       // Get the forgotten vertex
-      const forgottenVertex = currentNode.children[0].vertices.filter((x) => !currentNode.vertices.includes(x));
+        const forgottenVertex = currentNode.data.children[0].vertices.filter((x) => !currentNode.data.vertices.includes(x));
 
-      for (const set of allSubsets) {
-        const setWithV = JSON.parse(JSON.stringify(set));
-        setWithV.push(forgottenVertex);
-        // debugger;
-        currentNode.table[set] = Math.max(graph.runMis(subTree, set), graph.runMis(subTree, setWithV));
+
+        for (const set of allSubsets) {
+          const setWithV = JSON.parse(JSON.stringify(set));
+          setWithV.push(forgottenVertex);
+          currentNode.data.table[set] = Math.max(graph.runMis(subTree, set), graph.runMis(subTree, setWithV));
+        }
       }
-    }
 
-    // Introduce node
-    if (currentNode.vertices.length > currentNode.children[0].vertices.length) {
+      // Introduce node
+      if (currentNode.data.vertices.length > currentNode.data.children[0].vertices.length) {
       // Get the child's table
-      const child = currentNode.children[0];
-      const childClone = JSON.parse(JSON.stringify(child));
-      const childsTable = childClone.table;
+        const child = currentNode.data.children[0];
+        const childClone = JSON.parse(JSON.stringify(child));
+        const childsTable = childClone.table;
 
-      // Set the current node's table
-      currentNode.table = childsTable;
+        // Set the current node's table
+        currentNode.data.table = childsTable;
 
-      // Find the introduced vertex
-      const difference = currentNode.vertices.filter((x) => !currentNode.children[0].vertices.includes(x));
-      const introducedVertex = difference[0];
+        // Find the introduced vertex
+        const difference = currentNode.data.vertices.filter((x) => !currentNode.data.children[0].vertices.includes(x));
+        const introducedVertex = difference[0];
 
-      // debugger;
 
-      for (const set of allSubsets) {
+        for (const set of allSubsets) {
         // Only run MIS if the introduced vertex is in the current set
-        if (set.includes(introducedVertex)) {
-          const mis = graph.runMis(subTree, set);
+          if (set.includes(introducedVertex)) {
+            const mis = graph.runMis(subTree, set, introducedVertex);
 
-          if (currentNode.table[set]) {
-            currentNode.table[set]++;
-          } else {
-            currentNode.table[set] = mis;
+            if (currentNode.data.table[set]) {
+              currentNode.data.table[set]++;
+            } else {
+              currentNode.data.table[set] = mis;
+            }
           }
         }
       }
-    }
-    console.log(currentNode.table);
+
+      const keys = Object.keys(currentNode.data.table);
+      const values = Object.values(currentNode.data.table);
+      let sb = '';
+
+      keys.forEach((key, index) => {
+        if (key === '') key = 'Ø';
+        const value = values[index];
+        sb += `<tr><td>${key}</td><td>${value}</td></tr>`;
+      });
+
+      const tbody = document.getElementById('tbody');
+      tbody.innerHTML = sb;
+
+      /*       const outputText = document.getElementById('output-text');
+      outputText.innerHTML = JSON.stringify(currentNode.table, null, '\t').replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;').replace('{', '')
+        .replace('}', ''); */
+    }, animX * 3000);
+    animX++;
   });
 }
