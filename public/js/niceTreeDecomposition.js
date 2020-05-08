@@ -6,11 +6,8 @@ let niceTreeNode;
 let niceTreeLink;
 let niceTreeLabel;
 let root;
-
-const a = 97;
-const charArray2 = {};
-for (let i = 0; i < 26; i++) charArray2[i + 1] = String.fromCharCode(a + i);
-
+let animX = 0;
+const animationDuration = 1000;
 
 function resetTreeHighlight() {
   niceTreeNode.attr('opacity', 1);
@@ -57,11 +54,10 @@ export default function loadNiceTreeDecomposition(treeData) {
 
   root = d3.hierarchy(treeData);
   const treeLayout = d3.tree();
-  treeLayout.size([width, height - 200]);
+  treeLayout.size([width / 2, height - 200]);
   treeLayout(root);
 
   const rootId = root.data.id;
-
 
   niceTreeLink = treeSvg
     .append('g')
@@ -76,7 +72,6 @@ export default function loadNiceTreeDecomposition(treeData) {
     .attr('x2', (d) => d.target.x)
     .attr('y2', (d) => d.target.y)
     .attr('transform', `translate(${0}, ${40})`);
-
 
   // Nodes
   niceTreeNode = treeSvg
@@ -150,8 +145,6 @@ export function bfs() {
     }
   }
 }
-
-let animX = 0;
 
 function mergeUnique(arr1, arr2) {
   return arr1.concat(arr2.filter((item) => arr1.indexOf(item) === -1));
@@ -234,7 +227,7 @@ export function threeColor(root) {
           d3.select(`#node-${currentNode.id}`).style('fill', 'red').transition().duration(1000);
         }
       }
-    }, animX * 200);
+    }, animX * 1000);
     animX++;
   });
 }
@@ -258,55 +251,44 @@ const getAllSubsets = (theArray) => theArray.reduce(
   [[]],
 );
 
-function readKey() {
-  return new Promise((resolve) => {
-    window.addEventListener('keypress', resolve, { once: true });
+function animateNode(nodeToAnimate, animationDelay) {
+  const descendants = nodeToAnimate.descendants();
+
+  const descendantsIds = [];
+
+  descendants.forEach((currentNode) => {
+    descendantsIds.push(currentNode.data.id);
+  });
+  niceTreeNode
+    .transition()
+    .style('stroke', (currentNode) => {
+      if (descendantsIds.includes(currentNode.data.id)) return 'orange';
+      return 'black';
+    });
+}
+
+function animateLink(node) {
+  const desLinks = node.links();
+  const wat = [];
+
+  desLinks.forEach((currentLink) => {
+    wat.push(currentLink.source.data, currentLink.target.data);
+  });
+
+  niceTreeLink.style('stroke', (currentLink) => {
+    if (wat.includes(currentLink.source.data)) return 'orange';
+    return 'black';
   });
 }
 
-
-export async function mis() {
+export function mis() {
   root.copy().eachAfter((currentNode) => {
     setTimeout(() => {
     // Initiliaze table for this node
       currentNode.data.table = {};
 
-      // d3.select(`#node-${currentNode.data.id}`).style('stroke', 'orange').transition().duration(1000);
-      // d3.select(`#node-${currentNode.data.id}`).style('stroke-width', '5px').transition().duration(1000);
-
-      const desLinks = currentNode.links();
-      const descendants = currentNode.descendants();
-      const wat = [];
-      const des = [];
-
-      descendants.forEach((currentNode) => {
-        des.push(currentNode.data.id);
-      });
-
-      desLinks.forEach((currentLink) => {
-        wat.push(currentLink.source.data, currentLink.target.data);
-      });
-
-      niceTreeLink.style('stroke', (currentLink) => {
-        if (wat.includes(currentLink.source.data)) return 'orange';
-        return 'black';
-      });
-
-      niceTreeLink.style('stroke-width', (currentLink) => {
-        if (wat.includes(currentLink.source.data)) return '5px';
-        return '3px';
-      });
-
-      niceTreeNode.style('stroke', (currentNode) => {
-        if (des.includes(currentNode.data.id)) return 'orange';
-        return 'black';
-      });
-
-      niceTreeNode.style('stroke-width', (currentNode) => {
-        if (des.includes(currentNode.data.id)) return '5px';
-        return '3px';
-      });
-
+      animateNode(currentNode);
+      animateLink(currentNode);
 
       // Get all the subsets of the current vertices in this tree node
       const allSubsets = getAllSubsets(currentNode.data.vertices);
@@ -401,10 +383,11 @@ export async function mis() {
       const tbody = document.getElementById('tbody');
       tbody.innerHTML = sb;
 
-      /*       const outputText = document.getElementById('output-text');
+
+    /*       const outputText = document.getElementById('output-text');
       outputText.innerHTML = JSON.stringify(currentNode.table, null, '\t').replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;').replace('{', '')
         .replace('}', ''); */
-    }, animX * 3000);
+    }, animX * 800);
     animX++;
   });
 }

@@ -87,7 +87,7 @@ function readNiceTreeDecomposition(treeData) {
     }
 
     const tree = {
-      id: String(root),
+      id: parseInt(root, 10),
       label: allBagLabels[root],
       vertices: verticesInBag[root],
       liss: 0,
