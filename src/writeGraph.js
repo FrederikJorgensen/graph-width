@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 function writeGraphFile(graph) {
-  const newg = graph
+  const trimmedGraph = graph
     .replace('{', '')
     .replace('"', '')
     .replace('"', '')
@@ -9,29 +9,15 @@ function writeGraphFile(graph) {
     .replace('}', '')
     .replace('"', '')
     .replace('"', '');
-  const newestg = JSON.parse(newg);
-  const numberOfEdges = newestg.length;
-  const vertices = new Set();
 
-  newestg.forEach((link) => {
-    vertices.add(link[0]);
-    vertices.add(link[1]);
-  });
-
-  const array = Array.from(vertices);
-
-  let largest = 0;
-
-  for (let i = 0; i <= largest; i++) {
-    if (array[i] > largest) {
-      largest = array[i];
-    }
-  }
-  const numberOfVertices = largest;
-
+  const splitted = trimmedGraph.split('-');
+  const numberOfVertices = splitted[1];
+  const edges = JSON.parse(splitted[0]);
+  const numberOfEdges = edges.length;
   let newstring = '';
+
   newstring += `p tw ${numberOfVertices} ${numberOfEdges}\n`;
-  newestg.forEach((v) => {
+  edges.forEach((v) => {
     newstring += `${v.join(' ')}\n`;
   });
 

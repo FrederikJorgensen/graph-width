@@ -11,7 +11,6 @@
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/intro.min.js"></script>
-  <!-- <script type="text/javascript" src="https://unpkg.com/force-in-a-box/dist/forceInABox.js"></script> -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/introjs.min.css">
   <script type="module" src="js/main.js"></script>
   <script type="module" src="js/niceTreeDecomposition.js"></script>
@@ -24,107 +23,71 @@
 
 <body>
   <div class="topnav" id="myTopnav">
-    <a class="active">Graph Width Visualizer</a>
-    <a id="draw-graph-button">Draw Graph</a>
-    <a id="reload-graph-button">Reload Graph</a>
-    <div class="dropdown">
-      <button class="dropbtn">Algorithms
-        <i class="fa fa-caret-down"></i>
-      </button>
-      <div class="dropdown-content">
-        <a id="tree-decomposition-button">Tree Decomposition</a>
-        <a id="nice-tree-decomposition-button">Nice Tree Decomposition</a>
-        <a id="max-independent-set-button">Max Independent Set</a>
-      </div>
+    <div class="project-title">
+      Graph Width Visualizer
     </div>
-    <a href="javascript:void(0);" class="icon" onclick="myFunction()">&#9776;</a>
+    <div id="draw-graph-button">
+      <i class="material-icons">palette</i>
+    </div>
+    <div id="random-graph-button">
+      <i class="material-icons">refresh</i>
+    </div>
+    <div id="tree-decomposition-button">
+      Tree Decomposition
+    </div>
+    <div id="nice-tree-decomposition-button">
+      Nice Tree Decomposition
+    </div>
+    <div id="max-independent-set-button">
+      Max Independent Set
+    </div>
   </div>
-
   <div class="flex-container">
     <div class="center-container">
       <div id="left-container">
         <div id="graph-svg-container">
           <svg id="graphSvg"></svg>
         </div>
+        <div id="td-container">
+          <div id="app-interface">
+            <div class="error-messages">
+              <h3 id="error-message">Create a graph before computing a tree decomposition!</h3>
+              <h3 id="nice-tree-error-message">You must create a tree decomposition before you can create a nice one!
+              </h3>
+              <h3 id="algorithm-error-message">Before running an algorithm you must create a nice tree decomposition!
+              </h3>
+            </div>
+            <div id="mis-content">
+              <h3>Dynamic Programming Table</h3>
+              <table class="table">
+                <tbody id="tbody">
+                </tbody>
+              </table>
+            </div>
+            <div id="app-content">
+              <h3 id="info-title">App Interface</h3>
+              <div>
+                <ul>
+                  <li>Add a vertex by left-clicking within the graph container</li>
+                  <li id="bob">Add an edge by dragging from one vertex to another</li>
+                  <li>Delete a node by right-clicking it</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
       <div id="right-container">
-        <div id="td-container">
+        <div id="nice-td-container">
           <svg id='nice-td-svg'></svg>
         </div>
       </div>
     </div>
   </div>
+  <div id='control-keys'>
+    <i id="left-control-key" class='material-icons md-48'>keyboard_arrow_left</i>
+    <i id="right-control-key" class='material-icons md-48'>keyboard_arrow_right</i>
+  </div>
 </body>
 
 </html>
-
-<!-- <div class="sidenav">
-  <div class="random-generator">
-    <p>v</p>
-    <div class="number-of-vertices">
-      <i id="verticesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
-      <input type="text" id="numberOfVertices" value="10" />
-      <i id="verticesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
-    </div>
-    <p>e</p>
-    <div class="number-of-links">
-      <i id="edgesLeftArrow" class="material-icons md-36 hoverable">keyboard_arrow_left</i>
-      <input type="text" id="numberOfEdges" value="10" />
-      <i id="edgesRightArrow" class="material-icons md-36 hoverable">keyboard_arrow_right</i>
-    </div>
-  </div>
-</div>
-<div id="reload-graph" class="reload-container hoverable">
-  <i class="material-icons md-36">replay</i>
-</div>
-
-<div id="draw-graph-button" class="draw-graph-container hoverable">
-  <i class="material-icons md-36">palette</i>
-</div>
-
-<div class="fileUpload btn btn-primary">
-  <span>U</span>
-  <input type="file" id="file-upload" class="upload" />
-</div> -->
-
-<!-- <div class=buttons>
-  <div id="compute">TD</p>
-  </div>
-  <div id="computeNiceTree">
-    <p>
-      NTD
-    </p>
-  </div>
-</div>
-<div class="buttons">
-  <div id="max-independent-set">
-    <p>MIS</p>
-  </div>
-</div>
-</div>  -->
-
-<!--       <div id="td-container">
-                 <table class="table">
-          <tr>
-            <th>Set</th>
-            <th>MIS</th>
-          </tr>
-          <tbody id="tbody">
-          </tbody>
-        </table> 
-        <div id="output-text"></div>
-        <div class="text_container hidden">
-          <div>
-            <div class="loader"></div>
-          </div>
-        </div>
-        <svg id="tdSvg"></svg>
-      </div>
-    </div> -->
-
-<!-- <div class="nice-td-info"> -->
-<!--         <p>Root node is <span class="root-node-color">orange</span></p>
-        <p>Join nodes are <span class="join-node-color">blue</span></p>
-        <p>Introduce nodes are <span class="introduce-node-color">green</span></p>
-        <p>Forget nodes are <span class="forget-node-color">red</span></p>
-        <p>Leaf nodes are <span class="leaf-node-color">black</span></p> -->

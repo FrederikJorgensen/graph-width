@@ -1,6 +1,7 @@
 
 import loadNiceTreeDecomposition from './niceTreeDecomposition.js';
 import loadTreeDecomposition from './treeDecomposition.js';
+import * as dg from './drawGraph.js';
 
 const a = 97;
 const charArray = {};
@@ -23,7 +24,7 @@ export function readTreeDecomposition(treeData) {
       splitted.shift();
       splitted.shift();
       for (let j = 0; j < splitted.length; j++) {
-        bagLabel += `${splitted[j]} `;
+        bagLabel += `${splitted[j]},`;
       }
       bagLabel = bagLabel.replace(/,\s*$/, '');
       bagLabel = `${bagLabel}`;
@@ -35,7 +36,7 @@ export function readTreeDecomposition(treeData) {
   }
   treeDecomp.nodes = nodes;
   treeDecomp.links = links;
-  loadTreeDecomposition(treeDecomp, '#tdSvg');
+  loadTreeDecomposition(treeDecomp, '#td-svg');
 }
 
 function readNiceTreeDecomposition(treeData) {

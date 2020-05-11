@@ -1,16 +1,14 @@
 /* eslint-disable no-restricted-syntax */
-import * as graph from './graph.js';
+import * as dg from './drawGraph.js';
 
 let treeSvg;
-let niceTreeNode;
 let niceTreeLink;
-let niceTreeLabel;
 let root;
 let animX = 0;
 
 export default function loadNiceTreeDecomposition(treeData) {
-  const width = document.getElementById('td-container').offsetWidth;
-  const height = document.getElementById('td-container').offsetHeight;
+  const width = document.getElementById('nice-td-container').offsetWidth;
+  const height = document.getElementById('nice-td-container').offsetHeight;
 
   treeSvg = d3.select('#nice-td-svg').attr('viewBox', [0, 0, width, height]);
 
@@ -32,157 +30,48 @@ export default function loadNiceTreeDecomposition(treeData) {
     .attr('y2', (d) => d.target.y)
     .attr('transform', `translate(${0}, ${40})`);
 
-  // Nodes
-  niceTreeNode = treeSvg
+  let nodeSvg = treeSvg
     .append('g')
-    .selectAll('circle.node')
-    .data(root.descendants())
+    .selectAll('circle');
+
+
+  nodeSvg = nodeSvg
+    .data(root.descendants());
+
+  const g = nodeSvg
     .enter()
+    .append('g')
+    .on('mouseover', function (d) {
+      if (d3.select(this).select('text').classed('highlighted-text')) return;
+      d3.select(this).select('text').classed('highlighted-text', true);
+    })
+    .on('mouseleave', function (d) {
+      d3.select(this).select('text').classed('highlighted-text', false);
+    });
+
+  g
     .append('circle')
     .attr('class', 'node')
-  /*     .style('fill', (d) => {
-      if (d.data.id === rootId) return 'orange';
-      if ('children' in d.data === false) return 'black';
-      if (d.data.children.length === 2) return 'blue';
-      if (d.data.vertices.length > d.data.children[0].vertices.length) return 'green';
-      if (d.data.vertices.length < d.data.children[0].vertices.length) return 'red';
-    }) */
     .attr('id', (d) => `node-${d.data.id}`)
     .attr('cx', (d) => d.x)
     .attr('cy', (d) => d.y)
     .attr('r', 20)
     .attr('transform', `translate(${0}, ${40})`);
 
-  niceTreeLabel = treeSvg
-    .append('g')
-    .selectAll('text')
-    .data(root.descendants())
-    .enter()
+  g
     .append('text')
     .attr('dy', '.2em')
     .attr('text-anchor', 'middle')
     .attr('class', 'label')
-    .text((d) => d.data.id)
+    .text((d) => d.data.label)
     .attr('x', (d) => d.x)
     .attr('y', (d) => d.y)
     .attr('transform', `translate(${0}, ${40})`);
 }
 
-function visitElement(element, animX) {
-  d3.select(`#node-${element.id}`)
-    .transition().duration(1000).delay(1000 * animX)
-    .style('fill', 'red');
-}
-
-export function bfs() {
-  const queue = [];
-  queue.push(newRoot);
-  let animX = 0;
-  while (queue.length !== 0) {
-    const element = queue.shift();
-    visitElement(element, animX);
-    animX += 1;
-    if (element.children !== undefined) {
-      for (let i = 0; i < element.children.length; i++) {
-        queue.push(element.children[i]);
-      }
-    }
-  }
-}
-
-function mergeUnique(arr1, arr2) {
-  return arr1.concat(arr2.filter((item) => arr1.indexOf(item) === -1));
-}
-
-export function threeColor(root) {
-  const rootId = root.data.id;
-  root.copy().sum((currentNode) => {
-    setTimeout(() => {
-      if (currentNode.id === root.data.id) {
-        if (currentNode.children[0].colorable) {
-          d3.select(`#node-${currentNode.id}`).style('fill', 'green').transition().duration(1000);
-          return;
-        }
-        d3.select(`#node-${currentNode.id}`).style('fill', 'red').transition().duration(1000);
-        return;
-      }
-
-      /*       if (currentNode.vertices.length === 0) {
-        d3.select(`#node-${currentNode.id}`).style('fill', 'green').transition().duration(1000);
-        currentNode.colorable = true;
-        return;
-      } */
-
-      if ('children' in currentNode === false) {
-        d3.select(`#node-${currentNode.id}`).style('fill', 'green').transition().duration(1000);
-        currentNode.summedVertices = [];
-        currentNode.states = new Set();
-        currentNode.add({});
-
-        const startState = [0, 0, 0];
-        return;
-      }
-
-      if (currentNode.children.length === 2) {
-        const child1 = currentNode.children[0];
-        const child2 = currentNode.children[1];
-        if (child1.colorable && child2.colorable) {
-          currentNode.colorable = true;
-          d3.select(`#node-${currentNode.id}`).style('fill', 'green').transition().duration(1000);
-        } else {
-          d3.select(`#node-${currentNode.id}`).style('fill', 'red').transition().duration(1000);
-        }
-      }
-
-      if (currentNode.vertices.length < currentNode.children[0].vertices.length) {
-        const difference = currentNode.children[0].vertices.filter((x) => !currentNode.vertices.includes(x));
-        const forgottenVertex = difference[0];
-        const child = currentNode.children[0];
-        const news = JSON.parse(JSON.stringify(child));
-        const newArray = news.summedVertices.filter((x) => x !== forgottenVertex);
-        currentNode.summedVertices = newArray;
-
-        if (currentNode.colorable && currentNode.children[0].colorable) {
-          d3.select(`#node-${currentNode.id}`).style('fill', 'green').transition().duration(1000);
-        } else {
-          d3.select(`#node-${currentNode.id}`).style('fill', 'red').transition().duration(1000);
-        }
-      }
-
-      if (currentNode.vertices.length > currentNode.children[0].vertices.length) {
-        const difference = currentNode.vertices.filter((x) => !currentNode.children[0].vertices.includes(x));
-        const introducedVertex = difference[0];
-        const child = currentNode.children[0];
-        const news = JSON.parse(JSON.stringify(child));
-        currentNode.summedVertices = news.summedVertices;
-        if (!currentNode.summedVertices.includes(introducedVertex)) currentNode.summedVertices.push(introducedVertex);
-
-        for (let i = 0; i < currentNode.children[0].states.length; i++) {
-          const newObj = {};
-          for (let color = 1; color <= 3; color++) {
-            newObj[introducedVertex] = color;
-          }
-        }
-        currentNode.summedVertices.sort();
-
-        if (currentNode.colorable && currentNode.children[0].colorable) {
-          d3.select(`#node-${currentNode.id}`).style('fill', 'green').transition().duration(1000);
-        } else {
-          d3.select(`#node-${currentNode.id}`).style('fill', 'red').transition().duration(1000);
-        }
-      }
-    }, animX * 1000);
-    animX++;
-  });
-}
-
-export function runThreeColor() {
-  threeColor(root);
-}
-
-function getSubTree(root, currentNode) {
+function getSubTree(rootOfSubtree, currentNode) {
   let subTree;
-  root.each((d) => {
+  rootOfSubtree.each((d) => {
     if (d.data.id === currentNode.id) subTree = d.descendants();
   });
   return subTree;
@@ -195,7 +84,7 @@ const getAllSubsets = (theArray) => theArray.reduce(
   [[]],
 );
 
-function animateNode(nodeToAnimate, animationDelay) {
+function animateNode(nodeToAnimate) {
   const descendants = nodeToAnimate.descendants();
 
   const descendantsIds = [];
@@ -203,12 +92,16 @@ function animateNode(nodeToAnimate, animationDelay) {
   descendants.forEach((currentNode) => {
     descendantsIds.push(currentNode.data.id);
   });
-  niceTreeNode
-    .transition()
-    .style('stroke', (currentNode) => {
-      if (descendantsIds.includes(currentNode.data.id)) return 'orange';
-      return 'black';
-    });
+
+  d3.select('#nice-td-svg').selectAll('circle').classed('highlighted-node', (currentNode) => {
+    if (descendantsIds.includes(currentNode.data.id)) return true;
+    return false;
+  });
+
+  d3.select('#nice-td-svg').selectAll('g').select('text').classed('highlighted-text', (currentNode) => {
+    if (descendantsIds.includes(currentNode.data.id)) return true;
+    return false;
+  });
 }
 
 function animateLink(node) {
@@ -219,119 +112,156 @@ function animateLink(node) {
     wat.push(currentLink.source.data, currentLink.target.data);
   });
 
-  niceTreeLink.style('stroke', (currentLink) => {
-    if (wat.includes(currentLink.source.data)) return 'orange';
-    return 'black';
+  d3.selectAll('#nice-td-svg line').classed('highlighted-link', (link) => {
+    if (wat.includes(link.source.data)) return 'orange';
   });
 }
 
-export function mis() {
+let current = 0;
+
+export function mis(currentId) {
+  animX = 0;
+  let i = 0;
   root.copy().eachAfter((currentNode) => {
-    setTimeout(() => {
-    // Initiliaze table for this node
+    i++;
+    if (currentId !== i) return;
+
+    currentNode.data.table = {};
+
+    animateNode(currentNode);
+    animateLink(currentNode);
+
+    // Get all the subsets of the current vertices in this tree node
+    const allSubsets = getAllSubsets(currentNode.data.vertices);
+
+    // Get the subtree rooted at this node
+    const subTree = getSubTree(root, currentNode.data);
+
+    // Leaf node
+    if ('children' in currentNode.data === false) {
       currentNode.data.table = {};
-
-      animateNode(currentNode);
-      animateLink(currentNode);
-
-      // Get all the subsets of the current vertices in this tree node
-      const allSubsets = getAllSubsets(currentNode.data.vertices);
-
-      // Get the subtree rooted at this node
-      const subTree = getSubTree(root, currentNode.data);
-
-      // Leaf node
-      if ('children' in currentNode.data === false) {
-        currentNode.data.table = {};
-        if (currentNode.data.vertices.length === 0) {
-          currentNode.data.table[''] = 0;
-        } else {
-          const vertex = currentNode.data.vertices[0];
-          currentNode.data.table[vertex] = 1;
-        }
-        return;
+      if (currentNode.data.vertices.length === 0) {
+        currentNode.data.table[''] = 0;
+      } else {
+        const vertex = currentNode.data.vertices[0];
+        currentNode.data.table[vertex] = 1;
       }
+      return;
+    }
 
-      // Join node
-      if (currentNode.data.children.length === 2) {
+    // Join node
+    if (currentNode.data.children.length === 2) {
       // Get child 1's table
-        const child1 = currentNode.data.children[0];
-        const child1Clone = JSON.parse(JSON.stringify(child1));
-        const child1Table = child1Clone.table;
+      const child1 = currentNode.data.children[0];
+      const child1Clone = JSON.parse(JSON.stringify(child1));
+      const child1Table = child1Clone.table;
 
-        // Get child 2's table
-        const child2 = currentNode.data.children[1];
-        const child2Clone = JSON.parse(JSON.stringify(child2));
-        const child2Table = child2Clone.table;
+      // Get child 2's table
+      const child2 = currentNode.data.children[1];
+      const child2Clone = JSON.parse(JSON.stringify(child2));
+      const child2Table = child2Clone.table;
 
-        for (const set of allSubsets) {
-          const currentNodeValue = graph.runMis(subTree, set);
-          const child1value = child1Table[set];
-          const child2value = child2Table[set];
-          currentNode.data.table[set] = child1value + child2value - currentNodeValue;
-        }
+      for (const set of allSubsets) {
+        const currentNodeValue = dg.runMis(subTree, set);
+        const child1value = child1Table[set];
+        const child2value = child2Table[set];
+        currentNode.data.table[set] = child1value + child2value - currentNodeValue;
       }
+    }
 
-      // Forget node
-      if (currentNode.data.vertices.length < currentNode.data.children[0].vertices.length) {
-      // Get the forgotten vertex
-        const forgottenVertex = currentNode.data.children[0].vertices.filter((x) => !currentNode.data.vertices.includes(x));
+    // Forget node
+    if (currentNode.data.vertices.length < currentNode.data.children[0].vertices.length) {
+      const childsVertices = currentNode.data.children[0].vertices;
+      const forgottenVertex = childsVertices
+        .filter((x) => !currentNode.data.vertices.includes(x));
 
-
-        for (const set of allSubsets) {
-          const setWithV = JSON.parse(JSON.stringify(set));
-          setWithV.push(forgottenVertex);
-          currentNode.data.table[set] = Math.max(graph.runMis(subTree, set), graph.runMis(subTree, setWithV));
-        }
+      for (const set of allSubsets) {
+        const setWithV = JSON.parse(JSON.stringify(set));
+        setWithV.push(forgottenVertex);
+        const setWithoutV = dg.runMis(subTree, set);
+        const algoWithV = dg.runMis(subTree, setWithV);
+        currentNode.data.table[set] = Math.max(setWithoutV, algoWithV);
       }
+    }
 
-      // Introduce node
-      if (currentNode.data.vertices.length > currentNode.data.children[0].vertices.length) {
+    // Introduce node
+    if (currentNode.data.vertices.length > currentNode.data.children[0].vertices.length) {
       // Get the child's table
-        const child = currentNode.data.children[0];
-        const childClone = JSON.parse(JSON.stringify(child));
-        const childsTable = childClone.table;
+      const child = currentNode.data.children[0];
+      const childClone = JSON.parse(JSON.stringify(child));
+      const childsTable = childClone.table;
 
-        // Set the current node's table
-        currentNode.data.table = childsTable;
+      // Set the current node's table
+      currentNode.data.table = childsTable;
 
-        // Find the introduced vertex
-        const difference = currentNode.data.vertices.filter((x) => !currentNode.data.children[0].vertices.includes(x));
-        const introducedVertex = difference[0];
+      // Find the introduced vertex
+      const { vertices } = currentNode.data;
+      const childsVertices = currentNode.data.children[0].vertices;
+      const difference = vertices.filter((x) => !childsVertices.includes(x));
+      const introducedVertex = difference[0];
 
 
-        for (const set of allSubsets) {
+      for (const set of allSubsets) {
         // Only run MIS if the introduced vertex is in the current set
-          if (set.includes(introducedVertex)) {
-            const mis = graph.runMis(subTree, set, introducedVertex);
+        if (set.includes(introducedVertex)) {
+          const maxSet = dg.runMis(subTree, set, introducedVertex);
 
-            if (currentNode.data.table[set]) {
-              currentNode.data.table[set]++;
-            } else {
-              currentNode.data.table[set] = mis;
-            }
+          if (currentNode.data.table[set]) {
+            currentNode.data.table[set]++;
+          } else {
+            currentNode.data.table[set] = maxSet;
           }
         }
       }
+    }
 
-      const keys = Object.keys(currentNode.data.table);
-      const values = Object.values(currentNode.data.table);
-      let sb = '';
+    console.log(currentNode.data.id);
 
-      keys.forEach((key, index) => {
-        if (key === '') key = 'Ø';
-        const value = values[index];
-        sb += `<tr><td>${key}</td><td>${value}</td></tr>`;
-      });
+    const keys = Object.keys(currentNode.data.table);
+    const values = Object.values(currentNode.data.table);
+    let sb = '';
 
-      const tbody = document.getElementById('tbody');
-      tbody.innerHTML = sb;
+    keys.forEach((key, index) => {
+      if (key === '') {
+        key = 'Ø';
+        keys.splice(index, 1);
+        keys.unshift(key);
+        const val = values[index];
+        values.splice(index, 1);
+        values.unshift(val);
+      }
+    });
 
+    keys.forEach((key, index) => {
+      if (key === '') key = '∅';
+      let value = values[index];
+      if (value < -1000) value = '-∞';
+      sb += `<tr><td>{${key}}</td><td>${value}</td></tr>`;
+    });
 
-    /*       const outputText = document.getElementById('output-text');
-      outputText.innerHTML = JSON.stringify(currentNode.table, null, '\t').replace(/\n/g, '<br>').replace(/\t/g, '&nbsp;&nbsp;&nbsp;').replace('{', '')
-        .replace('}', ''); */
-    }, animX * 800);
-    animX++;
+    const tbody = document.getElementById('tbody');
+    tbody.innerHTML = sb;
   });
 }
+
+
+function increment() {
+  const N = root.descendants().length;
+  mis((current = ++current % N));
+}
+
+function decrement() {
+  const N = root.descendants().length;
+  mis((current = --current % N));
+}
+
+d3.select(document.body).on('keyup', () => {
+  if (d3.event.key === 'ArrowRight') {
+    increment();
+  } else if (d3.event.key === 'ArrowLeft') {
+    decrement();
+  }
+});
+
+d3.select('#left-control-key').on('click', decrement);
+d3.select('#right-control-key').on('click', increment);

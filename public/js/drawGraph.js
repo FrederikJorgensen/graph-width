@@ -1,233 +1,372 @@
+/* eslint-disable no-restricted-syntax */
+let nodes = [];
+let links = [];
+
 const width = document.getElementById('graph-svg-container').offsetWidth;
 const height = document.getElementById('graph-svg-container').offsetHeight;
-let node;
-let link;
-let label;
-const drawLinks = [];
+const svg = d3.select('#graphSvg').attr('width', width).attr('height', height);
+let lastNodeId = 0;
+let mousedownNode = null;
 
-function beginDraw() {
-  const nodes = [];
-  let mouse = null;
-  let startId = 1;
-  let mouseDownNode;
-  let mouseUpNode;
-  let hoveringANode = false;
+const dragLine = svg
+  .append('path')
+  .attr('class', 'dragLine hidden')
+  .attr('d', 'M0,0L0,0');
 
-  let svg = d3.select('#graphSvg')
-    .property('value', { nodes, drawLinks })
-    .attr('viewBox', [-width / 2, -height / 2, width, height])
-    .attr('cursor', 'crosshair');
+let linkSvg = svg
+  .append('g')
+  .selectAll('line');
 
-  function mouseleft() {
-    mouse = null;
-  }
+let nodeSvg = svg
+  .append('g')
+  .selectAll('circle');
 
-  function ticked() {
-    node.attr('cx', (d) => d.x)
-      .attr('cy', (d) => d.y);
+function tick() {
+  nodeSvg.attr('transform', (d) => `translate(${d.x},${d.y})`);
 
-    link.attr('x1', (d) => d.source.x)
-      .attr('y1', (d) => d.source.y)
-      .attr('x2', (d) => d.target.x)
-      .attr('y2', (d) => d.target.y);
+  linkSvg.attr('x1', (d) => d.source.x)
+    .attr('y1', (d) => d.source.y)
+    .attr('x2', (d) => d.target.x)
+    .attr('y2', (d) => d.target.y);
+}
 
-    label.attr('x', (d) => d.x).attr('y', (d) => d.y);
-  }
+const simulation = d3
+  .forceSimulation(nodes)
+  .force(
+    'charge',
+    d3
+      .forceManyBody()
+      .strength(-500),
+    // .distanceMax((width + height) / 2),
+  )
+  .force('collide', d3.forceCollide(30))
+  .force('link', d3.forceLink(links).distance(80).strength(0.6).id((d) => d.id))
+  .force('x', d3.forceX(width / 2))
+  .force('y', d3.forceY(height / 2))
+  .on('tick', tick);
 
-  const simulation = d3.forceSimulation(nodes)
-    .force('charge', d3.forceManyBody().strength(-500))
-    .force(
-      'link',
-      d3
-        .forceLink(drawLinks)
-        .id((d) => d.id)
-        .distance(120)
-        .strength(0.7),
-    )
-    .force('x', d3.forceX())
-    .force('y', d3.forceY())
-    .on('tick', ticked);
+function beginDrawLine(d) {
+  d3.event.preventDefault();
+  mousedownNode = d;
+  dragLine
+    .classed('hidden', false)
+    .attr(
+      'd',
+      `M${
+        mousedownNode.x
+      },${
+        mousedownNode.y
+      }L${
+        mousedownNode.x
+      },${
+        mousedownNode.y}`,
+    );
+}
 
-  const dragLine = svg.append('line')
-    .attr('class', 'drag_line drag_line_hidden')
-    .attr('x1', 0)
-    .attr('y1', 0)
-    .attr('x2', 0)
-    .attr('y2', 0);
-
-  function mousemoved() {
-    if (mouseDownNode) {
-      dragLine
-        .attr('x1', mouseDownNode.x)
-        .attr('y1', mouseDownNode.y)
-        .attr('x2', d3.mouse(this)[0])
-        .attr('y2', d3.mouse(this)[1]);
-    }
-
-    const [x, y] = d3.mouse(this);
-    mouse = { x, y };
-    simulation.alpha(0.3).restart();
-  }
-
-
-  const drag = (sim) => {
-    function dragstarted(d) {
-      if (!d3.event.active) sim.alphaTarget(0.3).restart();
-      d.fx = d.x;
-      d.fy = d.y;
-    }
-
-    function dragged(d) {
-      d.fx = d3.event.x;
-      d.fy = d3.event.y;
-    }
-
-    function dragended(d) {
-      if (!d3.event.active) sim.alphaTarget(0);
-      d.fx = null;
-      d.fy = null;
-    }
-
-    return d3
-      .drag()
-      .on('start', dragstarted)
-      .on('drag', dragged)
-      .on('end', dragended);
-  };
-
-  const dragger = drag(simulation)
-    .on('start.mouse', mouseleft)
-    .on('end.mouse', mousemoved);
-
-  link = svg.append('g')
-    .attr('stroke', '#999')
-    .selectAll('line');
-
-  node = svg.append('g').selectAll('circle');
-  label = svg.append('g').selectAll('text');
-
-  function handleMouseOver() {
-    hoveringANode = true;
-  }
-
-  function handleMouseOut() {
-    hoveringANode = false;
-  }
-
-  function mousedown(d) {
-    mouseDownNode = d;
-
-    dragLine
-      .attr('class', 'link')
-      .attr('x1', mouseDownNode.x)
-      .attr('y1', mouseDownNode.y)
-      .attr('x2', mouseDownNode.x)
-      .attr('y2', mouseDownNode.y);
-  }
-
-  function resetMouseVars() {
-    mouseDownNode = null;
-    mouseUpNode = null;
-  }
-
-  function mouseup(d) {
-    mouseUpNode = d;
-    dragLine.attr('class', 'drag_line_hidden');
-
-    drawLinks.push({ source: mouseDownNode, target: mouseUpNode });
-
-    link = link
-      .data(drawLinks)
-      .join('line');
-
-    simulation.nodes(nodes);
-    simulation.force('link').links(drawLinks);
-    simulation.alpha(1).restart();
-
-    resetMouseVars();
-  }
-
-  function addNode() {
-    const e = d3.event;
-    if (e.button == 0) {
-      const coords = d3.mouse(e.currentTarget);
-      const newNode = {
-        x: coords[0], y: coords[1], id: ++lastNodeId, degree: 0,
-      };
-      nodes.push(newNode);
-      restart();
+function stopDrawLine(d) {
+  if (!mousedownNode || mousedownNode === d) return;
+  for (let i = 0; i < links.length; i++) {
+    const l = links[i];
+    if (
+      (l.source === mousedownNode && l.target === d)
+      || (l.source === d && l.target === mousedownNode)
+    ) {
+      return;
     }
   }
+  const newLink = { source: mousedownNode, target: d };
+  links.push(newLink);
+}
 
-  function spawn(source) {
-    nodes.push(source);
+function removeNode(d) {
+  if (d3.event.ctrlKey) return;
+  const linksToRemove = links.filter((l) => l.source === d || l.target === d);
+  linksToRemove.map((l) => links.splice(links.indexOf(l), 1));
+  nodes.splice(nodes.indexOf(d), 1);
+  d3.event.preventDefault();
+  restart();
+}
 
-    label = label
-      .data(nodes)
-      .join(
-        (enter) => enter.append('text').attr('class', 'label').attr('text-anchor', 'middle').text((d) => d.id)
-          .attr('dy', '.2em'),
-        (update) => update,
-        (exit) => exit.remove(),
-      );
+function restart() {
+  linkSvg = linkSvg.data(links);
+  linkSvg.exit().remove();
 
-    node = node
-      .data(nodes)
-      .join(
-        (enter) => enter.append('circle').attr('r', 20).attr('class', 'node').attr('dy', '.2em')
-          .call(dragger),
-        (update) => update,
-        (exit) => exit.remove(),
-      )
-      .on('mouseover', handleMouseOver)
-      .on('mouseout', handleMouseOut)
-      .on('mousedown', mousedown)
-      .on('mouseup', mouseup);
-
-    simulation.nodes(nodes);
-    simulation.force('link').links(drawLinks);
-    simulation.alpha(1).restart();
-
-    svg.property('value', {
-      nodes: nodes.map((d) => ({ id: d.index })),
-      links: drawLinks.map((d) => ({ source: d.source.index, target: d.target.index })),
+  const ed = linkSvg
+    .enter()
+    .append('line')
+    .attr('class', 'link')
+    .on('mousedown', () => {
+      d3.event.stopPropagation();
     });
-  }
 
-  function clicked() {
-    d3.event.preventDefault();
-    if (hoveringANode) return;
-    mousemoved.call(this);
-    spawn({ x: mouse.x, y: mouse.y, id: ++startId });
-  }
+  linkSvg = ed.merge(linkSvg);
 
-  svg = svg
-    .on('mouseleave', mouseleft)
-    .on('mousemove', mousemoved)
-    .on('click', clicked);
+  nodeSvg = nodeSvg.data(nodes, (d) => d.id);
+  nodeSvg.exit().remove();
 
-  spawn({ x: 0, y: 0, id: startId });
+  const g = nodeSvg
+    .enter()
+    .append('g')
+    .on('mouseover', function (d) {
+      d3.select(this).select('text').classed('highlighted-text', true);
+    })
+    .on('mouseleave', function (d) {
+      d3.select(this).select('text').classed('highlighted-text', false);
+    })
+    .on('mousedown', () => {
+      d3.event.stopPropagation();
+    });
+
+  g.append('circle')
+    .attr('id', (d) => `node-${d.id}`)
+    .on('mousedown', beginDrawLine)
+
+    .on('mouseup', stopDrawLine)
+    .on('contextmenu', removeNode)
+    .attr('class', 'node')
+    .attr('r', 20)
+    .append('title')
+    .text((d) => `v${d.id}`);
+
+  g.append('text')
+    .text((d) => d.id)
+    .attr('dy', '.2em')
+    .attr('class', 'label')
+    .attr('text-anchor', 'middle');
+
+  nodeSvg = g.merge(nodeSvg);
+
+  simulation.nodes(nodes);
+  simulation.force('link').links(links);
+  simulation.alpha(0.8).restart();
+
+  svg.property('value', {
+    nodes: nodes.map((d) => ({ id: d.index })),
+    links: links.map((d) => ({ source: d.source.index, target: d.target.index })),
+  });
 }
 
-export function resetDrawingGraph() {
-  d3.select('#graphSvg').selectAll('g').remove();
-  if (node && label && link) {
-    node.remove();
-    label.remove();
-    link.remove();
+function addNode() {
+  d3.selectAll('circle').classed('highlighted-node', false);
+  d3.selectAll('line').classed('highlighted-link', false);
+  d3.selectAll('g text').classed('highlighted-text', false);
+  d3.selectAll('#nice-td-svg g').remove();
+  const e = d3.event;
+  if (e.button === 0) {
+    const coords = d3.mouse(e.currentTarget);
+    const newNode = {
+      x: coords[0], y: coords[1], id: ++lastNodeId, degree: 0,
+    };
+    nodes.push(newNode);
+    restart();
   }
-  beginDraw();
 }
 
-export function isDrawing() {
-  if (node && label && link) return true;
+function updateDragLine() {
+  if (!mousedownNode) return;
+  const coords = d3.mouse(d3.event.currentTarget);
+  dragLine.attr(
+    'd',
+    `M${
+      mousedownNode.x
+    },${
+      mousedownNode.y
+    }L${
+      coords[0]
+    },${
+      coords[1]}`,
+  );
+}
+
+function hideDragLine() {
+  dragLine.classed('hidden', true);
+  mousedownNode = null;
+  restart();
+}
+
+function leftCanvas() {
+  dragLine.classed('hidden', true);
+  mousedownNode = null;
+}
+
+
+// restart();
+
+const getAllSubsets = (theArray) => theArray.reduce(
+  (subsets, value) => subsets.concat(
+    subsets.map((set) => [value, ...set]),
+  ),
+  [[]],
+);
+
+function subset(array, n) {
+  const arr = getAllSubsets(array);
+  // debugger;
+  const newArray = [];
+  for (const a of arr) {
+    if (a.length === n && a.length <= n) newArray.push(a);
+  }
+  return newArray;
+}
+
+export function newSubGraph(subTree) {
+  const subGraphNodeIds = [];
+
+  subTree.forEach((node) => {
+    for (const v of node.data.vertices) {
+      if (!subGraphNodeIds.includes(v)) subGraphNodeIds.push(v);
+    }
+  });
+
+  const subGraphNodes = nodes.filter((currentNode) => subGraphNodeIds.includes(currentNode.id));
+  const subGraphLinks = links.filter((currentLink) => subGraphNodeIds
+    .includes(currentLink.source.id)
+    && subGraphNodeIds.includes(currentLink.target.id));
+
+
+  d3.select('#graphSvg').selectAll('circle').classed('highlighted-node', (node) => {
+    if (subGraphNodeIds.includes(node.id)) return true;
+    return false;
+  });
+
+  d3.select('#graphSvg').selectAll('text').classed('highlighted-text', (node) => {
+    if (subGraphNodeIds.includes(node.id)) return true;
+    return false;
+  });
+
+  d3.select('#graphSvg').selectAll('line').classed('highlighted-link', (link) => {
+    if (subGraphNodeIds.includes(link.source.id) && subGraphNodeIds.includes(link.target.id)) {
+      return true;
+    }
+  });
+
+  return { nodes: subGraphNodes, links: subGraphLinks };
+}
+
+export function buildAdjacencyList(links) {
+  const adjacencyList = [];
+  links.forEach((d) => {
+    adjacencyList[`${d.source.id}-${d.target.id}`] = true;
+    adjacencyList[`${d.target.id}-${d.source.id}`] = true;
+  });
+  return adjacencyList;
+}
+
+function maximumIndependentSet(verticesInSubGraph, adj, set) {
+  let maximumSet = 0;
+  let maximumIndependentSet = [];
+  let candidato = true;
+
+  for (let i = 2; i < verticesInSubGraph.length + 1; i++) {
+    const conjunto = subset(verticesInSubGraph, i);
+
+    for (const c of conjunto) {
+      candidato = true;
+
+      const pares = subset(c, 2);
+
+      for (const par of pares) {
+        const test1 = par[0];
+        const test2 = par[1];
+
+        for (const s of set) {
+          if (adj[`${test1}-${s}`]) {
+            candidato = false;
+            break;
+          }
+
+          if (adj[`${test2}-${s}`]) {
+            candidato = false;
+            break;
+          }
+        }
+
+        if (adj[`${test1}-${test2}`]) {
+          candidato = false;
+          break;
+        }
+      }
+
+      if (candidato && c.length > maximumSet) {
+        maximumSet = c.length;
+        maximumIndependentSet = c;
+      }
+    }
+  }
+  // if (set !== undefined && set.length > 0) maximumIndependentSet.push(set);
+  const v = parseInt(set[0], 10);
+  if (!Number.isNaN(v) && v !== undefined && !maximumIndependentSet.includes(v)) maximumIndependentSet.push(v);
+  d3.selectAll('#graphSvg circle').style('stroke', (node) => {
+    if (maximumIndependentSet.includes(node.id)) return 'blue';
+  });
+  return maximumIndependentSet;
+}
+
+function isNeighboring(set, introducedVertex, adjacencyList) {
+  for (const s of set) {
+    if (adjacencyList[`${s}-${introducedVertex}`]) return true;
+  }
   return false;
 }
 
-export function convertLinks() {
+function isNeighborInSet(set, adjacencyList) {
+  for (let i = 0; i < set.length; i++) {
+    const vertex1 = set[i];
+    for (let j = 0; j < set.length; j++) {
+      const vertex2 = set[j];
+      if (vertex1 !== vertex2 && adjacencyList[`${vertex1}-${vertex2}`]) return true;
+    }
+  }
+  return false;
+}
+
+export function runMis(subTree, set, introducedVertex) {
+  if (set.length === 0) return 0;
+  const subGraph = newSubGraph(subTree);
+
+  const verticesInSubGraph = [];
+  subGraph.nodes.forEach((node) => {
+    verticesInSubGraph.push(node.id);
+  });
+
+  const adjacencyList = buildAdjacencyList(subGraph.links);
+  if (isNeighboring(set, introducedVertex, adjacencyList)) return -9999;
+  if (isNeighborInSet(set, adjacencyList)) return -9999;
+  const mis = maximumIndependentSet(verticesInSubGraph, adjacencyList, set);
+  return mis.length;
+}
+
+svg
+  .on('mousedown', addNode)
+  .on('contextmenu', () => {
+    d3.event.preventDefault();
+  })
+  .on('mousemove', updateDragLine)
+  .on('mouseup', hideDragLine)
+  .on('mouseleave', leftCanvas);
+
+export function getAllEdges() {
   const convertedArray = [];
-  drawLinks.forEach((currentLink) => {
-    convertedArray.push([currentLink.source.id, currentLink.target.id]);
+  links.forEach((link) => {
+    convertedArray.push([link.source.id, link.target.id]);
   });
   return convertedArray;
+}
+
+export function getLargestNode() {
+  return nodes.length;
+}
+
+export function startDraw() {
+  nodes.splice(0);
+  links.splice(0);
+  lastNodeId = 0;
+  restart();
+}
+
+export function loadRandomGraph(graph) {
+  nodes = graph.nodes;
+  links = graph.links;
+  lastNodeId = nodes.length;
+  restart();
 }

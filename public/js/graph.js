@@ -9,34 +9,8 @@ let graphLinkSvg;
 let graphNodeSvg;
 let graphLabelSvg;
 let simulation;
-const padding = 5;
-const clusterPadding = 20;
-const maxRadius = 10;
-const numClusters = 20;
 const color = d3.scaleOrdinal(d3.schemeCategory10);
-let isSeperating = false;
-let clusters;
-let hulls;
-let hullG;
 let svg;
-const line = d3.line().curve(d3.curveBasisClosed);
-
-
-function hullPoints(data) {
-  let pointArr = [];
-  const padding = 2.5;
-  data.each((d) => {
-    const pad = d.radius + padding;
-    pointArr = pointArr.concat([
-      [d.x - pad, d.y - pad],
-      [d.x - pad, d.y + pad],
-      [d.x + pad, d.y - pad],
-      [d.x + pad, d.y + pad],
-    ]);
-  });
-  return pointArr;
-}
-
 
 export function loadGraph(graph) {
   d3.select('#graphSvg').selectAll('g').remove();
@@ -47,10 +21,6 @@ export function loadGraph(graph) {
   graphLinks = links;
 
   svg = d3.select('#graphSvg').attr('width', graphWidth).attr('height', graphHeight);
-
-  graphNodes.forEach((node) => {
-    node.radius = 15;
-  });
 
   graphLinkSvg = svg
     .append('g')
@@ -82,40 +52,8 @@ export function loadGraph(graph) {
     .attr('text-anchor', 'middle')
     .text((d) => d.id);
 
-  // https://bl.ocks.org/mbostock/7881887
-  function cluster(alpha) {
-    return function (d) {
-      const cluster = clusters[d.cluster];
-      if (cluster === d || d.cluster == 0) return;
-      let x = d.x - cluster.x;
-      let y = d.y - cluster.y;
-      let l = Math.sqrt(x * x + y * y);
-      const r = d.radius + cluster.radius + 3;
-      if (l != r) {
-        l = (l - r) / l * alpha;
-        d.x -= x *= l;
-        d.y -= y *= l;
-        cluster.x += x;
-        cluster.y += y;
-      }
-    };
-  }
-
   function ticked() {
-    if (isSeperating) {
-      graphNodeSvg
-        .each(cluster(0.2))
-        .each(collide(0.1))
-        .attr('cx', (d) => d.x = Math.max(d.radius, Math.min(graphWidth - d.radius, d.x)))
-        .attr('cy', (d) => d.y = Math.max(d.radius, Math.min(graphHeight - d.radius, d.y)));
-
-      hulls
-        .attr('d', (d) => line(d3.polygonHull(hullPoints(d.nodes))));
-    } else {
-      graphNodeSvg
-        .attr('cx', (d) => d.x = Math.max(d.radius, Math.min(graphWidth - d.radius, d.x)))
-        .attr('cy', (d) => d.y = Math.max(d.radius, Math.min(graphHeight - d.radius, d.y)));
-    }
+    graphNodeSvg.attr('transform', (d) => `translate(${d.x},${d.y})`);
 
     graphLabelSvg.attr('x', (d) => d.x).attr('y', (d) => d.y);
 
@@ -126,50 +64,12 @@ export function loadGraph(graph) {
       .attr('y2', (d) => d.target.y);
   }
 
-  function collide(alpha) {
-    // https://bl.ocks.org/mbostock/7882658
-    const quadtree = d3.quadtree()
-      .x((d) => d.x)
-      .y((d) => d.y)
-      .extent([[0, 0], [graphWidth, graphHeight]])
-      .addAll(graphNodes);
-    return function (d) {
-      const r = d.radius + (maxRadius * 8) + Math.max(padding, clusterPadding);
-      const nx1 = d.x - r;
-      const nx2 = d.x + r;
-      const ny1 = d.y - r;
-      const ny2 = d.y + r;
-      quadtree.visit((quad, x1, y1, x2, y2) => {
-        const { data } = quad;
-        if (data && data !== d) {
-          let x = d.x - data.x;
-          let y = d.y - data.y;
-          let l = Math.sqrt(x * x + y * y);
-          const r = d.radius + data.radius + (d.cluster == data.cluster ? padding : clusterPadding);
-          if (l < r) {
-            l = (l - r) / l * alpha;
-            d.x -= x *= l;
-            d.y -= y *= l;
-            data.x += x;
-            data.y += y;
-          }
-        }
-        return x1 > nx2 || x2 < nx1 || y1 > ny2 || y2 < ny1;
-      });
-    };
-  }
-
-
   simulation = d3.forceSimulation(graphNodes)
     .force('link', d3.forceLink(graphLinks).id((d) => d.id))
     .force('charge', d3.forceManyBody().strength(-400))
-    .on('tick', ticked);
-  // .restart();
-  // .force('center', null)
-  // .force('collide', null)
-  // .alpha(0.3)
-  // .force('center', d3.forceCenter().x(graphWidth / 2).y(graphHeight / 2))
-  // .force('collide', d3.forceCollide((d) => d.radius + 5))
+    .on('tick', ticked)
+    .force('center', d3.forceCenter().x(graphWidth / 2).y(graphHeight / 2));
+
 
   function dragstarted(d) {
     if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -193,77 +93,6 @@ export function loadGraph(graph) {
   );
 }
 
-function checkNodes(selectedNodeVertices, link) {
-  if (!selectedNodeVertices.includes(link.source.id)
-  && !selectedNodeVertices.includes(link.target.id)) return true;
-  if (!selectedNodeVertices.includes(link.source.id)
-  && selectedNodeVertices.includes(link.target.id)) return false;
-  if (selectedNodeVertices.includes(link.source.id)
-  && selectedNodeVertices.includes(link.target.id)) return true;
-  if (selectedNodeVertices.includes(link.source.id)
-  && !selectedNodeVertices.includes(link.target.id)) return false;
-  return true;
-}
-
-export function highlightSeperator(selectedNode) {
-  loadGraph(currentGraph);
-  const selectedNodeVertices = selectedNode.data.vertices;
-  const filteredNodes = graphNodes.filter((node) => !selectedNodeVertices.includes(node.id));
-  const filteredNodesById = [];
-  filteredNodes.forEach((node) => {
-    filteredNodesById.push(node.id);
-  });
-  const subGraphNodes = graphNodes.filter((node) => selectedNodeVertices.includes(node.id));
-  for (let i = 0; i < subGraphNodes.length; i++) {
-    subGraphNodes[i].index = i;
-  }
-  const first = graphLinks.filter((link) => checkNodes(selectedNodeVertices, link));
-  graphLinkSvg = graphLinkSvg
-    .data(first)
-    .join('line');
-
-  graphNodes.forEach((node) => {
-    if (selectedNodeVertices.includes(node.id)) {
-      node.cluster = 1;
-      node.radius = 15;
-      node.x = Math.random() * graphWidth;
-      node.y = Math.random() * graphHeight;
-    } else {
-      node.cluster = 2;
-      node.radius = 15;
-      node.x = Math.random() * graphWidth;
-      node.y = Math.random() * graphHeight;
-    }
-  });
-
-  const clusterMap = {};
-  graphNodes.forEach((n) => {
-    if (!clusterMap[n.cluster] || (n.radius > clusterMap[n.cluster].radius)) clusterMap[n.cluster] = n;
-  });
-  clusters = clusterMap;
-
-  hullG = svg.append('g')
-    .attr('class', 'hulls');
-
-  hulls = hullG
-    .selectAll('path')
-    .data(Object.keys(clusters).map((c) => ({
-      cluster: c,
-      nodes: graphNodeSvg.filter((d) => d.cluster == c),
-    })).filter((d) => d.cluster != 0), (d) => d.cluster)
-    .enter().append('path')
-    .attr('d', (d) => line(d3.polygonHull(hullPoints(d.nodes))))
-    .attr('fill', (d) => color(d.cluster))
-    .attr('opacity', 0.4);
-
-
-  isSeperating = true;
-  simulation.alpha(0.3).force('center', d3.forceCenter().x(graphWidth / 2).y(graphHeight / 2)).force('collide', d3.forceCollide((d) => d.radius + 5)).force('charge', d3.forceManyBody().strength(0));
-  simulation.nodes(graphNodes);
-  simulation.force('link').links(graphLinks);
-  simulation.alpha(0.1).restart();
-}
-
 export function resetHighlight() {
   if (graphLinkSvg && graphNodeSvg && graphLabelSvg) {
     graphLinkSvg.attr('opacity', 1);
@@ -283,7 +112,7 @@ export function getAllEdges() {
 
 const numberOfColors = 3;
 const result = [];
-// let adjlist = [];
+const adjlist = [];
 
 function isSafe(k, subGraphNodes, color) {
   for (let i = 0; i < subGraphNodes.length; i++) {
@@ -395,221 +224,3 @@ export function createSubGraph(currentTreeNode) {
   return { isColorable: true, coloredNodes };
 } */
 
-const testGraph = {
-  nodes: [
-    {
-      id: 1,
-      cluster: 1,
-    },
-    {
-      id: 2,
-      cluster: 1,
-    },
-    {
-      id: 3,
-      cluster: 1,
-    },
-    {
-      id: 4,
-      cluster: 1,
-    },
-    {
-      id: 5,
-      cluster: 1,
-    },
-    {
-      id: 6,
-      cluster: 1,
-    },
-    {
-      id: 7,
-      cluster: 1,
-    },
-    {
-      id: 8,
-      cluster: 1,
-    },
-  ],
-  links: [
-    {
-      source: 1,
-      target: 8,
-    },
-    {
-      source: 8,
-      target: 5,
-    },
-    {
-      source: 5,
-      target: 6,
-    },
-    {
-      source: 6,
-      target: 7,
-    },
-    {
-      source: 7,
-      target: 4,
-    },
-    {
-      source: 4,
-      target: 2,
-    },
-    {
-      source: 2,
-      target: 7,
-    },
-    {
-      source: 2,
-      target: 3,
-    },
-    {
-      source: 3,
-      target: 6,
-    },
-  ],
-};
-
-loadGraph(testGraph);
-
-const getAllSubsets = (theArray) => theArray.reduce(
-  (subsets, value) => subsets.concat(
-    subsets.map((set) => [value, ...set]),
-  ),
-  [[]],
-);
-
-function subset(array, n) {
-  const arr = getAllSubsets(array);
-  // debugger;
-  const newArray = [];
-  for (const a of arr) {
-    if (a.length === n && a.length <= n) newArray.push(a);
-  }
-  return newArray;
-}
-
-export function newSubGraph(subTree) {
-  const subGraphNodeIds = [];
-
-  subTree.forEach((node) => {
-    for (const v of node.data.vertices) {
-      if (!subGraphNodeIds.includes(v)) subGraphNodeIds.push(v);
-    }
-  });
-
-  const subGraphNodes = graphNodes.filter((currentNode) => subGraphNodeIds.includes(currentNode.id));
-  const subGraphLinks = graphLinks.filter((currentLink) => subGraphNodeIds.includes(currentLink.source.id) && subGraphNodeIds.includes(currentLink.target.id));
-
-  graphLinkSvg.classed('highlighted-link', (link) => {
-    if (subGraphNodeIds.includes(link.source.id) && subGraphNodeIds.includes(link.target.id)) {
-      return true;
-    }
-    return false;
-  });
-
-  graphNodeSvg.attr('stroke', (node) => {
-    if (subGraphNodeIds.includes(node.id)) {
-      return 'orange';
-    }
-  });
-
-  graphNodeSvg.attr('stroke-width', (node) => {
-    if (subGraphNodeIds.includes(node.id)) {
-      return '5px';
-    }
-  });
-
-  return { nodes: subGraphNodes, links: subGraphLinks };
-}
-
-export function buildAdjacencyList(links) {
-  const adjacencyList = [];
-  links.forEach((d) => {
-    adjacencyList[`${d.source.id}-${d.target.id}`] = true;
-    adjacencyList[`${d.target.id}-${d.source.id}`] = true;
-    // adjacencyList[`${d.source.id}-${d.source.id}`] = true;
-    // adjacencyList[`${d.target.id}-${d.target.id}`] = true;
-  });
-  return adjacencyList;
-}
-
-function maximumIndependentSet(verticesInSubGraph, adj, set) {
-  let maximumSet = 0;
-  let maximumIndependentSet = [];
-  let candidato = true;
-
-  for (let i = 2; i < verticesInSubGraph.length + 1; i++) {
-    const conjunto = subset(verticesInSubGraph, i);
-
-    for (const c of conjunto) {
-      candidato = true;
-
-      const pares = subset(c, 2);
-
-      for (const par of pares) {
-        const test1 = par[0];
-        const test2 = par[1];
-
-        for (const s of set) {
-          if (adj[`${test1}-${s}`]) {
-            candidato = false;
-            break;
-          }
-
-          if (adj[`${test2}-${s}`]) {
-            candidato = false;
-            break;
-          }
-        }
-
-        if (adj[`${test1}-${test2}`]) {
-          candidato = false;
-          break;
-        }
-      }
-
-      if (candidato && c.length > maximumSet) {
-        maximumSet = c.length;
-        maximumIndependentSet = c;
-      }
-    }
-  }
-  // if (set !== undefined && set.length > 0) maximumIndependentSet.push(set);
-  const v = parseInt(set[0], 10);
-  if (!Number.isNaN(v) && v !== undefined && !maximumIndependentSet.includes(v)) maximumIndependentSet.push(v);
-  return maximumIndependentSet;
-}
-
-function isNeighboring(set, introducedVertex, adjacencyList) {
-  for (const s of set) {
-    if (adjacencyList[`${s}-${introducedVertex}`]) return true;
-  }
-  return false;
-}
-
-function isNeighborInSet(set, adjacencyList) {
-  for (let i = 0; i < set.length; i++) {
-    const vertex1 = set[i];
-    for (let j = 0; j < set.length; j++) {
-      const vertex2 = set[j];
-      if (vertex1 !== vertex2 && adjacencyList[`${vertex1}-${vertex2}`]) return true;
-    }
-  }
-  return false;
-}
-
-export function runMis(subTree, set, introducedVertex) {
-  const subGraph = newSubGraph(subTree);
-
-  const verticesInSubGraph = [];
-  subGraph.nodes.forEach((node) => {
-    verticesInSubGraph.push(node.id);
-  });
-
-  const adjacencyList = buildAdjacencyList(subGraph.links);
-  if (isNeighboring(set, introducedVertex, adjacencyList)) return -9999;
-  if (isNeighborInSet(set, adjacencyList)) return -9999;
-  const mis = maximumIndependentSet(verticesInSubGraph, adjacencyList, set);
-  return mis.length;
-}
