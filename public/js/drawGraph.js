@@ -1,6 +1,14 @@
 /* eslint-disable no-restricted-syntax */
-let nodes = [];
-let links = [];
+let nodes = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }, { id: 7 }];
+let links = [
+  { source: 1, target: 2 },
+  { source: 1, target: 3 },
+  { source: 3, target: 7 },
+  { source: 6, target: 5 },
+  { source: 5, target: 4 },
+  { source: 5, target: 7 },
+  { source: 5, target: 1 },
+];
 
 const width = document.getElementById('graph-svg-container').offsetWidth;
 const height = document.getElementById('graph-svg-container').offsetHeight;
@@ -36,11 +44,10 @@ const simulation = d3
     'charge',
     d3
       .forceManyBody()
-      .strength(-500),
-    // .distanceMax((width + height) / 2),
+      .strength(-300)
+      .distanceMax(width / 2),
   )
-  .force('collide', d3.forceCollide(30))
-  .force('link', d3.forceLink(links).distance(80).strength(0.6).id((d) => d.id))
+  .force('link', d3.forceLink(links).distance(60).id((d) => d.id))
   .force('x', d3.forceX(width / 2))
   .force('y', d3.forceY(height / 2))
   .on('tick', tick);
@@ -109,9 +116,11 @@ function restart() {
     .append('g')
     .on('mouseover', function (d) {
       d3.select(this).select('text').classed('highlighted-text', true);
+      d3.select(this).select('circle').classed('highlighted-node', true);
     })
     .on('mouseleave', function (d) {
       d3.select(this).select('text').classed('highlighted-text', false);
+      d3.select(this).select('circle').classed('highlighted-node', false);
     })
     .on('mousedown', () => {
       d3.event.stopPropagation();
@@ -124,7 +133,7 @@ function restart() {
     .on('mouseup', stopDrawLine)
     .on('contextmenu', removeNode)
     .attr('class', 'node')
-    .attr('r', 20)
+    .attr('r', 12)
     .append('title')
     .text((d) => `v${d.id}`);
 
@@ -150,6 +159,7 @@ function addNode() {
   d3.selectAll('circle').classed('highlighted-node', false);
   d3.selectAll('line').classed('highlighted-link', false);
   d3.selectAll('g text').classed('highlighted-text', false);
+  d3.selectAll('circle').style('stroke', 'black');
   d3.selectAll('#nice-td-svg g').remove();
   const e = d3.event;
   if (e.button === 0) {
@@ -189,9 +199,6 @@ function leftCanvas() {
   mousedownNode = null;
 }
 
-
-// restart();
-
 const getAllSubsets = (theArray) => theArray.reduce(
   (subsets, value) => subsets.concat(
     subsets.map((set) => [value, ...set]),
@@ -201,7 +208,6 @@ const getAllSubsets = (theArray) => theArray.reduce(
 
 function subset(array, n) {
   const arr = getAllSubsets(array);
-  // debugger;
   const newArray = [];
   for (const a of arr) {
     if (a.length === n && a.length <= n) newArray.push(a);
@@ -252,7 +258,7 @@ export function buildAdjacencyList(links) {
   return adjacencyList;
 }
 
-function maximumIndependentSet(verticesInSubGraph, adj, set) {
+function maximumIndependentSet(verticesInSubGraph, adj, set, isHovering) {
   let maximumSet = 0;
   let maximumIndependentSet = [];
   let candidato = true;
@@ -296,9 +302,11 @@ function maximumIndependentSet(verticesInSubGraph, adj, set) {
   // if (set !== undefined && set.length > 0) maximumIndependentSet.push(set);
   const v = parseInt(set[0], 10);
   if (!Number.isNaN(v) && v !== undefined && !maximumIndependentSet.includes(v)) maximumIndependentSet.push(v);
-  d3.selectAll('#graphSvg circle').style('stroke', (node) => {
-    if (maximumIndependentSet.includes(node.id)) return 'blue';
-  });
+  if (isHovering) {
+    d3.selectAll('#graphSvg circle').classed('highlighted-stroke', (node) => {
+      if (maximumIndependentSet.includes(node.id)) return true;
+    });
+  }
   return maximumIndependentSet;
 }
 
@@ -320,7 +328,7 @@ function isNeighborInSet(set, adjacencyList) {
   return false;
 }
 
-export function runMis(subTree, set, introducedVertex) {
+export function runMis(subTree, set, introducedVertex, isHovering) {
   if (set.length === 0) return 0;
   const subGraph = newSubGraph(subTree);
 
@@ -332,7 +340,7 @@ export function runMis(subTree, set, introducedVertex) {
   const adjacencyList = buildAdjacencyList(subGraph.links);
   if (isNeighboring(set, introducedVertex, adjacencyList)) return -9999;
   if (isNeighborInSet(set, adjacencyList)) return -9999;
-  const mis = maximumIndependentSet(verticesInSubGraph, adjacencyList, set);
+  const mis = maximumIndependentSet(verticesInSubGraph, adjacencyList, set, isHovering);
   return mis.length;
 }
 
@@ -370,3 +378,26 @@ export function loadRandomGraph(graph) {
   lastNodeId = nodes.length;
   restart();
 }
+
+export function checkIntroducedVertex(introducedNode, state, subTree) {
+  const subGraph = newSubGraph(subTree);
+  const adjList = buildAdjacencyList(subGraph.links);
+  adjList[`${introducedNode}-${introducedNode}`] = true;
+  const adjacentNodes = subGraph.nodes.filter((node) => adjList[`${node.id}-${introducedNode}`]);
+  const adjacentLinks = subGraph.links.filter((link) => link.source.id === introducedNode || link.target.id === introducedNode);
+  adjacentNodes.reverse();
+
+  for (let i = 0; i < adjacentNodes.length; i++) {
+    const node = adjacentNodes[i];
+    node.color = state[i];
+  }
+
+  for (const link of adjacentLinks) {
+    if (link.source.color === link.target.color) {
+      return false;
+    }
+  }
+  return true;
+}
+
+restart();

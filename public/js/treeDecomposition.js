@@ -40,9 +40,11 @@ export default function loadTreeDecomposition(tree, canvas) {
     .append('g')
     .on('mouseover', function (d) {
       d3.select(this).select('text').classed('highlighted-text', true);
+      d3.select(this).select('circle').classed('highlighted-node', true);
     })
     .on('mouseleave', function (d) {
       d3.select(this).select('text').classed('highlighted-text', false);
+      d3.select(this).select('circle').classed('highlighted-node', false);
     });
 
   g

@@ -2,9 +2,11 @@
 import * as dg from './drawGraph.js';
 
 let treeSvg;
-let niceTreeLink;
 let root;
 let animX = 0;
+let isMis = false;
+let isColor = false;
+let current = 0;
 
 export default function loadNiceTreeDecomposition(treeData) {
   const width = document.getElementById('nice-td-container').offsetWidth;
@@ -17,7 +19,7 @@ export default function loadNiceTreeDecomposition(treeData) {
   treeLayout.size([width, height - 100]);
   treeLayout(root);
 
-  niceTreeLink = treeSvg
+  treeSvg
     .append('g')
     .selectAll('line')
     .data(root.links())
@@ -42,10 +44,11 @@ export default function loadNiceTreeDecomposition(treeData) {
     .enter()
     .append('g')
     .on('mouseover', function (d) {
-      if (d3.select(this).select('text').classed('highlighted-text')) return;
+      d3.select(this).select('circle').classed('highlighted-node', true);
       d3.select(this).select('text').classed('highlighted-text', true);
     })
     .on('mouseleave', function (d) {
+      d3.select(this).select('circle').classed('highlighted-node', false);
       d3.select(this).select('text').classed('highlighted-text', false);
     });
 
@@ -117,14 +120,23 @@ function animateLink(node) {
   });
 }
 
-let current = 0;
 
-export function mis(currentId) {
+function test1(e) {
+  alert(`you clicked${e}`);
+  // e.style.background = 'red';
+}
+
+let currentSubTree;
+
+
+export function mis() {
+  isColor = false;
+  isMis = true;
   animX = 0;
   let i = 0;
   root.copy().eachAfter((currentNode) => {
     i++;
-    if (currentId !== i) return;
+    if (current !== i) return;
 
     currentNode.data.table = {};
 
@@ -136,6 +148,8 @@ export function mis(currentId) {
 
     // Get the subtree rooted at this node
     const subTree = getSubTree(root, currentNode.data);
+
+    currentSubTree = subTree;
 
     // Leaf node
     if ('children' in currentNode.data === false) {
@@ -215,8 +229,6 @@ export function mis(currentId) {
       }
     }
 
-    console.log(currentNode.data.id);
-
     const keys = Object.keys(currentNode.data.table);
     const values = Object.values(currentNode.data.table);
     let sb = '';
@@ -236,23 +248,201 @@ export function mis(currentId) {
       if (key === '') key = '∅';
       let value = values[index];
       if (value < -1000) value = '-∞';
-      sb += `<tr><td>{${key}}</td><td>${value}</td></tr>`;
+      sb += `<tr id=${key} class="mis-row"><td class="sets">{${key}}</td><td>${value}</td></tr>`;
     });
 
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = sb;
+    d3.selectAll('.sets').on('mouseover', () => {
+      highlightMaxSet(d3.event.target.innerText);
+    });
+    d3.selectAll('.sets').on('mouseleave', () => {
+      d3.selectAll('circle').classed('highlighted-stroke', false);
+    });
   });
 }
 
+function highlightMaxSet(setToHighlight) {
+  let sb = '';
+  sb += setToHighlight.replace('{', '').replace('}', '');
+  if (sb === 'Ø') return;
+  sb = `[${sb}]`;
+  const set = JSON.parse(sb);
+  console.log(set);
+  dg.runMis(currentSubTree, set, 0, true);
+}
+
+function isArrayInArray(arr, item) {
+  const item_as_string = JSON.stringify(item);
+
+  const contains = arr.some((ele) => JSON.stringify(ele) === item_as_string);
+  return contains;
+}
+
+const colors = ['red', 'green', 'blue'];
+
+export function threeColor() {
+  isMis = false;
+  isColor = true;
+  let i = 1;
+  root.copy().eachAfter((currentNode) => {
+    if (current !== i++) return;
+
+    animateNode(currentNode);
+
+    const node = currentNode.data;
+
+    if ('children' in node === false) {
+      node.pos = [];
+      return;
+    }
+
+    const child = node.children[0];
+    const subTree = getSubTree(root, currentNode.data);
+    dg.newSubGraph(subTree);
+
+    if (node.vertices.length > child.vertices.length) {
+      const childClone = JSON.parse(JSON.stringify(child));
+      const childsStates = childClone.states;
+      const difference = node.vertices.filter((x) => !child.vertices.includes(x));
+      const introducedVertex = difference[0];
+      const newStates = [];
+
+      if (child.vertices.length === 0) {
+        for (const color of colors) {
+          const newState = [];
+          newState.push(color);
+          newStates.push(newState);
+        }
+        const x = node.vertices[0];
+        node.pos = childClone.pos;
+        if (!node.pos.includes(introducedVertex)) node.pos.push(x);
+        node.states = newStates;
+      } else {
+        for (const childState of childsStates) {
+          for (const color of colors) {
+            const newState = JSON.parse(JSON.stringify(childState));
+            newState.push(color);
+            if (dg.checkIntroducedVertex(introducedVertex, newState, subTree)) {
+              newStates.push(newState);
+            }
+          }
+        }
+        node.states = newStates;
+        node.pos = childClone.pos;
+        if (!node.pos.includes(introducedVertex)) node.pos.push(introducedVertex);
+      }
+    }
+
+    if (node.vertices.length < child.vertices.length) {
+      const childClone = JSON.parse(JSON.stringify(child));
+      const childStates = childClone.states;
+
+      node.pos = childClone.pos;
+      const forgottenVertex = child.vertices.filter((x) => !node.vertices.includes(x));
+      if (node.pos.includes(parseInt(forgottenVertex, 10))) node.pos = node.pos.filter((x) => x !== parseInt(forgottenVertex, 10));
+
+
+      for (const childState of childStates) {
+        childState.pop();
+      }
+
+      for (let i = 0; i < childStates.length; i++) {
+        const array1 = childStates[i];
+        for (let j = 0; j < childStates.length; j++) {
+          const array2 = childStates[j];
+          if (JSON.stringify(array1) === JSON.stringify(array2)) childStates.splice(i, 1);
+        }
+      }
+      node.states = childStates;
+    }
+
+    if (node.children.length === 2) {
+      const child1 = node.children[0];
+      const child1Clone = JSON.parse(JSON.stringify(child1));
+      const child1States = child1Clone.states;
+
+      const child2 = node.children[1];
+      const child2Clone = JSON.parse(JSON.stringify(child2));
+      const child2States = child2Clone.states;
+      const newStates = [];
+
+      if (child1States.length < child2States.length) {
+        node.pos = child1.pos;
+        for (const childState of child1States) {
+          if (isArrayInArray(child2States, childState)) newStates.push(childState);
+        }
+      } else {
+        node.pos = child2.pos;
+        for (const childState of child2States) {
+          if (isArrayInArray(child1States, childState)) newStates.push(childState);
+        }
+      }
+      node.states = newStates;
+    }
+
+
+    let sb = '';
+    sb += '<tr>';
+    for (let i = 0; i < node.pos.length; i++) {
+      sb += `<td><strong>${node.pos[i]}</strong></td>`;
+    }
+
+    sb += '</tr>';
+
+    for (const state of node.states) {
+      sb += '<tr>';
+      for (const s of state) {
+        let color = '';
+        if (s === 'red') {
+          color = 'red';
+        }
+        if (s === 'green') {
+          color = 'green';
+        }
+        if (s === 'blue') {
+          color = 'blue';
+        }
+
+        sb += `<td class="${color}">${s}</td>`;
+      }
+      sb += '</tr>';
+    }
+
+    const tbody = document.getElementById('three-color-body');
+
+    tbody.innerHTML = sb;
+  });
+}
 
 function increment() {
   const N = root.descendants().length;
-  mis((current = ++current % N));
+
+  if (isMis) {
+    current++;
+    if (current !== N) current %= N;
+    mis();
+    return;
+  }
+
+  if (isColor) {
+    current++;
+    if (current !== N) current %= N;
+    threeColor();
+  }
 }
 
 function decrement() {
   const N = root.descendants().length;
-  mis((current = --current % N));
+
+  if (isMis) {
+    mis((current = --current % N));
+    return;
+  }
+
+  if (isColor) {
+    threeColor((current = --current % N));
+  }
 }
 
 d3.select(document.body).on('keyup', () => {
@@ -263,5 +453,17 @@ d3.select(document.body).on('keyup', () => {
   }
 });
 
+
 d3.select('#left-control-key').on('click', decrement);
 d3.select('#right-control-key').on('click', increment);
+
+function reset() {
+  current = 0;
+  d3.selectAll('circle').classed('highlighted-node', false);
+  d3.selectAll('text').classed('highlighted-text', false);
+  d3.selectAll('line').classed('highlighted-link', false);
+  d3.selectAll('tr').on('click', () => alert('yep'));
+}
+
+document.getElementById('max-independent-set-button').addEventListener('click', reset);
+document.getElementById('three-color-button').addEventListener('click', reset);

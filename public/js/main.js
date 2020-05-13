@@ -3,14 +3,21 @@ import readLocalTreeFile from './readTree.js';
 import * as ntd from './niceTreeDecomposition.js';
 import * as dg from './drawGraph.js';
 
-$('#error-message').hide();
-$('#nice-tree-error-message').hide();
-$('#algorithm-error-message').hide();
-$('#mis-content').hide();
-$('#control-keys').hide();
+function removeAllMessages() {
+  $('#error-message').hide();
+  $('#nice-tree-error-message').hide();
+  $('#algorithm-error-message').hide();
+  $('#mis-content').hide();
+  $('#app-content').hide();
+  $('#control-keys').hide();
+  $('#three-color-content').hide();
+}
+
+removeAllMessages();
+d3.selectAll('.topnav div').on('click', removeAllMessages);
 
 let isTreeDecompositionComputed = false;
-let isNiceTreeeDecompositionComputed = false;
+let isNiceTreeeDecompositionComputed = true;
 
 function incrementVerticesCounter() {
   let value = parseInt(document.getElementById('numberOfVertices').value, 10);
@@ -94,6 +101,7 @@ function reload() {
   d3.selectAll('g').selectAll('text').classed('highlighted-text', false);
   d3.selectAll('circle').classed('highlighted-node', false);
   d3.selectAll('line').classed('highlighted-link', false);
+  d3.selectAll('circle').style('stroke', 'black');
   removeTreeDecomposition();
   removeNiceTreeDecomposition();
   const randomGraph = generateRandomGraph(10, 10);
@@ -105,7 +113,7 @@ function computeTreeDecomposition() {
   removeNiceTreeDecomposition();
 
   let json = JSON.stringify(dg.getAllEdges());
-  json += '-' + dg.getLargestNode();
+  json += `-${dg.getLargestNode()}`;
 
   $.ajax({
     url: '/compute',
@@ -120,10 +128,6 @@ function computeTreeDecomposition() {
     complete() {
       isTreeDecompositionComputed = true;
 
-      $('#error-message').hide();
-      $('#nice-tree-error-message').hide();
-      $('#app-content').hide();
-      $('#algorithm-error-message').hide();
 
       const treeDecompositionPath = 'td.td';
       readLocalTreeFile(treeDecompositionPath, 'treeDecomposition');
@@ -133,52 +137,46 @@ function computeTreeDecomposition() {
 
 function handleComputeNiceTree() {
   if (!isTreeDecompositionComputed) {
-    $('#algorithm-error-message').hide();
-    $('#error-message').hide();
-    $('#app-content').hide();
     $('#nice-tree-error-message').show();
     return;
   }
-  $('#error-message').hide();
-  $('#nice-tree-error-message').hide();
-  $('#app-content').hide();
-  $('#algorithm-error-message').hide();
   isNiceTreeeDecompositionComputed = true;
   d3.select('#nice-td-svg').selectAll('g').remove();
   const niceTreeDecompositionPath = 'nicetd.td';
   readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
 }
 
+const niceTreeDecompositionPath = 'nicetd.td';
+readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
+
+
 function handleStartDraw() {
   d3.selectAll('circle').classed('highlighted-node', false);
   d3.selectAll('line').classed('highlighted-link', false);
   d3.selectAll('g').selectAll('text').classed('highlighted-text', false);
-  $('#algorithm-error-message').hide();
-  $('#error-message').hide();
-  $('#nice-tree-error-message').hide();
+  d3.selectAll('circle').style('stroke', 'black');
   $('#app-content').show();
   d3.select('#nice-td-svg').selectAll('g').remove();
   dg.startDraw();
 }
 
+function handleThreeColor() {
+  $('#three-color-content').show();
+  ntd.threeColor();
+}
+
 function handleMis() {
   if (!isNiceTreeeDecompositionComputed) {
-    $('#error-message').hide();
-    $('#nice-tree-error-message').hide();
-    $('#app-content').hide();
     $('#algorithm-error-message').show();
     return;
   }
-  d3.selectAll('circle').classed('highlighted-node', false).classed('node', true);
-  d3.selectAll('line').classed('highlighted-link', false).classed('link', true);
-  d3.selectAll('g text').classed('highlighted-text', false).classed('label', true);
+  // d3.selectAll('circle').classed('highlighted-node', false).classed('node', true);
+  // d3.selectAll('line').classed('highlighted-link', false).classed('link', true);
+  // d3.selectAll('g text').classed('highlighted-text', false).classed('label', true);
 
-  $('#error-message').hide();
-  $('#nice-tree-error-message').hide();
-  $('#app-content').hide();
-  $('#algorithm-error-message').hide();
   $('#mis-content').show();
   $('#control-keys').show();
+  ntd.mis();
 }
 
 const verticesLeftArrow = $('#verticesLeftArrow');
@@ -210,4 +208,10 @@ document
   .getElementById('nice-tree-decomposition-button')
   .addEventListener('click', handleComputeNiceTree);
 
-document.getElementById('max-independent-set-button').addEventListener('click', handleMis);
+document
+  .getElementById('max-independent-set-button')
+  .addEventListener('click', handleMis);
+
+document
+  .getElementById('three-color-button')
+  .addEventListener('click', handleThreeColor);
