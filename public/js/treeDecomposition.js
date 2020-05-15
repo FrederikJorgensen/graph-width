@@ -1,11 +1,14 @@
 
+import * as graph from './graph.js';
+
 let treeLinks;
+const colorsNodes = d3.scaleOrdinal(d3.schemeCategory10);
 
-export default function loadTreeDecomposition(tree, canvas) {
-  const graphWidth = document.getElementById('nice-td-container').offsetWidth;
-  const graphHeight = document.getElementById('nice-td-container').offsetHeight;
+export default function loadTreeDecomposition(tree) {
+  const tdWidth = document.getElementById('td-container').offsetWidth;
+  const tdHeight = document.getElementById('td-container').offsetHeight;
+  const svg = d3.select('#td-svg').attr('width', tdWidth).attr('height', tdHeight);
 
-  const svg = d3.select('#nice-td-svg').attr('viewBox', [-graphWidth / 2, -graphHeight / 2, graphWidth, graphHeight]);
   const { nodes } = tree;
   const { links } = tree;
 
@@ -39,10 +42,13 @@ export default function loadTreeDecomposition(tree, canvas) {
     .enter()
     .append('g')
     .on('mouseover', function (d) {
+      graph.showSeperator(d.vertices);
       d3.select(this).select('text').classed('highlighted-text', true);
       d3.select(this).select('circle').classed('highlighted-node', true);
+      d3.select(this).select('circle').classed('moving-node', true);
     })
     .on('mouseleave', function (d) {
+      graph.hideSeperator();
       d3.select(this).select('text').classed('highlighted-text', false);
       d3.select(this).select('circle').classed('highlighted-node', false);
     });
@@ -50,7 +56,10 @@ export default function loadTreeDecomposition(tree, canvas) {
   g
     .append('circle')
     .attr('class', 'node')
-    .attr('r', 20);
+    .style('fill', d3.scaleOrdinal()
+      .domain([0, 1])
+      .range(['red', 'blue', 'green']))
+    .attr('r', 17);
 
   g
     .append('text')
@@ -72,8 +81,8 @@ export default function loadTreeDecomposition(tree, canvas) {
   const simulation = d3.forceSimulation(nodes)
     .force('link', d3.forceLink(links).id((d) => d.id).distance(60).strength(0.9))
     .force('charge', d3.forceManyBody().strength(-500))
-    .force('x', d3.forceX())
-    .force('y', d3.forceY())
+    .force('x', d3.forceX(tdWidth / 2))
+    .force('y', d3.forceY(tdHeight / 2))
     .on('tick', ticked);
 
   function dragstarted(d) {

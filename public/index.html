@@ -8,16 +8,27 @@
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link href='http://fonts.googleapis.com/css?family=PT+Sans:400,700' rel='stylesheet' type='text/css'>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.css"
+    integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous">
+  <!-- The loading of KaTeX is deferred to speed up page rendering -->
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"
+    integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz"
+    crossorigin="anonymous"></script>
+  <!-- To automatically render math in text elements, include the auto-render extension: -->
+  <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"
+    integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
+    onload="renderMathInElement(document.body);"></script>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script src="https://code.jquery.com/jquery-2.2.0.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/intro.min.js"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/intro.js@2.9.3/introjs.min.css">
   <script type="module" src="js/main.js"></script>
   <script type="module" src="js/niceTreeDecomposition.js"></script>
-  <script type="module" src="js/graph.js"></script>
   <script type="module" src="js/graphReader.js"></script>
   <script type="module" src="js/readTree.js"></script>
-  <script type="module" src="js/drawGraph.js"></script>
+  <script type="module" src="js/graph.js"></script>
+  <script type="module" src="js/controller.js"></script>
+  <script type="module" src="js/content.js"></script>
   <title>Graph Width Visualizer</title>
 </head>
 
@@ -26,33 +37,153 @@
     <div class="project-title">
       Graph Width Visualizer
     </div>
-    <div id="draw-graph-button">
-      <i class="material-icons">palette</i>
-    </div>
-    <div id="random-graph-button">
-      <i class="material-icons">refresh</i>
-    </div>
-    <div id="tree-decomposition-button">
-      Tree Decomposition
-    </div>
-    <div id="nice-tree-decomposition-button">
-      Nice Tree Decomposition
-    </div>
-    <div id="max-independent-set-button">
-      Max Independent Set
-    </div>
-    <div id="three-color-button">
-      3-Coloring
-    </div>
   </div>
   <div class="flex-container">
     <div class="center-container">
       <div id="left-container">
-        <div id="graph-svg-container">
-          <svg id="graphSvg"></svg>
+        <h2 id="content-title"></h2>
+        <div class="theory-content">
+
+
+          <div id="td-content">
+            A <strong>tree decomposition</strong> of <span id="one"></span> is a tree <span id="treeMath"></span>
+            that consists of vertices structured in a tree like way. Each node in the tree <span id="treeMath2"></span>
+            we
+            will denote as <span id="b"></span> or as a bag.
+            Each bag consists of vertices <span id="v"></span> where <span id="bags"></span>. <br /> <br />
+            The tree decomposition must satisfy the following criteria:
+            <br />
+            <ul>
+              <li>Every vertex of <span id="graph2"></span> must be in some bag of <span id="tree2"></span></li>
+              <li>For all edges <span id="edge"></span> of <span id="g1"></span> there must be some bag containing both
+                ends of <span id="edge2"></span></li>
+              <li>Let us define three bags of <span id="t3"></span> as <span id="b1"></span><span id="b2"></span> and
+                <span id="b3"></span> in which <span id="b22"></span> lies on the path between <span id="b12"></span>
+                and
+                <span id="b32"></span>. Then if a vertex <span id="vertex2"></span> of <span id="graph3"></span> belongs
+                to <span id="b13"></span> and <span id="b33"></span> then it must also belong to <span id="b23"></span>
+              </li>
+            </ul>
+            <strong>
+              <p>Exercises</p>
+            </strong>
+            <p>Create the tree decomposition of the current graph.</p>
+          </div>
+          <div class="seperator-content">
+            <p>Seperator content....</p>
+            <p>Hover over a node in the tree decomposition to see how it seperates the graph.</p>
+          </div>
+          <div class="nice-td-content">
+            <p>Nice td content....</p>
+            <p>Exercises</p>
+            <ul>
+              <li>Draw the nice tree decomposition of the current tree decomposition</li>
+            </ul>
+          </div>
+          <div class="algorithms-content">
+            <p>algorithms content....</p>
+          </div>
+          <div class="max-independent-set-content">
+            <button id="max-independent-set-button" class="pure-material-button-contained">Max Independent Set</button>
+            <div id="mis-content">
+              <table class="table">
+                <tbody id="tbody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+          <div class="three-color-content">
+            <div class="h2">3 coloring content.....</div>
+            <button id="three-color-button" class="pure-material-button-contained">3-Coloring</button>
+            <table class="table">
+              <tbody id="three-color-body">
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+      <div id="middle-container">
+        <div id="graph-container">
+          <svg id="graph-svg">
+            <div class="graph-controls">
+              <i id="reset-draw-graph" class="material-icons md-48">palette</i>
+              <i id="random-graph-button" class="material-icons md-48">shuffle</i>
+              <i id="myBtn" class="material-icons md-48">help</i>
+              <div id="myModal" class="modal">
+
+                <!-- Modal content -->
+                <div class="modal-content">
+                  <span class="close">&times;</span>
+                  <div class="app-interface">
+                    <strong>
+                      <p>App Interface</p>
+                    </strong>
+                    <ul>
+                      <li>Add a vertex by left-clicking within the graph container</li>
+                      <li>Add an edge by dragging from one vertex to another</li>
+                      <li>Delete a vertex by right-clicking it</li>
+                      <li>Hold down CTRL to drag a vertex</li>
+                      <li>Reset drawing by clicking <i class="material-icons">palette</i></li>
+                      <li>Reload a random graph by clicking <i class="material-icons">shuffle</i></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+              <!--               <div class="vertices-number-container">
+                <p>V = </p>
+                <span class="material-icons md-48">keyboard_arrow_left</span>
+                <span id="number-of-vertices">10</span>
+                <span class="material-icons md-48">keyboard_arrow_right</span>
+              </div> -->
+            </div>
+          </svg>
         </div>
         <div id="td-container">
-          <div id="app-interface">
+          <svg id="td-svg">
+            <div id="tree-decomposition-button" class="td-controls">
+              <!-- Create Tree Decomposition -->
+              <button class="pure-material-button-contained">Create Tree Decomposition</button>
+            </div>
+          </svg>
+        </div>
+      </div>
+      <div id="right-container">
+        <div id="nice-td-container">
+          <svg id='nice-td-svg'>
+            <div id="nice-tree-decomposition-button" class="nice-td-controls">
+              <button class="pure-material-button-contained">Compute Nice Tree Decomposition</button>
+            </div>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id='control-keys-container'>
+    <div class="control-keys">
+      <div class="previous-text">
+        <a href="" class="previous">
+          <button class="pure-material-button-contained chapter-buttons">
+            Back
+          </button>
+        </a>
+      </div>
+      <div class="next-text">
+        <a href="" class="next">
+          <button class="pure-material-button-contained  chapter-buttons">
+            Next
+          </button>
+        </a>
+      </div>
+    </div>
+  </div>
+  <script src="js/content.js"></script>
+  <script src="js/controller.js"></script>
+</body>
+
+</html>
+
+<!--           <div id="app-interface">
             <div class="error-messages">
               <h3 id="error-message">Create a graph before computing a tree decomposition!</h3>
               <h3 id="nice-tree-error-message">You must create a tree decomposition before you can create a nice one!
@@ -60,19 +191,8 @@
               <h3 id="algorithm-error-message">Before running an algorithm you must create a nice tree decomposition!
               </h3>
             </div>
-            <div id="mis-content">
-              <h3>Maximum Independent Set</h3>
-              <table class="table">
-                <tbody id="tbody">
-                </tbody>
-              </table>
-            </div>
             <div id="three-color-content">
-              <h3>3-Coloring</h3>
-              <table class="table">
-                <tbody id="three-color-body">
-                </tbody>
-              </table>
+
             </div>
             <div id="app-content">
               <h3 id="info-title">App Interface</h3>
@@ -84,21 +204,4 @@
                 </ul>
               </div>
             </div>
-          </div>
-        </div>
-
-      </div>
-      <div id="right-container">
-        <div id="nice-td-container">
-          <svg id='nice-td-svg'></svg>
-        </div>
-      </div>
-    </div>
-  </div>
-  <div id='control-keys'>
-    <i id="left-control-key" class='material-icons md-48'>keyboard_arrow_left</i>
-    <i id="right-control-key" class='material-icons md-48'>keyboard_arrow_right</i>
-  </div>
-</body>
-
-</html>
+          </div> -->

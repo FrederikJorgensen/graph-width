@@ -1,20 +1,16 @@
+/* eslint-disable space-infix-ops */
 /* eslint-disable quote-props */
 import readLocalTreeFile from './readTree.js';
 import * as ntd from './niceTreeDecomposition.js';
-import * as dg from './drawGraph.js';
+import * as graph from './graph.js';
 
-function removeAllMessages() {
-  $('#error-message').hide();
-  $('#nice-tree-error-message').hide();
-  $('#algorithm-error-message').hide();
-  $('#mis-content').hide();
-  $('#app-content').hide();
-  $('#control-keys').hide();
-  $('#three-color-content').hide();
-}
-
-removeAllMessages();
-d3.selectAll('.topnav div').on('click', removeAllMessages);
+$('.algorithms-content').hide();
+$('#right-container').hide();
+$('#td-content').show();
+$('.seperator-content').hide();
+$('.nice-td-content').hide();
+$('.max-independent-set-content').hide();
+$('.three-color-content').hide();
 
 let isTreeDecompositionComputed = false;
 let isNiceTreeeDecompositionComputed = true;
@@ -101,19 +97,19 @@ function reload() {
   d3.selectAll('g').selectAll('text').classed('highlighted-text', false);
   d3.selectAll('circle').classed('highlighted-node', false);
   d3.selectAll('line').classed('highlighted-link', false);
-  d3.selectAll('circle').style('stroke', 'black');
   removeTreeDecomposition();
   removeNiceTreeDecomposition();
   const randomGraph = generateRandomGraph(10, 10);
-  dg.loadRandomGraph(randomGraph);
+  graph.loadRandomGraph(randomGraph);
 }
+
 
 function computeTreeDecomposition() {
   removeTreeDecomposition();
   removeNiceTreeDecomposition();
 
-  let json = JSON.stringify(dg.getAllEdges());
-  json += `-${dg.getLargestNode()}`;
+  let json = JSON.stringify(graph.getAllEdges());
+  json += `-${graph.getLargestNode()}`;
 
   $.ajax({
     url: '/compute',
@@ -146,10 +142,6 @@ function handleComputeNiceTree() {
   readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
 }
 
-const niceTreeDecompositionPath = 'nicetd.td';
-readLocalTreeFile(niceTreeDecompositionPath, 'niceTreeDecomposition');
-
-
 function handleStartDraw() {
   d3.selectAll('circle').classed('highlighted-node', false);
   d3.selectAll('line').classed('highlighted-link', false);
@@ -157,7 +149,7 @@ function handleStartDraw() {
   d3.selectAll('circle').style('stroke', 'black');
   $('#app-content').show();
   d3.select('#nice-td-svg').selectAll('g').remove();
-  dg.startDraw();
+  graph.startDraw();
 }
 
 function handleThreeColor() {
@@ -198,7 +190,7 @@ document
   .addEventListener('click', reload);
 
 document
-  .getElementById('draw-graph-button')
+  .getElementById('reset-draw-graph')
   .addEventListener('click', handleStartDraw);
 
 document
@@ -215,3 +207,5 @@ document
 document
   .getElementById('three-color-button')
   .addEventListener('click', handleThreeColor);
+
+window.onload = reload();

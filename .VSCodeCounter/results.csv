@@ -1,0 +1,20 @@
+"filename", "language", "JavaScript", "JSON", "Shell Script", "Markdown", "HTML", "CSS", "comment", "blank", "total"
+"c:\Users\fjvem\Desktop\graph-width-visualizer\.eslintrc.js", "JavaScript", 24, 0, 0, 0, 0, 0, 0, 1, 25
+"c:\Users\fjvem\Desktop\graph-width-visualizer\README.md", "Markdown", 0, 0, 0, 20, 0, 0, 0, 4, 24
+"c:\Users\fjvem\Desktop\graph-width-visualizer\package-lock.json", "JSON", 0, 2894, 0, 0, 0, 0, 0, 1, 2895
+"c:\Users\fjvem\Desktop\graph-width-visualizer\package.json", "JSON", 0, 35, 0, 0, 0, 0, 0, 1, 36
+"c:\Users\fjvem\Desktop\graph-width-visualizer\public\css\style.css", "CSS", 0, 0, 0, 0, 0, 487, 21, 99, 607
+"c:\Users\fjvem\Desktop\graph-width-visualizer\public\index.html", "HTML", 0, 0, 0, 0, 167, 0, 32, 8, 207
+"c:\Users\fjvem\Desktop\graph-width-visualizer\public\js\content.js", "JavaScript", 37, 0, 0, 0, 0, 0, 0, 2, 39
+"c:\Users\fjvem\Desktop\graph-width-visualizer\public\js\controller.js", "JavaScript", 111, 0, 0, 0, 0, 0, 4, 33, 148
+"c:\Users\fjvem\Desktop\graph-width-visualizer\public\js\graph.js", "JavaScript", 437, 0, 0, 0, 0, 0, 57, 83, 577
+"c:\Users\fjvem\Desktop\graph-width-visualizer\public\js\graphReader.js", "JavaScript", 55, 0, 0, 0, 0, 0, 0, 9, 64
+"c:\Users\fjvem\Desktop\graph-width-visualizer\public\js\main.js", "JavaScript", 167, 0, 0, 0, 0, 0, 7, 38, 212
+"c:\Users\fjvem\Desktop\graph-width-visualizer\public\js\niceTreeDecomposition.js", "JavaScript", 391, 0, 0, 0, 0, 0, 20, 86, 497
+"c:\Users\fjvem\Desktop\graph-width-visualizer\public\js\readTree.js", "JavaScript", 107, 0, 0, 0, 0, 0, 1, 13, 121
+"c:\Users\fjvem\Desktop\graph-width-visualizer\public\js\treeDecomposition.js", "JavaScript", 87, 0, 0, 0, 0, 0, 0, 22, 109
+"c:\Users\fjvem\Desktop\graph-width-visualizer\src\app.js", "JavaScript", 32, 0, 0, 0, 0, 0, 1, 6, 39
+"c:\Users\fjvem\Desktop\graph-width-visualizer\src\runtreealgo.sh", "Shell Script", 0, 0, 2, 0, 0, 0, 1, 0, 3
+"c:\Users\fjvem\Desktop\graph-width-visualizer\src\writeGraph.js", "JavaScript", 26, 0, 0, 0, 0, 0, 0, 6, 32
+"c:\Users\fjvem\Desktop\graph-width-visualizer\src\writeTreeDecomposition.js", "JavaScript", 39, 0, 0, 0, 0, 0, 0, 11, 50
+"Total", "-", 1513, 2929, 2, 20, 167, 487, 144, 423, 5685

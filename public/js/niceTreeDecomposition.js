@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-syntax */
-import * as dg from './drawGraph.js';
+import * as graph from './graph.js';
 
 let treeSvg;
 let root;
@@ -8,15 +8,25 @@ let isMis = false;
 let isColor = false;
 let current = 0;
 
-export default function loadNiceTreeDecomposition(treeData) {
-  const width = document.getElementById('nice-td-container').offsetWidth;
-  const height = document.getElementById('nice-td-container').offsetHeight;
+const colorsNodes = d3.scaleOrdinal(d3.schemeCategory10).domain(['foo', 'bar', 'baz', 'foobar']);
 
-  treeSvg = d3.select('#nice-td-svg').attr('viewBox', [0, 0, width, height]);
+const tooltip = d3.select('#nice-td-container')
+  .append('div')
+  .attr('class', 'tooltip')
+  .attr('id', 'tooltip')
+  .style('opacity', 0);
+
+
+export default function loadNiceTreeDecomposition(treeData) {
+  const niceTdWidth = document.getElementById('nice-td-container').offsetWidth;
+  const niceTdHeight = document.getElementById('nice-td-container').offsetHeight;
+
+  treeSvg = d3.select('#nice-td-svg').attr('width', niceTdWidth).attr('height', niceTdHeight);
+  // .attr('viewBox', [0, 0, niceTdWidth, niceTdHeight]);
 
   root = d3.hierarchy(treeData);
   const treeLayout = d3.tree();
-  treeLayout.size([width, height - 100]);
+  treeLayout.size([niceTdWidth, niceTdHeight - 100]);
   treeLayout(root);
 
   treeSvg
@@ -34,8 +44,7 @@ export default function loadNiceTreeDecomposition(treeData) {
 
   let nodeSvg = treeSvg
     .append('g')
-    .selectAll('circle');
-
+    .selectAll('ellipse');
 
   nodeSvg = nodeSvg
     .data(root.descendants());
@@ -44,21 +53,35 @@ export default function loadNiceTreeDecomposition(treeData) {
     .enter()
     .append('g')
     .on('mouseover', function (d) {
+      graph.showSeperator(d.data.vertices);
       d3.select(this).select('circle').classed('highlighted-node', true);
       d3.select(this).select('text').classed('highlighted-text', true);
     })
     .on('mouseleave', function (d) {
+      graph.hideSeperator();
       d3.select(this).select('circle').classed('highlighted-node', false);
       d3.select(this).select('text').classed('highlighted-text', false);
     });
 
   g
-    .append('circle')
-    .attr('class', 'node')
-    .attr('id', (d) => `node-${d.data.id}`)
+    .append('ellipse')
+    .style('fill', (d) => {
+      if (d.depth === 0) return 'yellow';
+      if ('children' in d === false) return d3.rgb(colorsNodes(1));
+      if (d.data.children.length === 2) return d3.rgb(colorsNodes('foobar'));
+      if (d.data.vertices.length > d.data.children[0].vertices.length) return d3.rgb(colorsNodes('baz'));
+      if (d.data.vertices.length < d.data.children[0].vertices.length) return d3.rgb(colorsNodes(4));
+      // if (d.data.vertices > d.data.children[0]) return 'red';
+    })
     .attr('cx', (d) => d.x)
     .attr('cy', (d) => d.y)
-    .attr('r', 20)
+    .attr('rx', (d) => 17 + (d.data.vertices.length * 3))
+    .attr('ry', (d) => 17)
+    .attr('id', (d) => `nice-tree-node-${d.data.id}`)
+    .attr('class', 'node')
+    // .attr('cx', (d) => d.x)
+    // .attr('cy', (d) => d.y)
+    // .attr('r', 20)
     .attr('transform', `translate(${0}, ${40})`);
 
   g
@@ -96,7 +119,7 @@ function animateNode(nodeToAnimate) {
     descendantsIds.push(currentNode.data.id);
   });
 
-  d3.select('#nice-td-svg').selectAll('circle').classed('highlighted-node', (currentNode) => {
+  d3.select('#nice-td-svg').selectAll('ellipse').classed('highlighted-node', (currentNode) => {
     if (descendantsIds.includes(currentNode.data.id)) return true;
     return false;
   });
@@ -120,14 +143,7 @@ function animateLink(node) {
   });
 }
 
-
-function test1(e) {
-  alert(`you clicked${e}`);
-  // e.style.background = 'red';
-}
-
 let currentSubTree;
-
 
 export function mis() {
   isColor = false;
@@ -160,6 +176,7 @@ export function mis() {
         const vertex = currentNode.data.vertices[0];
         currentNode.data.table[vertex] = 1;
       }
+      d3.select('#tooltip').style('opacity', 0);
       return;
     }
 
@@ -176,7 +193,7 @@ export function mis() {
       const child2Table = child2Clone.table;
 
       for (const set of allSubsets) {
-        const currentNodeValue = dg.runMis(subTree, set);
+        const currentNodeValue = graph.runMis(subTree, set);
         const child1value = child1Table[set];
         const child2value = child2Table[set];
         currentNode.data.table[set] = child1value + child2value - currentNodeValue;
@@ -192,8 +209,8 @@ export function mis() {
       for (const set of allSubsets) {
         const setWithV = JSON.parse(JSON.stringify(set));
         setWithV.push(forgottenVertex);
-        const setWithoutV = dg.runMis(subTree, set);
-        const algoWithV = dg.runMis(subTree, setWithV);
+        const setWithoutV = graph.runMis(subTree, set);
+        const algoWithV = graph.runMis(subTree, setWithV);
         currentNode.data.table[set] = Math.max(setWithoutV, algoWithV);
       }
     }
@@ -218,7 +235,7 @@ export function mis() {
       for (const set of allSubsets) {
         // Only run MIS if the introduced vertex is in the current set
         if (set.includes(introducedVertex)) {
-          const maxSet = dg.runMis(subTree, set, introducedVertex);
+          const maxSet = graph.runMis(subTree, set, introducedVertex);
 
           if (currentNode.data.table[set]) {
             currentNode.data.table[set]++;
@@ -251,6 +268,17 @@ export function mis() {
       sb += `<tr id=${key} class="mis-row"><td class="sets">{${key}}</td><td>${value}</td></tr>`;
     });
 
+    const neww = document.getElementById(`nice-tree-node-${currentNode.data.id}`).getBoundingClientRect().top;
+    const new2 = document.getElementById(`nice-tree-node-${currentNode.data.id}`).getBoundingClientRect().left;
+
+    const start = `<table><tbody id="tbody">${sb}</tbody></table>`;
+    tooltip.transition()
+      .duration(300)
+      .style('opacity', 1);
+    tooltip.html(start)
+      .style('left', `${new2 - 100}px`)
+      .style('top', `${neww}px`);
+
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = sb;
     d3.selectAll('.sets').on('mouseover', () => {
@@ -268,8 +296,7 @@ function highlightMaxSet(setToHighlight) {
   if (sb === 'Ø') return;
   sb = `[${sb}]`;
   const set = JSON.parse(sb);
-  console.log(set);
-  dg.runMis(currentSubTree, set, 0, true);
+  graph.runMis(currentSubTree, set, 0, true);
 }
 
 function isArrayInArray(arr, item) {
@@ -299,7 +326,7 @@ export function threeColor() {
 
     const child = node.children[0];
     const subTree = getSubTree(root, currentNode.data);
-    dg.newSubGraph(subTree);
+    graph.newSubGraph(subTree);
 
     if (node.vertices.length > child.vertices.length) {
       const childClone = JSON.parse(JSON.stringify(child));
@@ -323,7 +350,7 @@ export function threeColor() {
           for (const color of colors) {
             const newState = JSON.parse(JSON.stringify(childState));
             newState.push(color);
-            if (dg.checkIntroducedVertex(introducedVertex, newState, subTree)) {
+            if (graph.checkIntroducedVertex(introducedVertex, newState, subTree)) {
               newStates.push(newState);
             }
           }
@@ -465,5 +492,5 @@ function reset() {
   d3.selectAll('tr').on('click', () => alert('yep'));
 }
 
-document.getElementById('max-independent-set-button').addEventListener('click', reset);
-document.getElementById('three-color-button').addEventListener('click', reset);
+// document.getElementById('max-independent-set-button').addEventListener('click', reset);
+// document.getElementById('three-color-button').addEventListener('click', reset);

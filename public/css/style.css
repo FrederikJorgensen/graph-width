@@ -1,65 +1,155 @@
 html {
   height:100%;
+  margin: 0;;
 }
 
 body {
-  min-height: 100%;
-  margin: 0;
+  height: 100%;
+  /* min-height: 100%; */
   overflow: hidden;
-  font-family: 'Inter', sans-serif;
-  height:100vh;
-  padding: 0;
   margin: 0;
-  color: #333333;
-  /* pointer-events: none; */
+  font-family: 'Inter', sans-serif;
 }
 
 .flex-container {
   display: flex;
-  height: 90%;
+  height: 92%;
   width: 100%;
   justify-content: center;
 }
 
 .center-container {
-  overflow: hidden;
-  padding: 0px;
   display: flex;
-  flex: .8;
+  align-items: center;
+  flex: .9;
   height: 100%;
-  /* flex: 0.7; */
+}
+
+#content-title {
+  text-align: center;
+  margin-bottom: 20px;
 }
 
 #left-container {
-  flex: 0.55;
+  flex: 0.3;
+  height: 100%;
+}
+
+#middle-container {
+  flex: 0.7;
   justify-content: center;
   align-items: center;
-  margin: 10px 10px 10px 10px;
-  height: 90%;
+  height: 95%;
 }
 
 #right-container {
-  flex: 0.45;
-  /* border: solid 1px lightgray; */
-  height: 90%;
-  margin: 10px 10px 10px 10px;
+  flex: 0.3;
+  height: 95%;
 }
 
-#graph-svg-container {
+#graph-container {
+  display: flex;
   height: 50%;
-  border: solid 1px lightgray;
+  width: 100%;
+  border-bottom: none;
   cursor: crosshair;
+  justify-content: center;
+  align-items: flex-end;
+  border: solid 1px lightgray;
+  border-bottom: none;
+  background-color: whitesmoke;
+}
+
+.graph-controls {
+  height: 8%;
+  margin-bottom: 20px;
+  display: flex;
+  position: relative;
+}
+
+#graph-title {
+  display: flex;
+  align-items: flex-start;
+  position: relative;
+}
+
+
+.vertices-number-container {
+  color: rgb(51, 51, 51);
+  opacity: 90%;
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+}
+
+.graph-controls > i {
+  color: rgb(51, 51, 51);
+}
+
+#graph-svg {
+  position: absolute;
+
 }
 
 #td-container {
   display: flex;
-  height: 50%;
   justify-content: center;
+  align-items: flex-end;
+  width: 100%;
+  height: 50%;
+  border: solid 1px lightgray;
+  background-color: whitesmoke;
+}
+
+#td-svg {
+  position: absolute;
+
+}
+
+#nice-td-svg {
+  position: absolute;
+  /* height: 100%; */
+  /* width: 100%; */
+}
+
+
+.td-controls {
+  display: flex;
+  position: relative;
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.nice-td-controls {
+  display: flex;
+  position: relative;
+  font-weight: bold;
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.compute-td-text:hover {
+  color: orange;
+  cursor: pointer;
+}
+
+#graph-container div {
+  color: rgb(51, 51, 51);
 }
 
 #nice-td-container {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
   width: 100%;
   height: 100%;
+  background-color: whitesmoke;
+  border: solid 1px lightgray;
+}
+
+.app-interface {
+  margin-top: 10px;
 }
 
 .loader {
@@ -102,7 +192,7 @@ body {
   background-color: rgb(51, 51, 51);
   display: flex;
   flex-shrink: 0;
-  height: 50px;
+  height: 3%;
   align-items: center;
   justify-self: center;
   overflow: hidden;
@@ -117,7 +207,7 @@ body {
   text-align: center;
   padding: 0px 20px;
   text-decoration: none;
-  font-size: 14px;
+  font-size: 16px;
   cursor: pointer;
   height: 100%;
   user-select: none;
@@ -131,50 +221,13 @@ body {
   height: 100%;
   background-color: #4CAF50;
   color: white;
+  font-weight: bold;
 }
 
 
 /* Hide the link that should open and close the topnav on small screens */
 .topnav .icon {
   display: none;
-}
-
-/* Dropdown container - needed to position the dropdown content */
-.dropdown {
-  float: left;
-  overflow: hidden;
-}
-
-/* Style the dropdown button to fit inside the topnav */
-.dropdown .dropbtn {
-  font-size: 13px;
-  border: none;
-  outline: none;
-  color: white;
-  padding: 14px 16px;
-  background-color: inherit;
-  font-family: inherit;
-  margin: 0;
-}
-
-/* Style the dropdown content (hidden by default) */
-.dropdown-content {
-  display: none;
-  position: absolute;
-  background-color: #f9f9f9;
-  min-width: 160px;
-  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
-  z-index: 1;
-}
-
-/* Style the links inside the dropdown */
-.dropdown-content a {
-  float: none;
-  color: black;
-  padding: 12px 16px;
-  text-decoration: none;
-  display: block;
-  text-align: left;
 }
 
 /* Add a dark background on topnav links and the dropdown button on hover */
@@ -241,27 +294,19 @@ g.text:hover {
   text-align: center;
 }
 
-/* Node styling */
-
-/* Link styling */
 .link {
   stroke: rgb(51, 51, 51);
-  stroke-width: 3;
+  stroke-width: 3.5;
 }
 
 .highlighted-link {
   stroke: orange;
 }
 
-/* .link:hover {
-  stroke: orange;
-  cursor: pointer;
-} */
-
 .label {
-  fill: rgb(51, 51, 51);
+  fill: white;
   font-family: "PT Sans", sans-serif;
-  font-size: 16;
+  font-size: 12px;
   font-weight: bold;
   text-anchor: middle;
   pointer-events: none;
@@ -271,25 +316,19 @@ g.text:hover {
 .node {
   fill: rgb(238, 238, 238);
   stroke: rgb(51, 51, 51);
-  stroke-width: 3px;
+  stroke-width: 3.5px;
 }
 
 .highlighted-node {
-  fill: orange;
-  stroke: orange;
+  fill: orange !important;
+  stroke: orange !important;
   cursor: pointer;
 }
 
-/* .node:hover {
-  stroke: orange;
-  fill: orange;
-  cursor: pointer;
-} */
 
 .highlighted-text {
   fill: white;
 }
-
 
 .table {
   margin: auto;
@@ -304,22 +343,22 @@ g.text:hover {
   padding:0 25px;
 }
 
-
-#control-keys {
-  display: flex;
-  height: 10%;
-  justify-content: center;
-}
-
 .material-icons.md-48 { 
   font-size: 48px;
-  margin-bottom: 20px;
   cursor: pointer;
   user-select: none;
+  color: rgb(51, 51, 51);
+  opacity: 80%;
 }
 
 .material-icons.md-48:hover { 
   color: orange;
+}
+
+
+
+#graph-svg div:hover {
+  color: orange; 
 }
 
 .red {
@@ -345,5 +384,224 @@ td {
 }
 
 .highlighted-stroke {
-  stroke: blue;
+  stroke: #BF55EC !important;
+}
+
+a {
+  text-decoration: none;
+  color: black;
+}
+
+#control-keys-container {
+  display: flex;
+  background-color: rgb(51, 51, 51);
+  height: 5%;
+  justify-content: center;
+}
+
+.moving-node {
+  cursor: grabbing;
+}
+
+.not-drawing {
+  cursor: default;
+}
+
+.creating-link {
+  cursor: pointer;
+}
+
+.control-keys {
+  height: 100%;
+  width: 30%;
+  align-items: center;
+  justify-content: space-between;
+  display: flex;
+}
+
+.previous {
+  display: flex;
+
+}
+
+.next {
+  display: flex;
+}
+
+.next:hover {
+  color: orange;
+}
+
+.previous:hover {
+  color: orange;
+}
+
+.control-keys p {
+  font-weight: bold;
+}
+
+.pure-material-button-contained.chapter-buttons {
+  background-color: rgb(66, 66, 66);
+}
+
+.pure-material-button-contained {
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 4px;
+  padding: 0 16px;
+  min-width: 64px;
+  height: 36px;
+  vertical-align: middle;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
+  /* background-color: rgb(var(--pure-material-primary-rgb, 33, 150, 243)); */
+  background-color: rgb(51, 51, 51);
+  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  font-family: var(--pure-material-font, "Roboto", "Segoe UI", BlinkMacSystemFont, system-ui, -apple-system);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 36px;
+  overflow: hidden;
+  outline: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+}
+
+.pure-material-button-contained::-moz-focus-inner {
+  border: none;
+}
+
+/* Overlay */
+.pure-material-button-contained::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+/* Ripple */
+.pure-material-button-contained::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  padding: 50%;
+  width: 32px; /* Safari */
+  height: 32px; /* Safari */
+  background-color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1);
+  transition: opacity 1s, transform 0.5s;
+}
+
+/* Hover, Focus */
+.pure-material-button-contained:hover,
+.pure-material-button-contained:focus {
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.pure-material-button-contained:hover::before {
+  opacity: 0.08;
+}
+
+.pure-material-button-contained:focus::before {
+  opacity: 0.24;
+}
+
+.pure-material-button-contained:hover:focus::before {
+  opacity: 0.3;
+}
+
+/* Active */
+.pure-material-button-contained:active {
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.pure-material-button-contained:active::after {
+  opacity: 0.32;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0s;
+}
+
+/* Disabled */
+.pure-material-button-contained:disabled {
+  color: rgba(var(--pure-material-onsurface-rgb, 0, 0, 0), 0.38);
+  background-color: rgba(var(--pure-material-onsurface-rgb, 0, 0, 0), 0.12);
+  box-shadow: none;
+  cursor: initial;
+}
+
+.pure-material-button-contained:disabled::before {
+  opacity: 0;
+}
+
+.pure-material-button-contained:disabled::after {
+  opacity: 0;
+}
+
+/* The Modal (background) */
+.modal {
+  display: none; /* Hidden by default */
+  position: fixed; /* Stay in place */
+  z-index: 1; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border: 1px solid #888;
+  width: 30%; /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+  color: #aaa;
+  float: right;
+  font-size: 28px;
+  font-weight: bold;
+}
+
+.close:hover,
+.close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.theory-content {
+  padding: 30px;
+  line-height: 1.6;
+}
+
+div.tooltip {
+  position: absolute;
+  z-index: 1;
+  background-color: white;
+  /* max-width; 200px; */
+  height: auto;
+  padding: 1px;
+  border-style: solid;
+  border-radius: 4px;
+  border-width: 1px;
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, .5);
+  pointer-events: none;
 }
