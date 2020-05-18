@@ -1,37 +1,39 @@
 const contentData = {
-  treewidth: {
-    'content-title': 'Tree Decomposition',
-    'theory-content': 's...',
-    prev: 'index.html',
-    next: '?seperator',
+  home: {
+    'content-title': 'Home',
+    next: '?graph-separator',
   },
-  seperator: {
-    'content-title': 'Seperator',
-    'theory-content': 'about sep..',
-    previous: '?treewidth',
+  'graph-separator': {
+    'content-title': 'Graph Separator',
+    scripts: ['graph.js'],
+    previous: '?home',
+    next: '?tree-decomposition',
+  },
+  'tree-decomposition': {
+    'content-title': 'Tree Decomposition',
+    scripts: ['graph-separator.js', 'tree-decomposition.js'],
+    previous: '?graph-separator',
     next: '?nice-tree-decomposition',
   },
   'nice-tree-decomposition': {
     'content-title': 'Nice Tree Decomposition',
-    'theory-content': 'about nice tre....',
-    previous: '?seperator',
+    scripts: ['graph.js', 'tree-decomposition.js', 'nice-tree-decomposition.js'],
+    previous: '?tree-decomposition',
     next: '?algorithms',
   },
   algorithms: {
     'content-title': 'Algorithms on tree decomps....',
-    'theory-content': 'about algorithms',
+    scripts: ['tree.js'],
     previous: '?nice-tree-decomposition',
     next: '?max-independent-set',
   },
   'max-independent-set': {
     'content-title': 'Max Independent Set',
-    'theory-content': 'about max independent set',
     previous: '?algorithms',
     next: '?three-color',
   },
   'three-color': {
     'content-title': '3-Coloring',
-    'theory-content': 'about three color....',
     previous: '?max-independent-set',
   },
 

@@ -2,12 +2,30 @@
 import * as graph from './graph.js';
 
 let treeLinks;
-const colorsNodes = d3.scaleOrdinal(d3.schemeCategory10);
+
+let simulation;
+
+function recenter() {
+  const w = document.getElementById('td-container').offsetWidth;
+  const h = document.getElementById('td-container').offsetHeight;
+  d3.select('#graph-svg').attr('width', w).attr('height', h);
+  simulation = d3
+    .forceSimulation()
+    .force('center', d3.forceCenter(w / 2, h / 2))
+    .force('x', d3.forceX(w / 2).strength(0.1))
+    .force('y', d3.forceY(h / 2).strength(0.1))
+    .alpha(1)
+    .restart();
+}
+
+$(document).ready(() => { recenter(); });
 
 export default function loadTreeDecomposition(tree) {
   const tdWidth = document.getElementById('td-container').offsetWidth;
   const tdHeight = document.getElementById('td-container').offsetHeight;
   const svg = d3.select('#td-svg').attr('width', tdWidth).attr('height', tdHeight);
+
+  recenter();
 
   const { nodes } = tree;
   const { links } = tree;
@@ -78,11 +96,12 @@ export default function loadTreeDecomposition(tree) {
       .attr('y2', (d) => d.target.y);
   }
 
-  const simulation = d3.forceSimulation(nodes)
+  simulation
+    .nodes(nodes)
     .force('link', d3.forceLink(links).id((d) => d.id).distance(60).strength(0.9))
     .force('charge', d3.forceManyBody().strength(-500))
-    .force('x', d3.forceX(tdWidth / 2))
-    .force('y', d3.forceY(tdHeight / 2))
+    .force('x', d3.forceX(tdWidth / 2).strength(0.3))
+    .force('y', d3.forceY(tdHeight / 2).strength(0.3))
     .on('tick', ticked);
 
   function dragstarted(d) {

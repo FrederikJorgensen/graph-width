@@ -262,22 +262,38 @@ export function mis() {
     });
 
     keys.forEach((key, index) => {
-      if (key === '') key = '∅';
-      let value = values[index];
-      if (value < -1000) value = '-∞';
-      sb += `<tr id=${key} class="mis-row"><td class="sets">{${key}}</td><td>${value}</td></tr>`;
+      const value = values[index];
+      if (value < -1000) return;
+      if (key !== 'Ø') {
+        key = `{${key}}`;
+      }
+      sb += `<tr id=${key} class="mis-row"><td class="sets">${key}</td><td>${value}</td></tr>`;
     });
 
     const neww = document.getElementById(`nice-tree-node-${currentNode.data.id}`).getBoundingClientRect().top;
     const new2 = document.getElementById(`nice-tree-node-${currentNode.data.id}`).getBoundingClientRect().left;
+    /*     const nodeWidth = document.getElementById(`nice-tree-node-${currentNode.data.id}`);
+    const bBox = nodeWidth.getBBox();
+    console.log('XxY', `${bBox.x}x${bBox.y}`);
+    console.log('size', `${bBox.width}x${bBox.height}`);
+    console.log(nodeWidth); */
+    // console.log(d3.select(`#nice-tree-node-${currentNode.data.id}`).attr('cx'));
+
+
+    console.log(neww);
 
     const start = `<table><tbody id="tbody">${sb}</tbody></table>`;
-    tooltip.transition()
-      .duration(300)
+    tooltip
+
       .style('opacity', 1);
     tooltip.html(start)
-      .style('left', `${new2 - 100}px`)
-      .style('top', `${neww}px`);
+      .style('left', `${new2 - 80}px`)
+      .style('top', `${neww + 17}px`);
+
+    d3.select('#dp-arrow')
+      .style('opacity', 1)
+      .style('left', `${new2 - 25}px`)
+      .style('top', `${neww + 7}px`);
 
     const tbody = document.getElementById('tbody');
     tbody.innerHTML = sb;
@@ -371,6 +387,7 @@ export function threeColor() {
 
 
       for (const childState of childStates) {
+        console.log(childState);
         childState.pop();
       }
 

@@ -1,6 +1,7 @@
 html {
   height:100%;
   margin: 0;;
+  user-select: none;
 }
 
 body {
@@ -52,11 +53,9 @@ body {
   height: 50%;
   width: 100%;
   border-bottom: none;
-  cursor: crosshair;
   justify-content: center;
   align-items: flex-end;
   border: solid 1px lightgray;
-  border-bottom: none;
   background-color: whitesmoke;
 }
 
@@ -73,8 +72,15 @@ body {
   position: relative;
 }
 
-
 .vertices-number-container {
+  color: rgb(51, 51, 51);
+  opacity: 90%;
+  display: flex;
+  align-items: center;
+  font-size: 24px;
+}
+
+.edges-number-container {
   color: rgb(51, 51, 51);
   opacity: 90%;
   display: flex;
@@ -88,7 +94,6 @@ body {
 
 #graph-svg {
   position: absolute;
-
 }
 
 #td-container {
@@ -230,11 +235,6 @@ body {
   display: none;
 }
 
-/* Add a dark background on topnav links and the dropdown button on hover */
-.topnav a:hover, .dropdown:hover .dropbtn {
-  background-color: #555;
-  color: white;
-}
 
 /* Add a grey background to dropdown links on hover */
 .dropdown-content a:hover {
@@ -385,11 +385,6 @@ td {
 
 .highlighted-stroke {
   stroke: #BF55EC !important;
-}
-
-a {
-  text-decoration: none;
-  color: black;
 }
 
 #control-keys-container {
@@ -604,4 +599,74 @@ div.tooltip {
   border-width: 1px;
   box-shadow: 3px 3px 10px rgba(0, 0, 0, .5);
   pointer-events: none;
+}
+
+#dp-arrow {
+  position: absolute;
+  /* z-index: 10; */
+  opacity: 0;
+  color: red;
+}
+
+.home-link {
+  text-decoration: none;
+  color: white;
+}
+
+.loading {
+  color: red;
+}
+
+.drawinng {
+  cursor: crosshair;
+}
+
+.drawing-disabled {
+  pointer-events: none;
+  cursor: pointer;
+}
+
+.exercise-locked {
+  opacity: 50%;
+}
+
+.exercises {
+  margin-top: 50px;
+}
+
+.exercise {
+  margin-bottom: 30px;
+}
+
+.exercise-active {
+  color: orange;
+}
+
+.exercise-title:hover {
+  color: orange;
+  cursor: pointer;
+}
+
+.separating-node {
+  fill: #00e322;
+  stroke: #00e322;
+}
+
+.not-separating-node {
+  fill: red;
+  stroke: red;
+}
+
+.exercise-result {
+  margin-top: 30px;
+}
+
+.correct-answer {
+  vertical-align: middle;
+  color: green;
+}
+
+.wrong-answer {
+  vertical-align: middle;
+  color: red;
 }
