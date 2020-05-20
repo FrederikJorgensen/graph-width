@@ -24,61 +24,54 @@
 </head>
 
 <body>
-  <div class="topnav" id="myTopnav">
+<!--   <div class="topnav" id="myTopnav">
 
     <div class="project-title">
       <a href="?home" class="home-link">
         Graph Width Visualizer </a>
     </div>
 
-  </div>
+  </div> -->
   <div class="flex-container">
     <div class="center-container">
       <div id="left-container">
         <h2 id="content-title"></h2>
         <div class="theory-content">
-          <div id="td-content">
-            A <strong>tree decomposition</strong> of <span id="one"></span> is a tree <span id="treeMath"></span>
-            that consists of vertices structured in a tree like way. Each node in the tree <span id="treeMath2"></span>
-            we
-            will denote as <span id="b"></span> or as a bag.
-            Each bag consists of vertices <span id="v"></span> where <span id="bags"></span>. <br /> <br />
-            The tree decomposition must satisfy the following criteria:
-            <br />
-            <ul>
-              <li>Every vertex of <span id="graph2"></span> must be in some bag of <span id="tree2"></span></li>
-              <li>For all edges <span id="edge"></span> of <span id="g1"></span> there must be some bag containing both
-                ends of <span id="edge2"></span></li>
-              <li>Let us define three bags of <span id="t3"></span> as <span id="b1"></span><span id="b2"></span> and
-                <span id="b3"></span> in which <span id="b22"></span> lies on the path between <span id="b12"></span>
-                and
-                <span id="b32"></span>. Then if a vertex <span id="vertex2"></span> of <span id="graph3"></span> belongs
-                to <span id="b13"></span> and <span id="b33"></span> then it must also belong to <span id="b23"></span>
-              </li>
-            </ul>
-            <strong>
-              <p>Exercises</p>
-            </strong>
-            <ol>
-              <li>
-                <div>Create the tree decomposition of the current graph. \n check your solution</div>
-                <div>Check your solution</div>
-              </li>
-            </ol>
-          </div>
           <div class="seperator-content">
-            <div>Before exploring treewidth and tree decomposition it is important to understand the concept of a graph
+            <div>Before exploring treewidth and tree decompositions it is important to understand the concept of a graph
               separator (also known as a <a href="https://en.wikipedia.org/wiki/Vertex_separator">vertex separator</a>).
-
-              A subset containing some vertices in the graph \(S \subset V \) is a graph seperator if the
-              removal of that
-              set leaves the graph into several connected components.
+              <br />
+              <h3>Vertex Separator</h3>
+              A subset \(S \subset V \) containing some vertices in the graph is a seperator if the
+              removal of \( S \) cuts the graph into several connected components.
             </div>
             <h3>Minimal Seperators</h3>
             <div>
-              a Minimal...
+              We say that \(S\) is a minimal separator if no proper subset of \(S\) contains a separator.
+              <br /><br />
+              That is if
+              \(S=\{A,B\}\) is a separator in some graph. For the seperator to be minimal these must be true:
+              <br /><br />
+              \( S_1=\{A\} \) cannot be a separator in the graph.
+              <br />
+              \( S_2=\{ B\} \) cannot be a separator in the graph.
             </div>
+
+            <h3>Balanced Separator</h3>
+            <div>A separator \(S\) is balanced if every component of <span class="some-math">\( G \setminus S \) has
+                atmost \( \dfrac{V(G)-S}{2}
+                \) vertices.</span>
+              <!-- <br /> -->
+              That is once
+              you remove the separator from the graph the remaining components must not contain more vertices than the
+              size of the their current graph / 2.</div>
+
+
+
             <div class="exercises">
+              <p class="separator-exercises-info">Click on an exercise to start it. Click on a vertex in the graph to
+                include it into the set \( S \) and
+                click on the vertex again to remove it from \( S \).</p>
               <div id="exercise-1" class="exercise">
                 <div id="exercise-1-title" class="exercise-title"><strong>Exercise 1:</strong> Find a seperator in the
                   graph</div>
@@ -95,6 +88,10 @@
 
                 <div class="exercise-2-content">
                   <div class="exercise-result" id="exercise-2-result">\(S=\{\}\)</div>
+                  <div class="hint" id="exercise-2-hint-title">Show Hint</div>
+                  <div class="hint-content" id="exercise-2-hint-content">Recall that if any <a
+                      href="https://mathinsight.org/definition/proper_subset">proper subset</a> of your current set is a
+                    separator in the graph then it's not a minial separator.</div>
                 </div>
               </div>
 
@@ -105,9 +102,33 @@
 
                 <div class="exercise-3-content">
                   <div class="exercise-result" id="exercise-3-result">\(S=\{\}\)</div>
+                  <div class="hint" id="exercise-3-hint-title">Show Hint</div>
+                  <div class="hint-content" id="exercise-3-hint-content">Recall that every component after you separate
+                    the graph must have fewer vertices than the graph's total vertices divided by 2.</div>
                 </div>
+
+
               </div>
             </div>
+          </div>
+          <div id="td-content">
+            <div>
+              Treewidth is a way to measure how tree-like a graph is.
+              <br /> <br />
+              Why do we care how much a graph is "like" a tree? It turns out if a graph is similar to a tree we can
+              turn that graph into a tree.
+              <br /><br />
+              This is important because many problems that are hard to solve on graphs are a lot easier to
+              solve on trees.
+              <br /><br />
+              Can you tell if the graph on the right side is tree-like?
+              <br /><br />
+              <div class="button" id="tw-answer">Click here to see the answer.</div>
+              <div id="tw-content">Not really. In the next chapter we will discuss a way to measure this.</div>
+            </div>
+          </div>
+          <div id="tree-decomposition-content">
+            some content goes here
           </div>
           <div class="nice-td-content">
             <p>Nice td content....</p>

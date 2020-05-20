@@ -4,60 +4,12 @@
 
 import * as helpers from '../helpers.js';
 
-
-let mousedownNode = null;
 let nodes = [];
 let links = [];
 let nodeSvg;
 let linkSvg;
 let simulation;
 const colors = d3.scaleOrdinal(d3.schemeCategory10);
-
-function beginDrawLine(d) {
-  if (d3.event.ctrlKey) return;
-  d3.event.preventDefault();
-  d3.select('#graph-svg').classed('creating-link', true);
-  d3.select(`#node-${d.id}`).classed('highlighted-node', true);
-  d3.select(`#text-${d.id}`).classed('highlighted-text', true);
-  mousedownNode = d;
-  d3.selectAll('path.dragLine')
-    .classed('hidden', false)
-    .attr(
-      'd',
-      `M${
-        mousedownNode.x
-      },${
-        mousedownNode.y
-      }L${
-        mousedownNode.x
-      },${
-        mousedownNode.y}`,
-    );
-}
-
-function stopDrawLine(d) {
-  if (!mousedownNode || mousedownNode === d) return;
-  for (let i = 0; i < links.length; i++) {
-    const l = links[i];
-    if (
-      (l.source === mousedownNode && l.target === d)
-        || (l.source === d && l.target === mousedownNode)
-    ) {
-      return;
-    }
-  }
-  const newLink = { source: mousedownNode, target: d };
-  links.push(newLink);
-}
-
-function removeNode(d) {
-  if (d3.event.ctrlKey) return;
-  const linksToRemove = links.filter((l) => l.source === d || l.target === d);
-  linksToRemove.map((l) => links.splice(links.indexOf(l), 1));
-  nodes.splice(nodes.indexOf(d), 1);
-  d3.event.preventDefault();
-  restart();
-}
 
 function restart() {
   d3.selectAll('circle').classed('highlighted-node', false);
@@ -100,9 +52,6 @@ function restart() {
 
   g.append('circle')
     .attr('id', (d) => `node-${d.id}`)
-    .on('mousedown', beginDrawLine)
-    .on('mouseup', stopDrawLine)
-    .on('contextmenu', removeNode)
     .attr('class', 'node')
     .style('fill', d3.rgb(colors(1)))
     .attr('r', 17);
@@ -119,54 +68,6 @@ function restart() {
   simulation.nodes(nodes);
   simulation.force('link').links(links);
   simulation.alpha(0.5).restart();
-}
-
-function getAllNodes() {
-  return d3.selectAll('#graph-svg circle').data();
-}
-
-function getLastNodeId() {
-  return getAllNodes().length;
-}
-
-function addNode() {
-  const e = d3.event;
-  if (e.button === 0) {
-    const coords = d3.mouse(e.currentTarget);
-    let lastNodeId = getLastNodeId();
-    const newNode = {
-      x: coords[0], y: coords[1], id: ++lastNodeId,
-    };
-    nodes.push(newNode);
-    restart();
-  }
-}
-
-function updateDragLine() {
-  if (!mousedownNode) return;
-  const coords = d3.mouse(d3.event.currentTarget);
-  d3.selectAll('path.dragLine').attr(
-    'd',
-    `M${
-      mousedownNode.x
-    },${
-      mousedownNode.y
-    }L${
-      coords[0]
-    },${
-      coords[1]}`,
-  );
-}
-
-function hideDragLine() {
-  d3.selectAll('path.dragLine').classed('hidden', true);
-  mousedownNode = null;
-  restart();
-}
-
-function leftCanvas() {
-  d3.selectAll('path.dragLine').classed('hidden', true);
-  mousedownNode = null;
 }
 
 export function startDraw() {
@@ -202,7 +103,6 @@ function ctrlPressed() {
   }
 }
 
-
 function ctrlRealesed() {
   if (d3.event.keyCode === 17) {
     d3.selectAll('#graph-svg circle').on('.drag', null);
@@ -221,18 +121,36 @@ function recenter() {
   const w = document.getElementById('graph-container').offsetWidth;
   const h = document.getElementById('graph-container').offsetHeight;
   simulation
-    // .force('center', d3.forceCenter(w / 2, h / 2))
+    .force('center', d3.forceCenter(w / 2, h / 2))
     .force('x', d3.forceX(w / 2).strength(0.2))
     .force('y', d3.forceY(h / 2).strength(0.2))
     .alpha(1)
     .restart();
 }
 
+
+d3.select('#exercise-1').on('click', () => {
+  resetAllExercises();
+  selectedNodes = [];
+  isSeparatorExercise = true;
+  isMinimalSeparatorExercise = false;
+  isBalanceExercise = false;
+  resetNodeStyling();
+  hideAllExercises();
+  d3.selectAll('div').classed('exercise-active', false);
+  d3.select('#exercise-1-title').classed('exercise-active', true);
+  $('.exercise-1-content').show();
+});
+
+
+$('#tw-answer').click(() => {
+  $('#tw-content').toggle();
+});
+
 function loadGraph() {
   const w = document.getElementById('graph-container').offsetWidth;
   const h = document.getElementById('graph-container').offsetHeight;
   const svg = d3.select('#graph-svg').attr('width', w).attr('height', h);
-  d3.select('#graph-svg').classed('loading', true);
 
   linkSvg = svg.append('g').selectAll('link');
 
@@ -271,14 +189,9 @@ function loadGraph() {
 }
 
 d3.select('#graph-svg')
-  .on('mousedown', addNode)
   .on('contextmenu', () => {
     d3.event.preventDefault();
-  })
-  .on('mousemove', updateDragLine)
-  .on('mouseup', hideDragLine)
-  .on('mouseleave', leftCanvas);
-
+  });
 export function main() {
   simulation = d3.forceSimulation();
   recenter();

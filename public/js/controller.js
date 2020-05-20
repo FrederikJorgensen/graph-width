@@ -15,6 +15,13 @@ $('.three-color-content').hide();
 $('.exercise-1-content').hide();
 $('.exercise-2-content').hide();
 $('.exercise-3-content').hide();
+$('#exercise-2-hint-content').hide();
+$('#exercise-3-hint-content').hide();
+$('.tree-width-container').hide();
+$('#tw-content').hide();
+$('#tree-decomposition-content').hide();
+$('#graph-container').hide();
+$('#td-container').hide();
 
 function loadContent(query) {
   const currentChapter = contentData[query];
@@ -23,10 +30,11 @@ function loadContent(query) {
   document.title = `${currentChapter['content-title']} - Graph Width Visualizer`;
   $('#content-title').html(currentChapter['content-title']);
 
+  const h = $('#left-container').height() - 150;
+  $('.theory-content').css('max-height', `${h}px`);
+
   if (currentChapter.previous) $('.previous').attr('href', currentChapter.previous);
   if (currentChapter.next) $('.next').attr('href', currentChapter.next);
-
-  if (query=== 'tree-decomposition') $('#td-content').show();
 
   if (query === 'graph-separator') {
     $('.seperator-content').show();
@@ -34,6 +42,17 @@ function loadContent(query) {
     $('#td-container').hide();
     $('#right-container').hide();
     $('.graph-controls').hide();
+  }
+
+  if (query === 'tree-width') {
+    $('.graph-controls').hide();
+    $('#td-container').hide();
+    $('#td-content').show();
+    d3.select('#graph-container').style('height', '100%');
+  }
+
+  if (query === 'tree-decomposition') {
+    $('#tree-decomposition-content').show();
   }
 
   if (query === 'nice-tree-decomposition') {

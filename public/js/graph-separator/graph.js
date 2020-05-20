@@ -78,23 +78,41 @@ d3.select('#exercise-3').on('click', () => {
   $('.exercise-3-content').show();
 });
 
+$('#exercise-2-hint-title').click(() => {
+  const hintTitle = document.getElementById('exercise-2-hint-title');
+
+  if (hintTitle.innerText === 'Show Hint') {
+    hintTitle.innerText = 'Hide Hint';
+  } else {
+    hintTitle.innerText = 'Show Hint';
+  }
+
+  $('#exercise-2-hint-content').toggle();
+});
+
+$('#exercise-3-hint-title').click(() => {
+  const hintTitle = document.getElementById('exercise-3-hint-title');
+
+  if (hintTitle.innerText === 'Show Hint') {
+    console.log('here');
+    hintTitle.innerText = 'Hide Hint';
+  } else {
+    hintTitle.innerText = 'Show Hint';
+  }
+
+  $('#exercise-3-hint-content').toggle();
+});
 
 /* https://stackoverflow.com/a/47147597/4169689 */
-const getAllSubsets = (theArray) => theArray.reduce(
-  (subsets, value) => subsets.concat(
-    subsets.map((set) => [value, ...set]),
-  ),
-  [[]],
-);
-
-/*
-    Take a set
-    return true or false
-*/
-
+const getAllSubsets = (theArray) =>
+  theArray.reduce(
+    (subsets, value) => subsets.concat(subsets.map((set) => [value, ...set])),
+    [[]]
+  );
 
 function showResult(isSeparating) {
   const resultDiv = document.getElementById('exercise-1-result');
+  const exerciseOneHint = document.getElementById('exercise-1-hint');
 
   if (selectedNodes.length === 0) {
     resultDiv.innerHTML = '\\( S = \\{ \\} \\)';
@@ -110,7 +128,6 @@ function showResult(isSeparating) {
 
   renderMathInElement(resultDiv);
 }
-
 
 function checkConnectivity(subGraphNodes, subGraphLinks) {
   let componentCount;
@@ -193,7 +210,7 @@ function showMinimalSeparatorResult(isMinimal) {
   }
 
   if (isMinimal) {
-    resultDiv.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is a minimal separating set!<span class="material-icons correct-answer">check</span>`;
+    resultDiv.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is a minimal separator!<span class="material-icons correct-answer">check</span>`;
   } else {
     resultDiv.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is not a minimal separator!<span class="material-icons wrong-answer">clear</span>`;
   }
@@ -211,11 +228,16 @@ function checkMinimalSeparator(d) {
 
   /* Get all proper subsets of current selected separator */
   const allSubsets = getAllSubsets(selectedNodes);
-  const allProperSubsets = allSubsets.filter((subset) => subset.length !== selectedNodes.length && subset.length !== 0);
+  const allProperSubsets = allSubsets.filter(
+    (subset) => subset.length !== selectedNodes.length && subset.length !== 0
+  );
+
+  /* Get the sub graph and whether it is disconnected */
 
   /* Check if any the proper subsets is a separator in the graph */
   for (const set of allProperSubsets) {
-    if (isSeparatorSet(set)) {
+    const sg = isSeparatorSet(set);
+    if (sg.isDisconnected) {
       d3.selectAll('circle.node').classed('separating-node', false);
       d3.selectAll('circle.node').classed('not-separating-node', (node) => {
         if (selectedNodes.includes(node.id)) return 'true';
@@ -225,18 +247,25 @@ function checkMinimalSeparator(d) {
     }
   }
 
-  d3.selectAll('circle.node').classed('not-separating-node', false);
-  d3.selectAll('circle.node').classed('separating-node', (node) => {
-    if (selectedNodes.includes(node.id)) return 'true';
-  });
-  showMinimalSeparatorResult(true);
+  const subg = isSeparatorSet(selectedNodes);
+
+  if (subg.isDisconnected) {
+    d3.selectAll('circle.node').classed('not-separating-node', false);
+    d3.selectAll('circle.node').classed('separating-node', (node) => {
+      if (selectedNodes.includes(node.id)) return 'true';
+    });
+    showMinimalSeparatorResult(true);
+    return;
+  }
+  d3.selectAll('circle.node').classed('separating-node', false);
+  showMinimalSeparatorResult(false);
 }
 
 function showBalanceResult(isBalanced) {
   const exerciseThreeResultDiv = document.getElementById('exercise-3-result');
 
   if (selectedNodes.length === 0) {
-    resultDiv.innerHTML = '\\( S = \\{ \\} \\)';
+    exerciseThreeResultDiv.innerHTML = '\\( S = \\{ \\} \\)';
     renderMathInElement(exerciseThreeResultDiv);
     return;
   }
@@ -253,6 +282,14 @@ function checkBalanceSeparator(d) {
   if (selectedNodes.includes(d.id)) {
     const nodeToRemove = selectedNodes.indexOf(d.id);
     selectedNodes.splice(nodeToRemove, 1);
+
+    /* After removing a separating node check if the remaining vertices are still adjacent */
+    if (selectedNodes.length > 1 && isSeparatingNodesAdjacent() === false) {
+      colorNotSeparating();
+      d3.selectAll('circle.node').style('fill', colors(1));
+      showBalanceResult(false);
+      return;
+    }
   } else {
     selectedNodes.push(d.id);
   }
@@ -260,31 +297,47 @@ function checkBalanceSeparator(d) {
   /* Original graph's vertices subtracting the vertex separator set */
   const balanceLimit = (nodes.length - selectedNodes.length) / 2;
 
-
+  /* Get the subgraph, sublinks and whether the graph is disconnected */
   const obj = isSeparatorSet(selectedNodes);
 
+  /* First check if the graph is disconnected */
   if (obj.isDisconnected === true) {
-    console.log(obj.subGraphNodes);
     const newnodes = obj.subGraphNodes;
-    console.log(newnodes);
     const connectedComponents = {};
 
+    /* Count the vertices in each component */
     for (const node of newnodes) {
       if ('cluster' in node) {
         const nc = node.cluster;
-        connectedComponents[nc] = (connectedComponents[nc] + 1) || 1;
+        connectedComponents[nc] = connectedComponents[nc] + 1 || 1;
       }
     }
 
     const componentLength = Object.values(connectedComponents);
 
+    /* Test each component length against the balance limit */
     for (const cl of componentLength) {
       if (cl > balanceLimit) {
+        d3.selectAll('circle.node').classed('separating-node', false);
+        d3.selectAll('circle.node').classed('not-separating-node', (node) => {
+          if (selectedNodes.includes(node.id)) return 'true';
+        });
+
         showBalanceResult(false);
         return;
       }
     }
+    d3.selectAll('circle.node').classed('not-separating-node', false);
+    d3.selectAll('circle.node').classed('separating-node', (node) => {
+      if (selectedNodes.includes(node.id)) return 'true';
+    });
     showBalanceResult(true);
+  } else {
+    d3.selectAll('circle.node').classed('separating-node', false);
+    d3.selectAll('circle.node').classed('not-separating-node', (node) => {
+      if (selectedNodes.includes(node.id)) return 'true';
+    });
+    showBalanceResult(false);
   }
 }
 
@@ -295,13 +348,6 @@ function buildAdjacencyList(links) {
     adjacencyList[`${d.target.id}-${d.source.id}`] = true;
   });
   return adjacencyList;
-}
-
-function checkNeighboring(newNode) {
-  for (const node of selectedNodes) {
-    if (ad[`${node}-${newNode}`]) return true;
-  }
-  return false;
 }
 
 function colorNotSeparating() {
@@ -332,11 +378,48 @@ function resetNodeStyling() {
   d3.selectAll('circle.node').style('fill', colors(1));
 }
 
+function isNeighboring(nodeToCheck) {
+  return selectedNodes.some((selectNode) => {
+    if (ad[`${selectNode}-${nodeToCheck}`]) {
+      return true;
+    }
+    return false;
+  });
+}
+
+function isSeparatingNodesAdjacent() {
+  return selectedNodes.every((node) => {
+    if (isNeighboring(node)) {
+      return true;
+    }
+    return false;
+  });
+}
+
+function isNeighboringSeparatedNodes(newNode) {
+  for (const node of selectedNodes) {
+    if (ad[`${node}-${newNode}`]) return true;
+  }
+  return false;
+}
+
 function checkSeparator(d) {
+  // if (d.id === 2) debugger;
+
   /* If node clicked on is already in the separator set we remove it */
   if (selectedNodes.includes(d.id)) {
     const nodeInSeparatorSet = selectedNodes.indexOf(d.id);
     selectedNodes.splice(nodeInSeparatorSet, 1);
+
+    /* After removing a separating node check if the remaining vertices are still adjacent */
+    if (selectedNodes.length > 1 && isSeparatingNodesAdjacent() === false) {
+      colorNotSeparating();
+      d3.selectAll('circle.node').style('fill', colors(1));
+      showResult(false);
+      return;
+    }
+
+    /* If the new separating set is empty reset the result and the styling */
     if (selectedNodes.length === 0) {
       showResult();
       resetNodeStyling();
@@ -345,7 +428,10 @@ function checkSeparator(d) {
   } else {
     selectedNodes.push(d.id);
     /* If new node to the separator is not a neighbor the result is wrong */
-    if (selectedNodes.length > 1 && checkNeighboring(d.id) === false) {
+    if (
+      selectedNodes.length > 1 &&
+      isNeighboringSeparatedNodes(d.id) === false
+    ) {
       colorNotSeparating();
       d3.selectAll('circle.node').style('fill', colors(1));
       showResult(false);
@@ -354,18 +440,26 @@ function checkSeparator(d) {
   }
 
   /* Remove the current separtor nodes */
-  const subGraphNodes = nodes.filter((node) => !selectedNodes.includes(node.id));
+  const subGraphNodes = nodes.filter(
+    (node) => !selectedNodes.includes(node.id)
+  );
 
   /* Remove the links from the separator node */
   const linksToRemove = links.filter((l) => {
-    if (selectedNodes.includes(l.target.id) || selectedNodes.includes(l.source.id)) return true;
+    if (
+      selectedNodes.includes(l.target.id) ||
+      selectedNodes.includes(l.source.id)
+    )
+      return true;
   });
   const subGraphLinks = links.filter((link) => !linksToRemove.includes(link));
 
   // d3.selectAll('line').style('stroke', (link) => (subGraphLinks.includes(link) ? 'red' : '#888888'));
 
   /* Check if the new subgraph after deleteing the separating set is connected */
-  if (checkConnectivity(subGraphNodes, subGraphLinks)) {
+  const subg = checkConnectivity(subGraphNodes, subGraphLinks);
+
+  if (subg.isDisconnected) {
     colorSeparting();
     showResult(true);
   } else {
@@ -394,18 +488,21 @@ function restart() {
   const g = nodeSvg
     .enter()
     .append('g')
-    .call(d3.drag()
-      .on('start', (v) => {
-        if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-        [v.fx, v.fy] = [v.x, v.y];
-      })
-      .on('drag', (v) => {
-        [v.fx, v.fy] = [d3.event.x, d3.event.y];
-      })
-      .on('end', (v) => {
-        if (!d3.event.active) simulation.alphaTarget(0);
-        [v.fx, v.fy] = [null, null];
-      }));
+    .call(
+      d3
+        .drag()
+        .on('start', (v) => {
+          if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+          [v.fx, v.fy] = [v.x, v.y];
+        })
+        .on('drag', (v) => {
+          [v.fx, v.fy] = [d3.event.x, d3.event.y];
+        })
+        .on('end', (v) => {
+          if (!d3.event.active) simulation.alphaTarget(0);
+          [v.fx, v.fy] = [null, null];
+        })
+    );
 
   g.append('circle')
     .attr('id', (d) => `node-${d.id}`)
@@ -461,11 +558,19 @@ function loadGraph() {
   simulation
     .nodes(nodes)
     .force('charge', d3.forceManyBody().strength(-300))
-    .force('link', d3.forceLink(links).id((d) => d.id).distance(50).strength(0.9))
+    .force(
+      'link',
+      d3
+        .forceLink(links)
+        .id((d) => d.id)
+        .distance(50)
+        .strength(0.9)
+    )
     .on('tick', () => {
       nodeSvg.attr('transform', (d) => `translate(${d.x},${d.y})`);
 
-      linkSvg.attr('x1', (d) => d.source.x)
+      linkSvg
+        .attr('x1', (d) => d.source.x)
         .attr('y1', (d) => d.source.y)
         .attr('x2', (d) => d.target.x)
         .attr('y2', (d) => d.target.y);
@@ -478,8 +583,28 @@ function loadGraph() {
 
 function main() {
   simulation = d3.forceSimulation();
-  nodes = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }, { id: 7 }, { id: 8 }, { id: 9 }];
-  links = [{ source: 1, target: 2 }, { source: 3, target: 1 }, { source: 7, target: 5 }, { source: 5, target: 2 }, { source: 8, target: 6 }, { source: 6, target: 4 }, { source: 6, target: 3 }, { source: 4, target: 3 }, { source: 4, target: 9 }];
+  nodes = [
+    { id: 1 },
+    { id: 2 },
+    { id: 3 },
+    { id: 4 },
+    { id: 5 },
+    { id: 6 },
+    { id: 7 },
+    { id: 8 },
+    { id: 9 },
+  ];
+  links = [
+    { source: 1, target: 2 },
+    { source: 3, target: 1 },
+    { source: 7, target: 5 },
+    { source: 5, target: 2 },
+    { source: 8, target: 6 },
+    { source: 6, target: 4 },
+    { source: 6, target: 3 },
+    { source: 4, target: 3 },
+    { source: 4, target: 9 },
+  ];
   recenter();
   window.onresize = recenter;
   loadGraph();
