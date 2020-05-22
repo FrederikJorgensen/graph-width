@@ -1,6 +1,6 @@
 html {
-  height:100%;
-  margin: 0;;
+  height: 100%;
+  margin: 0;
   user-select: none;
 }
 
@@ -9,20 +9,30 @@ body {
   /* min-height: 100%; */
   overflow: hidden;
   margin: 0;
-  font-family: 'Inter', sans-serif;
+  font-family: 'Walter Turncoat', Calibri, Arial, sans-serif;
+  /* font-family: 'Inter', sans-serif; */
+}
+
+.container {
+  display: flex;
+  height: 100%;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
 }
 
 .flex-container {
-  display: flex;
-  height: 92%;
+  /*   display: flex;
+  height: 100vh;
   width: 100%;
   justify-content: center;
+  align-items: center; */
 }
 
 .center-container {
   display: flex;
   align-items: center;
-  flex: .9;
+  flex: 0.9;
   height: 100%;
 }
 
@@ -108,7 +118,6 @@ body {
 
 #td-svg {
   position: absolute;
-
 }
 
 #nice-td-svg {
@@ -116,7 +125,6 @@ body {
   /* height: 100%; */
   /* width: 100%; */
 }
-
 
 .td-controls {
   display: flex;
@@ -219,22 +227,20 @@ body {
 }
 
 .topnav div:hover {
-  background-color: #4CAF50;
+  background-color: #4caf50;
 }
 
 .project-title {
   height: 100%;
-  background-color: #4CAF50;
+  background-color: #4caf50;
   color: white;
   font-weight: bold;
 }
-
 
 /* Hide the link that should open and close the topnav on small screens */
 .topnav .icon {
   display: none;
 }
-
 
 /* Add a grey background to dropdown links on hover */
 .dropdown-content a:hover {
@@ -249,7 +255,8 @@ body {
 
 /* When the screen is less than 600 pixels wide, hide all links, except for the first one ("Home"). Show the link that contains should open and close the topnav (.icon) */
 @media screen and (max-width: 600px) {
-  .topnav a:not(:first-child), .dropdown .dropbtn {
+  .topnav a:not(:first-child),
+  .dropdown .dropbtn {
     display: none;
   }
   .topnav a.icon {
@@ -260,7 +267,9 @@ body {
 
 /* The "responsive" class is added to the topnav with JavaScript when the user clicks on the icon. This class makes the topnav look good on small screens (display the links vertically instead of horizontally) */
 @media screen and (max-width: 600px) {
-  .topnav.responsive {position: relative;}
+  .topnav.responsive {
+    position: relative;
+  }
   .topnav.responsive a.icon {
     position: absolute;
     right: 0;
@@ -271,8 +280,12 @@ body {
     display: block;
     text-align: left;
   }
-  .topnav.responsive .dropdown {float: none;}
-  .topnav.responsive .dropdown-content {position: relative;}
+  .topnav.responsive .dropdown {
+    float: none;
+  }
+  .topnav.responsive .dropdown-content {
+    position: relative;
+  }
   .topnav.responsive .dropdown .dropbtn {
     display: block;
     width: 100%;
@@ -305,7 +318,7 @@ g.text:hover {
 
 .label {
   fill: white;
-  font-family: "PT Sans", sans-serif;
+  font-family: 'PT Sans', sans-serif;
   font-size: 12px;
   font-weight: bold;
   text-anchor: middle;
@@ -325,7 +338,6 @@ g.text:hover {
   cursor: pointer;
 }
 
-
 .highlighted-text {
   fill: white;
 }
@@ -336,14 +348,13 @@ g.text:hover {
   border: 1px solid lightgray;
   padding: 20px;
   margin-top: 20px;
-
 }
 
 .table td {
-  padding:0 25px;
+  padding: 0 25px;
 }
 
-.material-icons.md-48 { 
+.material-icons.md-48 {
   font-size: 48px;
   cursor: pointer;
   user-select: none;
@@ -351,27 +362,25 @@ g.text:hover {
   opacity: 80%;
 }
 
-.material-icons.md-48:hover { 
+.material-icons.md-48:hover {
   color: orange;
 }
 
-
-
 #graph-svg div:hover {
-  color: orange; 
+  color: orange;
 }
 
 .red {
   color: red;
-} 
+}
 
 .green {
   color: green;
-} 
+}
 
 .blue {
   color: blue;
-} 
+}
 
 .sets:hover {
   cursor: pointer;
@@ -384,7 +393,7 @@ td {
 }
 
 .highlighted-stroke {
-  stroke: #BF55EC !important;
+  stroke: #bf55ec !important;
 }
 
 #control-keys-container {
@@ -416,7 +425,6 @@ td {
 
 .previous {
   display: flex;
-
 }
 
 .next {
@@ -455,8 +463,16 @@ td {
   color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
   /* background-color: rgb(var(--pure-material-primary-rgb, 33, 150, 243)); */
   background-color: rgb(51, 51, 51);
-  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
-  font-family: var(--pure-material-font, "Roboto", "Segoe UI", BlinkMacSystemFont, system-ui, -apple-system);
+  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+    0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  font-family: var(
+    --pure-material-font,
+    'Roboto',
+    'Segoe UI',
+    BlinkMacSystemFont,
+    system-ui,
+    -apple-system
+  );
   font-size: 14px;
   font-weight: 500;
   line-height: 36px;
@@ -472,7 +488,7 @@ td {
 
 /* Overlay */
 .pure-material-button-contained::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   bottom: 0;
@@ -485,7 +501,7 @@ td {
 
 /* Ripple */
 .pure-material-button-contained::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 50%;
   top: 50%;
@@ -502,7 +518,8 @@ td {
 /* Hover, Focus */
 .pure-material-button-contained:hover,
 .pure-material-button-contained:focus {
-  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+    0 1px 10px 0 rgba(0, 0, 0, 0.12);
 }
 
 .pure-material-button-contained:hover::before {
@@ -519,7 +536,8 @@ td {
 
 /* Active */
 .pure-material-button-contained:active {
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
 .pure-material-button-contained:active::after {
@@ -554,8 +572,8 @@ td {
   width: 100%; /* Full width */
   height: 100%; /* Full height */
   overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0,0,0); /* Fallback color */
-  background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+  background-color: rgb(0, 0, 0); /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
 }
 
 /* Modal Content/Box */
@@ -598,7 +616,7 @@ div.tooltip {
   border-style: solid;
   border-radius: 4px;
   border-width: 1px;
-  box-shadow: 3px 3px 10px rgba(0, 0, 0, .5);
+  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
   pointer-events: none;
 }
 
@@ -678,7 +696,7 @@ div.tooltip {
   display: flex;
   justify-content: space-around;
   padding: 5px;
- /* justify-content: space-between; */
+  /* justify-content: space-between; */
   /* display: inline; */
   /* text-align: center; */
 }
@@ -721,13 +739,4 @@ div.tooltip {
 .tw-graph {
   flex: 1;
   background-color: lightseagreen;
-}
-
-.button {
-  text-decoration: underline;
-}
-
-.button:hover {
-  color: orange;
-  cursor: pointer;
 }

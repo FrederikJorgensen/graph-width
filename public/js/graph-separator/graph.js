@@ -2,9 +2,12 @@
 /* eslint-disable no-restricted-syntax */
 /* Graph Drawing Starts here */
 
+import * as controller from '../controller.js';
+
 let nodes = [];
 let links = [];
 let selectedNodes = [];
+let componentCount;
 let nodeSvg;
 let linkSvg;
 let simulation;
@@ -14,124 +17,90 @@ let isSeparatorExercise = false;
 let isMinimalSeparatorExercise = false;
 let isBalanceExercise = false;
 
-function removeNode(d) {
-  if (d3.event.ctrlKey) return;
-  const linksToRemove = links.filter((l) => l.source === d || l.target === d);
-  linksToRemove.map((l) => links.splice(links.indexOf(l), 1));
-  nodes.splice(nodes.indexOf(d), 1);
-  d3.event.preventDefault();
-  restart();
-}
-
-function hideAllExercises() {
-  $('.exercise-1-content').hide();
-  $('.exercise-2-content').hide();
-  $('.exercise-3-content').hide();
-}
-
-function resetAllExercises() {
-  const exerciseOneResultDiv = document.getElementById('exercise-1-result');
-  exerciseOneResultDiv.innerHTML = '\\( S = \\{ \\} \\)';
-  renderMathInElement(exerciseOneResultDiv);
-
-  const exerciseTwoResultDiv = document.getElementById('exercise-2-result');
-  exerciseTwoResultDiv.innerHTML = '\\( S = \\{ \\} \\)';
-  renderMathInElement(exerciseTwoResultDiv);
-}
-
-d3.select('#exercise-1').on('click', () => {
-  resetAllExercises();
-  selectedNodes = [];
-  isSeparatorExercise = true;
-  isMinimalSeparatorExercise = false;
-  isBalanceExercise = false;
-  resetNodeStyling();
-  hideAllExercises();
-  d3.selectAll('div').classed('exercise-active', false);
-  d3.select('#exercise-1-title').classed('exercise-active', true);
-  $('.exercise-1-content').show();
-});
-
-d3.select('#exercise-2').on('click', () => {
-  resetAllExercises();
-  selectedNodes = [];
-  isSeparatorExercise = false;
-  isMinimalSeparatorExercise = true;
-  isBalanceExercise = false;
-  resetNodeStyling();
-  hideAllExercises();
-  d3.selectAll('div').classed('exercise-active', false);
-  d3.select('#exercise-2-title').classed('exercise-active', true);
-  $('.exercise-2-content').show();
-});
-
-d3.select('#exercise-3').on('click', () => {
-  isSeparatorExercise = false;
-  isMinimalSeparatorExercise = false;
-  isBalanceExercise = true;
-  resetAllExercises();
-  selectedNodes = [];
-  resetNodeStyling();
-  hideAllExercises();
-  d3.selectAll('div').classed('exercise-active', false);
-  d3.select('#exercise-3-title').classed('exercise-active', true);
-  $('.exercise-3-content').show();
-});
-
-$('#exercise-2-hint-title').click(() => {
-  const hintTitle = document.getElementById('exercise-2-hint-title');
-
-  if (hintTitle.innerText === 'Show Hint') {
-    hintTitle.innerText = 'Hide Hint';
+export function toggleExercise1() {
+  if (isSeparatorExercise === true) {
+    isSeparatorExercise = false;
   } else {
-    hintTitle.innerText = 'Show Hint';
+    isSeparatorExercise = true;
   }
+}
 
-  $('#exercise-2-hint-content').toggle();
-});
-
-$('#exercise-3-hint-title').click(() => {
-  const hintTitle = document.getElementById('exercise-3-hint-title');
-
-  if (hintTitle.innerText === 'Show Hint') {
-    console.log('here');
-    hintTitle.innerText = 'Hide Hint';
+export function toggleExercise2() {
+  if (isMinimalSeparatorExercise === true) {
+    isMinimalSeparatorExercise = false;
   } else {
-    hintTitle.innerText = 'Show Hint';
+    isMinimalSeparatorExercise = true;
   }
+}
 
-  $('#exercise-3-hint-content').toggle();
-});
-
-/* https://stackoverflow.com/a/47147597/4169689 */
-const getAllSubsets = (theArray) =>
-  theArray.reduce(
-    (subsets, value) => subsets.concat(subsets.map((set) => [value, ...set])),
-    [[]]
-  );
+export function toggleExercise3() {
+  if (isBalanceExercise === true) {
+    isBalanceExercise = false;
+  } else {
+    isBalanceExercise = true;
+  }
+}
 
 function showResult(isSeparating) {
-  const resultDiv = document.getElementById('exercise-1-result');
-  const exerciseOneHint = document.getElementById('exercise-1-hint');
-
-  if (selectedNodes.length === 0) {
-    resultDiv.innerHTML = '\\( S = \\{ \\} \\)';
-    renderMathInElement(resultDiv);
-    return;
-  }
-
   if (isSeparating) {
-    resultDiv.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is a separator in the graph. <span class="material-icons correct-answer">check</span>`;
+    toggleExercise1();
+    controller.goNextExercise(1);
+    d3.select('.text-container').append('div').attr('id', 'exercise-result');
+    d3.select('.text-container').style('height', '350px');
+    const resultContainer = document.getElementById('exercise-result');
+    resultContainer.innerHTML = `The set \\( S = \\{ ${selectedNodes} \\} \\) is indeed a separator in the graph. <span class="material-icons correct-answer">check</span> <br/><br/>Because if we remove the separator it would disconnect the graph into ${componentCount} different components.<br/><br/>Click space to go to the next exercise...`;
+    componentCount = 0;
+    selectedNodes = [];
+    renderMathInElement(resultContainer);
   } else {
-    resultDiv.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is not a separator in the graph.  <span class="material-icons wrong-answer">clear</span>`;
+    /* If the user gets a wrong answer we should give a hint here... */
+    // resultDiv.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is not a separator in the graph.  <span class="material-icons wrong-answer">clear</span>`;
   }
-
-  renderMathInElement(resultDiv);
 }
 
-function checkConnectivity(subGraphNodes, subGraphLinks) {
-  let componentCount;
+function showMinimalSeparatorResult(isMinimal) {
+  if (isMinimal) {
+    toggleExercise2();
+    controller.goNextExercise(2);
+    d3.select('.text-container').append('div').attr('id', 'exercise-result');
+    d3.select('.text-container').style('height', '350px');
+    const resultContainer = document.getElementById('exercise-result');
+    resultContainer.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is a minimal separator!<span class="material-icons correct-answer">check</span>`;
+    componentCount = 0;
+    selectedNodes = [];
+    renderMathInElement(resultContainer);
+  } else {
+    // Give user hint here...
+  }
+}
 
+function showBalanceResult(isBalanced) {
+  const exerciseThreeResultDiv = document.getElementById('exercise-3-result');
+
+  if (isBalanced) {
+    toggleExercise3();
+    controller.goNextExercise(3);
+    d3.select('.text-container').append('div').attr('id', 'exercise-result');
+    d3.select('.text-container').style('height', '350px');
+    const resultContainer = document.getElementById('exercise-result');
+    resultContainer.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is a balanced separator!<span class="material-icons correct-answer">check</span>`;
+    componentCount = 0;
+    selectedNodes = [];
+    renderMathInElement(resultContainer);
+  } else {
+    // Give hint
+  }
+}
+
+
+/* https://stackoverflow.com/a/47147597/4169689 */
+const getAllSubsets = (theArray) => theArray.reduce(
+  (subsets, value) => subsets.concat(subsets.map((set) => [value, ...set])),
+  [[]],
+);
+
+
+function checkConnectivity(subGraphNodes, subGraphLinks) {
   if (subGraphNodes.length === 0) {
     componentCount = 0;
     return;
@@ -181,6 +150,8 @@ function checkConnectivity(subGraphNodes, subGraphLinks) {
     }
   }
 
+  d3.selectAll('circle.node').style('fill', (d) => colors(d.cluster));
+
   const isDisconnected = componentCount > 1;
 
   return { subGraphNodes, subGraphLinks, isDisconnected };
@@ -200,23 +171,6 @@ function isSeparatorSet(set) {
   return checkConnectivity(subGraphNodes, subGraphLinks);
 }
 
-function showMinimalSeparatorResult(isMinimal) {
-  const resultDiv = document.getElementById('exercise-2-result');
-
-  if (selectedNodes.length === 0) {
-    resultDiv.innerHTML = '\\( S = \\{ \\} \\)';
-    renderMathInElement(resultDiv);
-    return;
-  }
-
-  if (isMinimal) {
-    resultDiv.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is a minimal separator!<span class="material-icons correct-answer">check</span>`;
-  } else {
-    resultDiv.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is not a minimal separator!<span class="material-icons wrong-answer">clear</span>`;
-  }
-
-  renderMathInElement(resultDiv);
-}
 
 function checkMinimalSeparator(d) {
   if (selectedNodes.includes(d.id)) {
@@ -229,7 +183,7 @@ function checkMinimalSeparator(d) {
   /* Get all proper subsets of current selected separator */
   const allSubsets = getAllSubsets(selectedNodes);
   const allProperSubsets = allSubsets.filter(
-    (subset) => subset.length !== selectedNodes.length && subset.length !== 0
+    (subset) => subset.length !== selectedNodes.length && subset.length !== 0,
   );
 
   /* Get the sub graph and whether it is disconnected */
@@ -259,23 +213,6 @@ function checkMinimalSeparator(d) {
   }
   d3.selectAll('circle.node').classed('separating-node', false);
   showMinimalSeparatorResult(false);
-}
-
-function showBalanceResult(isBalanced) {
-  const exerciseThreeResultDiv = document.getElementById('exercise-3-result');
-
-  if (selectedNodes.length === 0) {
-    exerciseThreeResultDiv.innerHTML = '\\( S = \\{ \\} \\)';
-    renderMathInElement(exerciseThreeResultDiv);
-    return;
-  }
-
-  if (isBalanced) {
-    exerciseThreeResultDiv.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is a balanced separator!<span class="material-icons correct-answer">check</span>`;
-  } else {
-    exerciseThreeResultDiv.innerHTML = `\\( S = \\{ ${selectedNodes} \\} \\) is not a balanced separator!<span class="material-icons wrong-answer">clear</span>`;
-  }
-  renderMathInElement(exerciseThreeResultDiv);
 }
 
 function checkBalanceSeparator(d) {
@@ -368,7 +305,7 @@ function colorSeparting() {
   });
 }
 
-function resetNodeStyling() {
+export function resetNodeStyling() {
   d3.selectAll('circle.node').classed('not-separating-node', (node) => {
     if (selectedNodes.includes(node.id)) return false;
   });
@@ -404,8 +341,6 @@ function isNeighboringSeparatedNodes(newNode) {
 }
 
 function checkSeparator(d) {
-  // if (d.id === 2) debugger;
-
   /* If node clicked on is already in the separator set we remove it */
   if (selectedNodes.includes(d.id)) {
     const nodeInSeparatorSet = selectedNodes.indexOf(d.id);
@@ -429,8 +364,8 @@ function checkSeparator(d) {
     selectedNodes.push(d.id);
     /* If new node to the separator is not a neighbor the result is wrong */
     if (
-      selectedNodes.length > 1 &&
-      isNeighboringSeparatedNodes(d.id) === false
+      selectedNodes.length > 1
+      && isNeighboringSeparatedNodes(d.id) === false
     ) {
       colorNotSeparating();
       d3.selectAll('circle.node').style('fill', colors(1));
@@ -441,20 +376,17 @@ function checkSeparator(d) {
 
   /* Remove the current separtor nodes */
   const subGraphNodes = nodes.filter(
-    (node) => !selectedNodes.includes(node.id)
+    (node) => !selectedNodes.includes(node.id),
   );
 
   /* Remove the links from the separator node */
   const linksToRemove = links.filter((l) => {
     if (
-      selectedNodes.includes(l.target.id) ||
-      selectedNodes.includes(l.source.id)
-    )
-      return true;
+      selectedNodes.includes(l.target.id)
+      || selectedNodes.includes(l.source.id)
+    ) return true;
   });
   const subGraphLinks = links.filter((link) => !linksToRemove.includes(link));
-
-  // d3.selectAll('line').style('stroke', (link) => (subGraphLinks.includes(link) ? 'red' : '#888888'));
 
   /* Check if the new subgraph after deleteing the separating set is connected */
   const subg = checkConnectivity(subGraphNodes, subGraphLinks);
@@ -501,7 +433,7 @@ function restart() {
         .on('end', (v) => {
           if (!d3.event.active) simulation.alphaTarget(0);
           [v.fx, v.fy] = [null, null];
-        })
+        }),
     );
 
   g.append('circle')
@@ -511,7 +443,6 @@ function restart() {
       if (isMinimalSeparatorExercise) checkMinimalSeparator(d);
       if (isBalanceExercise) checkBalanceSeparator(d);
     })
-    .on('contextmenu', removeNode)
     .attr('class', 'node')
     .style('fill', d3.rgb(colors(1)))
     .attr('r', 17);
@@ -535,8 +466,8 @@ function restart() {
 /* Loading of graph simulation starts here */
 
 function recenter() {
-  const w = document.getElementById('graph-container').offsetWidth;
-  const h = document.getElementById('graph-container').offsetHeight;
+  const w = document.getElementById('main').offsetWidth;
+  const h = document.getElementById('main').offsetHeight;
   simulation
     .force('center', d3.forceCenter(w / 2, h / 2))
     .force('x', d3.forceX(w / 2).strength(0.1))
@@ -546,10 +477,13 @@ function recenter() {
 }
 
 function loadGraph() {
-  const w = document.getElementById('graph-container').offsetWidth;
-  const h = document.getElementById('graph-container').offsetHeight;
-  const svg = d3.select('#graph-svg').attr('width', w).attr('height', h);
-  d3.select('#graph-svg').classed('loading', true);
+  const w = document.getElementById('main').offsetWidth;
+  const h = document.getElementById('main').offsetHeight;
+  const svg = d3.select('#main').append('svg');
+
+  svg.attr('id', 'yup');
+
+  svg.attr('width', w).attr('height', h);
 
   linkSvg = svg.append('g').selectAll('link');
 
@@ -564,7 +498,7 @@ function loadGraph() {
         .forceLink(links)
         .id((d) => d.id)
         .distance(50)
-        .strength(0.9)
+        .strength(0.9),
     )
     .on('tick', () => {
       nodeSvg.attr('transform', (d) => `translate(${d.x},${d.y})`);
@@ -578,10 +512,9 @@ function loadGraph() {
 
   simulation.force('link').links(links);
   recenter();
-  d3.select('#graph-svg').classed('loading', false);
 }
 
-function main() {
+export function main() {
   simulation = d3.forceSimulation();
   nodes = [
     { id: 1 },
@@ -611,5 +544,3 @@ function main() {
   ad = buildAdjacencyList(links);
   restart();
 }
-
-window.onload = main;

@@ -1,3 +1,4 @@
+/* eslint-disable import/prefer-default-export */
 /* eslint-disable space-infix-ops */
 /* eslint-disable no-undef */
 /* eslint-disable dot-notation */
@@ -5,7 +6,10 @@
 /* eslint-disable space-infix-ops */
 /* eslint-disable quote-props */
 
-$('#td-content').hide();
+import SpeechBubble from './SpeechBubble.js';
+import * as separator from './graph-separator/graph.js';
+
+/* $('#td-content').hide();
 $('.algorithms-content').hide();
 $('#right-container').hide();
 $('.seperator-content').hide();
@@ -22,11 +26,73 @@ $('#tw-content').hide();
 $('#tree-decomposition-content').hide();
 $('#graph-container').hide();
 $('#td-container').hide();
+$('.center-container').hide(); */
 
-function loadContent(query) {
+/* Enable first exercise */
+
+// seperator.toggleExercise1();
+
+const sb = new SpeechBubble();
+sb.add();
+sb.setPosition(100, 100);
+
+
+function timeout(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function waitSpaceBarClicked() {
+  return new Promise();
+}
+
+function readKey() {
+  return new Promise((resolve) => {
+    window.addEventListener('keypress', resolve, { once: true });
+  });
+}
+
+export async function goNextExercise(currentExercise) {
+  let i = 0;
+  i++;
+
+
+  let query = window.location.search;
+  query = query.substr(1);
+
+  if (query === 'graph-separator') {
+    if (currentExercise === 1) {
+      await sb.say('Nice you found a separator!');
+      await readKey();
+      separator.resetNodeStyling();
+      separator.toggleExercise2();
+      await sb.say('There are different kinds of separators. We will cover minimal separators next. A minimal separator set S is a separator in a graph if no proper subset of the set S also contains a separator. In other words if some graph has a separator set S = {A,B} then A on its own cannot separate the graph neither can B. <br/>Try to find a minimal separator in the graph.');
+      const res = d3.select('.text-container').append('div').attr('id', 'exercise-result');
+      d3.select('.text-container').style('height', '100%');
+      const q = document.getElementById('exercise-result');
+      renderMathInElement(q);
+    }
+
+    if (currentExercise === 2) {
+      await sb.say('Great! You found a minimal separator in the graph!');
+      separator.resetNodeStyling();
+      separator.toggleExercise3();
+      await readKey();
+      await sb.say('Now try finding a balanced separator');
+    }
+
+    if (currentExercise === 3) {
+      await sb.say('Awesome! You found a balanced separator in the graph! <br/><br/>You should now have a basic understanding of graph separators. In the coming chapters we are going to look at how tree decompositions exploit these separators in their graphs. Go to next chapter to continue learning :)');
+      separator.resetNodeStyling();
+      separator.toggleExercise3();
+    }
+  }
+}
+
+
+async function loadContent(query) {
   const currentChapter = contentData[query];
-  const graphHeight = document.getElementById('graph-container').offsetHeight;
-  const graphWidth = document.getElementById('graph-container').offsetWidth;
+  // const graphHeight = document.getElementById('flex-container').offsetHeight;
+  // const graphWidth = document.getElementById('flex-container').offsetWidth;
   document.title = `${currentChapter['content-title']} - Graph Width Visualizer`;
   $('#content-title').html(currentChapter['content-title']);
 
@@ -36,13 +102,59 @@ function loadContent(query) {
   if (currentChapter.previous) $('.previous').attr('href', currentChapter.previous);
   if (currentChapter.next) $('.next').attr('href', currentChapter.next);
 
-  if (query === 'graph-separator') {
-    $('.seperator-content').show();
-    d3.select('#graph-container').style('height', '100%');
-    $('#td-container').hide();
-    $('#right-container').hide();
-    $('.graph-controls').hide();
+  // load app styling
+  $('head').append(
+    `<link href="js/${query}/${currentChapter.style}" rel="stylesheet">`,
+  );
+
+  /* Get all script needed to run this chapter */
+  let stringBuilder = '';
+  currentChapter.scripts.forEach((script) => {
+    stringBuilder += `<script type="module" src="js/${query}/${script}"></script>`;
+  });
+
+  /* Load all the scripts within the body */
+  $('body').append(stringBuilder);
+
+  const main = d3.select('.main');
+
+  if (query === 'home') {
+    const homeLogo = main.append('div').attr('class', 'home-title').append('h2');
+
+    homeLogo.text('GraphWidth.com').style('opacity', 0);
+
+    homeLogo.transition().duration(3000).style('opacity', 0.9);
+
+    const homeCenterContainer = d3.select('.home-title').style('opacity', 0);
+
+
+    homeCenterContainer.append('p').text('An interactive way to learn graph width measures.');
+    d3.select('.home-title').append('a').attr('href', currentChapter.next).append('button')
+      .text('Start Learning')
+      .attr('class', 'btn');
+
+    homeCenterContainer.transition().duration(3000).style('opacity', 0.9);
   }
+
+
+  if (query === 'graph-separator') {
+    main.append('div').attr('class', 'button-container');
+
+    d3.select('.button-container').append('div').attr('class', 'buttons');
+    d3.select('.buttons').append('a').attr('href', '/').append('div')
+      .attr('class', 'btn')
+      .text('Back');
+    d3.select('.buttons').append('a').attr('href', currentChapter.next).append('div')
+      .attr('class', 'btn')
+      .text('Next');
+
+    separator.toggleExercise1();
+    await sb.say('Before we explore treewidth there is one concept that we must familiarize ourselves with. That is the concept of graph separators.');
+    separator.main();
+    await timeout(2000);
+    await sb.say('We say that a set S is a <strong>graph separator</strong> if the removal of that set from the graph leaves the graph into multiple connected components. <br/><br/>Can you find one or multiple vertices that would separate the graph into different components? <br/> <br/> Click on a vertex to include it into the separator set.');
+  }
+
 
   if (query === 'tree-width') {
     $('.graph-controls').hide();
@@ -92,15 +204,6 @@ function loadContent(query) {
     $('#td-container').hide();
     $('.three-color-content').show();
   }
-
-  /* Get all script needed to run this chapter */
-  let stringBuilder = '';
-  currentChapter.scripts.forEach((script) => {
-    stringBuilder += `<script type="module" src="js/${query}/${script}"></script>`;
-  });
-
-  /* Load all the scripts within the body */
-  $('body').append(stringBuilder);
 }
 
 $(document).ready(() => {
@@ -115,7 +218,6 @@ $(document).ready(() => {
     loadContent(home);
   }
 });
-
 
 /* let isTreeDecompositionComputed = false;
 let isNiceTreeeDecompositionComputed = true;
