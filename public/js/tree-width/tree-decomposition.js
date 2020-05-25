@@ -1,14 +1,10 @@
-
-import * as graph from './graph.js';
-
 let treeLinks;
-
 let simulation;
 
-function recenter() {
-  const w = document.getElementById('td-container').offsetWidth;
-  const h = document.getElementById('td-container').offsetHeight;
-  d3.select('#graph-svg').attr('width', w).attr('height', h);
+function recenterTD() {
+  const w = document.getElementById('tree-container').offsetWidth;
+  const h = document.getElementById('tree-container').offsetHeight;
+  d3.select('#tree-container').attr('width', w).attr('height', h);
   simulation = d3
     .forceSimulation()
     .force('center', d3.forceCenter(w / 2, h / 2))
@@ -18,14 +14,12 @@ function recenter() {
     .restart();
 }
 
-$(document).ready(() => { recenter(); });
-
 export default function loadTreeDecomposition(tree) {
-  const tdWidth = document.getElementById('td-container').offsetWidth;
-  const tdHeight = document.getElementById('td-container').offsetHeight;
-  const svg = d3.select('#td-svg').attr('width', tdWidth).attr('height', tdHeight);
+  const tdWidth = document.getElementById('tree-container').offsetWidth;
+  const tdHeight = document.getElementById('tree-container').offsetHeight;
+  const svg = d3.select('#tree-container').append('svg').attr('width', tdWidth).attr('height', tdHeight);
 
-  recenter();
+  recenterTD();
 
   const { nodes } = tree;
   const { links } = tree;
@@ -59,32 +53,36 @@ export default function loadTreeDecomposition(tree) {
   const g = nodeSvg
     .enter()
     .append('g')
-    .on('mouseover', function (d) {
-      graph.showSeperator(d.vertices);
-      d3.select(this).select('text').classed('highlighted-text', true);
+    .on('mouseover', (d) => {
+      // graph.showSeperator(d.vertices);
+      /*       d3.select(this).select('text').classed('highlighted-text', true);
       d3.select(this).select('circle').classed('highlighted-node', true);
-      d3.select(this).select('circle').classed('moving-node', true);
+      d3.select(this).select('circle').classed('moving-node', true); */
     })
-    .on('mouseleave', function (d) {
-      graph.hideSeperator();
+    .on('mouseleave', (d) => {
+      /*       graph.hideSeperator();
       d3.select(this).select('text').classed('highlighted-text', false);
-      d3.select(this).select('circle').classed('highlighted-node', false);
+      d3.select(this).select('circle').classed('highlighted-node', false); */
     });
 
   g
     .append('circle')
+    .attr('id', (d) => `tree-node-${d.id}`)
     .attr('class', 'node')
     .style('fill', d3.scaleOrdinal()
       .domain([0, 1])
       .range(['red', 'blue', 'green']))
-    .attr('r', 17);
+    .attr('r', 22);
 
   g
     .append('text')
     .text((d) => d.label)
-    .attr('dy', '.2em')
-    .attr('class', 'label')
-    .attr('text-anchor', 'middle');
+    .style('font-size', function (d) { return `${Math.min(2 * d.r, (2 * d.r - 20) / this.getComputedTextLength() * 24)}px`; })
+    .attr('dy', '.35em')
+    .attr('class', 'label');
+  // .attr('dy', '.2em')
+  // .attr('class', 'label')
+  // .attr('text-anchor', 'middle');
 
   nodeSvg = g.merge(nodeSvg);
 

@@ -1,7 +1,3 @@
-/* eslint-disable prefer-destructuring */
-/* eslint-disable no-restricted-syntax */
-/* Graph Drawing Starts here */
-
 import * as helpers from '../helpers.js';
 
 let nodes = [];
@@ -38,6 +34,21 @@ function restart() {
   const g = nodeSvg
     .enter()
     .append('g')
+    .call(
+      d3
+        .drag()
+        .on('start', (v) => {
+          if (!d3.event.active) simulation.alphaTarget(0.3).restart();
+          [v.fx, v.fy] = [v.x, v.y];
+        })
+        .on('drag', (v) => {
+          [v.fx, v.fy] = [d3.event.x, d3.event.y];
+        })
+        .on('end', (v) => {
+          if (!d3.event.active) simulation.alphaTarget(0);
+          [v.fx, v.fy] = [null, null];
+        }),
+    )
     .on('mouseover', () => {
       d3.select(this).select('text').classed('highlighted-text', true);
       d3.select(this).select('circle').classed('highlighted-node', true);
@@ -70,110 +81,35 @@ function restart() {
   simulation.alpha(0.5).restart();
 }
 
-export function startDraw() {
-  nodes.splice(0);
-  links.splice(0);
-  restart();
-}
-
-const drag = d3.drag()
-  .filter(() => d3.event.button === 0 || d3.event.button === 2)
-  .on('start', (d) => {
-    if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-
-    d.fx = d.x;
-    d.fy = d.y;
-  })
-  .on('drag', (d) => {
-    d.fx = d3.event.x;
-    d.fy = d3.event.y;
-  })
-  .on('end', (d) => {
-    if (!d3.event.active) simulation.alphaTarget(0);
-
-    d.fx = null;
-    d.fy = null;
-  });
-
-
-function ctrlPressed() {
-  if (d3.event.keyCode === 17) {
-    d3.selectAll('circle.node').call(drag);
-    d3.select('#graph-svg').classed('moving-node', true);
-  }
-}
-
-function ctrlRealesed() {
-  if (d3.event.keyCode === 17) {
-    d3.selectAll('#graph-svg circle').on('.drag', null);
-    d3.select('#graph-svg').classed('moving-node', false);
-  }
-}
-
-d3.select(window).on('keydown', ctrlPressed).on('keyup', ctrlRealesed);
-
 /* Graph Drawing Ends Here */
 
 
 /* Loading of graph simulation starts here */
 
 function recenter() {
-  const w = document.getElementById('graph-container').offsetWidth;
-  const h = document.getElementById('graph-container').offsetHeight;
+  const w = document.getElementById('tw-intro').offsetWidth;
+  const h = document.getElementById('tw-intro').offsetHeight;
   simulation
     .force('center', d3.forceCenter(w / 2, h / 2))
-    .force('x', d3.forceX(w / 2).strength(0.2))
-    .force('y', d3.forceY(h / 2).strength(0.2))
+    .force('x', d3.forceX(w / 2).strength(0.1))
+    .force('y', d3.forceY(h / 2).strength(0.1))
     .alpha(1)
     .restart();
 }
 
-
-d3.select('#exercise-1').on('click', () => {
-  resetAllExercises();
-  selectedNodes = [];
-  isSeparatorExercise = true;
-  isMinimalSeparatorExercise = false;
-  isBalanceExercise = false;
-  resetNodeStyling();
-  hideAllExercises();
-  d3.selectAll('div').classed('exercise-active', false);
-  d3.select('#exercise-1-title').classed('exercise-active', true);
-  $('.exercise-1-content').show();
-});
-
-
-$('#tw-answer').click(() => {
-  $('#tw-content').toggle();
-});
-
 function loadGraph() {
-  const w = document.getElementById('graph-container').offsetWidth;
-  const h = document.getElementById('graph-container').offsetHeight;
-  const svg = d3.select('#graph-svg').attr('width', w).attr('height', h);
+  const w = document.getElementById('tw-intro').offsetWidth;
+  const h = document.getElementById('tw-intro').offsetHeight;
+  const svg = d3.select('#tw-intro').append('svg').attr('width', w).attr('height', h);
 
   linkSvg = svg.append('g').selectAll('link');
-
-  svg
-    .append('path')
-    .attr('class', 'dragLine hidden')
-    .attr('d', 'M0,0L0,0');
-
-  svg.append('g')
-    .attr('class', 'hulls');
-
-  svg.append('path')
-    .attr('fill', 'orange')
-    .attr('stroke', 'orange')
-    .attr('stroke-width', 16)
-    .attr('opacity', 0.2);
-
   nodeSvg = svg.selectAll('circle');
 
   simulation
     .nodes(nodes)
     .force('charge', d3.forceManyBody().strength(-400))
-    .force('link', d3.forceLink(links).distance(50).strength(0.9))
+    .force('link', d3.forceLink(links).id((d) => d.id).distance(50).strength(0.9))
+    .force('collision', d3.forceCollide().radius(20))
     .on('tick', () => {
       nodeSvg.attr('transform', (d) => `translate(${d.x},${d.y})`);
 
@@ -183,16 +119,68 @@ function loadGraph() {
         .attr('y2', (d) => d.target.y);
     });
 
+
   simulation.force('link').links(links);
   recenter();
-  d3.select('#graph-svg').classed('loading', false);
 }
 
-d3.select('#graph-svg')
-  .on('contextmenu', () => {
-    d3.event.preventDefault();
-  });
-export function main() {
+export function clearGraph() {
+  d3.select('svg').remove();
+  nodes.splice(0);
+  links.splice(0);
+  restart();
+}
+
+export function loadGraph1() {
+  simulation = d3.forceSimulation();
+  recenter();
+  loadGraph();
+
+  nodes = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }, { id: 7 }, { id: 8 }, { id: 9 }, { id: 10 }];
+  links = [
+    { source: 1, target: 2 },
+    { source: 2, target: 3 },
+    { source: 5, target: 1 },
+    { source: 1, target: 6 },
+    { source: 2, target: 7 },
+    { source: 3, target: 8 },
+    { source: 4, target: 9 },
+    { source: 5, target: 10 },
+    { source: 3, target: 1 },
+  ];
+  restart();
+}
+
+export function loadGraph2() {
+  simulation = d3.forceSimulation();
+  recenter();
+  loadGraph();
+
+  nodes = [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }, { id: 5 }, { id: 6 }, { id: 7 }, { id: 8 }, { id: 9 }, { id: 10 }];
+  links = [
+    { source: 1, target: 2 },
+    { source: 1, target: 3 },
+    { source: 1, target: 4 },
+    { source: 1, target: 5 },
+    { source: 1, target: 6 },
+    { source: 1, target: 7 },
+    { source: 1, target: 8 },
+    { source: 1, target: 9 },
+    { source: 1, target: 10 },
+    { source: 5, target: 8 },
+    { source: 8, target: 3 },
+    { source: 3, target: 6 },
+    { source: 6, target: 9 },
+    { source: 9, target: 4 },
+    { source: 4, target: 7 },
+    { source: 7, target: 2 },
+    { source: 2, target: 10 },
+    { source: 10, target: 5 },
+  ];
+  restart();
+}
+
+export function loadRandomGraph() {
   simulation = d3.forceSimulation();
   recenter();
   window.onresize = recenter;
@@ -202,5 +190,3 @@ export function main() {
   links = randomGraph.links;
   restart();
 }
-
-window.onload = main;

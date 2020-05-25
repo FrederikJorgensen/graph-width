@@ -1,12 +1,6 @@
 
-import loadNiceTreeDecomposition from './niceTreeDecomposition.js';
-import loadTreeDecomposition from './treeDecomposition.js';
-
-const a = 97;
-const charArray = {};
-for (let i = 0; i < 26; i++) charArray[String.fromCharCode(a + i)] = i + 1;
-const charArray2 = {};
-for (let i = 0; i < 26; i++) charArray2[i + 1] = String.fromCharCode(a + i);
+// import loadNiceTreeDecomposition from './niceTreeDecomposition.js';
+import loadTreeDecomposition from './tree-decomposition.js';
 
 export function readTreeDecomposition(treeData) {
   treeData.pop();
@@ -37,7 +31,7 @@ export function readTreeDecomposition(treeData) {
   }
   treeDecomp.nodes = nodes;
   treeDecomp.links = links;
-  loadTreeDecomposition(treeDecomp, '#td-svg');
+  loadTreeDecomposition(treeDecomp);
 }
 
 function readNiceTreeDecomposition(treeData) {
