@@ -1,13 +1,14 @@
-const contentData = {
+export default {
   home: {
-    'content-title': 'Home',
+    title: 'Home',
     scripts: ['home.js'],
     style: 'home.css',
     next: '?tree-width-intro',
   },
   'tree-width-intro': {
-    'content-title': 'Intro',
+    title: 'Intro',
     scripts: ['tree-width-intro.js'],
+    folder: '01-tree-width-intro',
     style: 'tree-width-intro.css',
     back: '/',
     next: '?graph-separator',
@@ -52,5 +53,4 @@ const contentData = {
     'content-title': '3-Coloring',
     back: '?max-independent-set',
   },
-
 };

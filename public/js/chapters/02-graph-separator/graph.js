@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 /* Graph Drawing Starts here */
 
-import * as controller from '../controller.js';
+import * as controller from '../../controller.js';
 
 let nodes = [];
 let links = [];

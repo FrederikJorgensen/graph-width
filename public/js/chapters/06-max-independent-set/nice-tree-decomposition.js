@@ -16,7 +16,6 @@ const tooltip = d3.select('#nice-td-container')
   .attr('id', 'tooltip')
   .style('opacity', 0);
 
-
 export default function loadNiceTreeDecomposition(treeData) {
   const niceTdWidth = document.getElementById('nice-td-container').offsetWidth;
   const niceTdHeight = document.getElementById('nice-td-container').offsetHeight;
@@ -79,9 +78,6 @@ export default function loadNiceTreeDecomposition(treeData) {
     .attr('ry', (d) => 17)
     .attr('id', (d) => `nice-tree-node-${d.data.id}`)
     .attr('class', 'node')
-    // .attr('cx', (d) => d.x)
-    // .attr('cy', (d) => d.y)
-    // .attr('r', 20)
     .attr('transform', `translate(${0}, ${40})`);
 
   g

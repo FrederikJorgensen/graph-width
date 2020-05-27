@@ -2,7 +2,7 @@
 /* eslint-disable no-restricted-syntax */
 /* Graph Drawing Starts here */
 
-import * as helpers from '../helpers.js';
+import * as helpers from '../../helpers.js';
 
 let mousedownNode = null;
 let nodes = [];

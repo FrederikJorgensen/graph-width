@@ -32,6 +32,12 @@ export function generateRandomGraph(n, m) {
   return graph;
 }
 
+export function readKey() {
+  return new Promise((resolve) => {
+    window.addEventListener('keypress', resolve, { once: true });
+  });
+}
+
 export function forceClusterCollision() {
   let nodes;
   let radii;

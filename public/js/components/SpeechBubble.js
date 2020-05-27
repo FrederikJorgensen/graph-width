@@ -6,12 +6,26 @@ export default class SpeechBubble {
     this.isSolutionShowing = false;
   }
 
+  clear() {
+    this.resultContainer.remove();
+    d3.selectAll('.speech-bubble-container g').remove();
+  }
+
   add(x, y) {
     const speechBubbleContainer = d3.select('#main').append('div').attr('class', 'speech-bubble-container');
     const textContainer = speechBubbleContainer.append('div').attr('class', 'text-container');
     this.textContainer = textContainer;
     this.speechBubbleContainer = speechBubbleContainer;
     this.setPosition(x, y);
+  }
+
+  addResult(text) {
+    const resultContainer = this.speechBubbleContainer.append('div').attr('class', 'result-container');
+    this.resultContainer = resultContainer;
+    // resultContainer.transition().duration(500).style('height', '100px');
+    const resultText = this.resultContainer.append('div').attr('class', 'result-text').style('opacity', 0).html(text);
+    resultText.transition().duration(500).style('opacity', 1);
+    this.resultContainer.append('div').attr('id', 'result-math');
   }
 
   async checkAnswer(answer) {

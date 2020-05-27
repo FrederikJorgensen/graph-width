@@ -1,7 +1,7 @@
 /* eslint-disable prefer-destructuring */
 /* eslint-disable no-restricted-syntax */
 
-import * as helpers from '../helpers.js';
+import * as helpers from '../../helpers.js';
 
 let nodes = [];
 let links = [];

@@ -284,7 +284,6 @@ export function mis() {
 
     const start = `<table><tbody id="tbody">${sb}</tbody></table>`;
     tooltip
-
       .style('opacity', 1);
     tooltip.html(start)
       .style('left', `${new2 - 80}px`)

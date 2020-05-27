@@ -530,7 +530,6 @@ export function hideSeperator() {
   simulation.alpha(0.1).restart();
 }
 
-
 function restart(canDraw) {
   d3.selectAll('circle').classed('highlighted-node', false);
   d3.selectAll('line').classed('highlighted-link', false);
@@ -588,7 +587,6 @@ function restart(canDraw) {
     .attr('class', 'label')
     .attr('text-anchor', 'middle')
     .attr('id', (d) => `text-${d.id}`);
-
 
   nodeSvg = g.merge(nodeSvg);
 
