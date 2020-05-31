@@ -25,7 +25,12 @@ export default class SpeechBubble {
     // resultContainer.transition().duration(500).style('height', '100px');
     const resultText = this.resultContainer.append('div').attr('class', 'result-text').style('opacity', 0).html(text);
     resultText.transition().duration(500).style('opacity', 1);
+    this.resultText = resultText;
     this.resultContainer.append('div').attr('id', 'result-math');
+  }
+
+  clearResult() {
+    this.resultContainer.remove();
   }
 
   async checkAnswer(answer) {
@@ -129,10 +134,11 @@ export default class SpeechBubble {
   }
 
   async say(text) {
-    this.textContainer.text('');
+    if (this.textContainer) this.textContainer.text(null);
+    if (this.typeIt) this.typeIt.destroy();
 
     return new Promise((resolve) => {
-      new TypeIt('.text-container', {
+      this.typeIt = new TypeIt('.text-container', {
         html: true,
         strings: text,
         speed: 10,

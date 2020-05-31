@@ -1,208 +1,200 @@
-/* eslint-disable import/prefer-default-export */
-/* eslint-disable space-infix-ops */
-/* eslint-disable no-undef */
-/* eslint-disable dot-notation */
-
-/* eslint-disable space-infix-ops */
-/* eslint-disable quote-props */
-
+import ChapterHandler from './ChapterHandler.js';
+import Roadmap from './components/Roadmap.js';
+import Logo from './components/Logo.js';
+import Menu from './components/Menu.js';
 import SpeechBubble from './components/SpeechBubble.js';
-import * as separator from './chapters/02-graph-separator/graph.js';
-import * as tdGraph from './chapters/03-tree-decomposition/graph.js';
-import readLocalTreeFile from './chapters/03-tree-decomposition/readTree.js';
-import * as treeWidthIntro from './chapters/01-tree-width-intro/tree-width-intro.js';
-import contentData from './content.js';
+import AbsoButton from './components/AbsoButton.js';
 
 export const width = document.getElementById('main').offsetWidth;
 export const height = document.getElementById('main').offsetHeight;
 
-function computeTreeDecomposition() {
-  let json = JSON.stringify(tdGraph.getAllEdges());
-  json += `-${tdGraph.getLargestNode()}`;
+const sb = new SpeechBubble();
+const chapterHandler = new ChapterHandler(sb);
+window.chapterHandler = chapterHandler;
 
-  $.ajax({
-    url: '/compute',
-    type: 'POST',
-    data: json,
-    processData: false,
-    dataType: 'json',
-    success() {
-      // console.log(data);
-    },
-    complete() {
-      const treeDecompositionPath = 'td.td';
-      readLocalTreeFile(treeDecompositionPath, 'treeDecomposition');
-    },
-  });
+const logo = new Logo(width / 2, height / 2);
+logo.draw();
+logo.drawSubheading();
+// logo.setPosition(window.innerWidth / 2, window.innerHeight / 2);
+
+function startStudent() {
+  timer.stop();
+  logo.setPosition(50, 50);
+  d3.select('#main').transition().duration(1500).style('background-color', '#e3e3e3');
+  chapterHandler.startFirstLevel();
 }
 
-export async function goNextExercise(currentExercise) {
-  let query = window.location.search;
-  query = query.substr(1);
+const absoButton = new AbsoButton('student', () => startStudent(), 'student-button', (width / 2) - 100, height / 2);
+absoButton.draw();
+const researcherButton = new AbsoButton('researcher', () => alert('Development still in progress...'), 'student-button', (width / 2) + 100, height / 2);
+researcherButton.draw();
 
-  /*   const sb = new SpeechBubble();
-  sb.add();
-  sb.setPosition(100, 100); */
 
-  if (query === 'graph-separator') {
-    if (currentExercise === 1) {
-      await sb.say('Nice you found a separator!');
-      await readKey();
-      separator.resetNodeStyling();
-      separator.toggleExercise2();
-      await sb.say('There are different kinds of separators. We will cover minimal separators next. A minimal separator set S is a separator in a graph if no proper subset of the set S also contains a separator. In other words if some graph has a separator set S = {A,B} then A on its own cannot separate the graph neither can B. <br/>Try to find a minimal separator in the graph.');
-      const res = d3.select('.text-container').append('div').attr('id', 'exercise-result');
-      d3.select('.text-container').style('height', '100%');
-      const q = document.getElementById('exercise-result');
-      renderMathInElement(q);
-    }
+const w = document.getElementById('main').offsetWidth;
+const h = document.getElementById('main').offsetHeight;
+// d3.select('#main').append('svg').attr('width', w).attr('height', h);
 
-    if (currentExercise === 2) {
-      await sb.say('Great! You found a minimal separator in the graph!');
-      separator.resetNodeStyling();
-      separator.toggleExercise3();
-      await readKey();
-      await sb.say('Now try finding a balanced separator');
-    }
+const links = d3.range(30).map((i) => ({
+  source: Math.floor(Math.random() * 10), target: Math.floor(Math.random() * 10),
+}));
 
-    if (currentExercise === 3) {
-      await sb.say('Awesome! You found a balanced separator in the graph! <br/><br/>You should now have a basic understanding of graph separators. In the coming chapters we are going to look at how tree decompositions exploit these separators in their graphs. Go to next chapter to continue learning :)');
-      separator.resetNodeStyling();
-      separator.toggleExercise3();
-    }
+
+const nodes = d3.range(10).map((i) => ({
+  id: i,
+  x: w * Math.random(),
+  y: h * Math.random(),
+  dx: Math.random() - 0.5,
+  dy: Math.random() - 0.5,
+}));
+
+const svg = d3.select('#main')
+  .append('svg')
+  .attr('width', w)
+  .attr('height', h);
+
+const correctZoom = d3.scaleLinear()
+  .domain([0, window.devicePixelRatio])
+  .range([0, 1]);
+
+const aFactor = Math.round(w * h / 500000);
+
+drawStars();
+
+function drawStars() {
+  const smallStars = [];
+  for (var i = 0; i < aFactor * 100; i++) {
+	  smallStars.push({ x: randomX(), y: randomY() });
   }
+
+  const mediumStars = [];
+  for (var i = 0; i < aFactor * 10; i++) {
+	  mediumStars.push({ x: randomX(), y: randomY() });
+  }
+
+  const bigStars = [];
+  for (var i = 0; i < aFactor; i++) {
+	  bigStars.push({ x: randomX(), y: randomY() });
+  }
+
+  d3.selectAll('svg > *').remove();
+
+  svg.selectAll('.smallStar')
+    .data(smallStars)
+    .enter()
+    .append('circle')
+    .classed('smallStar', true)
+    .attr('cx', (d) => d.x)
+    .attr('cy', (d) => d.y)
+    .attr('r', '1px')
+    .style('fill', '#fff');
+
+  svg.selectAll('.mediumStar')
+    .data(mediumStars)
+    .enter()
+    .append('circle')
+    .classed('mediumStar', true)
+    .attr('cx', (d) => d.x)
+    .attr('cy', (d) => d.y)
+    .attr('r', '2px')
+    .style('fill', '#fff');
+
+  svg.selectAll('.bigStar')
+    .data(bigStars)
+    .enter()
+    .append('circle')
+    .classed('bigStar', true)
+    .attr('cx', (d) => d.x)
+    .attr('cy', (d) => d.y)
+    .attr('r', '3px')
+    .style('fill', '#fff');
 }
 
-async function loadContent(query) {
-  const currentChapter = contentData[query];
-  document.title = `${currentChapter['content-title']}`;
+const inrange = ({ x: sx, y: sy }, { x: tx, y: ty }) => Math.hypot(sx - tx, sy - ty) <= 300;
 
-  let stringBuilder = '';
-  currentChapter.scripts.forEach((script) => {
-    stringBuilder += `<script type="module" src="js/${currentChapter.folder}/${script}"></script>`;
-  });
-
-  d3.select('body').append('script').text(stringBuilder);
-
-  const main = d3.select('.main');
-
-  let sb;
-
-
-  if (query === 'home') {
-    const homeLogo = main.append('div').attr('class', 'home-title').append('h2');
-    homeLogo.text('GraphWidth.com').style('opacity', 0);
-    homeLogo.transition().duration(3000).style('opacity', 0.9);
-    const homeCenterContainer = d3.select('.home-title').style('opacity', 0);
-
-    homeCenterContainer.append('p').text('An interactive way to learn graph width measures.');
-    d3.select('.home-title').append('a').attr('href', currentChapter.next).append('button')
-      .text('Start Learning')
-      .attr('class', 'btn');
-
-    homeCenterContainer.transition().duration(3000).style('opacity', 0.9);
-  }
-
-  if (query === 'graph-separator') {
-    separator.toggleExercise1();
-    await sb.say('Before we explore treewidth there is one concept that we must familiarize ourselves with. That is the concept of graph separators.');
-    separator.main();
-    await timeout(2000);
-    await sb.say('We say that a set S is a <strong>graph separator</strong> if the removal of that set from the graph leaves the graph into multiple connected components. <br/><br/>Can you find one or multiple vertices that would separate the graph into different components? <br/> <br/> Click on a vertex to include it into the separator set.');
-  }
-
-  if (query === 'tree-width') {
-    main.classed('center-graph-td ', true);
-    main.append('div').attr('id', 'graph-td');
-    d3.select('#graph-td').append('div').attr('id', 'graph-container');
-    d3.select('#graph-td').append('div').attr('id', 'tree-container');
-
-    await sb.say('Recall that treewidth is a way to measure how "tree-like" a graph is. What that actually means is how easy is it to decompose that graph into a tree. This is where <strong>tree decomposisiotns</strong> become very useful.');
-    await readKey();
-    sb.setPosition(sb.xPercentage, sb.yPercentage - 350);
-    await sb.say('Below you see a graph and one of its valid tree decompositions');
-    tdGraph.main();
-    computeTreeDecomposition();
-
-    await readKey();
-    await sb.say('We say that a tree decomposition is valid if it has the following 3 properties.');
-
-    await readKey();
-    await sb.say('Lets use the graph and tree decomposition below to proof that it is a valid tree decomposition.');
-
-    await readKey();
-    await sb.say('<strong>Property 1 (Node Coverage):</strong> Every vertex that appears in the graph must appear in some bag of the tree decomposition. <br/><br/>We will check every vertex in the graph and highlight the bag in the tree decompostion containing that vertex.');
-    await tdGraph.testNodeCoverage();
-    await sb.say('Since every vertex in the graph appears in some bag of the tree decomposition the first property of tree decomposition holds true.');
-
-    await readKey();
-    tdGraph.resetStyles();
-    await sb.say('Property 2 <strong>(Edge coverage):</strong> For every edge that appears in the graph there is some bag in the tree decomposition which contains the vertices of both ends of the edge.<br/><br/> Lets check if this holds true for our graph and tree decomposition.');
-    await tdGraph.edgeCoverage();
-    await sb.say('great property 2 holds true as well!');
-    await readKey();
-    tdGraph.resetStyles();
-    await sb.say('<strong>Property 3 (Coherence):</strong> Lets consider 3 bags of the tree decomposition b1, b2 and b3 that form a path in the tree decomposition. If a vertex from the graph belongs to b1 and b3 it must also belong to b2.');
-    await readKey();
-
-    tdGraph.main();
-    computeTreeDecomposition();
-    await readKey();
-
-    main.append('svg')
-      .attr('id', 'am')
-      .style('position', 'absolute')
-      .style('height', '40px')
-      .style('bottom', '250px')
-      .style('left', `${(width/2) + 80}px`);
-
-    main.append('div')
-      .style('height', '40px')
-      .text('Forgotten Vertices = ')
-      .style('position', 'absolute')
-      .style('bottom', '250px')
-      .style('left', `${(width/2) - 80}px`);
-
-    sb.setPosition(sb.xPercentage - 700, sb.yPercentage + 200);
-    await sb.say('We can test this property by traversing the tree decomposition in post-order and keeping track of forgotten vertices. <br/><br/> We say that a vertex in a bag is forgotten if the vertex appear in the leaf bag but not in its parents bag. Then all we do every time we hit a leaf is check if the leaf contains any of the forgotten vertices and if so we conclude the tree decomposition does not adhere to his property. But if the leaf does not contain a forgotten vertex we continue traversing and deleting the leaf from the tree after we have procesed it.');
-    await tdGraph.dfs();
-    await sb.say('It also satifies the 3rd property. We have now proofed that this is indeed a valid tree decomposition of the given graph.');
-    await readKey();
-    await sb.say('A graph can have multiple tree decompositions.');
-    await readKey();
-    sb.setPosition(sb.xPercentage, sb.yPercentage - 300);
-    await sb.say('A trivial tree decomposition contains all the graph vertices in one bag.');
-    tdGraph.main();
-    const tri = tdGraph.createTrivialTreeDecomposition();
-    tdGraph.loadAnyGraph(tri, 'tree-container');
-    await readKey();
-    await sb.say('The largest size of the bag is...');
-    tdGraph.main();
-    await readKey();
-    computeTreeDecomposition();
-    await readKey();
-    sb.setPosition(sb.xPercentage, sb.yPercentage - 300);
-    await sb.say('The treewidth of the tree decomposition is the largest bag - 1.');
-    await readKey();
-    await sb.say('What is the treewidth of the current tree decomposition?');
-    sb.setPosition(200, 500);
-    sb.addQuiz();
-    sb.addChoice('1', false);
-    sb.addChoice('2', true);
-    sb.addChoice('3', false);
-    sb.addSolution('The treewidth of a tree decomposition is the size of the largest bag - 1.');
-  }
+function randomX() {
+  return Math.round(Math.random() * window.innerWidth);
 }
 
-window.onload = () => {
-  let query = window.location.search;
-  query = query.substr(1);
+function randomY() {
+  return Math.round(Math.random() * window.innerHeight);
+}
 
-  const home = 'home';
+// const simulation = d3.forceSimulation(nodes).force('link', d3.forceLink(links).id((d) => d.id).distance(500).strength(0.01));
+// simulation.force('link').links(links);
 
-  if (contentData.hasOwnProperty(query)) {
-    loadContent(query);
-  } else {
-    loadContent(home);
-  }
-};
+
+let link = svg.append('g')
+  .attr('stroke', '#999')
+  .selectAll('line');
+
+svg.selectAll('g')
+  .data(nodes)
+  .attr('class', 'g')
+  .enter()
+  .append('g');
+
+svg.selectAll('g')
+  .append('circle')
+  .attr('r', 20)
+  .style('opacity', 0.9)
+  .style('stroke-width', '5px')
+  .style('stroke', 'rgb(51, 51, 51)')
+  .attr('class', 'nonhighlight');
+
+const m = 10; // diameter of circle
+
+function updateLinks() {
+  link = link
+    .data(links)
+    .join(
+      (enter) => enter.append('line').attr('stroke', '#999'),
+      (update) => update.style('stroke', 'green'),
+      (exit) => exit.style('stroke', 'red'),
+    );
+}
+
+const timer = d3.timer(() => {
+  d3.selectAll('circle.nonhighlight')
+    .attr('cx', (d) => {
+      d.x += d.dx;
+      if (d.x > w + m) d.x -= w + m * 2;
+      else if (d.x < 0 - m) d.x += w - m * 2;
+      return d.x;
+    })
+    .attr('cy', (d) => {
+      d.y += d.dy;
+      if (d.y > h + m) d.y -= h + m * 2;
+      else if (d.y < 0 - m) d.y += h - m * 2;
+      return d.y;
+    });
+
+  d3.selectAll('line').attr('x1', (d) => d.source.x)
+    .attr('y1', (d) => d.source.y)
+    .attr('x2', (d) => d.target.x)
+    .attr('y2', (d) => d.target.y);
+
+  /*   links = links.filter((link) => inrange(link.source, link.target));
+  updateLinks(); */
+
+  /*   for (let i = 0; i < nodes.length; i++) {
+    const cNode = nodes[i];
+    for (let j = 0; j < nodes.length; j++) {
+      const sNode = nodes[j];
+      if (inrange(cNode, sNode)) {
+        links.push({ source: cNode, target: sNode });
+      }
+    }
+  } */
+
+  /* Rerender links with enter, update and exit */
+});
+
+d3.select('#main')
+  .append('div')
+  .style('position', 'absolute')
+  .style('z-index', 20)
+  .style('bottom', '10px')
+  .style('right', '10px')
+  .append('a')
+  .attr('href', 'https://icons8.com/icon/41215/graph-clique')
+  .text('Icon by Icons8');

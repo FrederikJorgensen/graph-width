@@ -20,26 +20,13 @@ body {
   stroke-width: 3px;
 }
 
-.highlighted-link {
-  stroke: orange;
-}
-
-.highlighted-node {
-  fill: orange !important;
-  stroke: orange !important;
-  cursor: pointer;
-}
-
-.highlighted-text {
-  fill: white;
-}
-
 .table {
-  margin: auto;
-  width: 50%;
-  border: 1px solid lightgray;
+  z-index: 2;
+  background-color: white;
+  position: absolute;
+  border: 1.5px solid lightgray;
   padding: 20px;
-  margin-top: 20px;
+  transform: translate(-100%, 25px);
 }
 
 .table td {
@@ -68,13 +55,7 @@ td {
   user-select: none;
 }
 
-.highlighted-stroke {
-  stroke: #bf55ec !important;
-}
 
-.moving-node {
-  cursor: grabbing;
-}
 
 .not-drawing {
   cursor: default;
@@ -152,16 +133,6 @@ td {
   cursor: pointer;
 }
 
-.separating-node {
-  fill: #00e322;
-  stroke: #00e322;
-}
-
-.not-separating-node {
-  fill: red;
-  stroke: red;
-}
-
 .exercise-result {
   margin-top: 30px;
   margin-bottom: 30px;
@@ -197,6 +168,15 @@ td {
   font-family: 'Walter Turncoat', Calibri, Arial, sans-serif;
   height: 100%;
   width: 100%;
+  /*  */
+  position: absolute;
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  margin: auto;
+  background-color: #000;
+  overflow: hidden;
 }
 
 #exercise-result {
@@ -229,7 +209,7 @@ td {
 }
 
 svg {
-  z-index: -1;
+  z-index: 1;
   position: absolute;
 }
 
@@ -253,8 +233,8 @@ svg {
 #graph-td {
   display: flex;
   flex-direction: row;
-  width: 50%;
-  height: 50%;
+  width: 100%;
+  height: 100%;
 }
 
 #graph-container {
@@ -265,9 +245,6 @@ svg {
   flex: 0.5;
 }
 
-.treeNode {
-  fill:purple;
-}
 
 .choices {
   display: flex;
@@ -297,7 +274,7 @@ svg {
 }
 
 .speech-bubble-container {
-  z-index: 100;
+  z-index: 2;
   display: flex;
   flex-direction: column;
   position: absolute;
@@ -368,24 +345,6 @@ svg {
   height: 50%;
 }
 
-.graphLink {
-  stroke: rgb(51, 51, 51);
-  stroke-width: 3.5;
-}
-
-.label {
-  fill: white;
-  font-weight: bold;
-  text-anchor: middle;
-  pointer-events: none;
-  user-select: none;
-}
-
-.graphNode {
-  stroke: rgb(51, 51, 51);
-  stroke-width: 3.5px;
-}
-
 .result-container {
   display: flex; 
   flex-direction: column;
@@ -402,14 +361,6 @@ svg {
   padding-bottom: 10px;
 }
 
-.nonhighlighted-vertex {
-  /* fill: #1f77b4; */
-}
-
-.highlighted-vertex {
-  fill: orange;
-  transition: fill 200ms;
-}
 
 .vertex-in-max-set {
   fill: green;
@@ -443,4 +394,163 @@ svg {
   line-height: 100%;
   z-index: 100;
   transform: translate(-100%, -50%);
+}
+
+.highlighted-link {
+  stroke: orange;
+}
+
+.highlighted-node {
+  fill: orange !important;
+  stroke: orange !important;
+  cursor: pointer;
+}
+
+.highlighted-text {
+  fill: white;
+}
+
+.highlighted-stroke {
+  stroke: lightgreen !important;
+  stroke-width: 3.5px;
+}
+
+.moving-node {
+  cursor: grabbing;
+}
+
+.treeNode {
+  fill:purple;
+}
+
+.graphLink {
+  stroke: rgb(51, 51, 51);
+  stroke-width: 3.5;
+}
+
+.label {
+  fill: white;
+  font-weight: bold;
+  text-anchor: middle;
+  pointer-events: none;
+  user-select: none;
+}
+
+.graphNode {
+  stroke: rgb(51, 51, 51);
+  stroke-width: 3.5px;
+}
+
+.highlighted-vertex {
+  fill: orange;
+  transition: fill 300ms;
+}
+
+.nonhighlight {
+ fill: #1f77b4;
+}
+
+.separating-node {
+  fill: #00e322;
+}
+
+.not-separating-node {
+  fill: red;
+}
+
+.nav-links:hover {
+  color: orange;
+  cursor: pointer;
+}
+
+.logo-background {
+  position: absolute;
+  background: url(../brush_stroke.png);
+  background-repeat: no-repeat;
+  background-size: 100% 95%;
+  padding: 8px 50px;
+  font-size: 25px;
+  font-weight: bold;
+  color: white;
+  transform: translate(-50%, -50%); 
+}
+
+.yellow-brush-stroke {
+  position: absolute;
+  background: url(../yellow_brush_stroke.png);
+  background-repeat: no-repeat;
+  background-size: 100% 95%;
+  padding: 8px 70px;
+  font-size: 25px;
+  font-weight: bold;
+  color: white;
+  transform: translate(-50%, -50%); 
+}
+
+.logo-subheading {
+  color: black;
+  font-size: 20px;
+  opacity: 60%;
+}
+
+a {
+  text-decoration: none;
+  color: white;
+}
+
+a:hover {
+  color: orange;
+  transition: color 300ms;
+}
+
+.chapters {
+  z-index: 2;
+  position: absolute;
+  font-size: 40px;
+  bottom: 30px;
+  left: 30px;
+}
+
+.chapters:hover {
+  color: orange;
+  cursor: pointer;
+}
+
+.roadmap-container {
+  position: absolute;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 20px;
+  font-size: 20px;
+  background-color: white;
+  border: 1px solid black;
+}
+
+.roadmap-container text:hover {
+ color: orange;
+ cursor: pointer;
+}
+
+.roadmap-chapters {
+  display: flex;
+  flex-direction: column;
+}
+
+.roadmap-title {
+  flex: 0.2;
+  font-size: 40px;
+  align-self: center;
+}
+
+.roadmap-chapters {
+  flex: 0.8;
+}
+
+.home-link {
+  z-index: 1000;
+  stroke:rgb(51, 51, 51);
+  opacity: .9;
+  stroke-width: 5px;
 }

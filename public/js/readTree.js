@@ -1,7 +1,3 @@
-
-// import loadNiceTreeDecomposition from './niceTreeDecomposition.js';
-import loadTreeDecomposition from './tree-decomposition.js';
-
 export function readTreeDecomposition(treeData) {
   treeData.pop();
   const nodes = [];
@@ -31,10 +27,10 @@ export function readTreeDecomposition(treeData) {
   }
   treeDecomp.nodes = nodes;
   treeDecomp.links = links;
-  loadTreeDecomposition(treeDecomp);
+  return treeDecomp;
 }
 
-function readNiceTreeDecomposition(treeData) {
+export function readNiceTreeDecomposition(treeData) {
   const edgePairs = [];
   const allBagLabels = {};
   const verticesInBag = {};
@@ -98,17 +94,11 @@ function readNiceTreeDecomposition(treeData) {
     return tree;
   }
   const newTree = createTree(root, edgePairs);
-  loadNiceTreeDecomposition(newTree);
+  return newTree;
 }
 
-export default async function readLocalTreeFile(file, treeType) {
+export async function readLocalTreeFile(file) {
   const response = await fetch(file);
   const text = await response.text();
-  const splittedText = text.split('\n');
-
-  if (treeType === 'niceTreeDecomposition') {
-    readNiceTreeDecomposition(splittedText);
-  } else if (treeType === 'treeDecomposition') {
-    readTreeDecomposition(splittedText);
-  }
+  return text.split('\n');
 }

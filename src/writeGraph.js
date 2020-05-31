@@ -2,6 +2,7 @@ const fs = require('fs');
 
 function writeGraphFile(graph) {
   const trimmedGraph = graph
+    .replace('edges', '')
     .replace('{', '')
     .replace('"', '')
     .replace('"', '')
@@ -10,9 +11,10 @@ function writeGraphFile(graph) {
     .replace('"', '')
     .replace('"', '');
 
-  const splitted = trimmedGraph.split('-');
-  const numberOfVertices = splitted[1];
-  const edges = JSON.parse(splitted[0]);
+
+  const splitted = trimmedGraph.split('largestNode');
+  const numberOfVertices = splitted[1].replace(':', '');
+  const edges = JSON.parse(splitted[0].replace(/,([^,]*)$/, ''));
   const numberOfEdges = edges.length;
   let newstring = '';
 

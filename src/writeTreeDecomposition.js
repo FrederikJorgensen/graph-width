@@ -1,7 +1,7 @@
 const fs = require('fs');
 
 function writeTreeDecompositionFile(data) {
-  const treeDecompositionFile = fs.createWriteStream('public/td.td');
+  const treeDecompositionFile = fs.createWriteStream('public/tree-decomposition-files/td.td');
   const splitted = data.split('\n');
   const treeArray = [];
 
@@ -22,7 +22,7 @@ function writeTreeDecompositionFile(data) {
 }
 
 function writeNiceTreeDecomposition(data) {
-  const niceTreeDecompositionFile = fs.createWriteStream('public/nicetd.td');
+  const niceTreeDecompositionFile = fs.createWriteStream('public/tree-decomposition-files/nicetd.td');
   const splitted = data.split('\n');
 
   let reachedNiceTD = false;
