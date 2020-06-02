@@ -33,33 +33,6 @@ function removeHighlightVertex(nodeId) {
     .style('fill', '#1f77b4');
 }
 
-async function highlightNodes(node, parentNode, forgottenVertices) {
-  await d3
-    .selectAll('#tree-container ellipse')
-    .filter((d) => d === node || d === parentNode)
-    .transition()
-    .duration(500)
-    .style('fill', 'orange')
-    .style('stroke', 'orange')
-    .end();
-
-  d3.select('#am')
-    .selectAll('text')
-    .data(forgottenVertices)
-    .join(
-      (enter) => enter
-        .append('text')
-        .attr('dx', '1.25em')
-        .attr('y', '20px')
-        .attr('transform', (d, i) => `translate(${i * 30},${0})`)
-        .style('font-size', 24)
-        .style('fill', 'green')
-        .text((d) => d),
-      (update) => update.style('fill', 'black'),
-      (exit) => exit.remove(),
-    );
-}
-
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -126,7 +99,6 @@ function buildAdjList(newNodes, newLinks) {
   });
 
   newLinks.forEach((e) => {
-    console.log(e);
     adjList[e.source.id].push(e.target);
     adjList[e.target.id].push(e.source);
   });
@@ -158,20 +130,6 @@ export function resetStyles() {
     .style('stroke', 'rgb(51, 51, 51)');
 }
 
-async function animateDeleteNode(node) {
-  d3.selectAll('#tree-container line')
-    .filter((d) => (d.source === node) || (d.target === node))
-    .style('opacity', 0);
-
-  await d3
-    .selectAll('#tree-container ellipse')
-    .filter((d) => d === node)
-    .transition()
-    .duration(500)
-    .style('opacity', 0)
-    .end();
-}
-
 function adjFromLinks(links) {
   const adjacencyList = [];
   links.forEach((d) => {
@@ -190,6 +148,46 @@ export default class Graph {
     this.selectedNodes = [];
     this.isHoverEffect = false;
     this.animDuration = 1000;
+    this.testingCoherence = false;
+    this.cancel = false;
+  }
+
+  async animateDeleteNode(node) {
+    if (this.cancel) return;
+
+    d3.selectAll('#tree-container line')
+      .filter((d) => (d.source === node) || (d.target === node))
+      .transition()
+      .duration(this.animDuration)
+      .style('opacity', 0);
+
+    d3
+      .selectAll('#tree-container text')
+      .filter((d) => d === node)
+      .transition()
+      .duration(this.animDuration)
+      .style('opacity', 0);
+
+    await d3
+      .selectAll('#tree-container ellipse')
+      .filter((d) => d === node)
+      .transition()
+      .duration(this.animDuration)
+      .style('opacity', 0)
+      .end();
+  }
+
+  async highlightNodes(node, parentNode, forgottenVertices) {
+    if (this.cancel) return;
+    await d3
+      .selectAll('#tree-container ellipse')
+      .filter((d) => d === node || d === parentNode)
+      .transition()
+      .duration(this.animDuration)
+      .style('fill', 'orange')
+      .end();
+
+    d3.select('.math-container').html(`Forgotten vertices: ${forgottenVertices}`);
   }
 
   visitBag(bagId) {
@@ -406,11 +404,12 @@ export default class Graph {
     return { nodes: lol, links: tLinks };
   }
 
-  async dfs() {
+  async testCoherence() {
     let vertices = d3.selectAll('#tree-container ellipse').data();
     let edges = d3.selectAll('#tree-container line').data();
 
-    this.v = vertices;
+    /* Make sure all nodes are unvisited */
+    vertices.forEach((vertex) => vertex.visited = false);
 
     const stack = [];
     const forgottenVertices = [];
@@ -469,13 +468,16 @@ export default class Graph {
         edges = removeLinks(edges, currentVertex);
 
         /* Animate it */
-        await highlightNodes(currentVertex, parentNode, forgottenVertices);
-        resetStyles();
-        await animateDeleteNode(currentVertex);
+        await this.highlightNodes(currentVertex, parentNode, forgottenVertices);
+        d3.selectAll('ellipse').transition().duration(this.animDuration).style('fill', '#2ca02c');
+        await this.animateDeleteNode(currentVertex);
       }
     }
 
-    return new Promise((resolve) => resolve());
+    return new Promise(async (resolve) => {
+      await timeout(3000);
+      resolve();
+    });
   }
 
   edgeCoverage() {
@@ -501,22 +503,12 @@ export default class Graph {
   }
 
   resetLinkStyles() {
-    this.linkSvg.transition()
-      .duration(this.animDuration)
-      .style('stroke', 'rgb(51, 51, 51)');
+    d3.selectAll('#tree-container line').style('opacity', 1);
   }
 
-  async runEdgeCoverage() {
-    d3.select('.math-container').html(null);
-    this.anim = 0;
-    this.resetLinkStyles();
-    this.resetTreeDecompositionStyles();
-    this.stopAllTransitions();
-    await this.edgeCoverage();
-    d3.select('.math-container').html(`<span class="material-icons correct-answer">check</span> Since every edge and its adjacent vertices appear in some 
-    bag of the tree decomposition it also satifies <strong>property 2</strong>.
-    <br><br>
-    NOTE: It's possible not all the bags in the tree decomposition is highlighted if the graph contains isolated vertices since they obviously do not have an edge and therefor we don't test it.`);
+  resetTextStyles() {
+    d3.selectAll('#tree-container text')
+      .style('opacity', 1);
   }
 
   testNodeCoverage() {
@@ -543,7 +535,39 @@ export default class Graph {
     d3.selectAll('circle').interrupt();
     d3.selectAll('line').interrupt();
     d3.selectAll('ellipse').interrupt();
+    d3.selectAll('text').interrupt();
   }
+
+  async runCoherence() {
+    /* Reset all the styling and stop any running transitions */
+    this.resetLinkStyles();
+    this.resetTextStyles();
+    this.resetTreeDecompositionStyles();
+    this.stopAllTransitions();
+
+    /* Run the the algorithm without animation if it is already running */
+    this.cancel = true;
+    await this.testCoherence();
+    this.cancel = false;
+
+    /* Run the  algorithm normally with animation */
+    await this.testCoherence();
+    return new Promise((resolve) => resolve());
+  }
+
+  async runEdgeCoverage() {
+    d3.select('.math-container').html(null);
+    this.anim = 0;
+    this.resetLinkStyles();
+    this.resetTreeDecompositionStyles();
+    this.stopAllTransitions();
+    await this.edgeCoverage();
+    d3.select('.math-container').html(`<span class="material-icons correct-answer">check</span> Since every edge and its adjacent vertices appear in some 
+    bag of the tree decomposition it also satifies <strong>property 2</strong>.
+    <br><br>
+    NOTE: It's possible not all the bags in the tree decomposition is highlighted if the graph contains isolated vertices since they obviously do not have an edge and therefor we don't test it.`);
+  }
+
 
   async runNodeCoverage() {
     d3.select('.math-container').html(null);
@@ -1025,7 +1049,7 @@ export default class Graph {
   }
 
   clear() {
-    d3.select('svg').remove();
+    this.svg.remove();
   }
 
   hoverEffect(d) {
@@ -1049,7 +1073,11 @@ export default class Graph {
   }
 
   resetTreeDecompositionStyles() {
-    d3.selectAll('ellipse').style('fill', '#2ca02c').attr('rx', 35).attr('ry', 25);
+    d3.selectAll('ellipse')
+      .style('fill', '#2ca02c')
+      .attr('rx', 35)
+      .attr('ry', 25)
+      .style('opacity', 1);
   }
 
   loadGraph(graph, container, type) {
@@ -1060,6 +1088,8 @@ export default class Graph {
     const w = document.getElementById(container).offsetWidth;
     const h = document.getElementById(container).offsetHeight;
     const svg = d3.select(`#${container}`).append('svg').attr('width', w).attr('height', h);
+
+    this.svg = svg;
 
     const linkSvg = svg.selectAll('line.graphLink')
       .data(graph.links)
@@ -1093,7 +1123,7 @@ export default class Graph {
 
       const treeEllipse = svg.selectAll('g')
         .append('ellipse')
-        .attr('rx', 35)
+        .attr('rx', (d) => d.label.length * 8)
         .attr('ry', 25)
         .style('fill', '#2ca02c')
         .style('stroke', 'rgb(51, 51, 51)')
@@ -1156,7 +1186,6 @@ export default class Graph {
         .attr('class', 'label');
     }
 
-
     const simulation = d3.forceSimulation()
       .force('center', d3.forceCenter(w / 2, h / 2))
       .force('x', d3.forceX(w / 2).strength(0.2))
@@ -1180,7 +1209,7 @@ export default class Graph {
   }
 
   randomGraph() {
-    this.clear();
+    if (this.svg) this.clear();
     const randomGraph = generateRandomGraph(10, 10);
     this.loadGraph(randomGraph, this.container, 'graph');
   }

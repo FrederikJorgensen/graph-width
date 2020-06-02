@@ -1,18 +1,5 @@
 /* eslint-disable class-methods-use-this */
 
-function addTooltip() {
-  d3.select('#main').append('div')
-    .attr('id', 'tooltip')
-    .style('position', 'absolute')
-    .style('opacity', 0);
-
-
-  d3.select('#main')
-    .append('img')
-    .attr('src', './new.png')
-    .attr('id', 'tooltip-arrow')
-    .style('opacity', 0);
-}
 
 function resetStyles() {
   d3.selectAll('circle').classed('highlighted-vertex', false).classed('nonhighlight', true);
@@ -373,6 +360,21 @@ export default class Tree {
         .style('left', `${left - 50}px`)
         .style('top', `${top - 2}px`);
     });
+  }
+
+
+  addTooltip() {
+    d3.select('#main').append('div')
+      .attr('id', 'tooltip')
+      .style('position', 'absolute')
+      .style('opacity', 0);
+
+
+    d3.select('#main')
+      .append('img')
+      .attr('src', './new.png')
+      .attr('id', 'tooltip-arrow')
+      .style('opacity', 0);
   }
 
   createTable() {

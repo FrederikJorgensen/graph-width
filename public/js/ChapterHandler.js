@@ -351,6 +351,7 @@ Try going through the algorithm step by step to see how it works.
           await readKey();
           graph.resetNodeStyling();
           sb.clear();
+
           graph.stopAllTransitions();
           graph2.stopAllTransitions();
           graph.resetLinkStyles();
@@ -361,32 +362,26 @@ Try going through the algorithm step by step to see how it works.
 
           await readKey();
 
-          d3.select('#main')
-            .append('svg')
-            .attr('id', 'am')
-            .style('position', 'absolute')
-            .style('height', '40px')
-            .style('bottom', '250px')
-            .style('left', `${(width / 2) + 80}px`);
-
-          d3.select('#main')
-            .append('div')
-            .style('height', '40px')
-            .text('Forgotten Vertices = ')
-            .style('position', 'absolute')
-            .style('bottom', '250px')
-            .style('left', `${(width / 2) - 80}px`);
-
-          await sb.say('We can test this property by traversing the tree decomposition in post-order and keeping track of forgotten vertices. <br/><br/> We say that a vertex in a bag is forgotten if the vertex appear in the leaf bag but not in its parents bag. Then all we do every time we hit a leaf is check if the leaf contains any of the forgotten vertices and if so we conclude the tree decomposition does not adhere to his property. But if the leaf does not contain a forgotten vertex we continue traversing and deleting the leaf from the tree after we have procesed it.');
-          sb.addButton('Replay animation', () => graph.runCoherence());
-          await graph2.dfs();
-          await sb.say('It also satifies the 3rd property. We have now proofed that this is indeed a valid tree decomposition of the given graph.');
+          await sb.say(`We can test this property by traversing the tree decomposition in post-order and keeping track of forgotten vertices. <br/><br/>
+           We say that a vertex in a bag is forgotten if the vertex appear in the leaf bag but not in its parents bag. <br/><br/>Then all we do every time we hit a leaf is check 
+           if the leaf contains any of the forgotten vertices and if so we conclude the tree decomposition does not adhere to his property. <br/><br/>
+           But if the leaf does not contain a forgotten vertex we continue traversing and deleting the leaf from the tree after we have procesed it.`);
+          sb.addButton('Replay animation', () => graph2.runCoherence());
+          sb.addMath('');
+          await graph2.runCoherence();
           await readKey();
-          await sb.say('A graph can have multiple tree decompositions.');
+          sb.clear();
+          graph2.resetLinkStyles();
+          graph2.resetTreeDecompositionStyles();
+          graph2.resetTextStyles();
+          await sb.say('The last property holds true as well, since we would terminate the algorithm if we hit a forgotten vertex.');
           await readKey();
-          await sb.say('<strong>Example:</strong> A trivial tree decomposition contains all the graph vertices in one bag.');
-          graph.clear();
-          graph.randomGraph();
+          await sb.say('Since all 3 properties hold true we have proofed that the tree on the right side is a valid tree decomposition of the graph on the left side.');
+          await readKey();
+          await sb.say('Is this the only valid tree decomposition of this graph? <br><br> No, a graph can have multiple valid tree decompositions. <br><br> Lets take a look at some other valid tree decompositions of this graph.');
+          await readKey();
+          await sb.say('<strong>Example:</strong> The trivial tree decomposition of this graph contains all the graphs vertices in one bag.');
+          graph2.clear();
           const trivialTreeDecomposition = graph.computeTrivialTreeDecomposition();
           const trivGraph = new Graph();
           trivGraph.loadGraph(trivialTreeDecomposition, 'tree-container', 'tree');
@@ -422,6 +417,7 @@ Try going through the algorithm step by step to see how it works.
           await graph.readNiceTreeDecomposition();
           const nicetd = graph.getNiceTreeDecomposition();
           const tree = new Tree();
+          tree.addTooltip();
           tree.load(nicetd, 'tree-container');
           tree.setGraph(graph);
           const niceTreeDecompositionButton = new Button('Compute Nice Tree Decomposition');
