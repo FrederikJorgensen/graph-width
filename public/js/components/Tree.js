@@ -14,8 +14,13 @@ function addTooltip() {
     .style('opacity', 0);
 }
 
+function resetStyles() {
+  d3.selectAll('circle').classed('highlighted-vertex', false).classed('nonhighlight', true);
+}
+
 
 function highlightVertex(nodeId) {
+  resetStyles();
   d3.selectAll('circle')
     .filter((node) => nodeId === node.data.id)
     .classed('nonhighlight', false)
@@ -72,6 +77,15 @@ export default class Tree {
     this.root = null;
     this.current = 0;
     this.graph = null;
+  }
+
+  hideTooltip() {
+    d3.select('#tooltip').style('opacity', 0);
+    d3.select('#tooltip-arrow').style('opacity', 0);
+  }
+
+  remove() {
+    this.svg.remove();
   }
 
   setGraph(graph) {

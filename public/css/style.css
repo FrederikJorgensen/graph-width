@@ -554,3 +554,19 @@ a:hover {
   opacity: .9;
   stroke-width: 5px;
 }
+
+.math-container {
+  background-color: lightblue;
+  padding: 15px;
+  margin-top: 20px;
+}
+
+.exercise-container {
+  background-color: lightblue;
+  padding: 15px;
+  margin-top: 20px;
+}
+
+.bag-nonhighlight {
+  color: green;
+}

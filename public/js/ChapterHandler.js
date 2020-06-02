@@ -195,7 +195,14 @@ Try going through the algorithm step by step to see how it works.
           const previousStepButton = new Button('Go previous step', () => tree.previousStep(), 'previous-step-button');
           previousStepButton.draw();
           await readKey();
-          await sb.say('As you just saw the same problem is vastly faster on a tree than a graph this is why treewidth is important.');
+          sb.clearResult();
+          sb.clearButtons();
+          await sb.say('As you just saw the same problem is vastly faster on a tree than a graph. So if there exists a way to turn a graph into a tree a lot of problems can be solved quicker.');
+          await readKey();
+          tree.remove();
+          tree.hideTooltip();
+          sb.setPosition(width / 2, height / 2);
+          await sb.say('That concludes the introduction to treewidth. You should now have a basic understanding of the motivation behind studying this graph measure. Continue to Chapter 2...');
         }),
         '1. Introduction to Treewidth',
       ),
@@ -203,7 +210,7 @@ Try going through the algorithm step by step to see how it works.
       new Chapter(
         (async () => {
           sb.add(width / 2, height / 2);
-
+          await sb.say('Chapter 2: Graph Separators');
           await sb.say('Before we explore treewidth there is one concept that we must familiarize ourselves with. That is the concept of graph separators.');
           await readKey();
 
@@ -247,15 +254,25 @@ Try going through the algorithm step by step to see how it works.
           graph.resetExercises();
           sb.clearResult();
           graph.toggleMinimalSeparatorExercise();
-          await sb.say(`There are different kinds of separators. We will cover minimal separators next. A minimal separator set S is a separator in a graph if no proper subset of the set S also contains a separator.
-            In other words if some graph has a separator set S = {A,B} then A on its own cannot separate the graph neither can B. <br/>Try to find a minimal separator in the graph.`);
+          await sb.say(`There are different kinds of separators. <br/><br/> We will cover minimal separators next.  <br/><br/> A minimal separator set S is a separator in a graph if no proper subset of the set S also contains a separator.
+          <br/><br/>In other words if some graph has a separator set S = {A,B} then A on its own cannot separate the graph neither can B. <br/>Try to find a minimal separator in the graph.`);
           sb.addResult('Click on a vertex to include it into the separator set.');
           await readKey();
           graph.resetExercises();
           sb.clearResult();
           graph.toggleBalanceSeparatorExercise();
+          sb.setPosition(sb.xPercentage, sb.yPercentage + 30);
+          await sb.say(`<strong>Balanced separators:</strong> We say that a separator is balanced if every component that has been induced by the removal of the separator is less than <br/><br/> the number of vertices in the original graph 
+          <br/><br/> <strong>minus</strong> <br/><br/> the number of vertices in the separator <br/><br/> <strong>divided by</strong> <br/><br/> 2. <br/><br/>Mathematically we denote this as such:`);
+          sb.addMath(' We say that a separator \\( S \\) is balanced: if every component of $$ G \\setminus  S  \\leq \\frac{V(G)-S}{2} $$');
+          sb.addExercise('<strong>Exercise:</strong> Find a balanced separator in the graph. Click on a vertex to include it into the separator set.');
           sb.addResult('Click on a vertex to include it into the separator set.');
-          await sb.say('[balanced separator lecture here] Now try finding a balanced separator');
+          renderMathInElement(document.body);
+          await readKey();
+          graph.clear();
+          sb.clear();
+          sb.setPosition(width / 2, height / 2);
+          sb.say('This concludes the chapter on graph separators. <br><br> In the next chapter you learn how graph separators are utilized by certain concepts within treewidth.  <br><br>  Continue to Chapter 3...');
         }),
         '2. Graph Separators',
       ),
@@ -266,8 +283,15 @@ Try going through the algorithm step by step to see how it works.
           d3.select('#main').append('div').attr('id', 'graph-td');
           d3.select('#graph-td').append('div').attr('id', 'graph-container');
           d3.select('#graph-td').append('div').attr('id', 'tree-container');
-
-          await sb.say('Recall that treewidth is a way to measure how "tree-like" a graph is. What that actually means is how easy is it to decompose that graph into a tree. This is where <strong>tree decompositions</strong> become very useful.');
+          await sb.say('Chapter 3: Tree Decompositions');
+          await readKey();
+          await sb.say(`Recall that treewidth is a way to measure how "tree-like" a graph is and if the treewidth of a graph is small then we consider it very "tree-like".
+          <br><br>
+          Now we will explore a concept to define this formally.
+          <br><br>
+          We define treewidth using the concept of <strong>tree decompositions</strong>.`);
+          await readKey();
+          await sb.say('A <strong>tree decomposition</strong> is mapping of a graph structured as a tree that we use to define the treewidth of a graph.');
           await readKey();
           sb.setPosition(sb.xPercentage, sb.yPercentage - 350);
           await sb.say('Below you see a graph and one of its valid tree decompositions');
@@ -280,24 +304,61 @@ Try going through the algorithm step by step to see how it works.
           const graph2 = new Graph();
           graph2.loadGraph(n, 'tree-container', 'tree');
 
-          await readKey();
-          await sb.say('Lets use the graph and tree decomposition below to proof that it is a valid tree decomposition.');
+          d3.select('#graph-container')
+            .append('div')
+            .text('Graph G')
+            .style('font-size', '40px')
+            .style('position', 'absolute')
+            .style('left', `${width / 4}px`)
+            .style('bottom', `${height / 4}px`);
+
+          d3.select('#tree-container')
+            .append('div')
+            .text('Tree Decomposition T')
+            .style('font-size', '40px')
+            .style('position', 'absolute')
+            .style('left', `${0.65 * width}px`)
+            .style('bottom', `${0.2 * height}px`);
+
 
           await readKey();
+          sb.setPosition(0.75 * width, sb.yPercentage);
+          await sb.say('We refer to each node in the tree decomposition as a "bag". <br><br>Each bag contains some vertices of the the graph.');
+          sb.addExercise('Try to hover over a bag in the tree decomposition to see the related vertices in the graph.');
+          graph2.toggleHoverEffect();
+          await readKey();
+          graph.resetNodeStyling();
+          graph2.toggleHoverEffect();
+          sb.clear();
+          sb.setPosition(0.5 * width, sb.yPercentage);
+          await sb.say('We say that a tree decomposition is valid if it contains the following 3 properties.');
+          await readKey();
+          sb.addButton('Replay animation', () => graph.runNodeCoverage());
           await sb.say('<strong>Property 1 (Node Coverage):</strong> Every vertex that appears in the graph must appear in some bag of the tree decomposition. <br/><br/>We will check every vertex in the graph and highlight the bag in the tree decompostion containing that vertex.');
-          await graph.testNodeCoverage();
-          await sb.say('Since every vertex in the graph appears in some bag of the tree decomposition the first property of tree decomposition holds true.');
-
+          sb.addMath('');
+          graph.runNodeCoverage();
           await readKey();
+          sb.setPosition(0.5 * width, 0.3 * height);
+          sb.clear();
+          graph.stopAllTransitions();
+          graph2.stopAllTransitions();
           graph.resetNodeStyling();
-          graph2.resetNodeStyling();
+          graph2.resetTreeDecompositionStyles();
           await sb.say('Property 2 <strong>(Edge coverage):</strong> For every edge that appears in the graph there is some bag in the tree decomposition which contains the vertices of both ends of the edge.<br/><br/> Lets check if this holds true for our graph and tree decomposition.');
-          await graph.edgeCoverage();
-          await sb.say('Great property 2 holds true as well!');
+          sb.addButton('Replay animation', () => graph.runEdgeCoverage());
+          sb.addMath('');
+          graph.runEdgeCoverage();
           await readKey();
           graph.resetNodeStyling();
-          graph2.resetNodeStyling();
-          await sb.say('<strong>Property 3 (Coherence):</strong> Lets consider 3 bags of the tree decomposition b1, b2 and b3 that form a path in the tree decomposition. If a vertex from the graph belongs to b1 and b3 it must also belong to b2.');
+          sb.clear();
+          graph.stopAllTransitions();
+          graph2.stopAllTransitions();
+          graph.resetLinkStyles();
+          graph.resetNodeStyling();
+          graph2.resetTreeDecompositionStyles();
+          await sb.say(`<strong>Property 3 (Coherence):</strong> Lets consider 3 bags of the tree decomposition: b1, b2 and b3 that form a path in the tree decomposition.
+          <br><br>If a vertex from the graph belongs to b1 and b3 it must also belong to b2.`);
+
           await readKey();
 
           d3.select('#main')
@@ -315,7 +376,9 @@ Try going through the algorithm step by step to see how it works.
             .style('position', 'absolute')
             .style('bottom', '250px')
             .style('left', `${(width / 2) - 80}px`);
+
           await sb.say('We can test this property by traversing the tree decomposition in post-order and keeping track of forgotten vertices. <br/><br/> We say that a vertex in a bag is forgotten if the vertex appear in the leaf bag but not in its parents bag. Then all we do every time we hit a leaf is check if the leaf contains any of the forgotten vertices and if so we conclude the tree decomposition does not adhere to his property. But if the leaf does not contain a forgotten vertex we continue traversing and deleting the leaf from the tree after we have procesed it.');
+          sb.addButton('Replay animation', () => graph.runCoherence());
           await graph2.dfs();
           await sb.say('It also satifies the 3rd property. We have now proofed that this is indeed a valid tree decomposition of the given graph.');
           await readKey();

@@ -13,11 +13,11 @@ export function readTreeDecomposition(treeData) {
       splitted.shift();
       splitted.shift();
       for (let j = 0; j < splitted.length; j++) {
-        bagLabel += `${splitted[j]},`;
+        bagLabel += `${splitted[j]} `;
         const currentNode = parseInt(splitted[j], 10);
         vertices.push(currentNode);
       }
-      bagLabel = bagLabel.replace(/,\s*$/, '');
+      // bagLabel = bagLabel.replace(/,\s*$/, '');
       bagLabel = `${bagLabel}`;
       nodes.push({ id: bagId, label: bagLabel, vertices });
     } else {

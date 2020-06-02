@@ -7,7 +7,9 @@ export default class SpeechBubble {
   }
 
   clear() {
-    this.resultContainer.remove();
+    if (this.resultContainer) this.resultContainer.remove();
+    if (this.mathContainer) this.mathContainer.remove();
+    if (this.exerciseContainer) this.exerciseContainer.remove();
     d3.selectAll('.speech-bubble-container g').remove();
   }
 
@@ -17,6 +19,32 @@ export default class SpeechBubble {
     this.textContainer = textContainer;
     this.speechBubbleContainer = speechBubbleContainer;
     this.setPosition(x, y);
+  }
+
+  addButton(buttonText, event) {
+    this.button = this.speechBubbleContainer.append('g').datum(this);
+
+    this.button
+      .append('button')
+      .text(buttonText)
+      .attr('class', 'btn')
+      .attr('id', this.id)
+      .attr('fill', '#D3D3D3')
+      .on('click', () => {
+        event();
+      });
+  }
+
+  addExercise(exercise) {
+    const exerciseContainer = this.speechBubbleContainer.append('div').attr('class', 'exercise-container');
+    this.exerciseContainer = exerciseContainer;
+    this.exerciseContainer.html(exercise);
+  }
+
+  addMath(math) {
+    const mathContainer = this.speechBubbleContainer.append('div').attr('class', 'math-container');
+    this.mathContainer = mathContainer;
+    this.mathContainer.html(math);
   }
 
   addResult(text) {
@@ -31,6 +59,10 @@ export default class SpeechBubble {
 
   clearResult() {
     this.resultContainer.remove();
+  }
+
+  clearButtons() {
+    d3.selectAll('g button').remove();
   }
 
   async checkAnswer(answer) {
@@ -141,7 +173,7 @@ export default class SpeechBubble {
       this.typeIt = new TypeIt('.text-container', {
         html: true,
         strings: text,
-        speed: 10,
+        speed: 1,
         loop: false,
         cursor: false,
       }).exec(() => {
