@@ -1,8 +1,27 @@
+/* eslint-disable no-continue */
+/* eslint-disable no-return-assign */
+/* eslint-disable no-shadow */
+/* eslint-disable max-len */
+/* eslint-disable camelcase */
+/* eslint-disable consistent-return */
+/* eslint-disable no-lonely-if */
 /* eslint-disable class-methods-use-this */
 
 
 function resetStyles() {
   d3.selectAll('circle').classed('highlighted-vertex', false).classed('nonhighlight', true);
+}
+
+function multiDimensionalUnique(arr) {
+  const uniques = [];
+  const itemsFound = {};
+  for (let i = 0, l = arr.length; i < l; i++) {
+    const stringified = JSON.stringify(arr[i]);
+    if (itemsFound[stringified]) { continue; }
+    uniques.push(arr[i]);
+    itemsFound[stringified] = true;
+  }
+  return uniques;
 }
 
 
@@ -15,7 +34,6 @@ function highlightVertex(nodeId) {
 }
 
 function moveTooltip(node, maxSetIncl, maxSetExcl) {
-  addTooltip();
   const { top } = document.getElementById(`treeNode-${node.id}`).getBoundingClientRect();
   const { left } = document.getElementById(`treeNode-${node.id}`).getBoundingClientRect();
 
@@ -40,8 +58,6 @@ function moveTooltip(node, maxSetIncl, maxSetExcl) {
     .style('top', `${top - 2}px`);
 }
 
-let animX = 0;
-
 function getSubTree(rootOfSubtree, currentNode) {
   let subTree;
   rootOfSubtree.each((d) => {
@@ -58,12 +74,17 @@ const getAllSubsets = (theArray) => theArray.reduce(
 );
 
 export default class Tree {
-  constructor() {
+  constructor(container) {
+    this.container = container;
     this.isMis = false;
     this.isColor = false;
     this.root = null;
     this.current = 0;
     this.graph = null;
+  }
+
+  clear() {
+    this.svg.remove();
   }
 
   hideTooltip() {
@@ -150,6 +171,19 @@ export default class Tree {
     });
   }
 
+  addTooltip() {
+    d3.select('#main').append('div')
+      .attr('id', 'tooltip')
+      .style('position', 'absolute')
+      .style('opacity', 0);
+
+    d3.select('#main')
+      .append('img')
+      .attr('src', './new.png')
+      .attr('id', 'tooltip-arrow')
+      .style('opacity', 0);
+  }
+
   setMisNormalTree() {
     this.isMisNormalTree = true;
   }
@@ -218,6 +252,7 @@ export default class Tree {
 
       const node = currentNode.data;
 
+      /* Leaf node */
       if ('children' in node === false) {
         const { top } = document.getElementById(`treeNode-${currentNode.data.id}`).getBoundingClientRect();
         const { left } = document.getElementById(`treeNode-${currentNode.data.id}`).getBoundingClientRect();
@@ -231,7 +266,9 @@ export default class Tree {
           .style('opacity', 1)
           .style('left', `${left - 50}px`)
           .style('top', `${top - 2}px`);
-        node.pos = [];
+
+
+        node.positionTracker = [];
         return;
       }
 
@@ -239,11 +276,17 @@ export default class Tree {
       const subTree = getSubTree(this.root, currentNode.data);
       this.graph.newSubGraph(subTree);
 
+      /* Introduce Node */
       if (node.vertices.length > child.vertices.length) {
+        /* Get child states */
         const childClone = JSON.parse(JSON.stringify(child));
         const childsStates = childClone.states;
+
+        /* Find the introduced vertex */
         const difference = node.vertices.filter((x) => !child.vertices.includes(x));
         const introducedVertex = difference[0];
+
+        /* Initialize new states */
         const newStates = [];
 
         if (child.vertices.length === 0) {
@@ -252,49 +295,60 @@ export default class Tree {
             newState.push(color);
             newStates.push(newState);
           }
-          const x = node.vertices[0];
-          node.pos = childClone.pos;
-          if (!node.pos.includes(introducedVertex)) node.pos.push(x);
+          const ps = childClone.positionTracker;
+          if (!ps.includes(introducedVertex)) ps.push(introducedVertex);
+          node.positionTracker = ps;
           node.states = newStates;
         } else {
           for (const childState of childsStates) {
             for (const color of colorArray) {
-              const newState = JSON.parse(JSON.stringify(childState));
-              newState.push(color);
-              if (this.graph.checkIntroducedVertex(introducedVertex, newState, subTree)) {
-                newStates.push(newState);
+              const oldState = JSON.parse(JSON.stringify(childState));
+              if (this.graph.checkIntroducedVertex(introducedVertex, childClone.positionTracker, oldState, color, subTree)) {
+                /* If we are here, we can safely add the color */
+                oldState.push(color);
+                newStates.push(oldState);
               }
             }
           }
           node.states = newStates;
-          node.pos = childClone.pos;
-          if (!node.pos.includes(introducedVertex)) node.pos.push(introducedVertex);
+
+          const ps = childClone.positionTracker;
+          if (!ps.includes(introducedVertex)) ps.push(introducedVertex);
+          node.positionTracker = ps;
         }
       }
 
+      /* Forgot node */
       if (node.vertices.length < child.vertices.length) {
+        /* Get the child's data  */
         const childClone = JSON.parse(JSON.stringify(child));
         const childStates = childClone.states;
 
-        node.pos = childClone.pos;
+        /* Find the forgotten vertex */
         const forgottenVertex = child.vertices.filter((x) => !node.vertices.includes(x));
-        if (node.pos.includes(parseInt(forgottenVertex, 10))) node.pos = node.pos.filter((x) => x !== parseInt(forgottenVertex, 10));
 
 
+        /* Get the position of the childs vertices */
+        const ps = childClone.positionTracker;
+        const parsed = parseInt(forgottenVertex, 10);
+        const forgottenVertexIndex = ps.indexOf(parsed);
+
+        /* Remove the forgotten vertex from position tracker */
+        ps.splice(forgottenVertexIndex, 1);
+        node.positionTracker = ps;
+
+        /* Remove the column in the table that includes forgotten vertices */
         for (const childState of childStates) {
-          childState.pop();
+          childState.splice(forgottenVertexIndex, 1);
         }
 
-        for (let i = 0; i < childStates.length; i++) {
-          const array1 = childStates[i];
-          for (let j = 0; j < childStates.length; j++) {
-            const array2 = childStates[j];
-            if (JSON.stringify(array1) === JSON.stringify(array2)) childStates.splice(i, 1);
-          }
-        }
-        node.states = childStates;
+        const uw = multiDimensionalUnique(childStates);
+
+        /* Update this table's state with the new states */
+        node.states = uw;
       }
 
+      /* Join node */
       if (node.children.length === 2) {
         const child1 = node.children[0];
         const child1Clone = JSON.parse(JSON.stringify(child1));
@@ -306,12 +360,12 @@ export default class Tree {
         const newStates = [];
 
         if (child1States.length < child2States.length) {
-          node.pos = child1.pos;
+          node.positionTracker = child1.positionTracker;
           for (const childState of child1States) {
             if (this.isArrayInArray(child2States, childState)) newStates.push(childState);
           }
         } else {
-          node.pos = child2.pos;
+          node.positionTracker = child2.positionTracker;
           for (const childState of child2States) {
             if (this.isArrayInArray(child1States, childState)) newStates.push(childState);
           }
@@ -321,10 +375,9 @@ export default class Tree {
 
       let sb = '';
       sb += '<tr>';
-      for (let i = 0; i < node.pos.length; i++) {
-        sb += `<td><strong>${node.pos[i]}</strong></td>`;
+      for (let i = 0; i < node.positionTracker.length; i++) {
+        sb += `<td><strong>${node.positionTracker[i]}</strong></td>`;
       }
-
       sb += '</tr>';
 
       for (const state of node.states) {
@@ -362,22 +415,7 @@ export default class Tree {
     });
   }
 
-
-  addTooltip() {
-    d3.select('#main').append('div')
-      .attr('id', 'tooltip')
-      .style('position', 'absolute')
-      .style('opacity', 0);
-
-
-    d3.select('#main')
-      .append('img')
-      .attr('src', './new.png')
-      .attr('id', 'tooltip-arrow')
-      .style('opacity', 0);
-  }
-
-  createTable() {
+  addColorTable() {
     d3.select('#main')
       .append('table')
       .style('opacity', 0)
@@ -406,6 +444,7 @@ export default class Tree {
 
       // Get all the subsets of the current vertices in this tree node
       const allSubsets = getAllSubsets(currentNode.data.vertices);
+      allSubsets.map((s) => s.sort());
 
       // Get the subtree rooted at this node
       const subTree = getSubTree(this.root, currentNode.data);
@@ -422,6 +461,7 @@ export default class Tree {
           currentNode.data.table[vertex] = 1;
         }
         d3.select('#tooltip').style('opacity', 0);
+        d3.select('#tooltip-arrow').style('opacity', 0);
         return;
       }
 
@@ -438,9 +478,9 @@ export default class Tree {
         const child2Table = child2Clone.table;
 
         for (const set of allSubsets) {
-          const currentNodeValue = this.graph.runMis(subTree, set);
           const child1value = child1Table[set];
           const child2value = child2Table[set];
+          const currentNodeValue = set.length;
           currentNode.data.table[set] = child1value + child2value - currentNodeValue;
         }
       }
@@ -451,12 +491,27 @@ export default class Tree {
         const forgottenVertex = childsVertices
           .filter((x) => !currentNode.data.vertices.includes(x));
 
+        // Get the child's table
+        const child = currentNode.data.children[0];
+        const childClone = JSON.parse(JSON.stringify(child));
+        const childsTable = childClone.table;
+
         for (const set of allSubsets) {
-          const setWithV = JSON.parse(JSON.stringify(set));
-          setWithV.push(forgottenVertex);
-          const setWithoutV = this.graph.runMis(subTree, set);
-          const algoWithV = this.graph.runMis(subTree, setWithV);
-          currentNode.data.table[set] = Math.max(setWithoutV, algoWithV);
+          /* Union the forgottenVertex with the current subset */
+          const concatV = set.concat(forgottenVertex);
+          concatV.sort();
+
+          /* Value of set without v */
+          const setWithoutV = childsTable[set];
+
+          /* Value of set with v */
+          const setWithV = childsTable[concatV];
+
+          if (setWithoutV > setWithV) {
+            currentNode.data.table[set] = setWithoutV;
+          } else {
+            currentNode.data.table[set] = setWithV;
+          }
         }
       }
 
@@ -477,14 +532,17 @@ export default class Tree {
         const introducedVertex = difference[0];
 
         for (const set of allSubsets) {
-          // Only run MIS if the introduced vertex is in the current set
+          // We only care about the subsets containing the introduced vertex v
           if (set.includes(introducedVertex)) {
-            const maxSet = this.graph.runMis(subTree, set, introducedVertex);
+            /* Check if a vertex inside this set is adjacent to the introduced vertex */
+            const setWithoutV = set.filter((s) => s !== introducedVertex);
 
-            if (currentNode.data.table[set]) {
-              currentNode.data.table[set]++;
+            if (this.graph.isVertexAdjacent(subTree, set)) {
+              currentNode.data.table[set] = -9999;
             } else {
-              currentNode.data.table[set] = maxSet;
+              let oldValue = childsTable[setWithoutV];
+              oldValue++;
+              currentNode.data.table[set] = oldValue;
             }
           }
         }
@@ -513,7 +571,6 @@ export default class Tree {
         }
         sb += `<tr id=${key} class="mis-row"><td class="sets">${key}</td><td>${value}</td></tr>`;
       });
-
       const { top } = document.getElementById(`treeNode-${currentNode.data.id}`).getBoundingClientRect();
       const { left } = document.getElementById(`treeNode-${currentNode.data.id}`).getBoundingClientRect();
 
@@ -570,8 +627,8 @@ export default class Tree {
     if (node.liss !== 0) return node.liss;
 
     if ('children' in node === false) {
-      visitElement(node.data.id, animX);
-      animX++;
+      // visitElement(node.data.id, animX);
+      // animX++;
       return node.liss = 1;
     }
 
@@ -588,16 +645,13 @@ export default class Tree {
 
     node.liss = Math.max(lissExcl, lissIncl);
 
-    console.log(node.liss);
     return node.liss;
   }
 
-  load(treeData, container) {
-    this.container = container;
-
-    const height = document.getElementById(container).offsetHeight;
-    const width = document.getElementById(container).offsetWidth;
-    const treeSvg = d3.select(`#${container}`).append('svg')
+  load(treeData, type) {
+    const height = document.getElementById(this.container).offsetHeight;
+    const width = document.getElementById(this.container).offsetWidth;
+    const treeSvg = d3.select(`#${this.container}`).append('svg')
       .attr('width', width)
       .attr('height', height);
 
@@ -606,11 +660,11 @@ export default class Tree {
     const root = d3.hierarchy(treeData);
     this.root = root;
     const treeLayout = d3.tree();
-    treeLayout.size([width, height - 100]);
+    treeLayout.size([width, height - 80]);
     treeLayout(root);
 
+    /* Get the link data and draw the links */
     treeSvg
-      .append('g')
       .selectAll('line')
       .data(root.links())
       .enter()
@@ -620,36 +674,47 @@ export default class Tree {
       .attr('y1', (d) => d.source.y)
       .attr('x2', (d) => d.target.x)
       .attr('y2', (d) => d.target.y)
-      .attr('transform', `translate(${0}, ${40})`);
+      .attr('transform', `translate(${0}, ${30})`);
 
-    let nodeSvg = treeSvg
-      .append('g')
-      .selectAll('circle');
 
-    nodeSvg = nodeSvg
-      .data(root.descendants());
-
-    const g = nodeSvg
+    /* Get the node data and draw the nodes */
+    treeSvg
+      .selectAll('rect')
+      .data(root.descendants())
       .enter()
-      .append('g');
-
-    g
-      .append('circle')
+      .append('rect')
       .attr('id', (d) => `treeNode-${d.data.id}`)
-      .attr('cx', (d) => d.x)
-      .attr('cy', (d) => d.y)
-      .attr('r', 25)
-      .attr('class', 'nonhighlight')
-      .attr('transform', `translate(${0}, ${40})`);
+      .attr('width', 60)
+      .attr('height', 25)
+      .attr('x', (d) => d.x - 30)
+      .attr('y', (d) => d.y)
+      .attr('rx', 5)
+      .attr('ry', 5)
+      .attr('transform', `translate(${0}, ${30})`)
+      .attr('class', 'tree-node')
+      .style('stroke-width', '5px')
+      .style('stroke', (d) => {
+        if (type === 'nice') {
+          if ('children' in d.data === false) return 'black';
+          if (d.data.children.length === 2) return 'yellow';
+          if (d.data.vertices.length > d.data.children[0].vertices.length) return 'blue';
+          if (d.data.vertices.length < d.data.children[0].vertices.length) return 'red';
+        } else {
+          return 'black';
+        }
+      });
 
-    g
+    treeSvg
+      .selectAll('text')
+      .data(root.descendants())
+      .enter()
       .append('text')
-      .attr('dy', '.2em')
+      .attr('dy', '1em')
       .attr('text-anchor', 'middle')
       .attr('class', 'label')
       .text((d) => d.data.label)
       .attr('x', (d) => d.x)
       .attr('y', (d) => d.y)
-      .attr('transform', `translate(${0}, ${40})`);
+      .attr('transform', `translate(${0}, ${30})`);
   }
 }

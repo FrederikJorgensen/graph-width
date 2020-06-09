@@ -1,10 +1,29 @@
+/* eslint-disable func-names */
+/* eslint-disable no-undef */
+/* eslint-disable no-shadow */
+/* eslint-disable no-continue */
+/* eslint-disable no-use-before-define */
+/* eslint-disable max-len */
+/* eslint-disable no-return-assign */
+/* eslint-disable array-callback-return */
+/* eslint-disable prefer-promise-reject-errors */
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-async-promise-executor */
+/* eslint-disable consistent-return */
 /* eslint-disable class-methods-use-this */
 /* eslint-disable no-useless-return */
 /* eslint-disable no-bitwise */
-import { generateRandomGraph } from '../helpers.js';
-import * as readTree from '../readTree.js';
+import generateRandomGraph from '../Utilities/helpers.js';
+import * as readTree from '../Utilities/readTree.js';
+import { contextMenu as menu } from './ContextMenu.js';
 
 const colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+function hull(points) {
+  if (points.length < 2) return;
+  if (points.length < 3) return d3.polygonHull([points[0], ...points]);
+  return d3.polygonHull(points);
+}
 
 function generatePowerSet(array, n) {
   const result = [];
@@ -50,7 +69,6 @@ async function repeat(nodesToHighlight, animationSpeed) {
         .duration(200)
         .style('fill', '#1f77b4');
       i++;
-      console.log('here');
       await timeout(animationSpeed);
       if (i === 4) {
         resolve();
@@ -130,26 +148,172 @@ export function resetStyles() {
     .style('stroke', 'rgb(51, 51, 51)');
 }
 
-function adjFromLinks(links) {
-  const adjacencyList = [];
-  links.forEach((d) => {
-    adjacencyList[`${d.source.id}-${d.target.id}`] = true;
-    adjacencyList[`${d.target.id}-${d.source.id}`] = true;
-  });
-  return adjacencyList;
-}
-
-
 export default class Graph {
   constructor(container) {
     this.container = container;
     this.maxStop = false;
-    this.misAnimationSpeed = 500;
+    this.animationSpeed = 500;
     this.selectedNodes = [];
     this.isHoverEffect = false;
-    this.animDuration = 1000;
+    this.animDuration = 2000;
     this.testingCoherence = false;
     this.cancel = false;
+    this.lastNodeId = 0;
+    this.masterNodes = new Set();
+  }
+
+  isIntroducedVertexNeighbor(set, introducedVertex, adjacencyList) {
+    for (const s of set) {
+      if (adjacencyList[`${s}-${introducedVertex}`]) return true;
+    }
+    return false;
+  }
+
+  isVertexAdjacent(subTree, array) {
+    const subGraph = this.newSubGraph(subTree);
+
+    const verticesInSubGraph = [];
+    subGraph.nodes.forEach((node) => {
+      verticesInSubGraph.push(node.id);
+    });
+
+    const adjacencyList = this.returnAdj(subGraph.links);
+
+    if (this.isNeighborInSet(array, adjacencyList)) return true;
+    return false;
+  }
+
+  showSeparator(vertices) {
+    /* Keep track of the separating nodes for the overlay */
+    this.separatorNodes = this.nodes.filter((node) => vertices.includes(node.id));
+
+    /* Make overlay visible */
+    this.path.style('opacity', 0.3);
+
+    /* Get all the nodes that are not part of the separating set */
+    const restNodes = this.nodes.filter((node) => !vertices.includes(node.id));
+
+    /* Get all the links after removing separating set */
+    const restLinks = this.links.filter((link) => {
+      if (vertices.includes(link.source.id)) return false;
+      if (vertices.includes(link.target.id)) return false;
+      return true;
+    });
+    /* Check connectivity such that we can assign a cluster to each component */
+    this.checkConnectivity(restNodes, restLinks);
+
+    this.nodes.map((node) => {
+      if ('cluster' in node === false || node.cluster === null) {
+        node.cluster = 1;
+        return;
+      }
+    });
+
+    d3.selectAll('circle').style('fill', (d) => colors(d.cluster));
+
+    this.simulation.force('link',
+      d3.forceLink(this.links)
+        .distance(2)
+        .strength(0.1))
+      .force('collision', d3.forceCollide().radius(30));
+
+    this.simulation.force('charge', d3.forceManyBody().strength(-1500));
+
+    const groupingForce = forceInABox()
+      .strength(0.4) // Strength to foci
+      .template('force') // Either treemap or force
+      .groupBy('cluster') // Node attribute to group
+      .links(this.links)
+      .enableGrouping(true)
+      .linkStrengthInterCluster(0) // linkStrength between nodes of different clusters
+      .linkStrengthIntraCluster(0) // linkStrength between nodes of the same cluster
+      .forceLinkDistance(250)
+      .forceCharge(-2000); // Charge between the meta-nodes (Force template only)
+
+    this.simulation.force('group', groupingForce);
+    this.simulation.alpha(0.07).restart();
+  }
+
+  hideSeparator() {
+    this.path.style('opacity', 0);
+
+    d3.selectAll('circle').style('fill', '#1f77b4');
+
+    this.nodes.forEach((node) => node.cluster = null);
+
+    /*     d3.forceSimulation()
+      .force('center', d3.forceCenter(w / 2, h / 2))
+      .force('x', d3.forceX(w / 2).strength(0.2))
+      .force('y', d3.forceY(h / 2).strength(0.2))
+      .nodes(graph.nodes)
+      .force('charge', d3.forceManyBody().strength(-600).distanceMin(15))
+      .force('link', d3.forceLink(graph.links).id((d) => d.id).distance(85).strength(0.8))
+      .force('collision', d3.forceCollide().radius(20)) */
+
+    const groupingForce = forceInABox()
+      .strength(0) // Strength to foci
+      .template('force') // Either treemap or force
+      .groupBy('cluster') // Node attribute to group
+      .links(this.links)
+      .linkStrengthInterCluster(0) // linkStrength between nodes of different clusters
+      .linkStrengthIntraCluster(0) // linkStrength between nodes of the same cluster
+      .forceCharge(0); // Charge between the meta-nodes (Force template only)
+
+    this.simulation
+      .force('group', groupingForce)
+      .force('link', d3.forceLink(this.links).id((d) => d.id).distance(85).strength(0.8))
+      .force('charge', d3.forceManyBody().strength(-600).distanceMin(15));
+
+    this.simulation.alpha(0.1).restart();
+  }
+
+  showCoherence(vertices) {
+    d3.selectAll('circle')
+      .filter((node) => vertices.includes(node.id))
+      .transition()
+      .duration(300)
+      .style('opacity', 0);
+
+    d3.selectAll('#graph-container text')
+      .filter((node) => vertices.includes(node.id))
+      .transition()
+      .duration(300)
+      .style('opacity', 0);
+
+    d3.selectAll('#graph-container line')
+      .filter((link) => vertices.includes(link.source.id) || vertices.includes(link.target.id))
+      .transition()
+      .duration(300)
+      .style('opacity', 0);
+  }
+
+  hideCoherence() {
+    d3.selectAll('circle')
+      .filter((node) => node.id !== 0)
+      .transition()
+      .duration(300)
+      .style('opacity', 1);
+
+    d3.selectAll('line')
+      .transition()
+      .duration(300)
+      .style('opacity', 1);
+
+    d3.selectAll('#graph-container text')
+      .filter((node) => node.id !== 0)
+      .transition()
+      .duration(300)
+      .style('opacity', 1);
+  }
+
+  toggleCoherenceProof() {
+    d3.selectAll('ellipse').on('mouseover', (d) => this.graphOfTd.showCoherence(d.vertices));
+    d3.selectAll('ellipse').on('mouseout', () => this.graphOfTd.hideCoherence());
+  }
+
+  toggleSeparator() {
+    d3.selectAll('ellipse').on('mouseover', (d) => this.graphOfTd.showSeparator(d.vertices));
+    d3.selectAll('ellipse').on('mouseout', () => this.graphOfTd.hideSeparator());
   }
 
   async animateDeleteNode(node) {
@@ -201,6 +365,7 @@ export default class Graph {
       .attr('rx', 40)
       .attr('ry', 30)
       .on('end', () => {
+        d3.selectAll('ellipse').style('fill', '#2ca02c');
         d3.selectAll('ellipse')
           .filter((treeNode) => treeNode.id === bagId)
           .transition()
@@ -235,22 +400,28 @@ export default class Graph {
     return true;
   }
 
-  checkIntroducedVertex(introducedNode, state, subTree) {
+  checkIntroducedVertex(introducedNode, positionTracker, oldState, color, subTree) {
+    /* Get the subgraph rooted at this tree */
     const subGraph = this.newSubGraph(subTree);
-    const adjList = adjFromLinks(subGraph.links);
-    adjList[`${introducedNode}-${introducedNode}`] = true;
-    const adjacentNodes = subGraph.nodes.filter((node) => adjList[`${node.id}-${introducedNode}`]);
-    const adjacentLinks = subGraph.links.filter((link) => link.source.id === introducedNode || link.target.id === introducedNode);
-    adjacentNodes.reverse();
 
-    for (let i = 0; i < adjacentNodes.length; i++) {
-      const node = adjacentNodes[i];
-      node.color = state[i];
+    /* Reset the coloring */
+    subGraph.nodes.forEach((node) => node.color = null);
+
+    /* Color the nodes according to the oldState */
+    for (let i = 0; i < positionTracker.length; i++) {
+      const n = subGraph.nodes.find((node) => node.id === positionTracker[i]);
+      n.color = oldState[i];
     }
 
-    for (const link of adjacentLinks) {
-      if (link.source.color === link.target.color) {
-        return false;
+    /* Give the introduced vertex a color */
+    const iNode = subGraph.nodes.find((node) => node.id === introducedNode);
+    iNode.color = color;
+
+    for (const link of subGraph.links) {
+      if (link.source.color !== null && !link.target.color !== null) {
+        if (link.source.color === link.target.color) {
+          return false;
+        }
       }
     }
     return true;
@@ -289,12 +460,6 @@ export default class Graph {
     return { nodes: subGraphNodes, links: subGraphLinks };
   }
 
-  isIntroducedVertexNeighbor(set, introducedVertex, adjacencyList) {
-    for (const s of set) {
-      if (adjacencyList[`${s}-${introducedVertex}`]) return true;
-    }
-    return false;
-  }
 
   isNeighborInSet(set, adjacencyList) {
     for (let i = 0; i < set.length; i++) {
@@ -367,7 +532,6 @@ export default class Graph {
     return adjacencyList;
   }
 
-
   runMis(subTree, set, introducedVertex, isHovering) {
     if (set.length === 0) return 0;
     const subGraph = this.newSubGraph(subTree);
@@ -394,7 +558,7 @@ export default class Graph {
     const lol = [];
 
     this.nodes.forEach((node) => {
-      tNodes.push(node.id);
+      if (node.id !== 0) tNodes.push(node.id);
     });
 
     const onenode = { id: 1, label: JSON.stringify(tNodes).replace('[', '').replace(']', '') };
@@ -450,7 +614,7 @@ export default class Graph {
           const n = currentVertex.vertices[i];
 
           if (forgottenVertices.includes(n)) {
-            console.log('this is not valid');
+            /* not valid coherence */
           } else if (parentBag.length) {
             const parentVertices = parentNode.vertices;
 
@@ -485,19 +649,32 @@ export default class Graph {
       d3.selectAll('#graph-container line').style('fill', (edge) => {
         const sourceNode = edge.source.id;
         const targetNode = edge.target.id;
-        if (this.isEdgeInTreeDecomposition(sourceNode, targetNode)) {
-          d3.select(`#link-${edge.source.id}-${edge.target.id}`)
-            .transition()
-            .duration(this.animDuration)
-            .delay(this.animDuration * this.anim)
-            .style('stroke', 'orange')
-            .style('stroke-width', '5px')
-            .on('end', (edge) => {
-              const allEdges = d3.selectAll('#graph-container line').data();
-              if (edge === allEdges[allEdges.length - 1]) resolve();
-            });
-          this.anim++;
-        }
+        d3.select(`#link-${edge.source.id}-${edge.target.id}`)
+          .transition()
+          .duration(this.animDuration)
+          .delay(this.animDuration * this.anim)
+          .style('stroke', 'orange')
+          .style('stroke-width', '5px')
+          .on('end', (edge) => {
+            d3.selectAll('#graph-container line')
+              .style('stroke', 'rgb(51, 51, 51)')
+              .style('stroke-width', '3.5px');
+
+            const allEdges = d3.selectAll('#graph-container line').data();
+            if (edge === allEdges[allEdges.length - 1]) resolve();
+          });
+
+        d3.selectAll('#tree-container ellipse')
+          .filter((bag) => bag.vertices.includes(sourceNode) && bag.vertices.includes(targetNode))
+          .transition()
+          .duration(this.animDuration)
+          .delay(this.animDuration * this.anim)
+          .style('fill', 'orange')
+          .on('end', () => {
+            d3.selectAll('ellipse').style('fill', '#2ca02c');
+          });
+
+        this.anim++;
       });
     });
   }
@@ -514,19 +691,31 @@ export default class Graph {
   testNodeCoverage() {
     return new Promise((resolve) => {
       d3.selectAll('#graph-container circle').style('fill', (node) => {
-        if (this.isNodeInTreeDecomposition(node)) {
-          d3.select(`#graph-node-${node.id}`)
-            .transition()
-            .duration(this.animDuration)
-            .delay(this.animDuration * this.anim)
-            .style('fill', 'orange')
-            .on('end', (node) => {
-              const allNodes = d3.selectAll('#graph-container circle').data();
-              if (node === allNodes[allNodes.length - 1]) resolve();
-            });
-          this.anim++;
-        }
-        return colors(1);
+        d3.select(`#graph-node-${node.id}`)
+          .transition()
+          .duration(this.animDuration)
+          .delay(this.animDuration * this.anim)
+          .style('fill', 'orange')
+          .on('end', (node) => {
+            d3.selectAll('#graph-container circle')
+              .style('fill', '#1f77b4');
+            const allNodes = d3.selectAll('#graph-container circle').data();
+            if (node === allNodes[allNodes.length - 1]) resolve();
+          });
+
+
+        d3.selectAll('ellipse')
+          .filter((bag) => bag.vertices.includes(node.id))
+          .transition()
+          .duration(this.animDuration)
+          .delay(this.animDuration * this.anim)
+          .style('fill', 'orange')
+          .on('end', () => {
+            d3.selectAll('ellipse')
+              .style('fill', '#2ca02c');
+          });
+
+        this.anim++;
       });
     });
   }
@@ -618,7 +807,7 @@ export default class Graph {
 
   async computeTreeDecomposition() {
     return new Promise((resolve) => {
-      const newJson = { edges: this.getAllEdges(), largestNode: this.getLargestNode() };
+      const newJson = { edges: this.getAllEdges(), largestNode: this.getLargestNode() - 1 };
       const jsonString = JSON.stringify(newJson);
       makeRequest('POST', '/compute', jsonString).then(() => resolve());
     });
@@ -676,7 +865,7 @@ export default class Graph {
       this.selectedNodes.splice(nodeToRemove, 1);
 
       if (this.selectedNodes.length === 0) {
-        d3.select('.result-text').html(null);
+        d3.select('#separator-output').html(null);
         this.resetNodeStyling();
         return;
       }
@@ -685,26 +874,13 @@ export default class Graph {
       if (this.selectedNodes.length > 1 && this.isSeparatingNodesAdjacent() === false) {
         this.resetNodeStyling();
         this.colorNotSeparating();
-        d3.select('.result-text').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is a balanced separator!<span class="material-icons correct-answer">check</span>`);
+        d3.select('#separator-output').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is a balanced separator!<span class="material-icons correct-answer">check</span>`);
         renderMathInElement(document.body);
         return;
       }
     } else {
       this.selectedNodes.push(d.id);
     }
-
-    /* Check if the selected nodes form a connected component */
-    const subSelectecNodes = this.nodes.filter((node) => this.selectedNodes.includes(node.id));
-
-    const nonSelectedLinks = this.links.filter((l) => {
-      if (
-        !this.selectedNodes.includes(l.target.id)
-          || !this.selectedNodes.includes(l.source.id)
-      ) return true;
-    });
-    const subSelectedLinks = this.links.filter((link) => !nonSelectedLinks.includes(link));
-
-    const selectedNodesConnectivity = this.checkConnectivity(subSelectecNodes, subSelectedLinks);
 
     /* Original graph's vertices subtracting the vertex separator set */
     const balanceLimit = (this.nodes.length - this.selectedNodes.length) / 2;
@@ -713,7 +889,7 @@ export default class Graph {
     const obj = this.isSeparatorSet(this.selectedNodes);
 
     /* First check if the graph is disconnected */
-    if (obj.isDisconnected === true && selectedNodesConnectivity.isDisconnected === false) {
+    if (obj.isDisconnected === true) {
       const newnodes = obj.subGraphNodes;
       const connectedComponents = {};
 
@@ -732,19 +908,19 @@ export default class Graph {
         if (cl > balanceLimit) {
           this.resetNodeStyling();
           this.colorNotSeparating();
-          d3.select('.result-text').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is not a balanced separator!<span class="material-icons wrong-answer">clear</span>`);
+          d3.select('#separator-output').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is not a balanced separator!<span class="material-icons wrong-answer">clear</span>`);
           renderMathInElement(document.body);
           return;
         }
       }
       this.resetNodeStyling();
       this.colorSeparating();
-      d3.select('.result-text').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is a balanced separator!<span class="material-icons correct-answer">check</span>`);
+      d3.select('#separator-output').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is a balanced separator!<span class="material-icons correct-answer">check</span>`);
       renderMathInElement(document.body);
     } else {
       this.resetNodeStyling();
       this.colorNotSeparating();
-      d3.select('.result-text').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is not a balanced separator!<span class="material-icons wrong-answer">clear</span>`);
+      d3.select('#separator-output').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is not a balanced separator!<span class="material-icons wrong-answer">clear</span>`);
       renderMathInElement(document.body);
     }
   }
@@ -754,7 +930,7 @@ export default class Graph {
       const nodeInSeparatorSet = this.selectedNodes.indexOf(d.id);
       this.selectedNodes.splice(nodeInSeparatorSet, 1);
       if (this.selectedNodes.length === 0) {
-        d3.select('.result-text').html('Click on a vertex to include it into the separator set.');
+        d3.select('#separator-output').html('Click on a vertex to include it into the separator set.');
         this.resetNodeStyling();
         return;
       }
@@ -776,7 +952,7 @@ export default class Graph {
       if (sg.isDisconnected) {
         this.resetNodeStyling();
         this.colorNotSeparating();
-        d3.select('.result-text').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is not a minimal separator!<span class="material-icons wrong-answer">clear</span>`);
+        d3.select('#separator-output').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is not a minimal separator!<span class="material-icons wrong-answer">clear</span>`);
         renderMathInElement(document.body);
         return;
       }
@@ -787,13 +963,13 @@ export default class Graph {
     if (subg.isDisconnected) {
       this.resetNodeStyling();
       this.colorSeparating();
-      d3.select('.result-text').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is a minimal separator!<span class="material-icons correct-answer">check</span>`);
+      d3.select('#separator-output').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is a minimal separator!<span class="material-icons correct-answer">check</span>`);
       renderMathInElement(document.body);
       return;
     }
     this.resetNodeStyling();
     this.colorNotSeparating();
-    d3.select('.result-text').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is not a minimal separator!<span class="material-icons wrong-answer">clear</span>`);
+    d3.select('#separator-output').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is not a minimal separator!<span class="material-icons wrong-answer">clear</span>`);
     renderMathInElement(document.body);
   }
 
@@ -802,7 +978,8 @@ export default class Graph {
   }
 
   checkConnectivity(subGraphNodes, subGraphLinks) {
-    let componentCount;
+    let componentCount = 1;
+    let cluster = 2;
 
     if (subGraphNodes.length === 0) {
       componentCount = 0;
@@ -838,12 +1015,13 @@ export default class Graph {
       }
 
       v1.visited = true;
-      v1.cluster = componentCount;
+      v1.cluster = cluster.toString();
       if (q.length === 0) {
         for (let i = 0; i < subGraphNodes.length; i++) {
           if (!subGraphNodes[i].visited) {
             q.push(subGraphNodes[i]);
             componentCount++;
+            cluster++;
             break;
           }
         }
@@ -891,47 +1069,15 @@ export default class Graph {
       const nodeInSeparatorSet = this.selectedNodes.indexOf(d.id);
       this.selectedNodes.splice(nodeInSeparatorSet, 1);
 
-      /* After removing a separating node check if the remaining vertices are still adjacent */
-      if (this.selectedNodes.length > 1 && this.isSeparatingNodesAdjacent() === false) {
-        this.resetNodeStyling();
-        this.colorNotSeparating();
-        // showResult(false);
-        return;
-      }
-
       /* If the new separating set is empty reset the result and the styling */
       if (this.selectedNodes.length === 0) {
-        d3.select('.result-text').html('Click on a vertex to include it into the separator set.');
+        d3.select('#separator-output').html('Click on a vertex to include it into the separator set.');
         this.resetNodeStyling();
         return;
       }
     } else {
       this.selectedNodes.push(d.id);
-      /* If new node to the separator is not a neighbor the result is wrong */
-      if (
-        this.selectedNodes.length > 1
-      && this.isNeighboringSeparatedNodes(d.id) === false
-      ) {
-        this.resetNodeStyling();
-        this.colorNotSeparating();
-        d3.select('.result-text').html(`\\( S = \\{ ${this.selectedNodes} \\} \\) is not a separator in the graph.  <span class="material-icons wrong-answer">clear</span>`);
-        renderMathInElement(document.body);
-        return;
-      }
     }
-
-    /* Check if the selected nodes form a connected component */
-    const subSelectecNodes = this.nodes.filter((node) => this.selectedNodes.includes(node.id));
-
-    const nonSelectedLinks = this.links.filter((l) => {
-      if (
-        !this.selectedNodes.includes(l.target.id)
-          || !this.selectedNodes.includes(l.source.id)
-      ) return true;
-    });
-    const subSelectedLinks = this.links.filter((link) => !nonSelectedLinks.includes(link));
-
-    const selectedNodesConnectivity = this.checkConnectivity(subSelectecNodes, subSelectedLinks);
 
     /* Remove the current separator nodes */
     const subGraphNodes = this.nodes.filter(
@@ -951,10 +1097,10 @@ export default class Graph {
     const subg = this.checkConnectivity(subGraphNodes, subGraphLinks);
 
 
-    if (subg.isDisconnected && selectedNodesConnectivity.isDisconnected === false) {
+    if (subg.isDisconnected) {
       this.resetNodeStyling();
       this.colorSeparating();
-      d3.select('.result-text').html(`The set \\( S = \\{ ${this.selectedNodes} \\} \\) is indeed a separator in the graph. 
+      d3.select('#separator-output').html(`The set \\( S = \\{ ${this.selectedNodes} \\} \\) is indeed a separator in the graph. 
       <span class="material-icons correct-answer">check</span> 
       <br/><br/>Because if we remove the separator it would disconnect the graph into <strong>${this.componentCount}</strong> different components.`);
       renderMathInElement(document.body);
@@ -968,10 +1114,6 @@ export default class Graph {
 
   toggleSeparatorExercise() {
     d3.selectAll('circle').on('click', (d) => this.checkSeparator(d));
-  }
-
-  changeMisAnimationSpeed(ms) {
-    this.misAnimationSpeed = ms;
   }
 
   toggleMaxStop() {
@@ -992,64 +1134,90 @@ export default class Graph {
   }
 
   async maximumIndependentSet() {
-    let maximumSet = 0;
-    let maximumIndependentSet = [];
-    let possibleMaxSet = true;
+    return new Promise(async (resolve) => {
+      let maximumSet = 0;
+      let maximumIndependentSet = [];
+      let possibleMaxSet = true;
 
-    for (let i = 2; i < this.nodes.length + 1; i++) {
-      if (this.maxStop === true) break;
-      const conjunto = generatePowerSet(this.nodes, i);
-
-      for (const c of conjunto) {
-        possibleMaxSet = true;
-        const pair = generatePowerSet(c, 2);
-
+      for (let i = 2; i < this.nodes.length + 1; i++) {
         if (this.maxStop === true) break;
+        const conjunto = generatePowerSet(this.nodes, i);
 
-        for (const par of pair) {
-          const vertex1 = par[0];
-          const vertex2 = par[1];
-          if (this.misAnimationSpeed > 0) {
-            highlightVertex(vertex1.id);
-            highlightVertex(vertex2.id);
-            await timeout(this.misAnimationSpeed);
-            removeHighlightVertex(vertex1.id);
-            removeHighlightVertex(vertex2.id);
-          }
+        for (const c of conjunto) {
+          possibleMaxSet = true;
+          const pair = generatePowerSet(c, 2);
 
           if (this.maxStop === true) break;
 
-          if (this.adjacencyList[`${vertex1.id}-${vertex2.id}`]) {
-            possibleMaxSet = false;
-            break;
+          for (const par of pair) {
+            const vertex1 = par[0];
+            const vertex2 = par[1];
+            if (this.animationSpeed > 0) {
+              highlightVertex(vertex1.id);
+              highlightVertex(vertex2.id);
+              await timeout(this.animationSpeed);
+              removeHighlightVertex(vertex1.id);
+              removeHighlightVertex(vertex2.id);
+            }
+
+            if (this.maxStop === true) break;
+
+            if (this.adjacencyList[`${vertex1.id}-${vertex2.id}`]) {
+              possibleMaxSet = false;
+              break;
+            }
           }
-        }
 
-        if (possibleMaxSet && c.length > maximumSet) {
-          maximumSet = c.length;
-          maximumIndependentSet = c;
-          const result = [];
-          maximumIndependentSet.forEach((n) => {
-            n.isMax = true;
-            result.push(n.id);
-          });
+          if (possibleMaxSet && c.length > maximumSet) {
+            maximumSet = c.length;
+            maximumIndependentSet = c;
+            const result = [];
+            maximumIndependentSet.forEach((n) => {
+              n.isMax = true;
+              result.push(n.id);
+            });
 
-          if (this.misAnimationSpeed > 0) {
-            await repeat(c, this.misAnimationSpeed * 2);
-            await timeout(this.misAnimationSpeed * 2);
+            if (this.animationSpeed > 0) {
+              await repeat(c, this.animationSpeed * 1.5);
+              await timeout(this.animationSpeed * 1.5);
+            }
+
+            d3.select('#max-output').html(String.raw`Maximum Independent Set = \( \{ ${result} \} \)`);
+            renderMathInElement(document.body);
           }
-
-          d3.select('#result-math').html(String.raw`\( S = \{ ${result} \} \)`);
-          renderMathInElement(document.body);
         }
       }
+      this.resetNodeStyling();
+      d3.selectAll('circle').interrupt();
+      d3.selectAll('circle').filter((node) => maximumIndependentSet.includes(node)).style('fill', 'orange');
+      resolve();
+    });
+  }
+
+  async runMaximumIndependentSet() {
+    if (this.isMisRunning === true) {
+      this.animationSpeed = 0;
+      await timeout(1500);
+      d3.select('#max-output').html(null);
+      d3.selectAll('circle').interrupt();
+      d3.selectAll('circle').style('fill', '#1f77b4');
+      this.animationSpeed = 500;
+      this.maximumIndependentSet();
+    } else {
+      this.animationSoeed = 500;
+      this.isMisRunning = true;
+      this.maximumIndependentSet();
     }
-    d3.selectAll('circle').filter((node) => maximumIndependentSet.includes(node)).classed('highlighted-stroke', true);
-    return maximumIndependentSet;
+  }
+
+  skipForwardMaximumIndependentSet() {
+    this.animationSpeed = 0;
   }
 
   clear() {
     this.svg.remove();
+    this.nodes = [];
+    this.links = [];
   }
 
   hoverEffect(d) {
@@ -1080,18 +1248,387 @@ export default class Graph {
       .style('opacity', 1);
   }
 
-  loadGraph(graph, container, type) {
-    this.container = container;
-    this.graph = graph;
-    this.nodes = graph.nodes;
-    this.links = graph.links;
-    const w = document.getElementById(container).offsetWidth;
-    const h = document.getElementById(container).offsetHeight;
-    const svg = d3.select(`#${container}`).append('svg').attr('width', w).attr('height', h);
+  isConnected() {
+    let componentCount = 1;
+    let cluster = 2;
+
+    if (this.nodes.length === 0) {
+      componentCount = 0;
+      return;
+    }
+
+    componentCount = 1;
+    this.nodes.forEach((v) => {
+      v.visited = false;
+    });
+
+    const adjList = {};
+    this.nodes.forEach((v) => {
+      adjList[v.id] = [];
+    });
+
+    this.links.forEach((e) => {
+      adjList[e.source.id].push(e.target);
+      adjList[e.target.id].push(e.source);
+    });
+
+    const q = [];
+    q.push(this.nodes[0]);
+
+    while (q.length > 0) {
+      const v1 = q.shift();
+      const adj = adjList[v1.id];
+
+      for (let i = 0; i < adj.length; i++) {
+        const v2 = adj[i];
+        if (v2.visited) {
+          continue;
+        }
+        q.push(v2);
+      }
+
+      v1.visited = true;
+      v1.cluster = cluster.toString();
+      if (q.length === 0) {
+        for (let i = 0; i < this.nodes.length; i++) {
+          if (!this.nodes[i].visited) {
+            q.push(this.nodes[i]);
+            componentCount++;
+            cluster++;
+            break;
+          }
+        }
+      }
+    }
+
+    this.componentCount = componentCount;
+
+    const isConnected = componentCount === 1;
+
+    return isConnected;
+  }
+
+  isTree() {
+    const isConnected = this.isConnected();
+    if (isConnected && this.nodes.length - 1 === this.links.length) {
+      return true;
+    }
+    return false;
+  }
+
+  areNodesInTree() {
+    return this.graphOfTd.nodes.every((node) => this.masterNodes.includes(node.id));
+  }
+
+  isEveryGraphLinkInTree() {
+    return this.graphOfTd.links.every((link) => {
+      for (let i = 0; i < this.nodes.length; i++) {
+        const currentBag = this.nodes[i];
+        if (currentBag.vertices === undefined) continue;
+        if (currentBag.vertices.includes(link.source.id) && currentBag.vertices.includes(link.target.id)) return true;
+      }
+      return false;
+    });
+  }
+
+  checkCoherence() {
+    if (this.nodes.length === 0 || this.links.length === 0) return false;
+
+    /* Check if a node exists in multiple bags */
+    for (let i = 0; i < this.graphOfTd.nodes.length; i++) {
+      const currentNode = this.graphOfTd.nodes[i];
+      currentNode.counter = 0;
+
+      for (let j = 0; j < this.nodes.length; j++) {
+        const currentBag = this.nodes[j];
+        if (currentBag.vertices === undefined) continue;
+        if (currentBag.vertices.includes(currentNode.id)) {
+          currentNode.counter++;
+        }
+      }
+    }
+
+    const multipleNodes = this.graphOfTd.nodes.filter((node) => node.counter > 1);
+
+    for (let i = 0; i < multipleNodes.length; i++) {
+      const node = multipleNodes[i];
+      /* find all bags with this node */
+
+      const tempNodes = this.nodes.filter((bag) => {
+        if (bag.vertices) return bag.vertices.includes(node.id);
+      });
+
+      const tempLinks = this.links.filter((link) => tempNodes.includes(link.source) && tempNodes.includes(link.target));
+      const obj = this.checkConnectivity(tempNodes, tempLinks);
+      if (obj.isDisconnected) return false;
+    }
+    return true;
+  }
+
+  checkTreeDecomposition() {
+    let treeString;
+    let nodeCoverageString;
+    let edgeCoverageString;
+    let coherenceString;
+    let validString;
+
+    if (this.isTree()) {
+      treeString = 'Tree decomposition is a tree  <span class="material-icons correct-answer">check</span>';
+    } else {
+      treeString = 'Tree decomposition must be a tree. <span class="material-icons wrong-answer">clear</span>';
+    }
+
+    /* Check node coverage */
+    if (this.areNodesInTree()) {
+      nodeCoverageString = 'Node coverage  <span class="material-icons correct-answer">check</span>';
+    } else {
+      nodeCoverageString = 'Node coverage <span class="material-icons wrong-answer">clear</span>';
+    }
+
+    /* Check edge coverage */
+    if (this.isEveryGraphLinkInTree()) {
+      edgeCoverageString = 'Edge coverage <span class="material-icons correct-answer">check</span>';
+    } else {
+      edgeCoverageString = 'Edge coverage <span class="material-icons wrong-answer">clear</span>';
+    }
+
+    /* Check coherence property */
+    if (this.checkCoherence()) {
+      coherenceString = 'Coherence <span class="material-icons correct-answer">check</span>';
+    } else {
+      coherenceString = 'Coherence <span class="material-icons wrong-answer">clear</span>';
+    }
+
+    if (this.isTree() && this.areNodesInTree() && this.isEveryGraphLinkInTree() && this.checkCoherence()) {
+      validString = 'This is a valid tree decomposition <span class="material-icons correct-answer">check</span>';
+    } else {
+      validString = 'This is not a valid tree decomposition <span class="material-icons wrong-answer">clear</span>';
+    }
+
+    d3.select('#output').html(`
+      <div>${treeString}</div>
+      <div>${nodeCoverageString}</div>
+      <div>${edgeCoverageString}</div>
+      <div>${coherenceString}</div>
+      <div>${validString}</div>
+    `);
+  }
+
+  updateMasterList() {
+    let temp = [];
+    this.nodes.forEach((bag) => {
+      if (bag.vertices) temp = temp.concat(bag.vertices);
+    });
+
+    const tempSet = [...new Set(temp)];
+    this.masterNodes = tempSet;
+  }
+
+  removeEdge(d) {
+    this.links.splice(this.links.indexOf(d), 1);
+    d3.event.preventDefault();
+    this.restart();
+  }
+
+  restart() {
+    this.updateMasterList();
+    /* Enter, update, remove link SVGs */
+    this.link = this.link
+      .data(this.links, (d) => `v${d.source.id}-v${d.target.id}`)
+      .join(
+        (enter) => enter.append('line').lower().attr('class', 'tree-link').on('contextmenu', (d) => this.removeEdge(d)),
+        (update) => update,
+        (exit) => exit.remove(),
+      );
+
+    /* Enter, update, remove ellipse SVGs */
+    this.svg.selectAll('ellipse')
+      .data(this.nodes, (d) => d.id)
+      .join(
+        (enter) => {
+          enter.append('ellipse')
+            .attr('rx', 30)
+            .attr('ry', 25)
+            .style('fill', '#2ca02c')
+            .style('stroke', 'rgb(51, 51, 51)')
+            .style('stroke-width', '3.5px')
+            .on('mouseover', () => this.disableAddNode())
+            .on('mouseleave', () => this.enableAddNode())
+            .on('mousedown', (d) => this.beginDrawLine(d))
+            .on('mouseup', (d) => this.stopDrawLine(d))
+            .on('contextmenu', d3.contextMenu(menu));
+        },
+        (update) => update.attr('rx', (d) => (d.label && d.label.length > 2 ? d.label.length * 8 : 30)),
+        (exit) => exit.remove(),
+      );
+
+    this.svg.selectAll('text')
+      .data(this.nodes, (d) => d.id)
+      .join(
+        (enter) => enter.append('text')
+          .attr('dy', 4.5)
+          .text((d) => d.label)
+          .attr('class', 'label'),
+        (update) => update.text((d) => d.label),
+        (exit) => exit.remove(),
+      );
+
+    this.simulation.force('link').links(this.links);
+    this.simulation.nodes(this.nodes);
+    this.simulation.alpha(0.5).restart();
+    this.checkTreeDecomposition();
+  }
+
+  addNode() {
+    if (this.startedDrawing === false) this.svg.style('background-color', 'white');
+    if (this.canAddNode === false) return;
+    const e = d3.event;
+    if (e.button === 0) {
+      const coords = d3.mouse(e.currentTarget);
+      const newNode = {
+        x: coords[0], y: coords[1], id: ++this.lastNodeId,
+      };
+      this.nodes.push(newNode);
+      this.setg();
+      this.restart();
+    }
+  }
+
+  enableAddNode() {
+    this.canAddNode = true;
+  }
+
+  disableAddNode() {
+    this.canAddNode = false;
+  }
+
+  removeNode(d) {
+    d3.event.preventDefault();
+    const linksToRemove = this.links.filter((l) => l.source === d || l.target === d);
+    linksToRemove.map((l) => this.links.splice(this.links.indexOf(l), 1));
+    const indexOfNode = this.nodes.indexOf(d);
+    this.nodes.splice(indexOfNode, 1);
+    this.restart();
+  }
+
+  leftCanvas() {
+    this.dragLine.classed('hidden', true);
+    this.mousedownNode = null;
+  }
+
+  updateDragLine() {
+    if (!this.mousedownNode) return;
+    const coords = d3.mouse(d3.event.currentTarget);
+    this.dragLine.attr(
+      'd',
+      `M${
+        this.mousedownNode.x
+      },${
+        this.mousedownNode.y
+      }L${
+        coords[0]
+      },${
+        coords[1]}`,
+    );
+  }
+
+  hideDragLine() {
+    d3.selectAll('ellipse').style('fill', '#2ca02c');
+    this.dragLine.classed('hidden', true);
+    this.mousedownNode = null;
+    this.restart();
+  }
+
+  beginDrawLine(d) {
+    d3.selectAll('ellipse').filter((node) => node === d).style('fill', 'orange');
+    if (d3.event.ctrlKey) return;
+    d3.event.preventDefault();
+    this.mousedownNode = d;
+    this.dragLine
+      .classed('hidden', false)
+      .attr(
+        'd',
+        `M${
+          this.mousedownNode.x
+        },${
+          this.mousedownNode.y
+        }L${
+          this.mousedownNode.x
+        },${
+          this.mousedownNode.y}`,
+      );
+  }
+
+  stopDrawLine(d) {
+    d3.selectAll('ellipse').style('fill', '#2ca02c');
+    if (!this.mousedownNode || this.mousedownNode === d) return;
+    for (let i = 0; i < this.links.length; i++) {
+      const l = this.links[i];
+      if (
+        (l.source === this.mousedownNode && l.target === d)
+        || (l.source === d && l.target === this.mousedownNode)
+      ) {
+        return;
+      }
+    }
+    const newLink = { source: this.mousedownNode, target: d };
+    this.links.push(newLink);
+  }
+
+  enableDrawing() {
+    const svg = d3.select(`#${this.container}`).append('svg').attr('width', this.width).attr('height', this.height);
+    this.startedDrawing = false;
+    svg.style('background-color', 'lightgreen');
+    svg.style('cursor', 'crosshair');
 
     this.svg = svg;
 
-    const linkSvg = svg.selectAll('line.graphLink')
+    this.svg
+      .on('mousedown', () => this.addNode())
+      .on('contextmenu', () => d3.event.preventDefault())
+      .on('mousemove', () => this.updateDragLine())
+      .on('mouseup', () => this.hideDragLine())
+      .on('mouseleave', () => this.leftCanvas());
+
+    this.link = this.svg.selectAll('line');
+
+    this.node = this.svg.selectAll('g');
+
+    this.dragLine = this.svg
+      .append('path')
+      .attr('class', 'dragLine hidden')
+      .attr('d', 'M0,0L0,0');
+  }
+
+  setg() {
+    this.nodes.forEach((node) => {
+      node.graph = this;
+    });
+  }
+
+  loadGraph(graph, type, graphOfTd) {
+    this.graphOfTd = graphOfTd;
+    if (this.svg) this.clear();
+    this.graph = graph;
+    this.nodes = graph.nodes;
+    this.links = graph.links;
+    const w = document.getElementById(this.container).offsetWidth;
+    const h = document.getElementById(this.container).offsetHeight;
+    this.width = w;
+    this.height = h;
+    const svg = d3.select(`#${this.container}`).append('svg').attr('width', w).attr('height', h);
+
+    this.svg = svg;
+
+    const path = svg.append('path')
+      .attr('fill', 'orange')
+      .attr('stroke', 'orange')
+      .attr('stroke-width', 16)
+      .attr('opacity', 0);
+
+    this.path = path;
+
+    const linkSvg = svg.selectAll('line')
       .data(graph.links)
       .enter()
       .append('line')
@@ -1150,7 +1687,7 @@ export default class Graph {
         .style('letter-spacing', '4px')
         .attr('class', 'label');
     } else {
-      svg.selectAll('g')
+      /*       const g = svg.selectAll('g')
         .data(graph.nodes)
         .enter()
         .append('g')
@@ -1167,9 +1704,16 @@ export default class Graph {
             [v.fx, v.fy] = [null, null];
           }));
 
-      svg.selectAll('g')
+      this.g = g; */
+
+      const circle = svg.selectAll('circle')
+        .data(graph.nodes)
+        .enter()
         .append('circle')
-        .attr('id', (d) => `${type}-node-${d.id}`)
+        .attr('id', (d) => `graph-node-${d.id}`)
+        .style('opacity', (d) => {
+          if (d.id === 0) return 0;
+        })
         .attr('r', 22)
         .style('fill', () => {
           if (type === 'tree') return '#2ca02c';
@@ -1179,33 +1723,87 @@ export default class Graph {
         .style('stroke-width', '3.5px')
         .attr('class', 'nonhighlight');
 
-      svg.selectAll('g')
+      this.circle = circle;
+
+      svg.selectAll('text')
+        .data(graph.nodes)
+        .enter()
         .append('text')
+        .style('opacity', (d) => {
+          if (d.id === 0) return 0;
+        })
         .attr('dy', 4.5)
         .text((d) => (d.label ? d.label : d.id))
         .attr('class', 'label');
     }
+
+    const line = d3.line().curve(d3.curveBasisClosed);
+
+    /*     const groupingForce = forceInABox()
+      .strength(0.1)
+      .template('force')
+      .groupBy('cluster')
+      .links(graph.links)
+      .forceCharge(0)
+      .size([w, h]); */
+
+    /*     const simulation = d3.forceSimulation()
+      .nodes(graph.nodes)
+      .force('group', groupingForce)
+      .force('center', d3.forceCenter(w / 2, h / 2))
+      .force('x', d3.forceX(w / 2).strength(0.02))
+      .force('y', d3.forceY(h / 2).strength(0.02))
+      .force('collide', d3.forceCollide(25))
+      .force('charge', d3.forceManyBody().strength(-200))
+      .force('link',
+        d3.forceLink(graph.links)
+          .id((d) => d.id)
+          .distance(2)
+          .strength(groupingForce.getLinkStrength)); */
+
 
     const simulation = d3.forceSimulation()
       .force('center', d3.forceCenter(w / 2, h / 2))
       .force('x', d3.forceX(w / 2).strength(0.2))
       .force('y', d3.forceY(h / 2).strength(0.2))
       .nodes(graph.nodes)
-      .force('charge', d3.forceManyBody().strength(-600).distanceMin(15))
-      .force('link', d3.forceLink(graph.links).id((d) => d.id).distance(85).strength(0.8))
-      .force('collision', d3.forceCollide().radius(20))
+      .force('charge', d3.forceManyBody().strength(-800).distanceMin(15))
+      .force('link', d3.forceLink(graph.links).id((d) => d.id).distance(95).strength(0.5))
+      .force('collision', d3.forceCollide().radius(35))
       .on('tick', () => {
-        svg.selectAll('g').attr('transform', (d) => `translate(${d.x},${d.y})`);
-        // svg.selectAll('ellipse').attr('transform', (d) => `translate(${d.x},${d.y})`);
+        // this.svg.selectAll('g').attr('transform', (d) => `translate(${d.x},${d.y})`);
+        this.svg.selectAll('circle').attr('cx', (d) => d.x).attr('cy', (d) => d.y);
+        this.svg.selectAll('ellipse').attr('transform', (d) => `translate(${d.x},${d.y})`);
+        this.svg.selectAll('text').attr('x', (d) => d.x).attr('y', (d) => d.y);
 
-        svg.selectAll('line.graphLink').attr('x1', (d) => d.source.x)
+        this.svg.selectAll('line').attr('x1', (d) => d.source.x)
           .attr('y1', (d) => d.source.y)
           .attr('x2', (d) => d.target.x)
           .attr('y2', (d) => d.target.y);
+
+        if (this.separatorNodes) {
+          let pointArr = [];
+          const padding = 3.5;
+
+          for (let i = 0; i < this.separatorNodes.length; i++) {
+            const node = this.separatorNodes[i];
+            const pad = 17 + padding;
+            pointArr = pointArr.concat([
+              [node.x - pad, node.y - pad],
+              [node.x - pad, node.y + pad],
+              [node.x + pad, node.y - pad],
+              [node.x + pad, node.y + pad],
+            ]);
+          }
+          if (pointArr.length === 0) return;
+          this.path.attr('d', line(hull(pointArr)));
+        }
       });
 
     simulation.force('link').links(graph.links);
     this.buildAdjacencyList();
+    this.simulation = simulation;
+    this.setg();
   }
 
   randomGraph() {

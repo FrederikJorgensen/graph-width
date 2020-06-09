@@ -9,6 +9,7 @@ module.exports = {
     Atomics: 'readonly',
     SharedArrayBuffer: 'readonly',
     d3: true,
+    renderMathInElement: true
   },
   parserOptions: {
     ecmaVersion: 2018,

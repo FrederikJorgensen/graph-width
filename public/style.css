@@ -8,7 +8,100 @@ body {
   height: 100%;
   overflow: hidden;
   margin: 0;
+  font-family: Calibri, Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav {
+  flex: 0.05; 
+  background-color: lightblue;
+  align-items: flex-start;
+  background-color: #333;
+  overflow: hidden;
+}
+
+
+.logo {
+  display: inline-flex;
+  height: 100%;
+  width: auto;
+  align-items: center;
+  margin-left: 15px;
+}
+
+.logo-title {
+  margin-left: 10px;
+  font-size: 25px;
+  font-weight: bold;
+  color: white;
+}
+
+.main {
+  display: flex;
+  flex: .95;
+  justify-content: center;
+  align-items: center;
   font-family: 'Walter Turncoat', Calibri, Arial, sans-serif;
+  /* height: 100%; */
+  width: 100%;
+  /* position: absolute; */
+  top: 0px;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  margin: auto;
+  overflow: hidden;
+}
+
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  flex: 0.3;
+  height: 100%;
+  padding: 15px;
+}
+
+.nav-buttons-container {
+  display: flex;
+  text-align: center;
+  justify-content: space-between;
+  margin-top: auto
+}
+
+#app-area {
+  flex: 0.7;
+  height: 100%
+}
+
+#container {
+  display: flex;
+  height: 80%;
+  border: 1px solid lightgray;
+}
+
+#output {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  width: 100%;
+  height: 20%;
+}
+
+#max-output {
+  height: 50%;
+}
+
+#separator-output {
+  height: 50%;
+}
+
+#center-container {
+  display: flex;
+  height: 80%;
+  flex: 0.9;
 }
 
 .dragLine.hidden {
@@ -128,6 +221,13 @@ td {
   cursor: crosshair;
 }
 
+.exercise-box {
+  background-color: lightblue;
+  padding: 15px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
 .drawing-disabled {
   pointer-events: none;
   cursor: pointer;
@@ -161,23 +261,7 @@ td {
   background-color: lightseagreen;
 }
 
-.main {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-family: 'Walter Turncoat', Calibri, Arial, sans-serif;
-  height: 100%;
-  width: 100%;
-  /*  */
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
-  margin: auto;
-  background-color: #000;
-  overflow: hidden;
-}
+
 
 #exercise-result {
   margin-top: 30px;
@@ -217,13 +301,6 @@ svg {
   cursor: pointer;
 }
 
-.button-container {
-  position: absolute;
-  bottom: 10px;
-  left: 50%;
-  transform: translate(-50%, 0px);
-}
-
 .center-graph-td {
   display: flex; 
   justify-content: center;
@@ -238,11 +315,13 @@ svg {
 }
 
 #graph-container {
-  flex: 0.5;
+  height: 100%;
+  width: 50%
 }
 
 #tree-container {
-  flex: 0.5;
+  height: 100%;
+  width: 50%;
 }
 
 
@@ -369,6 +448,7 @@ svg {
 .tree-link {
   stroke: black;
   stroke-width: 3.5px;
+  z-index: -1;
 }
 
 .yepc {
@@ -418,11 +498,6 @@ svg {
 .moving-node {
   cursor: grabbing;
 }
-
-.treeNode {
-  fill:purple;
-}
-
 .graphLink {
   stroke: rgb(51, 51, 51);
   stroke-width: 3.5;
@@ -465,7 +540,7 @@ svg {
 
 .logo-background {
   position: absolute;
-  background: url(../brush_stroke.png);
+  background: url(Resources/brush_stroke.png);
   background-repeat: no-repeat;
   background-size: 100% 95%;
   padding: 8px 50px;
@@ -477,7 +552,7 @@ svg {
 
 .yellow-brush-stroke {
   position: absolute;
-  background: url(../yellow_brush_stroke.png);
+  background: url(Resources/yellow_brush_stroke.png);
   background-repeat: no-repeat;
   background-size: 100% 95%;
   padding: 8px 70px;
@@ -501,6 +576,10 @@ a {
 a:hover {
   color: orange;
   transition: color 300ms;
+}
+
+.chapter-title {
+  text-align: center;
 }
 
 .chapters {
@@ -561,6 +640,12 @@ a:hover {
   margin-top: 20px;
 }
 
+.proof-container {
+  background-color: lightgreen;
+  padding: 15px;
+  margin-top: 20px;
+}
+
 .exercise-container {
   background-color: lightblue;
   padding: 15px;
@@ -569,4 +654,84 @@ a:hover {
 
 .bag-nonhighlight {
   color: green;
+}
+
+.random-container {
+  display: flex;
+  flex: 0.2
+}
+
+.content-container {
+  overflow-y: auto;
+}
+
+.content {
+  font-size: 18px;
+  line-height: 26px;
+}
+
+hr {
+  border: 0;
+  clear:both;
+  display:block;
+  width: 96%;               
+  background-color:#eee;
+  height: 1px;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.d3-context-menu {
+	position: absolute;
+	display: none;
+	background-color: #f2f2f2;
+	border-radius: 4px;
+
+	font-family: Arial, sans-serif;
+	font-size: 14px;
+	min-width: 150px;
+	border: 1px solid #d4d4d4;
+
+	z-index:1200;
+}
+
+.d3-context-menu ul {
+	list-style-type: none;
+	margin: 4px 0px;
+	padding: 0px;
+	cursor: default;
+}
+
+.d3-context-menu ul li {
+	padding: 4px 16px;
+}
+
+.d3-context-menu ul li:hover {
+	background-color: #4677f8;
+	color: #fefefe;
+}
+
+li {
+  margin: 0 0 3px 0;
+}
+
+.tree-node {
+  fill: #2ca02c;
+}
+
+.join {
+  color: yellow;
+}
+
+.introduce {
+  color: blue;
+}
+
+.forget {
+  color: red;
+}
+
+.inout {
+  background-color: lightblue;
+  padding: 10px;
 }

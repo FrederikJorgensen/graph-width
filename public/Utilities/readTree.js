@@ -17,7 +17,6 @@ export function readTreeDecomposition(treeData) {
         const currentNode = parseInt(splitted[j], 10);
         vertices.push(currentNode);
       }
-      // bagLabel = bagLabel.replace(/,\s*$/, '');
       bagLabel = `${bagLabel}`;
       nodes.push({ id: bagId, label: bagLabel, vertices });
     } else {
