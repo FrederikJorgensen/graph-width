@@ -6,13 +6,32 @@ export default class Roadmap {
   show() {
     const data = this.chapterHandler.chapters.concat();
 
-    this.container = d3.select('#main')
+    const w = document.getElementById('body').offsetWidth;
+    const h = document.getElementById('body').offsetHeight;
+
+    this.overlay = d3.select('body')
+      .append('div')
+      .attr('class', 'overlay')
+      .attr('id', 'overlay')
+      .style('height', `${h}px`)
+      .style('width', `${w}px`);
+    // .on('click', () => console.log('clicked overlay'));
+
+    this.container = this.overlay
       .append('div')
       .attr('class', 'roadmap-container');
 
+    this.close = this.container
+      .append('span')
+      .attr('class', 'material-icons roadmap-close')
+      .text('close')
+      .on('click', () => this.toggle());
+
     this.container.append('text')
       .attr('class', 'roadmap-title')
-      .text('Chapters');
+      .text('Chapters')
+      .append('hr')
+      .style('background-color', 'rgb(51, 51, 51)');
 
     this.roadmapChapters = this.container.append('div')
       .attr('class', 'roadmap-chapters');
@@ -23,25 +42,29 @@ export default class Roadmap {
       .join(
         (enter) => enter.append('text')
           .text((d) => d.name)
+          .attr('class', (d) => (d.isActive ? 'roadmap-item-active' : 'roadmap-item'))
           .on('click', (d) => {
             this.visible = false;
             this.hide();
             this.chapterHandler.goToChapter(d);
           }),
-        (update) => update.style('background-color', 'red'),
-        (exit) => exit.style('background-color', 'red'),
+        (update) => update,
+        (exit) => exit.remove(),
       );
   }
 
   hide() {
+    this.overlay.remove();
     this.container.remove();
   }
 
   toggle() {
     if (this.visible) {
+      d3.select('#chapter-button').style('color', '#6d7e8e');
       this.visible = false;
       this.hide();
     } else {
+      d3.select('#chapter-button').style('color', '#1f1f1f');
       this.visible = true;
       this.show();
     }

@@ -4,7 +4,7 @@ export default class Sidebar {
     this.draw();
     this.setTitle(this.title);
     this.addContentArea();
-    this.addNavButtons();
+    // this.addNavButtons();
   }
 
   clear() {
@@ -30,16 +30,16 @@ export default class Sidebar {
     this.correctness = correctness;
   }
 
-  async toggleSolution() {
+  toggleSolution() {
     if (this.isSolutionShowing) {
       this.solutionButton.text('Show Solution');
       this.isSolutionShowing = false;
-      this.solutionTextContainer.text('');
-      this.solutionTextContainer.transition().duration(500).style('height', '0px').end();
+      this.solutionTextContainer.text(null);
+      this.solutionTextContainer.transition().duration(100).style('height', '0px');
     } else {
       this.solutionButton.text('Hide Solution');
       this.isSolutionShowing = true;
-      await this.solutionTextContainer.transition().duration(500).style('height', '40px').end();
+      this.solutionTextContainer.transition().duration(100).style('height', '40px');
       this.solutionTextContainer.text(this.solutionText);
     }
   }
@@ -73,7 +73,7 @@ export default class Sidebar {
     const submitButton = this.submitContainer
       .append('button')
       .text('submit')
-      .attr('class', 'btn')
+      .attr('class', 'pure-material-button-contained')
       .on('click', () => this.checkAnswer(this.currentGuess));
 
     this.submitButton = submitButton;
@@ -95,7 +95,7 @@ export default class Sidebar {
 
     const solutionButton = this.solutionButtonContainer.append('button')
       .text('Show Solution')
-      .attr('class', 'btn')
+      .attr('class', 'pure-material-button-contained')
       .attr('id', 'solution-button')
       .on('click', () => this.toggleSolution());
 
@@ -140,9 +140,7 @@ export default class Sidebar {
     this.buttonContainer
       .append('button')
       .text(buttonText)
-      .attr('class', 'btn')
-      .attr('id', 'yep')
-      .attr('fill', '#D3D3D3')
+      .attr('class', 'pure-material-button-contained')
       .on('click', () => {
         event();
       });
@@ -170,6 +168,54 @@ export default class Sidebar {
     this.sidebarContainer = sidebarContainer;
   }
 
+  addProgresBar() {
+    const { sections } = this.sectionHandler;
+    this.sections = sections;
+
+    this.progressBarContainer = this.sidebarContainer
+      .append('div')
+      .attr('class', 'progress-bar-container');
+
+    this.progressBarContainer
+      .append('span')
+      .attr('class', 'material-icons nav-arrows')
+      .text('keyboard_arrow_left')
+      .on('click', () => this.sectionHandler.goPreviousSection());
+
+    const w = 100 / sections.length;
+
+    this.progressBarContainer
+      .selectAll('div')
+      .data(sections)
+      .join(
+        (enter) => enter
+          .append('div')
+          .attr('class', (d) => (d.isActive ? 'progress-item-active' : 'progress-item'))
+          .style('width', `${w}%`)
+          .on('click', (d) => this.sectionHandler.goToSection(d)),
+        (update) => update,
+        (exit) => exit.remove(),
+      );
+
+    this.progressBarContainer
+      .append('span')
+      .attr('class', 'material-icons nav-arrows')
+      .text('keyboard_arrow_right')
+      .on('click', () => this.sectionHandler.goNextSection());
+  }
+
+  updateProgressBar() {
+    if (!this.progressBarContainer) return;
+    this.progressBarContainer
+      .selectAll('div')
+      .data(this.sections)
+      .join(
+        (enter) => enter,
+        (update) => update.attr('class', (d) => (d.isActive ? 'progress-item-active' : 'progress-item')),
+        (exit) => exit.remove(),
+      );
+  }
+
   addNavButtons() {
     const navButtonsContainer = this.sidebarContainer
       .append('div')
@@ -178,13 +224,15 @@ export default class Sidebar {
     this.navButtonsContainer = navButtonsContainer;
 
     this.navButtonsContainer
-      .append('button')
-      .text('<')
+      .append('span')
+      .attr('class', 'material-icons nav-arrows')
+      .text('keyboard_arrow_left')
       .on('click', () => this.sectionHandler.goPreviousSection());
 
     this.navButtonsContainer
-      .append('button')
-      .text('>')
+      .append('span')
+      .attr('class', 'material-icons nav-arrows')
+      .text('keyboard_arrow_right')
       .on('click', () => this.sectionHandler.goNextSection());
   }
 

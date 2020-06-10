@@ -7,6 +7,12 @@
 /* eslint-disable no-lonely-if */
 /* eslint-disable class-methods-use-this */
 
+const colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+// Include in your code!
+const data = [1, 2, 3, 4, 5, 6, 7, 8, 9];
+const myColor = d3.scaleOrdinal().domain(data)
+  .range(d3.schemeSet3);
 
 function resetStyles() {
   d3.selectAll('circle').classed('highlighted-vertex', false).classed('nonhighlight', true);
@@ -34,10 +40,6 @@ function highlightVertex(nodeId) {
 }
 
 function moveTooltip(node, maxSetIncl, maxSetExcl) {
-  const { top } = document.getElementById(`treeNode-${node.id}`).getBoundingClientRect();
-  const { left } = document.getElementById(`treeNode-${node.id}`).getBoundingClientRect();
-
-
   if ('children' in node === false) {
     d3.select('#tooltip').html('Largest set of a leaf is 1');
   } else {
@@ -47,15 +49,26 @@ function moveTooltip(node, maxSetIncl, maxSetExcl) {
     </div>`);
   }
 
+  const nodeSvg = d3.select(`#treeNode-${node.id}`);
+  const cx = nodeSvg.attr('cx');
+  const cy = nodeSvg.attr('cy');
+
+
   d3.select('#tooltip-arrow')
     .style('opacity', 1)
-    .style('left', `${left}px`)
-    .style('top', `${top + 25}px`);
+    .attr('x1', cx - 50)
+    .attr('y1', cy)
+    .attr('x2', cx - 18)
+    .attr('y2', cy)
+    .attr('transform', `translate(${0}, ${30})`);
+
+  const { top } = document.getElementById('tooltip-arrow').getBoundingClientRect();
+  const { left } = document.getElementById('tooltip-arrow').getBoundingClientRect();
 
   d3.select('#tooltip')
     .style('opacity', 1)
-    .style('left', `${left - 50}px`)
-    .style('top', `${top - 2}px`);
+    .style('left', `${left}px`)
+    .style('top', `${top}px`);
 }
 
 function getSubTree(rootOfSubtree, currentNode) {
@@ -74,13 +87,14 @@ const getAllSubsets = (theArray) => theArray.reduce(
 );
 
 export default class Tree {
-  constructor(container) {
+  constructor(container, type) {
     this.container = container;
     this.isMis = false;
     this.isColor = false;
     this.root = null;
     this.current = 0;
     this.graph = null;
+    this.type = type;
   }
 
   clear() {
@@ -172,15 +186,20 @@ export default class Tree {
   }
 
   addTooltip() {
-    d3.select('#main').append('div')
+    d3.select('#main')
+      .append('div')
       .attr('id', 'tooltip')
       .style('position', 'absolute')
       .style('opacity', 0);
 
-    d3.select('#main')
-      .append('img')
-      .attr('src', './new.png')
+    this.svg
+      .append('line')
       .attr('id', 'tooltip-arrow')
+      .attr('x1', 200)
+      .attr('y1', 100)
+      .attr('x2', 300)
+      .attr('y2', 100)
+      .attr('marker-end', 'url(#Triangle)')
       .style('opacity', 0);
   }
 
@@ -597,13 +616,6 @@ export default class Tree {
   }
 
   maxNext() {
-    /*     d3.select(document.body).on('keyup', () => {
-      if (d3.event.key === 'ArrowRight') {
-        increment();
-      } else if (d3.event.key === 'ArrowLeft') {
-        decrement();
-      }
-    }); */
     const N = this.root.descendants().length;
     this.current++;
     if (this.current !== N) this.current %= N;
@@ -620,42 +632,35 @@ export default class Tree {
     if (this.isColor) this.threeColor(this.current);
   }
 
-  maxIndependentSet(node) {
-    // debugger;
-    if (node === undefined) return 0;
-
-    if (node.liss !== 0) return node.liss;
-
-    if ('children' in node === false) {
-      // visitElement(node.data.id, animX);
-      // animX++;
-      return node.liss = 1;
-    }
-
-    const lissExcl = this.maxIndependentSet(node.children[0]) + this.maxIndependentSet(node.children[1]);
-
-    let lissIncl = 1;
-
-    if (node.children[0] !== undefined && 'children' in node.children[0]) {
-      lissIncl += this.maxIndependentSet(node.children[0].children[0]) + this.maxIndependentSet(node.children[0].children[1]);
-    }
-    if (node.children[1] !== undefined && 'children' in node.children[1]) {
-      lissIncl += this.maxIndependentSet(node.children[1].children[0]) + this.maxIndependentSet(node.children[1].children[1]);
-    }
-
-    node.liss = Math.max(lissExcl, lissIncl);
-
-    return node.liss;
-  }
-
   load(treeData, type) {
-    const height = document.getElementById(this.container).offsetHeight;
-    const width = document.getElementById(this.container).offsetWidth;
-    const treeSvg = d3.select(`#${this.container}`).append('svg')
+    if (this.svg) this.clear();
+    let height = document.getElementById(this.container).offsetHeight;
+    let width = document.getElementById(this.container).offsetWidth;
+
+    if (this.type === 'normal-tree') {
+      width /= 2;
+      height /= 3;
+    }
+
+    const svg = d3.select(`#${this.container}`)
+      .append('svg')
       .attr('width', width)
       .attr('height', height);
 
-    this.svg = treeSvg;
+    this.svg = svg;
+
+    this.svg
+      .append('marker')
+      .attr('id', 'triangle')
+      .attr('viewBox', '0 0 10 10')
+      .attr('refX', 10)
+      .attr('refY', 5)
+      .attr('markerWidth', 3.5)
+      .attr('markerHeight', 3.5)
+      .attr('orient', 'auto')
+      .append('path')
+      .attr('d', 'M 0 0 L 10 5 L 0 10 z')
+      .style('fill', 'rgb(51, 51, 51)');
 
     const root = d3.hierarchy(treeData);
     this.root = root;
@@ -664,7 +669,7 @@ export default class Tree {
     treeLayout(root);
 
     /* Get the link data and draw the links */
-    treeSvg
+    svg
       .selectAll('line')
       .data(root.links())
       .enter()
@@ -676,42 +681,60 @@ export default class Tree {
       .attr('y2', (d) => d.target.y)
       .attr('transform', `translate(${0}, ${30})`);
 
-
     /* Get the node data and draw the nodes */
-    treeSvg
-      .selectAll('rect')
-      .data(root.descendants())
-      .enter()
-      .append('rect')
-      .attr('id', (d) => `treeNode-${d.data.id}`)
-      .attr('width', 60)
-      .attr('height', 25)
-      .attr('x', (d) => d.x - 30)
-      .attr('y', (d) => d.y)
-      .attr('rx', 5)
-      .attr('ry', 5)
-      .attr('transform', `translate(${0}, ${30})`)
-      .attr('class', 'tree-node')
-      .style('stroke-width', '5px')
-      .style('stroke', (d) => {
-        if (type === 'nice') {
-          if ('children' in d.data === false) return 'black';
-          if (d.data.children.length === 2) return 'yellow';
-          if (d.data.vertices.length > d.data.children[0].vertices.length) return 'blue';
-          if (d.data.vertices.length < d.data.children[0].vertices.length) return 'red';
-        } else {
-          return 'black';
-        }
-      });
+    if (this.type === 'normal-tree') {
+      svg
+        .selectAll('circle')
+        .data(root.descendants())
+        .enter()
+        .append('circle')
+        .attr('id', (d) => `treeNode-${d.data.id}`)
+        .attr('r', 18)
+        .attr('cx', (d) => d.x)
+        .attr('cy', (d) => d.y)
+        .attr('class', 'normal-tree-node')
+        .attr('transform', `translate(${0}, ${30})`);
+    } else {
+      svg
+        .selectAll('rect')
+        .data(root.descendants())
+        .enter()
+        .append('rect')
+        .attr('id', (d) => `treeNode-${d.data.id}`)
+        .attr('width', (d) => {
+          const splitted = d.data.label.split(',');
+          return splitted.length * 25;
+        })
+        .attr('height', 25)
+        .attr('x', (d) => d.x - (d.data.label.split(',').length * 25 / 2))
+        .attr('y', (d) => d.y)
+        .attr('rx', 5)
+        .attr('ry', 5)
+        .attr('transform', `translate(${0}, ${30})`)
+        .attr('class', 'tree-node')
+        .style('fill', (d) => {
+          if ('children' in d.data === false) return myColor(9);
+          if (d.data.children.length === 2) return myColor(6);
+          if (d.data.vertices.length > d.data.children[0].vertices.length) return myColor(5);
+          if (d.data.vertices.length < d.data.children[0].vertices.length) return myColor(4);
+        });
+    }
 
-    treeSvg
+    svg
       .selectAll('text')
       .data(root.descendants())
       .enter()
       .append('text')
-      .attr('dy', '1em')
-      .attr('text-anchor', 'middle')
-      .attr('class', 'label')
+      .attr('dy', (d) => {
+        if (type === 'normal-tree') {
+          return '.25em';
+        }
+        return '1.1em';
+      })
+      .attr('class', (d) => {
+        if (type === 'normal-tree') return 'label';
+        return 'graph-label';
+      })
       .text((d) => d.data.label)
       .attr('x', (d) => d.x)
       .attr('y', (d) => d.y)

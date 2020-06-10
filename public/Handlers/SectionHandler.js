@@ -8,6 +8,8 @@ export default class SectionHandler {
     this.currentSectionIndex = 0;
     this.currentChapter = chapter;
 
+    window.sectionHandler = this;
+
     this.sections = [
       new Section(
         async () => {
@@ -117,7 +119,7 @@ export default class SectionHandler {
       new Section(
         async () => {
           this.graph.clear();
-          const tree = new Tree('container');
+          const tree = new Tree('container', 'normal-tree');
           this.tree = tree;
           this.tree.setMisNormalTree();
 
@@ -161,7 +163,9 @@ export default class SectionHandler {
               },
             ],
           };
-          this.tree.load(treeData);
+          this.tree.load(treeData, 'normal-tree');
+          this.tree.addTooltip();
+
           this.sidebar.addContent(`<p>Lets now look at how the <strong>Maximum Independent</strong> Set problem works on a tree.</p>
           
           <p>Using dynamic programming we can traverse the tree bottom-up and keep track of the 'state' of each node in the tree.</p>
@@ -273,13 +277,18 @@ export default class SectionHandler {
             
             `);
 
-          d3.select('#container')
-            .append('div')
-            .attr('id', 'graph-container');
+          if (!window.graphContainer && !window.treeContainer) {
+            const graphContainer = d3.select('#container')
+              .append('div')
+              .attr('id', 'graph-container');
 
-          d3.select('#container')
-            .append('div')
-            .attr('id', 'tree-container');
+            const treeContainer = d3.select('#container')
+              .append('div')
+              .attr('id', 'tree-container');
+
+            window.graphContainer = graphContainer;
+            window.treeContainer = treeContainer;
+          }
 
           const graph1 = {
             nodes: [
@@ -318,7 +327,7 @@ export default class SectionHandler {
 
           const treeDecomposition = new Graph('tree-container');
           treeDecomposition.loadGraph(td1, 'tree', this.graph);
-          this.treeDecomposition = treeDecomposition;
+          this.niceTreeDecomposition = treeDecomposition;
         },
         'chapter3',
       ),
@@ -330,8 +339,8 @@ export default class SectionHandler {
               `);
 
           this.graph.loadGraph(this.graph1);
-          this.treeDecomposition.loadGraph(this.td1, 'tree', this.graph);
-          this.treeDecomposition.toggleHoverEffect();
+          this.niceTreeDecomposition.loadGraph(this.td1, 'tree', this.graph);
+          this.niceTreeDecomposition.toggleHoverEffect();
         },
         'chapter3',
       ),
@@ -346,7 +355,7 @@ export default class SectionHandler {
             `);
 
           this.graph.loadGraph(this.graph1);
-          this.treeDecomposition.loadGraph(this.td1, 'tree', this.graph);
+          this.niceTreeDecomposition.loadGraph(this.td1, 'tree', this.graph);
           this.sidebar.addButton('Replay animation', () => this.graph.runNodeCoverage());
           this.graph.runNodeCoverage();
         },
@@ -359,12 +368,12 @@ export default class SectionHandler {
             s of both ends of the edge.<br/><br/> Lets check if this holds true for our graph and tree decomposition.
             `);
           this.graph.loadGraph(this.graph1);
-          this.treeDecomposition.loadGraph(this.td1, 'tree', this.graph);
+          this.niceTreeDecomposition.loadGraph(this.td1, 'tree', this.graph);
           this.sidebar.addButton('Replay animation', () => this.graph.runEdgeCoverage());
           this.graph.stopAllTransitions();
-          this.treeDecomposition.stopAllTransitions();
+          this.niceTreeDecomposition.stopAllTransitions();
           this.graph.resetNodeStyling();
-          this.treeDecomposition.resetTreeDecompositionStyles();
+          this.niceTreeDecomposition.resetTreeDecompositionStyles();
           this.graph.runEdgeCoverage();
         },
         'chapter3',
@@ -379,13 +388,13 @@ export default class SectionHandler {
             <p>Lets check this by going through the vertices in the graph like we did at property 1. And if a node is in multiple bags it MUST form a connected subtree in the tree decomposition.</p>
             `);
           this.graph.loadGraph(this.graph1);
-          this.treeDecomposition.loadGraph(this.td1, 'tree', this.graph);
+          this.niceTreeDecomposition.loadGraph(this.td1, 'tree', this.graph);
           this.graph.resetNodeStyling();
           this.graph.stopAllTransitions();
-          this.treeDecomposition.stopAllTransitions();
+          this.niceTreeDecomposition.stopAllTransitions();
           this.graph.resetLinkStyles();
           this.graph.resetNodeStyling();
-          this.treeDecomposition.resetTreeDecompositionStyles();
+          this.niceTreeDecomposition.resetTreeDecompositionStyles();
           this.sidebar.addButton('Replay animation', () => this.graph.runNodeCoverage());
           this.graph.runNodeCoverage();
         },
@@ -404,12 +413,12 @@ export default class SectionHandler {
             `);
           this.graph.loadGraph(this.graph1);
           this.graph.stopAllTransitions();
-          this.treeDecomposition.stopAllTransitions();
+          this.niceTreeDecomposition.stopAllTransitions();
           this.graph.resetLinkStyles();
           this.graph.resetNodeStyling();
-          this.treeDecomposition.clear();
+          this.niceTreeDecomposition.clear();
           const trivialTreeDecomposition = this.graph.computeTrivialTreeDecomposition();
-          this.treeDecomposition.loadGraph(trivialTreeDecomposition, 'tree');
+          this.niceTreeDecomposition.loadGraph(trivialTreeDecomposition, 'tree');
         },
         'chapter3',
       ),
@@ -429,7 +438,7 @@ export default class SectionHandler {
             ],
           };
           this.graph.loadGraph(this.graph1);
-          this.treeDecomposition.loadGraph(anotherTd, 'tree');
+          this.niceTreeDecomposition.loadGraph(anotherTd, 'tree');
         },
         'chapter3',
       ),
@@ -450,7 +459,7 @@ export default class SectionHandler {
           };
 
           this.graph.loadGraph(this.graph1);
-          this.treeDecomposition.loadGraph(td3, 'tree');
+          this.niceTreeDecomposition.loadGraph(td3, 'tree');
           this.sidebar.addQuiz();
           this.sidebar.addChoice('Yes', false);
           this.sidebar.addChoice('No', true);
@@ -485,7 +494,7 @@ export default class SectionHandler {
             ],
           };
 
-          this.treeDecomposition.loadGraph(td4, 'tree');
+          this.niceTreeDecomposition.loadGraph(td4, 'tree');
         },
         'chapter3',
       ),
@@ -504,7 +513,7 @@ export default class SectionHandler {
             `);
           this.graph.loadGraph(this.graph1);
 
-          this.treeDecomposition.loadGraph(this.td1, 'tree');
+          this.niceTreeDecomposition.loadGraph(this.td1, 'tree');
           this.sidebar.addQuiz();
           this.sidebar.addChoice('1', false);
           this.sidebar.addChoice('2', true);
@@ -537,7 +546,7 @@ export default class SectionHandler {
           this.sidebar.addChoice('4', true);
           this.sidebar.addChoice('5', false);
           this.sidebar.addSolution('4 Since the largest bag contains 5 vertices.');
-          this.treeDecomposition.loadGraph(anotherTd, 'tree');
+          this.niceTreeDecomposition.loadGraph(anotherTd, 'tree');
         },
         'chapter3',
       ),
@@ -563,7 +572,7 @@ export default class SectionHandler {
           this.sidebar.addChoice('4', false);
           this.sidebar.addChoice('5', true);
           this.sidebar.addSolution('5 Since the largest bag contains 6 vertices.');
-          this.treeDecomposition.loadGraph(td3, 'tree');
+          this.niceTreeDecomposition.loadGraph(td3, 'tree');
         },
         'chapter3',
       ),
@@ -572,12 +581,12 @@ export default class SectionHandler {
           this.sidebar.addContent(`
             Lets assume that the 3 tree decompositions you see on the right are ALL of the possible tree decompositions of the graph \\( G \\). (This is not true but for this exercise we will make this assumption)
           <br><br>
-          What is the <strong>treewidth</strong> of the <strong>graph G</strong>?
+          What is the <strong>treewidth</strong> of the <strong>graph \\( G \\)</strong>?
             `);
 
           this.graph.loadGraph(this.graph1);
 
-          this.treeDecomposition.clear();
+          this.niceTreeDecomposition.clear();
 
           d3.select('#tree-container')
             .style('display', 'flex')
@@ -664,8 +673,8 @@ export default class SectionHandler {
           this.tree1.clear();
           this.tree2.clear();
           this.tree3.clear();
-          this.treeDecomposition.loadGraph(this.td1, 'tree', this.graph);
-          this.treeDecomposition.toggleSeparator();
+          this.niceTreeDecomposition.loadGraph(this.td1, 'tree', this.graph);
+          this.niceTreeDecomposition.toggleSeparator();
         },
         'chapter3',
       ),
@@ -697,8 +706,8 @@ export default class SectionHandler {
             `);
           renderMathInElement(document.body);
           this.graph.loadGraph(this.graph1);
-          this.treeDecomposition.loadGraph(this.td1, 'tree', this.graph);
-          this.treeDecomposition.toggleCoherenceProof();
+          this.niceTreeDecomposition.loadGraph(this.td1, 'tree', this.graph);
+          this.niceTreeDecomposition.toggleCoherenceProof();
         },
         'chapter3',
       ),
@@ -721,8 +730,8 @@ export default class SectionHandler {
           this.sidebar.addExercise('Draw the tree tree decompostion of the graph \\( G \\).');
           renderMathInElement(document.body);
           this.graph.randomGraph();
-          this.treeDecomposition.clear();
-          this.treeDecomposition.enableDrawing();
+          this.niceTreeDecomposition.clear();
+          this.niceTreeDecomposition.enableDrawing();
         },
         'chapter3',
       ),
@@ -743,37 +752,36 @@ export default class SectionHandler {
               <li><strong><span class="forget">Forget node:</span></strong> \\( i \\) has 1 child \\( j \\), then \\( X_i = X_j - \\{ v \\} \\) for a vertex \\( \\{ v \\} \\)</li>
             </ul>
 
-            <p>On the right you see  a nice tree decompostion of the current graph.
-            We have colored each type of node a different color.
-            Spend some time getting familiar with the difference between the nodes. As we will be refering them a lot in the coming sections.</p>
+            <p>On the right you see  a nice tree decompostion of the current graph. Each node type of node is a different color.</p>
+
+            <p>Spend some time getting familiar with the difference between the nodes. As we will be refering them a lot in the coming sections.</p>
           `);
 
+          if (!window.graphContainer && !window.treeContainer) {
+            const graphContainer = d3.select('#container')
+              .append('div')
+              .attr('id', 'graph-container');
 
-          d3.select('#container')
-            .append('div')
-            .attr('id', 'graph-container');
+            const treeContainer = d3.select('#container')
+              .append('div')
+              .attr('id', 'tree-container');
 
-          d3.select('#container')
-            .append('div')
-            .attr('id', 'tree-container');
+            window.graphContainer = graphContainer;
+            window.treeContainer = treeContainer;
+          }
 
           const graph = new Graph('graph-container');
-          graph.randomGraph();
+          this.graph = graph;
+          this.graph.randomGraph();
 
-          await graph.computeTreeDecomposition();
-          await graph.readNiceTreeDecomposition();
-          const nicetd = graph.getNiceTreeDecomposition();
+          await this.graph.computeTreeDecomposition();
+          await this.graph.readNiceTreeDecomposition();
+          const niceTreeDecompositionData = this.graph.getNiceTreeDecomposition();
 
-          const tree = new Tree('tree-container');
-          tree.addTooltip();
-          tree.load(nicetd);
-          tree.setGraph(graph);
-
-          // this.sidebar.addButton('Max Independent Set', () => tree.mis());
-          // this.sidebar.addButton('3-Coloring', () => tree.runThreeColor());
-          // this.sidebar.addButton('next', () => tree.maxNext());
-          // this.sidebar.addButton('previous', () => tree.maxPrevious());
-          // tree.createTable();
+          const niceTreeDecomposition = new Tree('tree-container');
+          this.niceTreeDecomposition = niceTreeDecomposition;
+          this.niceTreeDecomposition.load(niceTreeDecompositionData);
+          this.niceTreeDecomposition.setGraph(this.graph);
         },
         'chapter4',
       ),
@@ -794,13 +802,18 @@ export default class SectionHandler {
       ),
       new Section(
         async () => {
-          d3.select('#container')
-            .append('div')
-            .attr('id', 'graph-container');
+          if (!window.graphContainer && !window.treeContainer) {
+            const graphContainer = d3.select('#container')
+              .append('div')
+              .attr('id', 'graph-container');
 
-          d3.select('#container')
-            .append('div')
-            .attr('id', 'tree-container');
+            const treeContainer = d3.select('#container')
+              .append('div')
+              .attr('id', 'tree-container');
+
+            window.graphContainer = graphContainer;
+            window.treeContainer = treeContainer;
+          }
 
           this.sidebar.addContent(`
           <p>The first algorithm we will consider is an algorithm to find the Maximum Indpependent Set of a graph \\( G \\) given its nice tree decomposition with width \\( k \\).</p>
@@ -818,7 +831,7 @@ export default class SectionHandler {
           <p>Let's now describe the algorithm.</p>
 
 
-          <section class="inout">
+          <section>
           <p><strong>Input:</strong> A nice tree decomposition of graph \\( G \\)</p>
           <p><strong>Output:</strong> The size of the Maximum Independent Set of \\( G \\)</p>
           </section>
@@ -826,30 +839,26 @@ export default class SectionHandler {
           <p><strong>Step 1:</strong> Perform a post-order (bottom-up) traversal of the tree.</p>
 
           <p><strong>Step 2:</strong> Compute the table \\( C_i \\) for each node \\( i \\), depending on the type of node do the following:</p>
-          <ul>
-            <li>
+  
+
               <p>If we hit a <strong>leaf node</strong> \\( i \\) with \\( X_i\\) \\( \\leq 1 \\)</p>
               <p>\\( C_i(Ø) = 0 \\)</p>
               <p>\\( C_i( \\{ v \\} ) = 1 \\)</p>
               <p>That is we only consider two scenarios: either it has 0 vertices or exactly 1 vertex.</p>
               <p>The empty set does not contain a MIS, thus we set the entry to 0. 
               If the leaf contains a vertex then the size of the MIS is exactly 1, recall that the induced subgraph of a leaf consits of exactly 1 vertex.</p>
-            </li>
 
-            <li>
               <p>If we hit a <strong>forget node</strong> \\( i \\) with child \\( j \\), then \\( X_i = X_j \\setminus \\{ v \\} \\) and \\( S \\subseteq X_i \\)</p>
               <p>\\( C_i(S) = max \\{ C_j(S), C_j( S \\cup \\{ v \\} ) \\} \\)</p>
               <p>We check if the sets of \\( X_i \\) is bigger with the forgotten vertex or without it and then keep the bigger one.</p>
-            </li>
-
-            <li>
+      
+              
               <p>If we hit a <strong>join node</strong> \\( i \\) with 2 children \\( j_1 \\) and \\( j_ 2 \\), then \\( X_i = X_{j_1} = X_{j_2} \\) and \\( S \\subseteq X_i \\)</p>
               <p>\\( C_i(S) = C_{j_1}(S) + C_{j_2}(S) - |S| \\)</p>
               <p>As \\( X_i \\), \\(X_{j_1} \\) and \\( X_{j_2} \\) all contain the same vertices and recalling the coherence property of 
               tree decompositions we can see that the the vertices in \\( X_i \\) is the intersection of the nodes in the 2 subtrees. We can then add the table entries from the children nodes' table and substract the ones we counted twice./p>
-            </li>
+     
 
-            <li>
               <p>If we hit a <strong>introduce node</strong> with child \\( j \\), then \\( X_i = X_j \\cup \\{ v \\} \\) and \\( S \\subseteq X_j \\)</p>
               <p>\\( C_i(S) = C_j(S)\\)</p>
              <p>
@@ -862,8 +871,6 @@ export default class SectionHandler {
              </p>
              <p>To compute the table of an introduce node we take over all the child node \\( X_j \\) table's entries. If a \\( v \\in S \\) we test if there are any 
              vertices in the set that are adjacent and if so we know it is not an independent set and we set the value to be minus infinity. If it is not adjacent we add 1 to the existing entry.</p>
-            </li>
-          </ul>
 
           <p><strong>Step 3:</strong></p> Lastly we return the largest independent set in the table \\( C_r \\) of the root node.
 
@@ -885,20 +892,22 @@ export default class SectionHandler {
          `);
 
           const graph = new Graph('graph-container');
-          const treeDecomposition = new Tree('tree-container');
-          this.treeDecomposition = treeDecomposition;
-          graph.randomGraph();
+          this.graph = graph;
+          const niceTreeDecomposition = new Tree('tree-container');
+          this.niceTreeDecomposition = niceTreeDecomposition;
+          this.graph.randomGraph();
 
-          await graph.computeTreeDecomposition();
-          await graph.readNiceTreeDecomposition();
-          const nicetd = graph.getNiceTreeDecomposition();
-          treeDecomposition.load(nicetd);
-          treeDecomposition.setGraph(graph);
-          treeDecomposition.addTooltip();
+          await this.graph.computeTreeDecomposition();
+          await this.graph.readNiceTreeDecomposition();
+          const niceTreeDecompositionData = this.graph.getNiceTreeDecomposition();
+          this.niceTreeDecompositionData = niceTreeDecompositionData;
+          this.niceTreeDecomposition.load(niceTreeDecompositionData);
+          this.niceTreeDecomposition.setGraph(this.graph);
+          this.niceTreeDecomposition.addTooltip();
 
-          this.sidebar.addButton('Max Independent Set', () => treeDecomposition.mis());
-          this.sidebar.addButton('next', () => treeDecomposition.maxNext());
-          this.sidebar.addButton('previous', () => treeDecomposition.maxPrevious());
+          // this.sidebar.addButton('Max Independent Set', () => this.niceTreeDecomposition.mis());
+          // this.sidebar.addButton('next', () => this.niceTreeDecomposition.maxNext());
+          // this.sidebar.addButton('previous', () => this.niceTreeDecomposition.maxPrevious());
         },
         'chapter5',
       ),
@@ -967,11 +976,22 @@ export default class SectionHandler {
           
           
           `);
-          this.treeDecomposition.addTooltip();
-          this.treeDecomposition.addColorTable();
-          this.sidebar.addButton('3-Coloring', () => this.treeDecomposition.runThreeColor());
-          this.sidebar.addButton('next', () => this.treeDecomposition.maxNext());
-          this.sidebar.addButton('previous', () => this.treeDecomposition.maxPrevious());
+          const graph = new Graph('graph-container');
+          this.graph = graph;
+          const niceTreeDecomposition = new Tree('tree-container');
+          this.niceTreeDecomposition = niceTreeDecomposition;
+          this.graph.randomGraph();
+
+          await this.graph.computeTreeDecomposition();
+          await this.graph.readNiceTreeDecomposition();
+          const niceTreeDecompositionData = this.graph.getNiceTreeDecomposition();
+          this.niceTreeDecompositionData = niceTreeDecompositionData;
+          this.niceTreeDecomposition.load(niceTreeDecompositionData);
+          this.niceTreeDecomposition.setGraph(this.graph);
+          this.niceTreeDecomposition.addTooltip();
+          // this.sidebar.addButton('3-Coloring', () => this.niceTreeDecomposition.runThreeColor());
+          // this.sidebar.addButton('next', () => this.niceTreeDecomposition.maxNext());
+          // this.sidebar.addButton('previous', () => this.niceTreeDecomposition.maxPrevious());
         },
         'chapter5',
       ),
@@ -984,14 +1004,18 @@ export default class SectionHandler {
     this.sidebar.clear();
     if (this.graph) this.graph.clear();
     if (this.tree) this.tree.clear();
-    if (this.treeDecomposition) this.treeDecomposition.clear();
+    if (this.niceTreeDecomposition) this.niceTreeDecomposition.clear();
     d3.select('#output').selectAll('*').remove();
     d3.select('#tooltip').remove();
     d3.select('#tooltip-arrow').remove();
     d3.select('#tree1').remove();
     d3.select('#tree2').remove();
     d3.select('#tree3').remove();
+
+    this.sections.map((section) => section.isActive = false);
+    this.currentSection.isActive = true;
     this.currentSection.create();
+    this.sidebar.updateProgressBar();
   }
 
   goPreviousSection() {
@@ -1005,6 +1029,12 @@ export default class SectionHandler {
     if (this.currentSectionIndex === this.sections.length - 1) return;
     this.currentSectionIndex++;
     this.currentSection = this.sections[this.currentSectionIndex];
+    this.createSection();
+  }
+
+  goToSection(section) {
+    this.currentSection = section;
+    this.currentSectionIndex = this.sections.indexOf(section);
     this.createSection();
   }
 

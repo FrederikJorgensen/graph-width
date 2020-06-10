@@ -1,7 +1,8 @@
 export default class Section {
-  constructor(section, chapter) {
+  constructor(section, chapter, isActive) {
     this.createSection = section;
     this.chapter = chapter;
+    this.isActive = isActive;
   }
 
   create() {

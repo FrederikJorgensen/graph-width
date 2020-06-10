@@ -2,50 +2,81 @@ html {
   height: 100%;
   margin: 0;
   user-select: none;
+  font-family: Helvetica Neue, Calibri, Arial, sans-serif;
+  color: rgb(51, 51, 51);
 }
 
 body {
   height: 100%;
   overflow: hidden;
   margin: 0;
-  font-family: Calibri, Arial, sans-serif;
   display: flex;
   flex-direction: column;
 }
 
 .nav {
-  flex: 0.05; 
+  display: flex;
+  flex: 0;
+  /* flex: 0.05;  */
   background-color: lightblue;
-  align-items: flex-start;
-  background-color: #333;
+  background-color: white;
+  box-shadow: 0 7px 9px -2px rgba(0,0,0,.2);
   overflow: hidden;
 }
 
+.nav-item {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px;
+  text-transform: uppercase;
+  font-size: 20px;
+  letter-spacing: .2em;
+  font-size: 15px;
+  color: #6d7e8e;
+}
+
+.nav-item:hover {
+  color: #1F1F1F;
+  transition: color 350ms;
+  cursor: pointer;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 25%;
+  width: 25%;
+}
+
+.subtitle {
+  text-align: center;
+  margin-bottom: 50px;
+}
 
 .logo {
   display: inline-flex;
   height: 100%;
   width: auto;
   align-items: center;
-  margin-left: 15px;
+  margin-right: 20px;
+  margin-left: 20px;
 }
 
 .logo-title {
   margin-left: 10px;
-  font-size: 25px;
-  font-weight: bold;
-  color: white;
+  font-size: 20px;
+  /* font-weight: bold; */
 }
 
 .main {
   display: flex;
-  flex: .95;
+  flex: 1;
   justify-content: center;
   align-items: center;
-  font-family: 'Walter Turncoat', Calibri, Arial, sans-serif;
-  /* height: 100%; */
   width: 100%;
-  /* position: absolute; */
   top: 0px;
   bottom: 0px;
   left: 0px;
@@ -54,13 +85,49 @@ body {
   overflow: hidden;
 }
 
-
 .sidebar {
   display: flex;
   flex-direction: column;
   flex: 0.3;
   height: 100%;
-  padding: 15px;
+}
+
+.progress-bar-container {
+  margin-top: auto;
+  height: 5%;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.progress-bar-container:first-child {
+  background-color: 'yellow';
+}
+
+.progress-bar-container:last-child {
+  background-color: 'blue';
+}
+
+.progress-item {
+  border-right: 2px solid white;
+  background: #e2e2e2;
+  height: 40%;
+}
+
+.progress-item-active {
+  border-width: 0 1px;
+  border-color: #fff;
+  background: #43e063;
+  height: 40%;
+  opacity: 75%;
+}
+
+.progress-item:hover {
+  /* background: #e2e2e2; */
+  height: 60%;
+  transition: height 100ms ease-in;
+  cursor: pointer;
 }
 
 .nav-buttons-container {
@@ -70,6 +137,16 @@ body {
   margin-top: auto
 }
 
+.material-icons.nav-arrows {
+  font-size: 40px;
+  color: #828282;
+}
+
+.material-icons.nav-arrows:hover {
+  color: orange; 
+  cursor: pointer;
+}
+
 #app-area {
   flex: 0.7;
   height: 100%
@@ -77,7 +154,9 @@ body {
 
 #container {
   display: flex;
-  height: 80%;
+  align-items: center;
+  justify-content: center;
+  height: 90%;
   border: 1px solid lightgray;
 }
 
@@ -87,7 +166,7 @@ body {
   align-items: center;
   flex-direction: column;
   width: 100%;
-  height: 20%;
+  height: 10%;
 }
 
 #max-output {
@@ -100,8 +179,12 @@ body {
 
 #center-container {
   display: flex;
-  height: 80%;
-  flex: 0.9;
+  height: 95%;
+  width: 95%;
+}
+
+h2 {
+  font-weight: 600;
 }
 
 .dragLine.hidden {
@@ -166,57 +249,6 @@ td {
   display: flex;
 }
 
-/* The Modal (background) */
-.modal {
-  display: none; /* Hidden by default */
-  position: fixed; /* Stay in place */
-  z-index: 1; /* Sit on top */
-  left: 0;
-  top: 0;
-  width: 100%; /* Full width */
-  height: 100%; /* Full height */
-  overflow: auto; /* Enable scroll if needed */
-  background-color: rgb(0, 0, 0); /* Fallback color */
-  background-color: rgba(0, 0, 0, 0.4); /* Black w/ opacity */
-}
-
-/* Modal Content/Box */
-.modal-content {
-  background-color: #fefefe;
-  margin: 15% auto; /* 15% from the top and centered */
-  padding: 20px;
-  border: 1px solid #888;
-  width: 30%; /* Could be more or less, depending on screen size */
-}
-
-/* The Close Button */
-.close {
-  color: #aaa;
-  float: right;
-  font-size: 28px;
-  font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-  color: black;
-  text-decoration: none;
-  cursor: pointer;
-}
-
-/* div.tooltip {
-  position: absolute;
-  z-index: 1;
-  background-color: white;
-  height: auto;
-  padding: 1px;
-  border-style: solid;
-  border-radius: 4px;
-  border-width: 1px;
-  box-shadow: 3px 3px 10px rgba(0, 0, 0, 0.5);
-  pointer-events: none;
-} */
-
 .drawinng {
   cursor: crosshair;
 }
@@ -267,38 +299,8 @@ td {
   margin-top: 30px;
 }
 
-.btn {
-  width: 100%;
-  border: none;
-  font-family: inherit;
-  font-size: 12px;
-  color: inherit;
-  background: none;
-  cursor: pointer;
-  padding: 5px 15px;
-  /* display: inline-block; */
-  margin: 15px 0px 15px 0px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-weight: 700;
-  outline: none;
-  position: relative;
-  background: rgb(31, 119, 180);
-  color: #fff;
-  box-shadow: 0 6px rgb(58, 142, 199);
-  -webkit-transition: none;
-  -moz-transition: none;
-  transition: none;
-  border-radius: 0 0 5px 5px;
-}
-
 svg {
   z-index: 1;
-  position: absolute;
-}
-
-.btn-container {
-  cursor: pointer;
 }
 
 .center-graph-td {
@@ -376,7 +378,9 @@ svg {
 }
 
 .quiz {
-  flex: 0.2;
+  /* height: 30%; */
+  /* flex: 0.2; */
+
 } 
 
 .submit-container {
@@ -445,35 +449,10 @@ svg {
   fill: green;
 }
 
-.tree-link {
-  stroke: black;
-  stroke-width: 3.5px;
-  z-index: -1;
-}
-
 .yepc {
   z-index: 10;
   width: 100px;
   height: 100px;
-}
-
-#tooltip {
-  background-color: white;
-  border: 2.5px solid black;
-  z-index: 100000;
-  padding: 15px;
-  transform: translate(-100%, 25px);
-}
-
-#tooltip-arrow { 
-  position: absolute;
-  width: 50px;				/* width of image (px or % or auto) */
-  height: auto;	
-  padding: 0px; 
-  margin: 0px;
-  line-height: 100%;
-  z-index: 100;
-  transform: translate(-100%, -50%);
 }
 
 .highlighted-link {
@@ -503,14 +482,6 @@ svg {
   stroke-width: 3.5;
 }
 
-.label {
-  fill: white;
-  font-weight: bold;
-  text-anchor: middle;
-  pointer-events: none;
-  user-select: none;
-}
-
 .graphNode {
   stroke: rgb(51, 51, 51);
   stroke-width: 3.5px;
@@ -533,33 +504,11 @@ svg {
   fill: red;
 }
 
-.nav-links:hover {
-  color: orange;
-  cursor: pointer;
-}
-
 .logo-background {
   position: absolute;
-  background: url(Resources/brush_stroke.png);
-  background-repeat: no-repeat;
-  background-size: 100% 95%;
-  padding: 8px 50px;
   font-size: 25px;
   font-weight: bold;
-  color: white;
-  transform: translate(-50%, -50%); 
-}
 
-.yellow-brush-stroke {
-  position: absolute;
-  background: url(Resources/yellow_brush_stroke.png);
-  background-repeat: no-repeat;
-  background-size: 100% 95%;
-  padding: 8px 70px;
-  font-size: 25px;
-  font-weight: bold;
-  color: white;
-  transform: translate(-50%, -50%); 
 }
 
 .logo-subheading {
@@ -570,46 +519,33 @@ svg {
 
 a {
   text-decoration: none;
-  color: white;
-}
-
-a:hover {
-  color: orange;
-  transition: color 300ms;
+  color: #1F1F1F;
 }
 
 .chapter-title {
   text-align: center;
 }
 
-.chapters {
-  z-index: 2;
-  position: absolute;
-  font-size: 40px;
-  bottom: 30px;
-  left: 30px;
-}
-
-.chapters:hover {
-  color: orange;
-  cursor: pointer;
+.overlay {
+  position: fixed;
+  z-index: 20000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0,0,0,0.8);
 }
 
 .roadmap-container {
-  position: absolute;
-  z-index: 10;
+  /* position: absolute; */
+  position: relative; 
+  /* z-index: 3; */
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   padding: 20px;
   font-size: 20px;
   background-color: white;
-  border: 1px solid black;
-}
-
-.roadmap-container text:hover {
- color: orange;
- cursor: pointer;
+  border-radius: 4px;
 }
 
 .roadmap-chapters {
@@ -619,12 +555,46 @@ a:hover {
 
 .roadmap-title {
   flex: 0.2;
-  font-size: 40px;
-  align-self: center;
+  font-size: 30px;
+  font-weight: 600;
 }
 
 .roadmap-chapters {
   flex: 0.8;
+  margin-bottom: 15px;
+}
+
+.roadmap-item {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-weight: 500;
+}
+
+.roadmap-item-active {
+  margin-top: 5px;
+  margin-bottom: 5px;
+  font-weight: 500;
+  color: #43e063;
+  opacity: 90%;
+}
+
+.roadmap-item:hover {
+ color: orange;
+ transition: color 350ms;
+ cursor: pointer;
+}
+
+.roadmap-close {
+  position: absolute;
+  top: 10px;
+  right: 15px;
+  font-size: 40px;
+}
+
+.roadmap-close:hover {
+  color: orange;
+  transition: color 350ms;
+  cursor: pointer;
 }
 
 .home-link {
@@ -662,10 +632,16 @@ a:hover {
 }
 
 .content-container {
+  height: 80%;
+  padding: 25px;
   overflow-y: auto;
 }
 
 .content {
+  height: auto;
+  width: 100%;
+  overflow-y: auto;
+  overflow-x: hidden;
   font-size: 18px;
   line-height: 26px;
 }
@@ -675,7 +651,8 @@ hr {
   clear:both;
   display:block;
   width: 96%;               
-  background-color:#eee;
+  /* background-color:#eee; */
+  background-color: lightgray;
   height: 1px;
   margin-top: 15px;
   margin-bottom: 15px;
@@ -715,23 +692,272 @@ li {
   margin: 0 0 3px 0;
 }
 
-.tree-node {
-  fill: #2ca02c;
-}
-
-.join {
-  color: yellow;
-}
-
-.introduce {
-  color: blue;
-}
-
-.forget {
-  color: red;
-}
-
 .inout {
   background-color: lightblue;
   padding: 10px;
+}
+
+.pure-material-button-contained {
+  position: relative;
+  display: inline-block;
+  box-sizing: border-box;
+  border: none;
+  border-radius: 4px;
+  padding: 0 16px;
+  min-width: 64px;
+  height: 36px;
+  vertical-align: middle;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
+  background-color: rgb(var(--pure-material-primary-rgb, 33, 150, 243));
+  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  font-family: var(--pure-material-font, "Roboto", "Segoe UI", BlinkMacSystemFont, system-ui, -apple-system);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 36px;
+  overflow: hidden;
+  outline: none;
+  cursor: pointer;
+  transition: box-shadow 0.2s;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+.pure-material-button-contained::-moz-focus-inner {
+  border: none;
+}
+
+/* Overlay */
+.pure-material-button-contained::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+/* Ripple */
+.pure-material-button-contained::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  border-radius: 50%;
+  padding: 50%;
+  width: 32px; /* Safari */
+  height: 32px; /* Safari */
+  background-color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
+  opacity: 0;
+  transform: translate(-50%, -50%) scale(1);
+  transition: opacity 1s, transform 0.5s;
+}
+
+/* Hover, Focus */
+.pure-material-button-contained:hover,
+.pure-material-button-contained:focus {
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+}
+
+.pure-material-button-contained:hover::before {
+  opacity: 0.08;
+}
+
+.pure-material-button-contained:focus::before {
+  opacity: 0.24;
+}
+
+.pure-material-button-contained:hover:focus::before {
+  opacity: 0.3;
+}
+
+/* Active */
+.pure-material-button-contained:active {
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+
+.pure-material-button-contained:active::after {
+  opacity: 0.32;
+  transform: translate(-50%, -50%) scale(0);
+  transition: transform 0s;
+}
+
+/* Disabled */
+.pure-material-button-contained:disabled {
+  color: rgba(var(--pure-material-onsurface-rgb, 0, 0, 0), 0.38);
+  background-color: rgba(var(--pure-material-onsurface-rgb, 0, 0, 0), 0.12);
+  box-shadow: none;
+  cursor: initial;
+}
+
+.pure-material-button-contained:disabled::before {
+  opacity: 0;
+}
+
+.pure-material-button-contained:disabled::after {
+  opacity: 0;
+}
+
+.normal-tree-node {
+  fill: rgb(238, 238, 238);
+  stroke: rgb(51, 51, 51);
+  stroke-width: 3.5;
+}
+
+.tree-node {
+  fill: #2ca02c;
+  stroke: rgb(51, 51, 51);
+  stroke-width: 3.5;
+}
+
+.tree-link {
+  stroke: rgb(51, 51, 51);
+  stroke-width: 3.5px;
+}
+
+.label {
+  fill: rgb(51, 51, 51);
+  font-family: "PT Sans", sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  text-anchor: middle;
+  pointer-events: none;
+  user-select: none;
+}
+
+.graph-label {
+  fill: #eee;
+  font-family: "PT Sans", sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  text-anchor: middle;
+  pointer-events: none;
+  user-select: none;
+}
+
+#tooltip-arrow {
+  marker-end: url(#triangle);
+  opacity: 1;
+  stroke: rgb(51, 51, 51);
+  stroke-width: 3.5px;
+  position: absolute;
+}
+
+#tooltip {
+  background-color: white;
+  border: 3.5px solid rgb(51, 51, 51);
+  z-index: 100000;
+  padding: 15px;
+  transform: translate(-100%, -2px);
+}
+
+.join {
+  color: rgb(253,180,98);
+}
+
+.introduce {
+  color: rgb(128,177,211);
+}
+
+.forget {
+  color: rgb(251,128,114);
+}
+
+.main-sandbox {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  top: 0px;
+  align-items: center;
+  bottom: 0px;
+  left: 0px;
+  right: 0px;
+  overflow: hidden;
+}
+
+.sandbox-sidebar-container {
+  height: 100%;
+  width: 20%;
+  display: flex; 
+  justify-content: center;
+}
+
+.sandbox-app-container {
+  display: flex;
+  width: 80%;
+  height: 90%;
+  margin-right: 25px;
+}
+
+.sandbox-sidebar {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  height: fit-content;
+  overflow: hidden;
+  width: 80%;
+  -webkit-box-shadow: 0px 0px 18px 0px rgba(48, 50, 50, 0.44);
+  -moz-box-shadow:    0px 0px 18px 0px rgba(48, 50, 50, 0.44);
+  box-shadow:         0px 0px 18px 0px rgba(48, 50, 50, 0.44);
+  position: relative;
+  top: 60px;
+  padding: 15px;
+}
+
+.slider {
+  width: 100%;
+}
+
+.sandbox-button {
+  display: inline-block;
+  position: relative;
+  background-color: #000;
+  color: #fff;
+  width: 100%;
+  padding: 12px 0;
+  text-align: center;
+  text-decoration: none;
+  font-size: 1em;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
+  margin-botom: 20px;
+}
+
+.sandbox-button:hover {
+  transition: background-color 0.3s;
+  background-color: #555;
+}
+
+.left-side {
+  width: 50%;
+  height: 100%;
+}
+
+#sandbox-graph {
+  height: 50%;
+  width: 100%;
+  border: 1px solid lightgray;
+}
+
+#sandbox-tree-decomposition {
+  height: 50%;
+  width: 100%;
+  border: 1px solid lightgray;
+}
+
+.right-side {
+  width: 50%;
+  height: 100%;
+}
+
+#sandbox-nice-tree-decomposition {
+  height: 100%;
+  width: 100%;
+  border: 1px solid lightgray;
 }

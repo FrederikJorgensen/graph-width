@@ -1678,19 +1678,31 @@ export default class Graph {
           return d.id;
         })
         .style('letter-spacing', '6px')
-        .attr('class', 'label');
+        .attr('class', 'graph-label');
 
       svg.selectAll('g')
         .append('text')
         .attr('dy', 15)
         .text((d) => d.label.substring(2))
         .style('letter-spacing', '4px')
-        .attr('class', 'label');
+        .attr('class', 'graph-label');
     } else {
-      /*       const g = svg.selectAll('g')
+      const circle = svg.selectAll('circle')
         .data(graph.nodes)
         .enter()
-        .append('g')
+        .append('circle')
+        .attr('id', (d) => `graph-node-${d.id}`)
+        .style('opacity', (d) => {
+          if (d.id === 0) return 0;
+        })
+        .attr('r', 18)
+        .style('fill', () => {
+          if (type === 'tree') return '#2ca02c';
+          return '#1f77b4';
+        })
+        .style('stroke', 'rgb(51, 51, 51)')
+        .style('stroke-width', '3.5px')
+        .attr('class', 'nonhighlight')
         .call(d3.drag()
           .on('start', (v) => {
             if (!d3.event.active) simulation.alphaTarget(0.3).restart();
@@ -1704,25 +1716,6 @@ export default class Graph {
             [v.fx, v.fy] = [null, null];
           }));
 
-      this.g = g; */
-
-      const circle = svg.selectAll('circle')
-        .data(graph.nodes)
-        .enter()
-        .append('circle')
-        .attr('id', (d) => `graph-node-${d.id}`)
-        .style('opacity', (d) => {
-          if (d.id === 0) return 0;
-        })
-        .attr('r', 22)
-        .style('fill', () => {
-          if (type === 'tree') return '#2ca02c';
-          return '#1f77b4';
-        })
-        .style('stroke', 'rgb(51, 51, 51)')
-        .style('stroke-width', '3.5px')
-        .attr('class', 'nonhighlight');
-
       this.circle = circle;
 
       svg.selectAll('text')
@@ -1734,44 +1727,30 @@ export default class Graph {
         })
         .attr('dy', 4.5)
         .text((d) => (d.label ? d.label : d.id))
-        .attr('class', 'label');
+        .attr('class', 'graph-label');
     }
 
     const line = d3.line().curve(d3.curveBasisClosed);
 
-    /*     const groupingForce = forceInABox()
-      .strength(0.1)
-      .template('force')
-      .groupBy('cluster')
-      .links(graph.links)
-      .forceCharge(0)
-      .size([w, h]); */
-
-    /*     const simulation = d3.forceSimulation()
-      .nodes(graph.nodes)
-      .force('group', groupingForce)
-      .force('center', d3.forceCenter(w / 2, h / 2))
-      .force('x', d3.forceX(w / 2).strength(0.02))
-      .force('y', d3.forceY(h / 2).strength(0.02))
-      .force('collide', d3.forceCollide(25))
-      .force('charge', d3.forceManyBody().strength(-200))
-      .force('link',
-        d3.forceLink(graph.links)
-          .id((d) => d.id)
-          .distance(2)
-          .strength(groupingForce.getLinkStrength)); */
-
-
     const simulation = d3.forceSimulation()
       .force('center', d3.forceCenter(w / 2, h / 2))
-      .force('x', d3.forceX(w / 2).strength(0.2))
-      .force('y', d3.forceY(h / 2).strength(0.2))
+      .force('x', d3.forceX(w / 2).strength(0.1))
+      .force('y', d3.forceY(h / 2).strength(0.1))
       .nodes(graph.nodes)
-      .force('charge', d3.forceManyBody().strength(-800).distanceMin(15))
-      .force('link', d3.forceLink(graph.links).id((d) => d.id).distance(95).strength(0.5))
-      .force('collision', d3.forceCollide().radius(35))
+      .force('charge', d3.forceManyBody().strength(-900))
+      .force('link', d3.forceLink(graph.links).id((d) => d.id).distance((d) => {
+        if (type === 'tree') {
+          return 100;
+        }
+        return 50;
+      }).strength(0.9))
+      .force('collision', d3.forceCollide().radius((d) => {
+        if (type === 'tree') {
+          return 50;
+        }
+        return d.r + 10;
+      }))
       .on('tick', () => {
-        // this.svg.selectAll('g').attr('transform', (d) => `translate(${d.x},${d.y})`);
         this.svg.selectAll('circle').attr('cx', (d) => d.x).attr('cy', (d) => d.y);
         this.svg.selectAll('ellipse').attr('transform', (d) => `translate(${d.x},${d.y})`);
         this.svg.selectAll('text').attr('x', (d) => d.x).attr('y', (d) => d.y);
@@ -1806,9 +1785,11 @@ export default class Graph {
     this.setg();
   }
 
-  randomGraph() {
+  randomGraph(vertices, edges) {
     if (this.svg) this.clear();
-    const randomGraph = generateRandomGraph(10, 10);
-    this.loadGraph(randomGraph, this.container, 'graph');
+    let randomGraph;
+    if (vertices === undefined && edges === undefined) randomGraph = generateRandomGraph(10, 10);
+    else randomGraph = generateRandomGraph(vertices, edges);
+    randomGraph = this.loadGraph(randomGraph, this.container, 'graph');
   }
 }
