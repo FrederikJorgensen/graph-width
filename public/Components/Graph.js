@@ -160,6 +160,8 @@ export default class Graph {
     this.cancel = false;
     this.lastNodeId = 0;
     this.masterNodes = new Set();
+    this.nodes = [];
+    this.links = [];
   }
 
   isIntroducedVertexNeighbor(set, introducedVertex, adjacencyList) {
@@ -1218,6 +1220,7 @@ export default class Graph {
     this.svg.remove();
     this.nodes = [];
     this.links = [];
+    this.lastNodeId = 0;
   }
 
   hoverEffect(d) {
@@ -1231,12 +1234,12 @@ export default class Graph {
   toggleHoverEffect() {
     if (this.isHoverEffect) {
       this.isHoverEffect = false;
-      this.treeEllipse.on('mouseover', null);
-      this.treeEllipse.on('mouseout', null);
+      this.nodeSvg.on('mouseover', null);
+      this.nodeSvg.on('mouseout', null);
     } else {
       this.isHoverEffect = true;
-      this.treeEllipse.on('mouseover', (d) => this.hoverEffect(d));
-      this.treeEllipse.on('mouseout', this.resetNodeStyling);
+      this.nodeSvg.on('mouseover', (d) => this.hoverEffect(d));
+      this.nodeSvg.on('mouseout', this.resetNodeStyling);
     }
   }
 
@@ -1433,23 +1436,26 @@ export default class Graph {
   restart() {
     this.updateMasterList();
     /* Enter, update, remove link SVGs */
-    this.link = this.link
+    this.svg.selectAll('line')
       .data(this.links, (d) => `v${d.source.id}-v${d.target.id}`)
       .join(
-        (enter) => enter.append('line').lower().attr('class', 'tree-link').on('contextmenu', (d) => this.removeEdge(d)),
+        (enter) => enter
+          .append('line')
+          .lower()
+          .attr('class', 'graphLink')
+          .on('contextmenu', (d) => this.removeEdge(d)),
         (update) => update,
         (exit) => exit.remove(),
       );
 
     /* Enter, update, remove ellipse SVGs */
-    this.svg.selectAll('ellipse')
+    this.svg.selectAll('circle')
       .data(this.nodes, (d) => d.id)
       .join(
         (enter) => {
-          enter.append('ellipse')
-            .attr('rx', 30)
-            .attr('ry', 25)
-            .style('fill', '#2ca02c')
+          enter.append('circle')
+            .attr('r', 20)
+            .style('fill', '#1f77b4')
             .style('stroke', 'rgb(51, 51, 51)')
             .style('stroke-width', '3.5px')
             .on('mouseover', () => this.disableAddNode())
@@ -1458,7 +1464,7 @@ export default class Graph {
             .on('mouseup', (d) => this.stopDrawLine(d))
             .on('contextmenu', d3.contextMenu(menu));
         },
-        (update) => update.attr('rx', (d) => (d.label && d.label.length > 2 ? d.label.length * 8 : 30)),
+        (update) => update,
         (exit) => exit.remove(),
       );
 
@@ -1467,20 +1473,18 @@ export default class Graph {
       .join(
         (enter) => enter.append('text')
           .attr('dy', 4.5)
-          .text((d) => d.label)
-          .attr('class', 'label'),
-        (update) => update.text((d) => d.label),
+          .text((d) => d.id)
+          .attr('class', 'graph-label'),
+        (update) => update,
         (exit) => exit.remove(),
       );
 
     this.simulation.force('link').links(this.links);
     this.simulation.nodes(this.nodes);
     this.simulation.alpha(0.5).restart();
-    this.checkTreeDecomposition();
   }
 
   addNode() {
-    if (this.startedDrawing === false) this.svg.style('background-color', 'white');
     if (this.canAddNode === false) return;
     const e = d3.event;
     if (e.button === 0) {
@@ -1533,14 +1537,14 @@ export default class Graph {
   }
 
   hideDragLine() {
-    d3.selectAll('ellipse').style('fill', '#2ca02c');
+    this.svg.selectAll('circle').style('fill', '#1f77b4');
     this.dragLine.classed('hidden', true);
     this.mousedownNode = null;
     this.restart();
   }
 
   beginDrawLine(d) {
-    d3.selectAll('ellipse').filter((node) => node === d).style('fill', 'orange');
+    this.svg.selectAll('circle').filter((node) => node === d).style('fill', 'orange');
     if (d3.event.ctrlKey) return;
     d3.event.preventDefault();
     this.mousedownNode = d;
@@ -1560,7 +1564,7 @@ export default class Graph {
   }
 
   stopDrawLine(d) {
-    d3.selectAll('ellipse').style('fill', '#2ca02c');
+    this.svg.selectAll('circle').style('fill', '#1f77b4');
     if (!this.mousedownNode || this.mousedownNode === d) return;
     for (let i = 0; i < this.links.length; i++) {
       const l = this.links[i];
@@ -1576,12 +1580,16 @@ export default class Graph {
   }
 
   enableDrawing() {
-    const svg = d3.select(`#${this.container}`).append('svg').attr('width', this.width).attr('height', this.height);
-    this.startedDrawing = false;
-    svg.style('background-color', 'lightgreen');
-    svg.style('cursor', 'crosshair');
-
+    if (this.svg) this.clear();
+    const w = document.getElementById(this.container).offsetWidth;
+    const h = document.getElementById(this.container).offsetHeight;
+    this.width = w;
+    this.height = h;
+    const svg = d3.select(`#${this.container}`).append('svg').attr('width', w).attr('height', h);
     this.svg = svg;
+    this.svg.style('cursor', 'crosshair');
+
+    this.restartSimulation();
 
     this.svg
       .on('mousedown', () => this.addNode())
@@ -1589,10 +1597,6 @@ export default class Graph {
       .on('mousemove', () => this.updateDragLine())
       .on('mouseup', () => this.hideDragLine())
       .on('mouseleave', () => this.leftCanvas());
-
-    this.link = this.svg.selectAll('line');
-
-    this.node = this.svg.selectAll('g');
 
     this.dragLine = this.svg
       .append('path')
@@ -1606,6 +1610,29 @@ export default class Graph {
     });
   }
 
+  restartSimulation() {
+    const simulation = d3.forceSimulation()
+      // .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+      .force('x', d3.forceX(this.width / 2).strength(0.1))
+      .force('y', d3.forceY(this.height / 2).strength(0.1))
+      .nodes(this.nodes)
+      .force('charge', d3.forceManyBody().strength(-500))
+      .force('link', d3.forceLink(this.links).id((d) => d.id).distance(70).strength(0.5))
+      .force('collision', d3.forceCollide().radius(20))
+      .on('tick', () => {
+        this.svg.selectAll('circle').attr('cx', (d) => d.x).attr('cy', (d) => d.y);
+        this.svg.selectAll('text').attr('x', (d) => d.x).attr('y', (d) => d.y);
+
+        this.svg.selectAll('line').attr('x1', (d) => d.source.x)
+          .attr('y1', (d) => d.source.y)
+          .attr('x2', (d) => d.target.x)
+          .attr('y2', (d) => d.target.y);
+      });
+
+    simulation.force('link').links(this.links);
+    this.simulation = simulation;
+  }
+
   loadGraph(graph, type, graphOfTd) {
     this.graphOfTd = graphOfTd;
     if (this.svg) this.clear();
@@ -1616,7 +1643,7 @@ export default class Graph {
     const h = document.getElementById(this.container).offsetHeight;
     this.width = w;
     this.height = h;
-    const svg = d3.select(`#${this.container}`).append('svg').attr('width', w).attr('height', h);
+    const svg = d3.select(`#${this.container}`).append('svg').attr('width', this.width).attr('height', this.height);
 
     this.svg = svg;
 
@@ -1658,15 +1685,13 @@ export default class Graph {
 
       this.treeg = treeg;
 
-      const treeEllipse = svg.selectAll('g')
+      this.nodeSvg = svg.selectAll('g')
         .append('ellipse')
         .attr('rx', (d) => d.label.length * 8)
         .attr('ry', 25)
         .style('fill', '#2ca02c')
         .style('stroke', 'rgb(51, 51, 51)')
         .style('stroke-width', '3.5px');
-
-      this.treeEllipse = treeEllipse;
 
       svg.selectAll('g')
         .append('text')
@@ -1687,7 +1712,7 @@ export default class Graph {
         .style('letter-spacing', '4px')
         .attr('class', 'graph-label');
     } else {
-      const circle = svg.selectAll('circle')
+      this.nodeSvg = svg.selectAll('circle')
         .data(graph.nodes)
         .enter()
         .append('circle')
@@ -1715,8 +1740,6 @@ export default class Graph {
             if (!d3.event.active) simulation.alphaTarget(0);
             [v.fx, v.fy] = [null, null];
           }));
-
-      this.circle = circle;
 
       svg.selectAll('text')
         .data(graph.nodes)

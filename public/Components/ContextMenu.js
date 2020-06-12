@@ -23,7 +23,7 @@ export const contextMenu = function (d) {
       },
     },
     {
-      title: 'Delete Bag',
+      title: 'Delete Node',
       action(elm, d, i) {
         d.graph.removeNode(d);
       },

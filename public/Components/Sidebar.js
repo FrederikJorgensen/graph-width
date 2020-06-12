@@ -4,7 +4,6 @@ export default class Sidebar {
     this.draw();
     this.setTitle(this.title);
     this.addContentArea();
-    // this.addNavButtons();
   }
 
   clear() {

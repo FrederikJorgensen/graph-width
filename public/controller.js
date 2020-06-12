@@ -1,11 +1,14 @@
 import ChapterHandler from './Handlers/ChapterHandler.js';
 import Roadmap from './Components/Roadmap.js';
+import SectionHandler from './Handlers/SectionHandler.js';
 
 export const width = document.getElementById('main').offsetWidth;
 export const height = document.getElementById('main').offsetHeight;
 
 const chapterHandler = new ChapterHandler();
 window.chapterHandler = chapterHandler;
+
+const sectionHandler = new SectionHandler();
 
 const roadmap = new Roadmap();
 
@@ -47,7 +50,9 @@ d3.select('#github-button').on('click', () => {
 });
 
 d3.select('#sandbox-button').on('click', () => {
-  chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1]);
+  d3.select('#chapter-button').style('color', '#6d7e8e');
+  d3.select('#sandbox-button').style('color', '#1f1f1f');
+  chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], true);
 });
 
 /* Close modal if clicked outside of modal box */
@@ -71,5 +76,21 @@ d3.select('body').on('keydown', () => {
       if (window.sectionHandler) window.sectionHandler.goNextSection();
       break;
     default:
+  }
+});
+
+d3.select(window).on('load', async () => {
+  const params = new URLSearchParams(location.search);
+  const hasChapter = params.has('chapter');
+  const chapterIndex = params.get('chapter') - 1;
+  const hasSandbox = params.has('sandbox');
+
+  if (hasSandbox) {
+    chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], hasSandbox);
+  }
+
+  if (hasChapter && chapterIndex < chapterHandler.chapters.length) {
+    const currentChapter = chapterHandler.chapters[chapterIndex];
+    chapterHandler.goToChapter(currentChapter, false);
   }
 });

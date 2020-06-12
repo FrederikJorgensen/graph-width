@@ -167,6 +167,8 @@ body {
   flex-direction: column;
   width: 100%;
   height: 10%;
+  font-size: 14px;
+  padding: 15px;
 }
 
 #max-output {
@@ -197,12 +199,12 @@ h2 {
 }
 
 .table {
-  z-index: 2;
+  z-index: 1000;
   background-color: white;
   position: absolute;
-  border: 1.5px solid lightgray;
-  padding: 20px;
-  transform: translate(-100%, 25px);
+  border: 3.5px solid rgb(51, 51, 51);
+  padding: 15px;
+  transform: translate(-100%, -2px);
 }
 
 .table td {
@@ -230,8 +232,6 @@ h2 {
 td {
   user-select: none;
 }
-
-
 
 .not-drawing {
   cursor: default;
@@ -882,14 +882,14 @@ li {
 
 .sandbox-sidebar-container {
   height: 100%;
-  width: 20%;
+  width: 15%;
   display: flex; 
   justify-content: center;
 }
 
 .sandbox-app-container {
   display: flex;
-  width: 80%;
+  width: 85%;
   height: 90%;
   margin-right: 25px;
 }
@@ -926,7 +926,28 @@ li {
   border: none;
   cursor: pointer;
   margin-top: 20px;
+  outline: none;
+}
+
+.sandbox-button-disabled {
+  pointer-events: none;
+  display: inline-block;
+  position: relative;
+  background-color:lightgray;
+  color: #fff;
+  width: 100%;
+  padding: 12px 0;
+  text-align: center;
+  text-decoration: none;
+  font-size: 1em;
+  border: none;
+  cursor: pointer;
+  margin-top: 20px;
   margin-botom: 20px;
+}
+
+.sandbox-button-disabled:hover {
+  cursor: not-allowed;
 }
 
 .sandbox-button:hover {
@@ -936,28 +957,53 @@ li {
 
 .left-side {
   width: 50%;
-  height: 100%;
+  height: 90%;
 }
 
 #sandbox-graph {
   height: 50%;
   width: 100%;
   border: 1px solid lightgray;
+  position: relative;
 }
 
 #sandbox-tree-decomposition {
   height: 50%;
   width: 100%;
   border: 1px solid lightgray;
+  position: relative;
 }
 
 .right-side {
   width: 50%;
-  height: 100%;
+  height: 90%;
+}
+
+#controls {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 10%;
+}
+
+.controls-container {
 }
 
 #sandbox-nice-tree-decomposition {
   height: 100%;
   width: 100%;
   border: 1px solid lightgray;
+  position: relative;
+}
+
+.container-text {
+  z-index: 5;
+  font-size: 20px;
+  font-weight: bold;
+  opacity: 50%;
+  bottom: 5px;
+  left: 5px;
+  position: absolute;
 }

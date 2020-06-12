@@ -39,6 +39,22 @@ function highlightVertex(nodeId) {
     .classed('highlighted-vertex', true);
 }
 
+function moveColorTable(node) {
+  const nodeSvg = d3.select(`#treeNode-${node.id}`);
+  const x = parseInt(nodeSvg.attr('x'), 10);
+  let y = parseInt(nodeSvg.attr('y'), 10);
+
+  y += 12.5;
+
+  d3.select('#tooltip-arrow')
+    .style('opacity', 1)
+    .attr('x1', x - 50)
+    .attr('y1', y)
+    .attr('x2', x)
+    .attr('y2', y)
+    .attr('transform', `translate(${0}, ${30})`);
+}
+
 function moveTooltip(node, maxSetIncl, maxSetExcl) {
   if ('children' in node === false) {
     d3.select('#tooltip').html('Largest set of a leaf is 1');
@@ -52,7 +68,6 @@ function moveTooltip(node, maxSetIncl, maxSetExcl) {
   const nodeSvg = d3.select(`#treeNode-${node.id}`);
   const cx = nodeSvg.attr('cx');
   const cy = nodeSvg.attr('cy');
-
 
   d3.select('#tooltip-arrow')
     .style('opacity', 1)
@@ -87,7 +102,7 @@ const getAllSubsets = (theArray) => theArray.reduce(
 );
 
 export default class Tree {
-  constructor(container, type) {
+  constructor(container, type, graph) {
     this.container = container;
     this.isMis = false;
     this.isColor = false;
@@ -95,6 +110,7 @@ export default class Tree {
     this.current = 0;
     this.graph = null;
     this.type = type;
+    this.graph = graph;
   }
 
   clear() {
@@ -185,24 +201,6 @@ export default class Tree {
     });
   }
 
-  addTooltip() {
-    d3.select('#main')
-      .append('div')
-      .attr('id', 'tooltip')
-      .style('position', 'absolute')
-      .style('opacity', 0);
-
-    this.svg
-      .append('line')
-      .attr('id', 'tooltip-arrow')
-      .attr('x1', 200)
-      .attr('y1', 100)
-      .attr('x2', 300)
-      .attr('y2', 100)
-      .attr('marker-end', 'url(#Triangle)')
-      .style('opacity', 0);
-  }
-
   setMisNormalTree() {
     this.isMisNormalTree = true;
   }
@@ -261,8 +259,6 @@ export default class Tree {
 
   threeColor() {
     const colorArray = ['red', 'green', 'blue'];
-    this.isMis = false;
-    this.isColor = true;
     let i = 1;
     this.root.copy().eachAfter((currentNode) => {
       if (this.current !== i++) return;
@@ -273,19 +269,16 @@ export default class Tree {
 
       /* Leaf node */
       if ('children' in node === false) {
-        const { top } = document.getElementById(`treeNode-${currentNode.data.id}`).getBoundingClientRect();
-        const { left } = document.getElementById(`treeNode-${currentNode.data.id}`).getBoundingClientRect();
+        moveColorTable(node);
 
-        d3.select('#tooltip-arrow')
-          .style('opacity', 1)
-          .style('left', `${left}px`)
-          .style('top', `${top + 25}px`);
+        const { top } = document.getElementById('tooltip-arrow').getBoundingClientRect();
+        const { left } = document.getElementById('tooltip-arrow').getBoundingClientRect();
 
         d3.select('#color-table')
+          .html(null)
           .style('opacity', 1)
-          .style('left', `${left - 50}px`)
-          .style('top', `${top - 2}px`);
-
+          .style('left', `${left}px`)
+          .style('top', `${top}px`);
 
         node.positionTracker = [];
         return;
@@ -418,29 +411,19 @@ export default class Tree {
         sb += '</tr>';
       }
 
-      const { top } = document.getElementById(`treeNode-${currentNode.data.id}`).getBoundingClientRect();
-      const { left } = document.getElementById(`treeNode-${currentNode.data.id}`).getBoundingClientRect();
+      moveColorTable(node);
 
-      d3.select('#tooltip-arrow')
-        .style('opacity', 1)
-        .style('left', `${left}px`)
-        .style('top', `${top + 25}px`);
+      const { top } = document.getElementById('tooltip-arrow').getBoundingClientRect();
+      const { left } = document.getElementById('tooltip-arrow').getBoundingClientRect();
 
       d3.select('#color-table')
-        .style('opacity', 1)
         .html(sb)
-        .style('left', `${left - 50}px`)
-        .style('top', `${top - 2}px`);
+        .style('opacity', 1)
+        .style('left', `${left}px`)
+        .style('top', `${top}px`);
     });
   }
 
-  addColorTable() {
-    d3.select('#main')
-      .append('table')
-      .style('opacity', 0)
-      .attr('id', 'color-table')
-      .attr('class', 'table');
-  }
 
   runThreeColor() {
     this.current = 0;
@@ -448,8 +431,6 @@ export default class Tree {
   }
 
   mis() {
-    this.isColor = false;
-    this.isMis = true;
     this.animX = 0;
     let i = 0;
     this.root.copy().eachAfter((currentNode) => {
@@ -479,8 +460,30 @@ export default class Tree {
           const vertex = currentNode.data.vertices[0];
           currentNode.data.table[vertex] = 1;
         }
-        d3.select('#tooltip').style('opacity', 0);
-        d3.select('#tooltip-arrow').style('opacity', 0);
+
+        const nodeSvg = d3.select(`#treeNode-${currentNode.data.id}`);
+        const x = parseInt(nodeSvg.attr('x'), 10);
+        let y = parseInt(nodeSvg.attr('y'), 10);
+
+        y += 12.5;
+
+        d3.select('#tooltip-arrow')
+          .style('opacity', 1)
+          .attr('x1', x - 50)
+          .attr('y1', y)
+          .attr('x2', x)
+          .attr('y2', y)
+          .attr('transform', `translate(${0}, ${30})`);
+
+
+        const { top } = document.getElementById('tooltip-arrow').getBoundingClientRect();
+        const { left } = document.getElementById('tooltip-arrow').getBoundingClientRect();
+
+        d3.select('#tooltip')
+          .html(null)
+          .style('opacity', 1)
+          .style('left', `${left}px`)
+          .style('top', `${top}px`);
         return;
       }
 
@@ -590,21 +593,32 @@ export default class Tree {
         }
         sb += `<tr id=${key} class="mis-row"><td class="sets">${key}</td><td>${value}</td></tr>`;
       });
-      const { top } = document.getElementById(`treeNode-${currentNode.data.id}`).getBoundingClientRect();
-      const { left } = document.getElementById(`treeNode-${currentNode.data.id}`).getBoundingClientRect();
 
       const start = `<table><tbody id="tbody">${sb}</tbody></table>`;
 
+      const nodeSvg = d3.select(`#treeNode-${currentNode.data.id}`);
+      const x = parseInt(nodeSvg.attr('x'), 10);
+      let y = parseInt(nodeSvg.attr('y'), 10);
+
+      y += 12.5;
+
       d3.select('#tooltip-arrow')
         .style('opacity', 1)
-        .style('left', `${left}px`)
-        .style('top', `${top + 25}px`);
+        .attr('x1', x - 50)
+        .attr('y1', y)
+        .attr('x2', x)
+        .attr('y2', y)
+        .attr('transform', `translate(${0}, ${30})`);
+
+
+      const { top } = document.getElementById('tooltip-arrow').getBoundingClientRect();
+      const { left } = document.getElementById('tooltip-arrow').getBoundingClientRect();
 
       d3.select('#tooltip')
         .html(start)
         .style('opacity', 1)
-        .style('left', `${left - 50}px`)
-        .style('top', `${top - 2}px`);
+        .style('left', `${left}px`)
+        .style('top', `${top}px`);
 
       d3.selectAll('.sets').on('mouseover', () => {
         this.highlightMaxSet(d3.event.target.innerText);
@@ -613,6 +627,74 @@ export default class Tree {
         d3.selectAll('circle').classed('highlighted-stroke', false);
       });
     });
+  }
+
+  disableAllAlgorithms() {
+    this.isMis = false;
+    this.isThreeColor = false;
+  }
+
+  addColorTable() {
+    if (this.colorTable) this.colorTable.remove();
+
+    this.colorTable = d3.select('#main')
+      .append('table')
+      .style('opacity', 0)
+      .attr('id', 'color-table')
+      .attr('class', 'table');
+  }
+
+  addTooltip() {
+    if (this.tooltip) this.tooltip.remove();
+
+    this.tooltip = d3.select('#main')
+      .append('div')
+      .attr('id', 'tooltip')
+      .style('position', 'absolute')
+      .style('opacity', 0);
+  }
+
+  addArrow() {
+    if (this.arrow) this.arrow.remove();
+    this.arrow = this.svg
+      .append('line')
+      .attr('id', 'tooltip-arrow')
+      .attr('x1', 200)
+      .attr('y1', 100)
+      .attr('x2', 300)
+      .attr('y2', 100)
+      .attr('marker-end', 'url(#Triangle)')
+      .style('opacity', 0);
+  }
+
+  removeColorTable() {
+    if (this.colorTable) this.colorTable.remove();
+  }
+
+  removeMisTable() {
+    if (this.tooltip) this.tooltip.remove();
+  }
+
+  enableMaximumIndependentSet() {
+    this.removeColorTable();
+    this.disableAllAlgorithms();
+
+    this.addArrow();
+    this.addTooltip();
+
+    this.isMis = true;
+    this.current = 0;
+  }
+
+  enableThreeColor() {
+    this.removeMisTable();
+    this.disableAllAlgorithms();
+
+    this.addArrow();
+    this.addColorTable();
+
+    this.isColor = true;
+    this.current = 0;
   }
 
   maxNext() {
