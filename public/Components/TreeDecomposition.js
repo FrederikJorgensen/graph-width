@@ -151,7 +151,9 @@ export default class TreeDecomposition {
   }
 
   checkCoherence() {
-    if (this.nodes.length === 0 || this.links.length === 0) return false;
+    console.log(this.nodes);
+    // if (this.nodes.length === 0 || this.links.length === 0) return false;
+
 
     /* Check if a node exists in multiple bags */
     for (let i = 0; i < this.graphOfTd.nodes.length; i++) {
@@ -179,6 +181,7 @@ export default class TreeDecomposition {
 
       const tempLinks = this.links.filter((link) => tempNodes.includes(link.source) && tempNodes.includes(link.target));
       const obj = this.checkConnectivity(tempNodes, tempLinks);
+      console.log(obj);
       if (obj.isDisconnected) return false;
     }
     return true;
