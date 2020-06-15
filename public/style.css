@@ -137,6 +137,11 @@ body {
   margin-top: auto
 }
 
+#arrow {
+  stroke: rgb(51, 51, 51);
+  fill: rgb(51, 51, 51);
+}
+
 .material-icons.nav-arrows {
   font-size: 40px;
   color: #828282;
@@ -254,10 +259,27 @@ td {
 }
 
 .exercise-box {
-  background-color: lightblue;
-  padding: 15px;
+  background-color: #d9e8ff;
+  border-radius: 10px;
+  padding: 12.5px;
   margin-top: 15px;
   margin-bottom: 15px;
+  font-size: 17px;
+  line-height: 22px;
+}
+
+.exercise-title {
+  color: #738199;
+}
+
+.fact {
+  background-color: #dfd;
+  border-radius: 10px;
+  padding: 12.5px;
+}
+
+.fact-title {
+  color: #2ca02c;
 }
 
 .drawing-disabled {
@@ -376,12 +398,6 @@ svg {
   line-height: 20px;
   font-size: 20px;
 }
-
-.quiz {
-  /* height: 30%; */
-  /* flex: 0.2; */
-
-} 
 
 .submit-container {
   display: flex;
@@ -518,7 +534,7 @@ svg {
 }
 
 a {
-  text-decoration: none;
+  /* text-decoration: none; */
   color: #1F1F1F;
 }
 
@@ -809,6 +825,10 @@ li {
   stroke-width: 3.5;
 }
 
+svg {
+  position: absolute;
+}
+
 .tree-node {
   fill: #2ca02c;
   stroke: rgb(51, 51, 51);
@@ -846,6 +866,15 @@ li {
   stroke: rgb(51, 51, 51);
   stroke-width: 3.5px;
   position: absolute;
+}
+
+#graph-tooltip {
+  position: absolute;
+  border: 1.5px solid lightgray;
+  background-color: white;
+  z-index: 100;
+  padding: 4px;
+  transform: translate(-100%, -50%);
 }
 
 #tooltip {
@@ -943,7 +972,7 @@ li {
   border: none;
   cursor: pointer;
   margin-top: 20px;
-  margin-botom: 20px;
+  margin-bottom: 20px;
 }
 
 .sandbox-button-disabled:hover {
@@ -986,9 +1015,6 @@ li {
   align-items: center;
   width: 100%;
   height: 10%;
-}
-
-.controls-container {
 }
 
 #sandbox-nice-tree-decomposition {

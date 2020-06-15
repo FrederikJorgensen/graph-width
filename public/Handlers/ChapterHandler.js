@@ -11,21 +11,11 @@ export default class ChapterHandler {
   constructor() {
     this.currentChapter = 1;
     this.chapters = [
-
-      new Chapter(
-        (
-          async () => {
-
-          }),
-        '1. Introduction to Treewidth',
-        false,
-      ),
-
       new Chapter(
         (async () => {
 
         }),
-        '2. Graph Separators',
+        '1. Graph Separators',
         false,
       ),
       new Chapter(
@@ -38,21 +28,21 @@ export default class ChapterHandler {
             .append('div')
             .attr('id', 'tree-container');
         }),
-        '3. Tree Decompositions',
+        '2. Treewidth & Tree Decompositions',
         false,
       ),
       new Chapter(
         (async () => {
 
         }),
-        '4. Nice Tree Decompositions',
+        '3. Nice Tree Decompositions',
         false,
       ),
       new Chapter(
         async () => {
-        
+
         },
-        '5. Algorithms on Tree Decompositions',
+        '4. Algorithms on Tree Decompositions',
         false,
       ),
       new Chapter(
@@ -312,7 +302,7 @@ export default class ChapterHandler {
             .on('click', () => niceTreeDecomposition.maxNext());
         },
 
-        '6. Sandbox',
+        '5. Sandbox',
       ),
     ];
   }

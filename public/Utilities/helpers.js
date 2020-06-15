@@ -31,3 +31,9 @@ export default function generateRandomGraph(n, m) {
   }
   return graph;
 }
+
+export function hull(points) {
+  if (points.length < 2) return;
+  if (points.length < 3) return d3.polygonHull([points[0], ...points]);
+  return d3.polygonHull(points);
+}

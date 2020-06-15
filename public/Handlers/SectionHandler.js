@@ -1,9 +1,11 @@
+/* eslint-disable no-return-assign */
+/* eslint-disable no-restricted-globals */
 import Section from '../Components/Section.js';
 import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
 import TreeDecomposition from '../Components/TreeDecomposition.js';
 import {
-  graph1, exampleGraph, exampleGraph2, exampleGraph3,
+  graph1, exampleGraph, exampleGraph2, exampleGraph3, gridGraph, cliqueGraph,
 } from '../Utilities/graphs.js';
 
 export default class SectionHandler {
@@ -18,122 +20,18 @@ export default class SectionHandler {
       new Section(
         async () => {
           this.sidebar.addContent(`
-            <p>What does treewidth mean? The treewidth of a graph is a measure to see how "tree-like" a graph is.</p>
-            <p>Can we see if a graph is "tree-like" just by looking at it? Lets take a look at some graphs.</p>
-            <p>Can you tell if this graph is tree-like? We know that trees do not contain cycles and this graph has exactly 1 cycle. So it must be easy to turn this graph into a tree?</p>`);
+          <p>Before we explore treewidth there is one concept that we must familiarize ourselves with.</p>
 
-          const graph = new Graph('container');
-          graph.loadGraph(exampleGraph2);
-        }, 'chapter1',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent('Lets take a look at another graph. Now this graph contains many cycles but if we remove some vertices we could also easily turn this into a tree.');
-          const graph = new Graph('container');
-          graph.loadGraph(exampleGraph);
-        },
-        'chapter1',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
-                <p>Why should we care about treewidth then?</p>
-
-               <p>Well we know that many problems which are considered hard to execute on graphs are a lot easier to execute on trees.</p>
-
-               <p>Which means if we can turn a given graph into a tree we can essentially compute the same problem on that tree of the graph.</p>
-
-               <p>First let us consider a classic graph problem: <strong>Maximum Independent Set</strong>.</p>
-               
-               <p>Recall that a maximum independent set is the largest possible size of an independent set of a graph.</p>
-
-               <p>The algorithm you see here is a naive brute force algorithm that checks every subset of the graph and the running time is</p>
-                $$ O(2^n * n * (n-1)/2) $$
-
-                <p>As you can tell this algorithm is really slow as we check all subsets of the graph.</p>`);
-
-          d3.select('#output')
-            .append('div')
-            .attr('id', 'max-output');
-
-          const graph = new Graph('container');
-          graph.randomGraph();
-
-          this.sidebar.addButton('Run Max Independent Set', () => graph.runMaximumIndependentSet());
-          this.sidebar.addButton('Skip Forward', () => graph.skipForwardMaximumIndependentSet());
-        },
-        'chapter1',
-      ),
-      new Section(
-        async () => {
-          if (this.graph) this.graph.clear();
-          const tree = new Tree('container', 'normal-tree');
-          this.tree = tree;
-          this.tree.setMisNormalTree();
-
-          const treeData = {
-            id: 1,
-            label: 1,
-            children: [
-              {
-                id: 2,
-                label: 2,
-                children: [
-                  {
-                    id: 5,
-                    label: 5,
-                    children: [{ id: 10, label: 10 }],
-                  },
-                  {
-                    id: 7,
-                    label: 7,
-                    children: [
-                      { id: 8, label: 8 },
-                    ],
-                  },
-                ],
-              },
-              {
-                id: 3,
-                label: 3,
-                children: [
-                  {
-                    id: 4,
-                    label: 4,
-                    children: [
-                      { id: 9, label: 9 },
-                    ],
-                  },
-                  {
-                    id: 6, label: 6,
-                  },
-                ],
-              },
-            ],
-          };
-          this.tree.load(treeData, 'normal-tree');
-          this.tree.addTooltip();
-
-          this.sidebar.addContent(`<p>Lets now look at how the <strong>Maximum Independent</strong> Set problem works on a tree.</p>
+          <p>That is the concept of a <strong>graph separator</strong>.</p>
           
-          <p>Using dynamic programming we can traverse the tree bottom-up and keep track of the 'state' of each node in the tree.</p>
+          <p>We say that a set \\( S \\) is a graph separator in a graph \\( G \\) if the removal of that set from \\( G \\) leaves \\( G \\) into multiple connected components.</p>
 
-          <p>This way we are creating partial solutions throughout the algorithm, which is very efficient because we will only need to store and calculate very little data in each partial solution.</p>
-          
-          <p>Try going through the algorithm step by step to see how it works. The running time is \\( O(n) \\) as we only have to visit each tree node once.</p>
-`);
-          renderMathInElement(document.body);
-          this.tree.setAllNodes();
-          this.sidebar.addButton('Next Step', () => tree.nextStep());
-          this.sidebar.addButton('Previous Step', () => tree.previousStep());
-        },
-        'chapter1',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`Before we explore treewidth there is one concept that we must familiarize ourselves with.
-          That is the concept of graph separators. We say that a set S is a <strong>graph separator</strong> if the removal of that set from the graph leaves the graph into multiple connected components.
-          <br/><br/>Can you find one or multiple vertices that would separate the graph into different components? Click on a vertex to include it into the separator set.`);
+          <p>In later chapters it becomes clear why we study graph separators. There are different types of graph separators we will cover those who are most relevant to treewidth in this chapter.</p>
+
+          <p><i>Click on a vertex in the graph to see if it separates the graph.</i></p>
+          `);
+
+          this.sidebar.addExercise('Find one or multiple vertices that would separate the graph into different components.');
 
           d3.select('#output')
             .append('div')
@@ -143,21 +41,16 @@ export default class SectionHandler {
           graph.loadGraph(exampleGraph3);
           graph.toggleSeparatorExercise();
         },
-        'chapter2',
+        'chapter1',
       ),
       new Section(
         async () => {
           this.sidebar.addContent(`
-          <p>There are different kinds of separators.</p>
+          <p>Let \\( S \\) be a separator in some graph \\( G \\). We say that \\( S\\) is a <strong>minimal separator</strong> if no proper subset separates the graph \\( G \\)
 
-          <p>We will cover minimal separators next.</p>
-
-          <p>A minimal separator set S is a separator in a graph if no proper subset of the set S also contains a separator.</p>
-
-          <p>In other words if some graph has a separator set S = {A,B} then A on its own cannot separate the graph neither can B.</p>
-
-          <p>Try to find a minimal separator in the graph. Click on a vertex to include it into the separator set.</p>
+          <p>In other words if some graph has a separator set \\( S = \\{ a,b \\} \\) then \\( a \\) on its own cannot separate the graph neither can \\( b \\).</p>
           `);
+          this.sidebar.addExercise('Find a minimal separator in the graph.');
           d3.select('#output')
             .append('div')
             .attr('id', 'separator-output');
@@ -168,17 +61,17 @@ export default class SectionHandler {
           graph.toggleMinimalSeparatorExercise();
         },
 
-        'chapter2',
+        'chapter1',
       ),
       new Section(
         async () => {
           this.sidebar.addContent(`
-            <strong>Balanced separators:</strong> We say that a separator is balanced if every component that has been induced by the removal of the separator is less than <br/><br/> the number of vertices in the original graph 
-            <br/><br/> <strong>minus</strong> <br/><br/> the number of vertices in the separator <br/><br/> <strong>divided by</strong> <br/><br/> 2.
-            <br/><br/>Mathematically we denote this as such: We say that a separator \\( S \\) is balanced: if every component of $$ G \\setminus  S  \\leq \\frac{V(G)-S}{2} $$
-            <strong>Exercise:</strong> Find a balanced separator in the graph. Click on a vertex to include it into the separator set.
-            Click on a vertex to include it into the separator set.
-            `);
+          <p>Let \\( S \\) be a separator in some graph \\( G \\). We say that \\( S \\) is a balanced separator if every component of \\( G - S \\) has \\( \\leq V(G) \\).</p>
+
+          <p>That is every component after you remove \\( S \\) should contain less than or equal amounts of vertices to the amount of vertices in the original graph divided by 2.</p>
+          `);
+
+          this.sidebar.addExercise('Find a balanced separator in the graph.');
 
           d3.select('#output')
             .append('div')
@@ -189,19 +82,18 @@ export default class SectionHandler {
           graph.resetExercises();
           graph.toggleBalanceSeparatorExercise();
         },
-        'chapter2',
+        'chapter1',
       ),
       new Section(
         async () => {
           this.sidebar.addContent(`
-            Recall that treewidth is a way to measure how "tree-like" a graph is and if the treewidth of a graph is small then we consider it very "tree-like".
-            <br><br>
-            Now we will explore a concept to define this formally.
-            <br><br>
-            We define treewidth using the concept of <strong>tree decompositions</strong>.
+          <p>Informally we can describe the <strong>treewidth</strong> of a graph to be a tree "build" from its separators that we saw in the previous chapter.</p>
 
-            A <strong>tree decomposition</strong> is mapping of a graph structured as a tree that we use to define the treewidth of a graph.
-            On the right you see a graph and one of its valid tree decompositions.
+          <p>More formally we define the treewidth of a graph using the notion of <strong>tree decompositions.</strong></p>
+
+          <p>A tree decomposition of a graph is a mapping of that graph into a tree adhering to certain properties.</p>
+
+          <p>On the right you see a graph \\( G \\) and one of its tree decompositions \\( T \\).
             
             `);
 
@@ -217,14 +109,17 @@ export default class SectionHandler {
           treeDecomposition.loadGraph(td1, 'tree', this.graph);
           this.treeDecomposition = treeDecomposition;
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
           this.sidebar.addContent(`
-              We refer to each node in the tree decomposition as a "bag". <br><br>Each bag contains some vertices of the the graph.
-              Try to hover over a bag in the tree decomposition to see the related vertices in the graph.
+              <p>We refer to each node in the tree decomposition as a "bag".</p>
+              
+              <p>Each bag contains some vertices of the the graph.</p>
               `);
+
+          this.sidebar.addExercise('Try to hover over a bag to see its related vertices.');
 
           const graph = new Graph('graph-container');
           graph.loadGraph(graph1);
@@ -236,7 +131,7 @@ export default class SectionHandler {
           treeDecomposition.loadGraph(td1, 'tree', graph);
           treeDecomposition.toggleHoverEffect();
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
@@ -258,7 +153,7 @@ export default class SectionHandler {
           this.sidebar.addButton('Replay animation', () => this.graph.runNodeCoverage());
           graph.runNodeCoverage();
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
@@ -285,7 +180,7 @@ export default class SectionHandler {
           treeDecomposition.resetTreeDecompositionStyles();
           graph.runEdgeCoverage();
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
@@ -303,18 +198,11 @@ export default class SectionHandler {
           await graph.readTreeDecomposition();
           const td1 = graph.getTreeDecomposition();
           const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', this.graph);
-
-          graph.resetNodeStyling();
-          graph.stopAllTransitions();
-          treeDecomposition.stopAllTransitions();
-          graph.resetLinkStyles();
-          graph.resetNodeStyling();
-          treeDecomposition.resetTreeDecompositionStyles();
-          this.sidebar.addButton('Replay animation', () => this.graph.runNodeCoverage());
-          graph.runNodeCoverage();
+          treeDecomposition.loadGraph(td1, 'tree', graph);
+          this.sidebar.addButton('Replay animation', () => graph.highlightCoherence());
+          graph.highlightCoherence();
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
@@ -334,7 +222,7 @@ export default class SectionHandler {
           const trivialTreeDecomposition = graph.computeTrivialTreeDecomposition();
           treeDecomposition.loadGraph(trivialTreeDecomposition, 'tree');
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
@@ -357,11 +245,11 @@ export default class SectionHandler {
           const treeDecomposition = new Graph('tree-container');
           treeDecomposition.loadGraph(anotherTd, 'tree');
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
-          this.sidebar.addContent('<strong>Exercise</strong> Is this a valid tree decomposition of the graph?');
+          this.sidebar.addExercise('Is this a valid tree decomposition of the graph?');
 
           const td3 = {
             nodes: [
@@ -386,14 +274,11 @@ export default class SectionHandler {
           this.sidebar.addChoice('No', true);
           this.sidebar.addSolution('Since the vertex 1 is in 2 bags it must form a connected subtree but in this tree it does not. Recall property 3.');
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
-          this.sidebar.addContent(`
-            <strong>Exercise</strong> Is this a valid tree decomposition?
-            
-            `);
+          this.sidebar.addExercise('Is this a valid tree decomposition of the graph?');
           const graph = new Graph('graph-container');
           graph.loadGraph(graph1);
 
@@ -419,7 +304,7 @@ export default class SectionHandler {
           const treeDecomposition = new Graph('tree-container');
           treeDecomposition.loadGraph(td4, 'tree');
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
@@ -431,9 +316,8 @@ export default class SectionHandler {
             <p><strong>Definition:</strong> We say that the <strong>width</strong> of a tree decomposition is the the size of the largest bag of that tree decomposition - 1.</p>
 
             <p><strong>Definition:</strong> The <strong>treewidth</strong> of a graph is the minimum width amongst all the tree decompositions of \\( G \\).</p>
-
-            <p>What is the width of the current tree decomposition?</p>
             `);
+          this.sidebar.addExercise('What is the width of the current tree decomposition?');
           const graph = new Graph('graph-container');
           graph.loadGraph(graph1);
 
@@ -449,11 +333,11 @@ export default class SectionHandler {
           this.sidebar.addChoice('3', false);
           this.sidebar.addSolution('The treewidth of a tree decomposition is the size of the largest bag - 1.');
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
-          this.sidebar.addContent('What about this one? What is the width?');
+          this.sidebar.addExercise('What about this one? What is the width?');
 
           const anotherTd = {
             nodes: [
@@ -478,7 +362,7 @@ export default class SectionHandler {
           const treeDecomposition = new Graph('tree-container');
           treeDecomposition.loadGraph(anotherTd, 'tree');
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
@@ -496,7 +380,7 @@ export default class SectionHandler {
           const graph = new Graph('graph-container');
           graph.loadGraph(graph1);
 
-          this.sidebar.addContent(`
+          this.sidebar.addExercise(`
             Lets check one more. What is the width?            
             `);
           this.sidebar.addQuiz();
@@ -508,15 +392,15 @@ export default class SectionHandler {
           const treeDecomposition = new Graph('tree-container');
           treeDecomposition.loadGraph(td3, 'tree');
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
           this.sidebar.addContent(`
-            Lets assume that the 3 tree decompositions you see on the right are ALL of the possible tree decompositions of the graph \\( G \\). (This is not true but for this exercise we will make this assumption)
-          <br><br>
-          What is the <strong>treewidth</strong> of the <strong>graph \\( G \\)</strong>?
+            <p>Lets assume that the 3 tree decompositions you see on the right are ALL of the possible tree decompositions of the graph \\( G \\). (This is not true but for this exercise we will make this assumption)</p>
+        
             `);
+          this.sidebar.addExercise('What is the <strong>treewidth</strong> of the <strong>graph \\( G \\)</strong>?');
           const graph = new Graph('graph-container');
           graph.loadGraph(graph1);
 
@@ -587,7 +471,7 @@ export default class SectionHandler {
           this.sidebar.addChoice('3', false);
           this.sidebar.addSolution('The correct answer is 2. Recall that the treewidth of a graph is the minimum width amonst all of the possible tree decompositions.');
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
@@ -597,9 +481,9 @@ export default class SectionHandler {
             <p>Each bag in the tree decomposition act as a separator in the graph.</p>
 
             <p>For example the bag containing 2 3 4 separates 1 and 5 6 7 in the graph.</p>
-
-            <p><strong>Exercise:</strong> Hover over a bag in the tree decomposition to see how it separates the graph.</p>
             `);
+
+          this.sidebar.addExercise('Hover over a bag in the tree decomposition to see how it separates the graph.');
           const graph = new Graph('graph-container');
           graph.loadGraph(graph1);
 
@@ -610,7 +494,7 @@ export default class SectionHandler {
           treeDecomposition.loadGraph(td1, 'tree', graph);
           treeDecomposition.toggleSeparator();
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
@@ -648,7 +532,7 @@ export default class SectionHandler {
           treeDecomposition.loadGraph(td1, 'tree', graph);
           treeDecomposition.toggleCoherenceProof();
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
@@ -676,39 +560,85 @@ export default class SectionHandler {
 
           td.enableDrawing();
         },
-        'chapter3',
+        'chapter2',
       ),
       new Section(
         async () => {
           this.sidebar.addContent(`
+            <p>[<strong>TODO SOMEHOW</strong>]</p>
             <p>Prove that for every clique \\( K \\), there is a bag \\( B \\) with \\(K \\subseteq B \\)</p>
           
           `);
-        }, 'chapter3',
+        }, 'chapter2',
       ),
       new Section(
         async () => {
           this.sidebar.addContent(`
-           <p>The treewidth of clique \\( k \\) is \\( k - 1\\)</p>
-          
+           <p class="fact"><span class="fact-title">Fact:</span> The treewidth of clique \\( k \\) is \\( k - 1\\)</p>
+
+           <p>As you can tell by the graph and its tree decomposition a clique has a large treewidth. An optimal tree decomposition of a clique is basically the trivial decomposition.</p>
           `);
-        }, 'chapter3',
+          const graph = new Graph('graph-container');
+          graph.loadGraph(cliqueGraph);
+          await graph.computeTreeDecomposition();
+          await graph.readTreeDecomposition();
+          const td1 = graph.getTreeDecomposition();
+          const treeDecomposition = new Graph('tree-container');
+          treeDecomposition.loadGraph(td1, 'tree', graph);
+        }, 'chapter2',
       ),
       new Section(
         async () => {
           this.sidebar.addContent(`
-           <p>For every \\( k \\geq 2\\), the treewidth of the \\( k\\) x \\( k \\) grid is exactly \\( k \\)</p>
+           <p class="fact"><span class="fact-title">Fact:</span> For every \\( k \\geq 2\\), the treewidth of the \\( k\\) x \\( k \\) grid is exactly \\( k \\)</p>
+
+           <p>Consider the \\( 3\\) x \\( 3 \\) grid on the right. Intuitively we can see there is no way we can separate this graph using less than \\( 3 \\) vertices.</p>
           
           `);
-        }, 'chapter3',
+          const graph = new Graph('graph-container');
+          graph.loadGraph(gridGraph);
+
+          await graph.computeTreeDecomposition();
+          await graph.readTreeDecomposition();
+          const td1 = graph.getTreeDecomposition();
+          const treeDecomposition = new Graph('tree-container');
+          treeDecomposition.loadGraph(td1, 'tree', graph);
+        }, 'chapter2',
       ),
       new Section(
         async () => {
           this.sidebar.addContent(`
-           
-          
+          <p>One part that you might have noticed that we left out is how do we construct these tree decompositions?</p>
+
+          <p>This is because an algorithm that constructs a tree decomposition given a graph is far from a trivial thing to do.
+          This in of itself could be a chapter. We have decided to rather focus on the properties of tree decompositions and how algorithms exploit them.</p>
+
+          <p>All that is needed to know for this interactive course is that it is NP-Hard to determine the treewidth of a graph. 
+          However there exists approximation algorithms that can find that provides an approximate treewidth given a graph. 
+          (<a href="https://www.sciencedirect.com/science/article/pii/S0304397597002284?via%3Dihub">Bodlaender et al. 2016</a>)</p>
+
+          <p>This also means discovering if a tree decomposition of width \\( k \\) k exists without knowledge of the treewidth is also NP Hard.
+          Although for a small constant \\( k \\) it is possible to find a tree decomposition in linear time. (<a href="https://epubs.siam.org/doi/10.1137/S0097539793251219">Bodlaender 1996</a>)
+          </p>         
+
+          <p>If you want to know more of the construction of tree decompositions the Chapter 10.5 in <a href="https://www.pearson.com/us/higher-education/program/Kleinberg-Algorithm-Design/PGM319216.html"
+          >Algorithm Design</a> is a good place to start.</p>
+
+          <p>We use a Java library called <a href="https://github.com/maxbannach/Jdrasil">Jdrasil</a> to compute tree decompositions.
+          The algorithm used in the library to obtain an exact tree decomposition is a mix of several known tree decomposition solvers.
+          </p>
+
+          <p>You can read more in their paper: <a href="https://drops.dagstuhl.de/opus/volltexte/2017/7605/pdf/LIPIcs-SEA-2017-28.pdf">Jdrasil: A Modular Library for Computing Tree Decompositions</a>.</p>
           `);
-        }, 'chapter3',
+          const graph = new Graph('graph-container');
+          graph.loadGraph(graph1);
+
+          await graph.computeTreeDecomposition();
+          await graph.readTreeDecomposition();
+          const td1 = graph.getTreeDecomposition();
+          const treeDecomposition = new Graph('tree-container');
+          treeDecomposition.loadGraph(td1, 'tree', graph);
+        }, 'chapter2',
       ),
       new Section(
         async () => {
@@ -722,12 +652,14 @@ export default class SectionHandler {
               <li>Every node of \\( T \\) has at most 2 children</li>
               <p>Every node of \\( T \\) must be one of the following types:</p>
               <li><strong><span class="leaf">Leaf node:<span></strong> \\( i \\)  is a leaf in \\( T \\) then \\( |X_i|\\) \\( \\leq \\) 1</li>
-              <li><strong><span class="join">Join node:</span></strong>  \\( i \\) has two children \\( j \\) and \\( k \\), then \\( X_i = X_j = X_k \\)</li>
-              <li><strong><span class="introduce">Introduce node:</span></strong>  \\( i \\) has 1 child \\( j \\), then \\( X_i = X_j \\cup \\{ v \\} \\) for a vertex \\( \\{ v \\} \\)</li>
-              <li><strong><span class="forget">Forget node:</span></strong> \\( i \\) has 1 child \\( j \\), then \\( X_i = X_j - \\{ v \\} \\) for a vertex \\( \\{ v \\} \\)</li>
+              <li><strong><span class="join">& Join node:</span></strong>  \\( i \\) has two children \\( j \\) and \\( k \\), then \\( X_i = X_j = X_k \\)</li>
+              <li><strong><span class="introduce">+ Introduce node:</span></strong>  \\( i \\) has 1 child \\( j \\), then \\( X_i = X_j \\cup \\{ v \\} \\) for a vertex \\( \\{ v \\} \\)</li>
+              <li><strong><span class="forget">- Forget node:</span></strong> \\( i \\) has 1 child \\( j \\), then \\( X_i = X_j - \\{ v \\} \\) for a vertex \\( \\{ v \\} \\)</li>
             </ul>
 
-            <p>On the right you see  a nice tree decompostion of the current graph. Each node type of the tree is a different color.</p>
+            <p>On the right you see a nice tree decompostion of the current graph.</P>
+            
+            <p>Each node type of the tree is a different color and has a diffrent symbol to make it easier to tell the difference.</p>
 
             <p>Spend some time getting familiar with the difference between the nodes. As we will be refering them a lot in the coming sections.</p>
           `);
@@ -758,24 +690,120 @@ export default class SectionHandler {
           this.treeDecomposition.load(niceTreeDecompositionData);
           this.treeDecomposition.setGraph(this.graph);
         },
-        'chapter4',
+        'chapter3',
       ),
       new Section(
         async () => {
           this.sidebar.addContent(`
-          <p>Given a graph \\( G \\) with \\( n \\) nodes and a tree decomposition of \\( G \\) with width \\( K \\) we can compute a nice tree decomposition 
-          with \\( n \\) nodes and width \\( K \\) in time \\( O(n) \\).</p>
+          <p>Given a graph \\( G \\) with \\( n \\) nodes and a tree decomposition of \\( G \\) with width \\( K \\) we can compute a nice tree decomposition of \\( G \\) with width \\( k \\) in polynomial time.
+          `);
+        },
+        'chapter3',
+      ),
+      new Section(
+        async () => {
+          this.sidebar.addContent(`
+            <p>We now introduce how algorithms exploit these tree decompositions.</p>
+
+            <p>Most algorithms that run on tree decompositions use a <strong>bottom-up</strong> approach combined with <strong>dynamic programming</strong>.</p>
+            
+            <p>For each node in the tree decomposition we store some information in classical dynamic programming table. What we store in this table depends on the algorithm we are running and what type of node it is.</p>
+
+            <p>The important part is that we store relatively little information at each node because we have 'split' up the graph into subgraphs by the properties of a tree decomposition.</p>
+
+            <p>We will start with a refresher on how <strong>dynamic programming</strong> works on "normal" trees.</p>
           `);
         },
         'chapter4',
       ),
       new Section(
         async () => {
+          if (this.graph) this.graph.clear();
+          const tree = new Tree('container', 'normal-tree');
+          this.tree = tree;
+          this.tree.setMisNormalTree();
+
+          const treeData = {
+            id: 1,
+            label: 1,
+            children: [
+              {
+                id: 2,
+                label: 2,
+                children: [
+                  {
+                    id: 5,
+                    label: 5,
+                    children: [{ id: 10, label: 10 }],
+                  },
+                  {
+                    id: 7,
+                    label: 7,
+                    children: [
+                      { id: 8, label: 8 },
+                    ],
+                  },
+                ],
+              },
+              {
+                id: 3,
+                label: 3,
+                children: [
+                  {
+                    id: 4,
+                    label: 4,
+                    children: [
+                      { id: 9, label: 9 },
+                    ],
+                  },
+                  {
+                    id: 6, label: 6,
+                  },
+                ],
+              },
+            ],
+          };
+          this.tree.load(treeData, 'normal-tree');
+          this.tree.addTooltip();
+          this.tree.addArrow();
+
           this.sidebar.addContent(`
-            <img src="https://memegenerator.net/img/instances/29740523.jpg" width="100%" height="300">
-          `);
+          <p>Lets now look at how the <strong>Maximum Independent Set</strong> problem works on a tree.</p>
+          
+          <p>Using dynamic programming we can traverse the tree bottom-up and keep track of the 'state' of each node in the tree.</p>
+
+          <p>This way we are creating partial solutions throughout the algorithm, which is very efficient because we will only need to store and calculate very little data in each partial solution.</p>
+
+          <p>The algorithm works as follow:</p>
+
+          <p>
+          <strong>Input:</strong> A tree.
+          <br>
+          <strong>Output:</strong> Maximum Independent Set of the tree.
+          </p>
+          <h3>Step 1:</h3>
+          <p>Start by performing a post-order (bottom-up) traversal of the tree.</p>
+          <h3>Step 2:</h3>
+
+          <p>We just need to take care of a few cases here:</p>
+          <ul>
+            <li>If the current node is a <strong>leaf</strong> we know it has no children so we set the maximum independent set to be 1.</li>
+            <li>For every other node we keep to rows in the table <strong>Max Set Incl</strong> which includes the current node so it cannot include its direct children but it can include the grandchildren.</li>
+            <li>The other entry is <strong>Max Set Excl</strong> which means we do not include the current node so we can include its direct children.</li>
+          </ul>
+
+          <p>Then we simply get the bigger of Max Set Incl or Max Set Excl for each subsolution</p>
+          <h3>Step 3:</h3>
+          <p>Get the bigger entry in the table of the root node to get the maximum independent set of the entire tree.</p>
+          
+          <p>Try going through the algorithm step by step to see how it works. The running time is \\( O(n) \\) as we only have to visit each tree node once.</p>
+`);
+          renderMathInElement(document.body);
+          this.tree.setAllNodes();
+          this.sidebar.addButton('Next Step', () => tree.nextStep());
+          this.sidebar.addButton('Previous Step', () => tree.previousStep());
         },
-        'chapter5',
+        'chapter4',
       ),
       new Section(
         async () => {
@@ -871,7 +899,7 @@ export default class SectionHandler {
 
           const graph = new Graph('graph-container');
           const niceTreeDecomposition = new Tree('tree-container');
-          graph.randomGraph();
+          graph.loadGraph(graph1);
 
           await graph.computeTreeDecomposition();
           await graph.readNiceTreeDecomposition();
@@ -897,7 +925,7 @@ export default class SectionHandler {
             .attr('class', 'material-icons nav-arrows')
             .on('click', () => niceTreeDecomposition.maxNext());
         },
-        'chapter5',
+        'chapter4',
       ),
       new Section(
         async () => {
@@ -964,17 +992,23 @@ export default class SectionHandler {
           
           
           `);
-          const graphContainer = d3.select('#container')
-            .append('div')
-            .attr('id', 'graph-container');
 
-          const treeContainer = d3.select('#container')
-            .append('div')
-            .attr('id', 'tree-container');
+          if (!window.graphContainer && !window.treeContainer) {
+            const graphContainer = d3.select('#container')
+              .append('div')
+              .attr('id', 'graph-container');
+
+            const treeContainer = d3.select('#container')
+              .append('div')
+              .attr('id', 'tree-container');
+
+            window.graphContainer = graphContainer;
+            window.treeContainer = treeContainer;
+          }
 
           const graph = new Graph('graph-container');
           const niceTreeDecomposition = new Tree('tree-container');
-          graph.randomGraph();
+          graph.loadGraph(graph1);
 
           await graph.computeTreeDecomposition();
           await graph.readNiceTreeDecomposition();
@@ -1000,7 +1034,7 @@ export default class SectionHandler {
 
           this.sidebar.addButton('3-Coloring', () => niceTreeDecomposition.runThreeColor());
         },
-        'chapter5',
+        'chapter4',
       ),
     ];
 
@@ -1009,10 +1043,6 @@ export default class SectionHandler {
 
   createSection() {
     d3.select('.nav').style('flex', 0.05);
-
-    /*     if (!this.graph) {
-      this.graph = new Graph('container');
-    } */
 
     /* Query strings */
     window.history.replaceState({}, '', '?');
@@ -1069,3 +1099,35 @@ export default class SectionHandler {
     this.createSection();
   }
 }
+
+/*
+new Section(
+  async () => {
+    this.sidebar.addContent(`
+          <p>Why should we care about treewidth then?</p>
+
+         <p>Well we know that many problems which are considered hard to execute on graphs are a lot easier to execute on trees.</p>
+
+         <p>Which means if we can turn a given graph into a tree we can essentially compute the same problem on that tree of the graph.</p>
+
+         <p>First let us consider a classic graph problem: <strong>Maximum Independent Set</strong>.</p>
+
+         <p>Recall that a maximum independent set is the largest possible size of an independent set of a graph.</p>
+
+         <p>The algorithm you see here is a naive brute force algorithm that checks every subset of the graph and the running time is</p>
+          $$ O(2^n * n * (n-1)/2) $$
+
+          <p>As you can tell this algorithm is really slow as we check all subsets of the graph.</p>`);
+
+    d3.select('#output')
+      .append('div')
+      .attr('id', 'max-output');
+
+    const graph = new Graph('container');
+    graph.randomGraph();
+
+    this.sidebar.addButton('Run Max Independent Set', () => graph.runMaximumIndependentSet());
+    this.sidebar.addButton('Skip Forward', () => graph.skipForwardMaximumIndependentSet());
+  },
+  'chapter1',
+), */

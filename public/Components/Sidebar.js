@@ -16,7 +16,7 @@ export default class Sidebar {
     const exerciseContainer = this.contentContainer.append('div').attr('class', 'exercise-box');
     this.exerciseContainer = exerciseContainer;
 
-    const exerciseContent = this.exerciseContainer.append('html').html(`<strong>Exercise:</strong> ${exercise}`);
+    const exerciseContent = this.exerciseContainer.append('div').html(`<strong class="exercise-title">Exercise:</strong> ${exercise}`);
     this.exerciseContent = exerciseContent;
   }
 
