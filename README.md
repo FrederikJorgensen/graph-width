@@ -15,6 +15,14 @@
 - [x] Chapter 4 - Algorithms on Tree Decompositions
 - [ ] Chapter x - Clique-width
 
+## Build your own chapter
+
+You can build your own chapter and make use of [GraphWidth.com](http://www.graphwidth.com/)'s library to visualize your content.
+
+To do so:
+- First follow the installation to get the app installed and running
+- Open `public/Chapters/content.txt`
+
 ## Attributions
 - [D3.js](https://d3js.org/)
 - [KaTeX](https://katex.org/)
@@ -23,8 +31,11 @@
 - [Material Icons](https://material.io/resources/icons/?style=baseline)
 
 
+## Requirements
+- Java 8 or later
+- Node 10 or later
 
-## Development
+## Install
 
 Clone the repository:  
 ```bash
@@ -34,7 +45,6 @@ Change directory into the repository:
 ```bash
 cd graph-width-visualizer
 ```
-
 Install the development tools:  
 ```bash
 npm install
