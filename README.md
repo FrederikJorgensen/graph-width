@@ -5,17 +5,17 @@
 > In graph theory, the treewidth of an undirected graph is a number associated with the graph. Treewidth may be defined in several equivalent ways: from the size of the largest vertex set in a tree decomposition of the graph, from the size of the largest clique in a chordal completion of the graph - Wikipedia
 
 GraphWidth.com is a full-stack application aimed at anyone with an interest in graph width measures and their applications. The teaching is done through short & precise interactive lectures. Along with a 
-'sandbox mode'.
-
-
+'sandbox mode' for those who wish to explore the concepts without guidance.
 
 ## Chapters
 
-### Chapter 1 - Graph Separators
+- Chapter 1 - Graph Separators
+- Chapter 2 - Treewidth & Tree Decompositions
+- Chapter 3 - Nice Tree Decompositions
+- Chapter 4 - Algorithms on Tree Decompositions
 
-
-
-GraphWidth.
+## Attributions
+- [D3.js](https://d3js.org/)
 
 ## Development
 
