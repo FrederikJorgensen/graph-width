@@ -12,7 +12,7 @@
 - [x] Chapter 1 - Graph Separators
 - [x] Chapter 2 - Treewidth & Tree Decompositions
 - [x] Chapter 3 - Nice Tree Decompositions
-- [x]Chapter 4 - Algorithms on Tree Decompositions
+- [x] Chapter 4 - Algorithms on Tree Decompositions
 - [ ] Chapter x - Clique-width
 
 ## Attributions
