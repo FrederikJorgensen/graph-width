@@ -9,10 +9,11 @@
 
 ## Chapters
 
-- Chapter 1 - Graph Separators
-- Chapter 2 - Treewidth & Tree Decompositions
-- Chapter 3 - Nice Tree Decompositions
-- Chapter 4 - Algorithms on Tree Decompositions
+- [x] Chapter 1 - Graph Separators
+- [x] Chapter 2 - Treewidth & Tree Decompositions
+- [x] Chapter 3 - Nice Tree Decompositions
+- [x]Chapter 4 - Algorithms on Tree Decompositions
+- [ ] Chapter x - Clique-width
 
 ## Attributions
 - [D3.js](https://d3js.org/)
@@ -21,8 +22,7 @@
 - [Force In A Box](https://github.com/john-guerra/forceInABox)
 - [Material Icons](https://material.io/resources/icons/?style=baseline)
 
-## Possible Chapters Queue
-- [ ] [Clique-width](https://en.m.wikipedia.org/wiki/Clique-width)
+
 
 ## Development
 
