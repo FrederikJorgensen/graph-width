@@ -22,6 +22,13 @@ You can build your own chapter and make use of [GraphWidth.com](http://www.graph
 To do so:
 - First follow the installation to get the app installed and running
 - Open `public/Chapters/content.txt`
+- Enter your content and the functionality you want and rerun the application
+- You can now see your custom content under chapter 5 'Misc'
+
+### Commands
+```
+#p This is a paragraph. It may include math notation X^2 X_i etc...
+```
 
 ## Attributions
 - [D3.js](https://d3js.org/)
