@@ -7,6 +7,7 @@ import TreeDecomposition from '../Components/TreeDecomposition.js';
 import {
   graph1, exampleGraph, exampleGraph2, exampleGraph3, gridGraph, cliqueGraph,
 } from '../Utilities/graphs.js';
+import { readLocalFile } from '../Utilities/helpers.js';
 
 export default class SectionHandler {
   constructor(sidebar, chapter) {
@@ -1090,9 +1091,84 @@ export default class SectionHandler {
     ];
 
     this.sections = this.sections.filter((section) => section.chapter === this.currentChapter);
+    this.createCustomSection();
+  }
+
+  async sectionFunctionBuilder(n) {
+    for (const line of n) {
+      if (line.startsWith('#create-graph')) {
+        const nodes = [];
+        const links = [];
+        const tempSet = new Set();
+
+        const splitted = line.split(' ');
+        splitted.shift();
+        for (const s of splitted) {
+          const v1 = parseInt(s[0], 10);
+          const v2 = parseInt(s[2], 10);
+          tempSet.add(v1);
+          tempSet.add(v2);
+          const newLink = { source: v1, target: v2 };
+          links.push(newLink);
+        }
+
+        tempSet.forEach((node) => {
+          const newNode = { id: node };
+          nodes.push(newNode);
+        });
+
+        const graphData = { nodes, links };
+
+        const graph = new Graph('graph-container');
+        this.graph = graph;
+        graph.loadGraph(graphData);
+      }
+
+      if (line.startsWith('#p')) {
+        const newLine = line.replace('#p', '');
+        this.sidebar.addContent(newLine);
+        renderMathInElement(document.body);
+      }
+
+      if (line.startsWith('#compute-tree-decomposition')) {
+        const newLine = line.replace('#compute-tree-decomposition', '');
+        await this.graph.computeTreeDecomposition();
+        await this.graph.readTreeDecomposition();
+        const td = this.graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td, 'tree', this.graph);
+      }
+    }
+  }
+
+  async createCustomSection() {
+    await readLocalFile('./Chapters/content.txt');
+    this.sectionFunctionBuilder(window.n);
+
+    // const add = new Function('sb', 'this.sidebar.addContent(\'yeeep\');');
+    // add(this.sidebar);
+
+    /*   const v = eval(`
+      const graph = new Graph('container');
+      graph.randomGraph();
+    `); */
+
+    // console.log(this.sidebar, add);
+
+    // const section = new Section(add, 'chapter5');
+    this.addSection(section);
+
+    // readLocalFile;
+  }
+
+  addSection(section) {
+    this.sections.push(section);
+    this.currentSection = section;
+    this.createSection();
   }
 
   createSection() {
+    if (!this.currentSection) this.currentSection = this.sections[0];
     d3.select('.nav').style('flex', 0.05);
 
     /* Query strings */

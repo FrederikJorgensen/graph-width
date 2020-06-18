@@ -6,6 +6,7 @@ import SectionHandler from './SectionHandler.js';
 import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
 import TreeDecomposition from '../Components/TreeDecomposition.js';
+import Section from '../Components/Section.js';
 
 export default class ChapterHandler {
   constructor() {
@@ -47,11 +48,22 @@ export default class ChapterHandler {
       ),
       new Chapter(
         async () => {
+          d3.select('#container')
+            .append('div')
+            .attr('id', 'graph-container');
+
+          d3.select('#container')
+            .append('div')
+            .attr('id', 'tree-container');
+        },
+        '5. Misc',
+        false,
+      ),
+      new Chapter(
+        async () => {
           let graphLoaded = false;
           let treeDecompositionLoaded = false;
           let niceTreeDecompositionLoaded = false;
-          // d3.select('#main').classed('main', false);
-          // d3.select('#main').classed('main-sandbox', true);
 
           const graph = new Graph('sandbox-graph');
           const treeDecomposition = new Graph('sandbox-tree-decomposition');
@@ -302,7 +314,7 @@ export default class ChapterHandler {
             .on('click', () => niceTreeDecomposition.maxNext());
         },
 
-        '5. Sandbox',
+        '6. Sandbox',
       ),
     ];
   }
@@ -314,7 +326,7 @@ export default class ChapterHandler {
     this.createChapter();
   }
 
-  goToChapter(chapter, isSandbox) {
+  goToChapter(chapter, isSandbox, isCustom) {
     if (isSandbox) {
       d3.select('.nav').style('flex', 0.05);
       window.history.replaceState({}, '', '?');
@@ -322,7 +334,6 @@ export default class ChapterHandler {
       window.history.replaceState({}, '', '');
       const params = new URLSearchParams(location.search);
       params.set('sandbox', 'true');
-      // params.toString();
       window.history.replaceState({}, '', `?${params.toString()}`);
       chapter.create();
       /* Credit icon maker on every page */
@@ -341,6 +352,7 @@ export default class ChapterHandler {
     this.currentChapter = chapter;
     this.createChapter();
   }
+
 
   createChapter() {
     /* Remove everything in main, sidebar and app area */
@@ -388,6 +400,8 @@ export default class ChapterHandler {
     const chapterNumberString = `chapter${chapterNumber}`;
 
     const sectionHandler = new SectionHandler(sidebar, chapterNumberString);
+    // const section = new Section(window.n, 'chapter5');
+    // sectionHandler.addSection(section);
     this.sectionHandler = sectionHandler;
 
     const currentSection = this.sectionHandler.sections[currentSectionIndex];

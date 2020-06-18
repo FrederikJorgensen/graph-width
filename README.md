@@ -1,5 +1,8 @@
 # Graph Width Visualizer
 
+
+![](readmeimg.png)
+
 ## Development
 
 Clone the repository:  

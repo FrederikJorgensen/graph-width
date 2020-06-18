@@ -1,0 +1,4 @@
+#create-graph 1-2 2-3 3-4 4-1
+#p This is some long form content including math stuff \( X_i \leq  X^2 \)
+#compute-tree-decomposition
+#hull 2 3

@@ -1,6 +1,8 @@
 import ChapterHandler from './Handlers/ChapterHandler.js';
 import Roadmap from './Components/Roadmap.js';
 import SectionHandler from './Handlers/SectionHandler.js';
+import Section from './Components/Section.js';
+import Graph from './Components/Graph.js';
 
 export const width = document.getElementById('main').offsetWidth;
 export const height = document.getElementById('main').offsetHeight;
@@ -8,7 +10,6 @@ export const height = document.getElementById('main').offsetHeight;
 const chapterHandler = new ChapterHandler();
 window.chapterHandler = chapterHandler;
 
-const sectionHandler = new SectionHandler();
 
 const roadmap = new Roadmap();
 

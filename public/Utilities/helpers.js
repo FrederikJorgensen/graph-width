@@ -37,3 +37,9 @@ export function hull(points) {
   if (points.length < 3) return d3.polygonHull([points[0], ...points]);
   return d3.polygonHull(points);
 }
+
+export async function readLocalFile(file) {
+  const response = await fetch(file);
+  const text = await response.text();
+  window.n = text.split('\n');
+}
