@@ -16,6 +16,10 @@ GraphWidth.com is a full-stack application aimed at anyone with an interest in g
 
 ## Attributions
 - [D3.js](https://d3js.org/)
+- [KaTeX](https://katex.org/)
+- [Icons8](https://icons8.com/)
+- [Force In A Box](https://github.com/john-guerra/forceInABox)
+- [Material Icons](https://material.io/resources/icons/?style=baseline)
 
 ## Development
 
