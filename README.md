@@ -3,6 +3,8 @@
 
 ![](readmeimg.png)
 
+> In graph theory, the treewidth of an undirected graph is a number associated with the graph. Treewidth may be defined in several equivalent ways: from the size of the largest vertex set in a tree decomposition of the graph, from the size of the largest clique in a chordal completion of the graph - Wikipedia
+
 ## Development
 
 Clone the repository:  
