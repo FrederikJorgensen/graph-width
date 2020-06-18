@@ -22,7 +22,7 @@
 - [Material Icons](https://material.io/resources/icons/?style=baseline)
 
 ## Possible Chapters Queue
-- [] [Clique-width](https://en.m.wikipedia.org/wiki/Clique-width)
+- [ ] [Clique-width](https://en.m.wikipedia.org/wiki/Clique-width)
 
 ## Development
 
