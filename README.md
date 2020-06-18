@@ -26,10 +26,18 @@ To do so:
 - You can now see your custom content under chapter 5 'Misc'
 
 ### Commands
+You can write content by using the **#p** command, you may include any math notation which is supported by [KaTeX](https://katex.org/).
 ```
-#p This is a paragraph. It may include math notation X^2 X_i etc...
+#p This is a paragraph including math stuff \( X_i \leq  X^2 \)
 ```
-
+Create a graph by using the **#create-graph** command followed by how you want each vertex to connect. I.e 1-2 connect a vertex called '1' with a vertex called '2'.
+```
+#create-graph 1-2 2-3
+```
+Compute the tree decomposition of the current graph by using the **#compute-tree-decomposition** command.
+```
+#compute-tree-decomposition
+```
 ## Attributions
 - [D3.js](https://d3js.org/)
 - [KaTeX](https://katex.org/)
