@@ -565,15 +565,6 @@ export default class SectionHandler {
       new Section(
         async () => {
           this.sidebar.addContent(`
-            <p>[<strong>TODO SOMEHOW</strong>]</p>
-            <p>Prove that for every clique \\( K \\), there is a bag \\( B \\) with \\(K \\subseteq B \\)</p>
-          
-          `);
-        }, 'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
            <p class="fact"><span class="fact-title">Fact:</span> The treewidth of clique \\( k \\) is \\( k - 1\\)</p>
 
            <p>As you can tell by the graph and its tree decomposition a clique has a large treewidth. An optimal tree decomposition of a clique is basically the trivial decomposition.</p>
@@ -694,9 +685,69 @@ export default class SectionHandler {
       ),
       new Section(
         async () => {
+          if (!window.graphContainer && !window.treeContainer) {
+            const graphContainer = d3.select('#container')
+              .append('div')
+              .attr('id', 'graph-container');
+
+            const treeContainer = d3.select('#container')
+              .append('div')
+              .attr('id', 'tree-container');
+
+            window.graphContainer = graphContainer;
+            window.treeContainer = treeContainer;
+          }
           this.sidebar.addContent(`
-          <p>Given a graph \\( G \\) with \\( n \\) nodes and a tree decomposition of \\( G \\) with width \\( K \\) we can compute a nice tree decomposition of \\( G \\) with width \\( k \\) in polynomial time.
+          <p class="fact"><strong class="fact-title">Theorem:</strong> Given a graph \\( G \\) with \\( n \\) nodes and a tree decomposition of \\( G \\)
+           with width \\( K \\) we can compute a nice tree decomposition of \\( G \\) with width \\( k \\) in polynomial time.</p>
+
+           <p>We describe an algorithm as follows...</p>
+           <p>
+           <strong>Step 1:</strong> Choose an arbitrary node to be the root.
+           <br>
+           <strong>Step 2:</strong> Make every node have at most 2 children.
+           <br>
+           <strong>Step 3:</strong> Every node that has 2 children, turn them into a join node.
+           <br>
+           <strong>Step 4:</strong> Every node that has 1 child, let the parent be \\( X_i \\) and the child be \\( X_j \\)
+           create introduce nodes that introduce the elements that are in \\( X_i \\) but not in \\( X_j \\). Create forget nodes for elements that are in \\( X_j \\) but not in \\( X_i \\).
+           <br>
+           <strong>Step 5:</strong> Make leafs have size at most 1 by adding as many introduced nodes as needed.
+           </p>
+           
           `);
+          this.sidebar.addExercise('Construct the nice tree decomposition of the tree decomposition.');
+
+          const td = {
+            nodes: [
+              {
+                id: 1,
+                label: '1 2 3',
+              },
+              {
+                id: 2,
+                label: '2 3 4',
+              },
+            ],
+            links: [
+              {
+                source: 1,
+                target: 2,
+              },
+            ],
+          };
+
+          const niceTreeDecompositionData = {
+            id: 1,
+            label: '',
+            vertices: [],
+            children: [],
+          };
+          const treeDecomposition = new Graph('graph-container');
+          treeDecomposition.loadGraph(td, 'tree');
+
+          const niceTreeDecomposition = new Tree('tree-container', 'nice', treeDecomposition);
+          niceTreeDecomposition.load(niceTreeDecompositionData, 'nice');
         },
         'chapter3',
       ),

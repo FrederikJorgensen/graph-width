@@ -107,6 +107,22 @@ export const exampleGraph3 = {
     ],
 };
 
+export const exampleGraph4 = {
+  nodes: [
+    { id: 1 },
+    { id: 2 },
+    { id: 3 },
+    { id: 4 },
+  ],
+  links: [
+    { source: 1, target: 2 },
+    { source: 1, target: 3 },
+    { source: 2, target: 3 },
+    { source: 2, target: 4 },
+    { source: 4, target: 3 },
+  ],
+};
+
 export const gridGraph = {
   nodes: [
     { id: 1 },

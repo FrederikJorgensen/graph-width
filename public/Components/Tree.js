@@ -1,3 +1,5 @@
+/* eslint-disable no-else-return */
+/* eslint-disable no-loop-func */
 /* eslint-disable no-mixed-operators */
 /* eslint-disable no-continue */
 /* eslint-disable no-return-assign */
@@ -9,6 +11,35 @@
 /* eslint-disable class-methods-use-this */
 
 import { hull } from '../Utilities/helpers.js';
+import { contextMenu as menu } from './TreeContextMenu.js';
+
+const arraysMatch = function (arr1, arr2) {
+  // Check if the arrays are the same length
+  if (arr1.length !== arr2.length) return false;
+
+  // Check if all items exist and are in the same order
+  for (let i = 0; i < arr1.length; i++) {
+    if (arr1[i] !== arr2[i]) return false;
+  }
+
+  // Otherwise, return true
+  return true;
+};
+
+Set.prototype.subSet = function (otherSet) {
+  // if size of this set is greater
+  // than otherSet then it can'nt be
+  //  a subset
+  if (this.size > otherSet.size) return false;
+
+  for (const elem of this) {
+    // if any of the element of
+    // this is not present in the
+    // otherset then return false
+    if (!otherSet.has(elem)) return false;
+  }
+  return true;
+};
 
 // Include in your code!
 const data = [1, 2, 3, 4, 5, 6, 7, 8, 9];
@@ -112,6 +143,237 @@ export default class Tree {
     this.graph = null;
     this.type = type;
     this.graph = graph;
+    this.masterNodes = [];
+  }
+
+  updateMasterList() {
+    let temp = [];
+    this.nodes.forEach((bag) => {
+      if (bag.vertices) temp = temp.concat(bag.vertices);
+    });
+
+    const tempSet = [...new Set(temp)];
+    this.masterNodes = tempSet;
+  }
+
+  isBinary() {
+    let isBinary = true;
+
+    this.root.sum((node) => {
+      if (node.children) {
+        node.children.length > 2 ? isBinary = false : isBinary = true;
+      }
+    });
+
+    return isBinary;
+  }
+
+  isNodeCoverage() {
+    const nodeCoverage = true;
+
+    const tempSet = new Set();
+
+    this.graph.nodes.forEach((node) => {
+      const tempArr = node.label.split(' ');
+      tempArr.forEach((ta) => tempSet.add(parseInt(ta, 10)));
+    });
+
+    const tempSet2 = new Set();
+
+    this.root.sum((node) => {
+      const tempArr2 = node.label.split(',');
+      tempArr2.forEach((ta) => tempSet2.add(parseInt(ta, 10)));
+    });
+
+    return tempSet.subSet(tempSet2);
+  }
+
+  isEdgeCoverage() {
+    return this.graph.links.every((link) => {
+      this.root.eachAfter((node) => {
+        console.log(link);
+        console.log(node);
+        if (node.data.vertices && node.data.vertices.includes(link.source.id) && node.data.vertices.includes(link.target.id)) {
+          return true;
+        }
+      });
+      return false;
+    });
+  }
+
+  checkNodeType() {
+    let isViableNodeType = false;
+    let finalBoolean = true;
+
+    this.root.eachAfter((bag) => {
+      const { vertices } = bag.data;
+
+      isViableNodeType = false;
+
+      if (!bag.data.children || bag.data.children.length === 0) {
+        if (vertices.length <= 1) {
+          isViableNodeType = true;
+        }
+      } else if (bag.data.children.length === 2) {
+        if (arraysMatch(bag.children[0].data.vertices, bag.children[1].data.vertices)) {
+          isViableNodeType = true;
+        }
+      } else if (vertices.length > bag.data.children[0].vertices.length) {
+        const vl = vertices.length - bag.data.children[0].vertices.length;
+        if (vl === 1) {
+          isViableNodeType = true;
+        }
+      } else if (vertices.length < bag.data.children[0].vertices.length) {
+        const vl = bag.data.children[0].vertices.length - vertices.length;
+        if (vl === 1) {
+          isViableNodeType = true;
+        }
+      }
+
+      if (isViableNodeType === false) {
+        finalBoolean = false;
+      }
+    });
+
+    return finalBoolean;
+  }
+
+  checkNiceProperties() {
+    if (this.isBinary()) {
+      // console.log('is binary');
+    } else {
+      // console.log('not binary');
+    }
+
+    if (this.isNodeCoverage()) {
+      // console.log('node coverage true');
+    } else {
+      // console.log('node coverage false');
+    }
+
+    if (this.checkNodeType()) {
+      d3.select('#output').html(`
+        All nodes are either a leaf, join, introduce or a forget node <span class="material-icons correct-answer">check</span>
+      `);
+    } else {
+      d3.select('#output').html(`
+      Some nodes are NOT a leaf, join, introduce or a forget node <span class="material-icons wrong-answer">clear</span>
+      `);
+    }
+  }
+
+  restart() {
+    this.updateMasterList();
+    this.setAllG();
+
+    const treeData = this.treeLayout(this.root);
+    const nodes = treeData.descendants();
+    const links = treeData.descendants().slice(1);
+
+    nodes.forEach((d) => {
+      d.y = d.depth * 180;
+    });
+
+    this.svg.selectAll('line')
+      .data(links, (d) => d.id)
+      .join(
+        (enter) => enter.append('line')
+          .lower()
+          .attr('class', 'tree-link')
+          .attr('x1', (d) => d.parent.x + 12.5)
+          .attr('y1', (d) => d.parent.y)
+          .attr('x2', (d) => d.x + 12.5)
+          .attr('y2', (d) => d.y),
+        (update) => update
+          .attr('x1', (d) => d.parent.x + 12.5)
+          .attr('y1', (d) => d.parent.y)
+          .attr('x2', (d) => d.x + 12.5)
+          .attr('y2', (d) => d.y),
+        (exit) => exit.remove(),
+      );
+
+
+    this.svg.selectAll('rect')
+      .data(nodes, (d) => d.id)
+      .join(
+        (enter) => enter
+          .append('rect')
+          .attr('width', (d) => {
+            const splitted = d.data.label.split(',');
+            return splitted.length * 25;
+          })
+          .attr('height', 25)
+          .attr('x', (d) => d.x - (d.data.label.split(',').length * 25 / 2))
+          .attr('y', (d) => d.y)
+          // .attr('transform', (d) => `translate(${d.x},${d.y})`)
+          .attr('rx', 5)
+          .attr('ry', 5)
+          .attr('class', 'tree-node')
+          .on('contextmenu', d3.contextMenu(menu)),
+        (update) => update
+          .attr('x', (d) => d.x - (d.data.label.split(',').length * 25 / 2))
+          // .attr('x', (d) => d.x)
+          .attr('y', (d) => d.y),
+        (exit) => exit.remove(),
+      );
+
+    this.svg.selectAll('text')
+      .data(nodes, (d) => d.label)
+      .join(
+        (enter) => enter
+          .append('text')
+          .attr('x', (d) => d.x)
+          .attr('y', (d) => d.y)
+          .attr('dy', '1.1em')
+          .attr('class', 'graph-label')
+          .text((d) => d.data.label),
+        (update) => update.text((d) => d.data.label),
+        (exit) => exit.remove(),
+      );
+
+    this.checkNiceProperties();
+  }
+
+  addNode(parentNode, label, vertices) {
+    const newNodeObject = {
+      id: ++this.nodes.length,
+      label,
+      children: null,
+      tree: this,
+      vertices,
+    };
+
+    const newNode = d3.hierarchy(newNodeObject);
+    newNode.depth = parentNode.depth + 1;
+    newNode.parent = parentNode;
+    newNode.children = null;
+
+    if (!parentNode.children) {
+      parentNode.children = [];
+      parentNode.data.children = [];
+    }
+
+    parentNode.children.push(newNode);
+    parentNode.data.children.push(newNode.data);
+
+    this.currentParent = parentNode;
+    this.restart();
+  }
+
+  removeNode(d) {
+    this.root.each((node) => {
+      if (d === node) {
+        node.children = null;
+        node.data.children = null;
+        const nIndex = node.parent.data.children.indexOf(node);
+        // const nIndex2 = node.parent.children.indexOf(node);
+        node.parent.data.children.splice(nIndex, 1);
+        console.log(node);
+
+        if (node.parent.children.length === 1) node.parent.children = null;
+      }
+    });
+    this.restart();
   }
 
   clear() {
@@ -940,10 +1202,20 @@ export default class Tree {
     if (this.isColor) this.threeColor(this.current);
   }
 
+  setAllG() {
+    this.root.eachAfter((node) => {
+      node.tree = this;
+    });
+  }
+
   load(treeData, type) {
     if (this.svg) this.clear();
     let height = document.getElementById(this.container).offsetHeight;
     let width = document.getElementById(this.container).offsetWidth;
+
+    this.treeData = treeData;
+    this.height = height;
+    this.width = width;
 
     if (this.type === 'normal-tree') {
       width /= 2;
@@ -955,9 +1227,16 @@ export default class Tree {
       .attr('width', width)
       .attr('height', height);
 
-    this.svg = svg;
+    const root = d3.hierarchy(treeData);
+    const treeLayout = d3.tree();
+    treeLayout.size([width, height - 80]);
+    treeLayout(root);
 
-    this.svg
+    this.root = root;
+    this.treeLayout = treeLayout;
+    this.nodes = root.descendants();
+
+    svg
       .append('marker')
       .attr('id', 'triangle')
       .attr('viewBox', '0 0 10 10')
@@ -970,6 +1249,9 @@ export default class Tree {
       .attr('d', 'M 0 0 L 10 5 L 0 10 z')
       .style('fill', 'rgb(51, 51, 51)');
 
+    this.svg = svg;
+
+    this.svg.on('contextmenu', () => d3.event.preventDefault());
 
     this.path = this.svg.append('path')
       .attr('fill', 'orange')
@@ -983,11 +1265,6 @@ export default class Tree {
       .attr('stroke-width', 16)
       .attr('opacity', 0);
 
-    const root = d3.hierarchy(treeData);
-    this.root = root;
-    const treeLayout = d3.tree();
-    treeLayout.size([width, height - 80]);
-    treeLayout(root);
 
     /* Get the link data and draw the links */
     svg
@@ -1000,6 +1277,7 @@ export default class Tree {
       .attr('y1', (d) => d.source.y)
       .attr('x2', (d) => d.target.x)
       .attr('y2', (d) => d.target.y)
+      .lower()
       .attr('transform', `translate(${0}, ${30})`);
 
     /* Get the node data and draw the nodes */
@@ -1027,18 +1305,20 @@ export default class Tree {
           return splitted.length * 25;
         })
         .attr('height', 25)
-        .attr('x', (d) => d.x - (d.data.label.split(',').length * 25 / 2))
+        // .attr('x', (d) => d.x - (d.data.label.split(',').length * 25 / 2))
+        .attr('x', (d) => d.x)
         .attr('y', (d) => d.y)
         .attr('rx', 5)
         .attr('ry', 5)
-        .attr('transform', `translate(${0}, ${30})`)
+        // .attr('transform', `translate(${0}, ${30})`)
         .attr('class', 'tree-node')
         .style('fill', (d) => {
-          if ('children' in d.data === false) return myColor(9);
+          if ('children' in d.data === false || d.data.children.length === 0) return myColor(9);
           if (d.data.children.length === 2) return myColor(6);
           if (d.data.vertices.length > d.data.children[0].vertices.length) return myColor(5);
           if (d.data.vertices.length < d.data.children[0].vertices.length) return myColor(4);
-        });
+        })
+        .on('contextmenu', d3.contextMenu(menu));
     }
 
     svg
@@ -1060,13 +1340,16 @@ export default class Tree {
       })
       .text((d) => {
         if (type === 'normal-tree') return d.data.label;
-        if ('children' in d.data === false) return;
+        if ('children' in d.data === false || d.data.children.length === 0) return;
         if (d.data.children.length === 2) return `& ${d.data.label}`;
         if (d.data.vertices.length > d.data.children[0].vertices.length) return `+ ${d.data.label}`;
         if (d.data.vertices.length < d.data.children[0].vertices.length) return `- ${d.data.label}`;
         return d.data.label;
       })
-
       .attr('transform', `translate(${0}, ${30})`);
+
+    // this.root.eachAfter((node) => node.data.vertices = []);
+
+    this.setAllG();
   }
 }
