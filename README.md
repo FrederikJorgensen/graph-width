@@ -30,7 +30,7 @@ You can write content by using the **#p** command, you may include any math nota
 ```
 #p This is a paragraph including math stuff \( X_i \leq  X^2 \)
 ```
-Create a graph by using the **#create-graph** command followed by how you want each vertex to connect. I.e 1-2 connect a vertex called '1' with a vertex called '2'.
+Create a graph by using the **#create-graph** command followed by how you want each vertex to connect. I.e 1-2 connects a vertex called '1' with a vertex called '2'.
 ```
 #create-graph 1-2 2-3
 ```
