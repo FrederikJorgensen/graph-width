@@ -1091,7 +1091,9 @@ export default class SectionHandler {
     ];
 
     this.sections = this.sections.filter((section) => section.chapter === this.currentChapter);
-    this.createCustomSection();
+
+
+    if (this.currentChapter === 'chapter5') this.createCustomSection();
   }
 
   async sectionFunctionBuilder(n) {

@@ -1,3 +1,7 @@
+/* eslint-disable no-return-assign */
+/* eslint-disable no-restricted-globals */
+/* eslint-disable no-eval */
+/* eslint-disable max-len */
 /* eslint-disable import/prefer-default-export */
 
 import Chapter from '../Components/Chapter.js';
@@ -6,7 +10,6 @@ import SectionHandler from './SectionHandler.js';
 import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
 import TreeDecomposition from '../Components/TreeDecomposition.js';
-import Section from '../Components/Section.js';
 
 export default class ChapterHandler {
   constructor() {
@@ -21,11 +24,11 @@ export default class ChapterHandler {
       ),
       new Chapter(
         (async () => {
-          const graphContainer = d3.select('#container')
+          d3.select('#container')
             .append('div')
             .attr('id', 'graph-container');
 
-          const treeContainer = d3.select('#container')
+          d3.select('#container')
             .append('div')
             .attr('id', 'tree-container');
         }),
@@ -58,6 +61,245 @@ export default class ChapterHandler {
         },
         '5. Misc',
         false,
+      ),
+      new Chapter(
+        async () => {
+          const sandboxSidebarContainer = d3.select('#main')
+            .append('div')
+            .attr('class', 'custom-algorithm-sidebar-container');
+
+          const sandboxSidebar = sandboxSidebarContainer
+            .append('div')
+            .attr('class', 'custom-sidebar');
+
+          sandboxSidebar
+            .append('h2')
+            .text('Create a custom algorithm')
+            .style('margin', '5px')
+            .style('text-align', 'center')
+            .append('hr')
+            .style('margin-bottom', '0');
+
+
+          const sandboxAppContainer = d3.select('#main')
+            .append('div')
+            .attr('class', 'custom-algorithm-app-container');
+
+          sandboxAppContainer
+            .append('div')
+            .attr('class', 'left-side')
+            .attr('id', 'left-side');
+
+          const rightSide = sandboxAppContainer
+            .append('div')
+            .attr('class', 'right-side')
+            .attr('id', 'right-side');
+
+
+          rightSide
+            .append('div')
+            .attr('id', 'sandbox-nice-tree-decomposition');
+
+          const graph = new Graph('left-side');
+          graph.randomGraph();
+          const niceTreeDecomposition = new Tree('sandbox-nice-tree-decomposition');
+          await graph.computeTreeDecomposition();
+          await graph.readNiceTreeDecomposition();
+          const niceTdData = graph.getNiceTreeDecomposition();
+          niceTreeDecomposition.load(niceTdData);
+          niceTreeDecomposition.addTooltip();
+          niceTreeDecomposition.addArrow();
+
+          // sandboxSidebar.append('text-area');
+
+          sandboxSidebar
+            .append('text')
+            .html(`
+              <p>Here you can create a custom algorithm that runs on a nice tree decomposition.</p>
+
+              <p>Just specify what you want to happen at each type of node.</p>
+            `).style('padding', '0 15px 0 15px');
+
+          sandboxSidebar
+            .append('textarea')
+            .attr('id', 'editor');
+          // .text('switch(type){\n case "leaf":\n //Your code for a leaf node.\n break;\n\n case "introduce":\n // Your code for an introduce node.\n break;\n\n case "forget":\n //Your code for a forget node.\n break;\n\n case "join":\n // Your code for a join node.\n break;\n}');
+
+          const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+            value: 'function myScript(){return 100;}\n',
+            mode: 'javascript',
+            theme: 'monokai',
+            lineNumbers: true,
+            autoCloseBrackets: true,
+          });
+
+          editor.setSize('100%', '100%');
+
+
+          const someString = `
+          switch(type){ 
+          case "leaf":
+            // By definition we know that leaf nodes are empty.
+            node.table[''] = 0;
+            break;
+
+          case "introduce":
+            // Set all the entries of this table to be the same as the child's
+            node.table = childTable;
+
+            // Get the introduced vertex
+            const introducedVertex = niceTreeDecomposition.getIntroducedVertex(node);
+          
+
+            for (const set of allSubsets) {
+              // We only care about the subsets containing the introduced vertex v
+              if (set.includes(introducedVertex)) {
+                /* Check if a vertex inside this set is adjacent to the introduced vertex */
+                const setWithoutV = set.filter((s) => s !== introducedVertex);
+    
+                if (graph.isVertexAdjacent(subTree, set)) {
+                  // If the vertex is adjacent to another vertex in the set, we set the value to be -9999
+                  node.table[set] = -9999;
+                } else {
+                  // If not we increment the value of the child table
+                  let oldValue = childTable[setWithoutV];
+                  oldValue++;
+                  node.table[set] = oldValue;
+                }
+              }
+            }
+            break;
+
+          case "forget":
+            // Get the forgotten vertex.
+            const forgottenVertex = niceTreeDecomposition.getForgottenVertex(node);
+
+            for (const set of allSubsets) {
+              /* Union the forgottenVertex with the current subset */
+              const concatV = set.concat(forgottenVertex);
+              concatV.sort();
+    
+              /* Value of set without v */
+              const setWithoutV = childTable[set];
+    
+              /* Value of set with v */
+              const setWithV = childTable[concatV];
+
+              console.log("without v");
+              console.log(setWithoutV);
+              console.log("with v");
+              console.log(setWithV);
+    
+              if (setWithoutV > setWithV) {
+                node.table[set] = setWithoutV;
+              } else {
+                node.table[set] = setWithV;
+              }
+            }
+
+            break;
+
+          case "join":
+            // Get child 2's table
+            const child2Table = niceTreeDecomposition.getChild2Table(node);
+
+            for (const set of allSubsets) {
+              const child1value = childTable[set];
+              const child2value = child2Table[set];
+              const currentNodeValue = set.length;
+              node.table[set] = child1value + child2value - currentNodeValue;
+            }
+
+            break;
+          }`;
+
+          const formattedJSON = js_beautify(someString, { indent_size: 2 });
+
+          editor.setValue(formattedJSON);
+
+          const root = niceTreeDecomposition.getRoot();
+
+          let userInput = '';
+          let current = 0;
+          let customFunction = '';
+
+          sandboxSidebar.append('button')
+            .text('Run Code')
+            .attr('class', 'sandbox-button')
+            .on('click', () => {
+              userInput = editor.getValue();
+
+              customFunction = `
+            let i = 1;
+            
+            root.eachAfter((currentNode) => {
+              if (current !== i++) return;
+
+              niceTreeDecomposition.animateNode(currentNode);
+              niceTreeDecomposition.animateLink(currentNode);
+
+              const node = currentNode.data;
+
+              node.table = {};
+
+              let childTable;
+
+              if ('children' in node) {
+                childTable = niceTreeDecomposition.getChildTable(node);
+              }
+
+              const subTree = niceTreeDecomposition.getSubTree(root, node)
+              
+              const allSubsets = getAllSubsets(node.vertices);
+              allSubsets.map((s) => s.sort());
+  
+              let type = '';
+  
+              if ('children' in node === false) type = 'leaf';
+              else if (node.children.length === 2) type = 'join';
+              else if (node.vertices.length > node.children[0].vertices.length) type = 'introduce';
+              else if (node.vertices.length < node.children[0].vertices.length) type = 'forget';
+  
+              ${userInput}
+
+              console.log(node.table);
+
+              niceTreeDecomposition.drawTable(node);
+  
+            })`;
+            });
+
+          const controls = rightSide
+            .append('div')
+            .attr('id', 'controls');
+
+          const controlsContainer = controls.append('div')
+            .attr('class', 'controls-container');
+
+          controlsContainer
+            .append('span')
+            .text('keyboard_arrow_left')
+            .attr('class', 'material-icons nav-arrows')
+            .on('click', () => {
+              if (current === 0) return;
+              const N = root.descendants().length;
+              --current;
+              current %= N;
+              eval(customFunction);
+            });
+
+          controlsContainer
+            .append('span')
+            .text('keyboard_arrow_right')
+            .attr('class', 'material-icons nav-arrows')
+            .on('click', () => {
+              const N = root.descendants().length;
+              current++;
+              if (current !== N) current %= N;
+              eval(customFunction);
+            });
+        },
+        '7. Create Custom Algorithm',
       ),
       new Chapter(
         async () => {
@@ -129,6 +371,8 @@ export default class ChapterHandler {
               d3.select('#e').text(val);
             });
 
+          sandboxSidebar.append('h3').text('Graph Controls').attr('class', 'sandbox-sidebar-heading');
+
           sandboxSidebar.append('button')
             .text('Random Graph')
             .attr('class', 'sandbox-button')
@@ -159,6 +403,9 @@ export default class ChapterHandler {
               d3.select('#draw-td-button').classed('sandbox-button-disabled', false);
             });
 
+
+          sandboxSidebar.append('h3').text('TD Controls').attr('class', 'sandbox-sidebar-heading');
+
           sandboxSidebar
             .append('button')
             .text('Draw Tree Decomposition')
@@ -185,8 +432,9 @@ export default class ChapterHandler {
               d3.select('#compute-nicetd-button').classed('sandbox-button', true);
               d3.select('#compute-nicetd-button').classed('sandbox-button-disabled', false);
               treeDecompositionLoaded = true;
-              console.log('here');
             });
+
+          sandboxSidebar.append('h3').text('Nice TD Controls').attr('class', 'sandbox-sidebar-heading');
 
           sandboxSidebar
             .append('button')
@@ -205,6 +453,8 @@ export default class ChapterHandler {
               d3.select('#max-inde-b').classed('sandbox-button', true);
               d3.select('#max-inde-b').classed('sandbox-button-disabled', false);
             });
+
+          sandboxSidebar.append('h3').text('Algorithms').attr('class', 'sandbox-sidebar-heading');
 
           sandboxSidebar
             .append('button')
@@ -326,7 +576,7 @@ export default class ChapterHandler {
     this.createChapter();
   }
 
-  goToChapter(chapter, isSandbox, isCustom) {
+  goToChapter(chapter, isSandbox) {
     if (isSandbox) {
       d3.select('.nav').style('flex', 0.05);
       window.history.replaceState({}, '', '?');

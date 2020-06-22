@@ -1,8 +1,8 @@
+/* eslint-disable func-names */
+/* eslint-disable max-len */
+/* eslint-disable no-restricted-globals */
 import ChapterHandler from './Handlers/ChapterHandler.js';
 import Roadmap from './Components/Roadmap.js';
-import SectionHandler from './Handlers/SectionHandler.js';
-import Section from './Components/Section.js';
-import Graph from './Components/Graph.js';
 
 export const width = document.getElementById('main').offsetWidth;
 export const height = document.getElementById('main').offsetHeight;
@@ -54,6 +54,10 @@ d3.select('#sandbox-button').on('click', () => {
   d3.select('#chapter-button').style('color', '#6d7e8e');
   d3.select('#sandbox-button').style('color', '#1f1f1f');
   chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], true);
+});
+
+d3.select('#custom-algorithm-button').on('click', () => {
+  chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 2], true);
 });
 
 /* Close modal if clicked outside of modal box */

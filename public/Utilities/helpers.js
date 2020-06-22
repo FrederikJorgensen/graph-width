@@ -43,3 +43,10 @@ export async function readLocalFile(file) {
   const text = await response.text();
   window.n = text.split('\n');
 }
+
+export const getAllSubsets = (theArray) => theArray.reduce(
+  (subsets, value) => subsets.concat(
+    subsets.map((set) => [value, ...set]),
+  ),
+  [[]],
+);

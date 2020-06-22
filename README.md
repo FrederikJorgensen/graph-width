@@ -13,7 +13,7 @@
 - [x] Chapter 2 - Treewidth & Tree Decompositions
 - [x] Chapter 3 - Nice Tree Decompositions
 - [x] Chapter 4 - Algorithms on Tree Decompositions
-- [ ] Chapter x - Clique-width
+- [x] Sandbox Mode
 
 ## Build your own chapter
 

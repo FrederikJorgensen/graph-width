@@ -12,6 +12,16 @@
     integrity="sha384-zB1R0rpPzHqg7Kpt0Aljp8JPLqbXI3bhnPWROx27a9N0Ll6ZP/+DiW/UqRcLbRjq" crossorigin="anonymous" />
   <link rel="shortcut icon" type="image/x-icon" href="Resources/clique.png" />
 
+  <link rel="stylesheet" href="codemirror/lib/codemirror.css" rel="stylesheet" />
+  <link rel="stylesheet" href="codemirror/theme/monokai.css" />
+
+  <script src="codemirror/lib/codemirror.js"></script>
+  <script src="codemirror/mode/javascript/javascript.js"></script>
+  <script src="codemirror/addon/edit/closebrackets.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.11.0/beautify.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.11.0/beautify-css.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.11.0/beautify-html.js"></script>
 
   <script type="module" src="controller.js"></script>
   <script type="module" src="Utilities/d3-context-menu.js"></script>
@@ -53,6 +63,7 @@
     </a>
     <a class="nav-item" id="chapter-button">chapters</a>
     <a class="nav-item" id="sandbox-button">sandbox</a>
+    <a class="nav-item" id="custom-algorithm-button">custom algorithm</a>
     <a class="nav-item" id="github-button">github</a>
   </nav>
   <div class="main" id="main"></div>
