@@ -15,6 +15,17 @@
 - [x] Chapter 4 - Algorithms on Tree Decompositions
 - [x] Sandbox Mode
 
+## Custom Algorithm
+
+We use a simple [switch statement](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch") to easily determine which node we are at.
+- Each node has a <strong>table</strong> where you can store information about this node. Access this by using <code>node.table</code>.
+- Each node has a <strong>childTable</strong>. Access this with <code>childTable</code>.
+- To get an <strong>introduced vertex</strong> use <code>getIntroducedVertex()</code> on a node.
+- The <strong>power set</strong> of a node is already calculated use <code>allSubsets</code> to access it.
+- Access the respective graph object of a tree decomposition by using <code>graph</code>.
+- To check if a vertex in a set is adjacent to any other vertex in the set use <code>graph.isVertexAdjacent(tree, set)</code> where tree is the tree rooted at this node and set is the set you want to check.
+- Get the forgotten vertex of a node by using <code>getForgottenVertex(node).</code>
+
 ## Build your own chapter
 
 You can build your own chapter and make use of [GraphWidth.com](http://www.graphwidth.com/)'s library to visualize your content.

@@ -10,6 +10,8 @@ import SectionHandler from './SectionHandler.js';
 import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
 import TreeDecomposition from '../Components/TreeDecomposition.js';
+// eslint-disable-next-line no-unused-vars
+import { getAllSubsets } from '../Utilities/helpers.js';
 
 export default class ChapterHandler {
   constructor() {
@@ -117,13 +119,18 @@ export default class ChapterHandler {
             .html(`
               <p>Here you can create a custom algorithm that runs on a nice tree decomposition.</p>
 
-              <p>Just specify what you want to happen at each type of node.</p>
+              <p>Currently the only supported language is JavaScript.</p>
+
+              <p>The algorithm performs a post-order traversel of the tree, you just need to specify what you want to happen at each specific node type.</p>
+
+              <p>Once you've written some code save it and run through it by using the controls under the nice tree decomposition to step through your algorithm
+              You may use your own custom JavaScript code or make use of our existing library functions which you can see <a href="https://github.com/FrederikJorgensen/graph-width-visualizer">here</a>.</p>
             `).style('padding', '0 15px 0 15px');
 
           sandboxSidebar
             .append('textarea')
-            .attr('id', 'editor');
-          // .text('switch(type){\n case "leaf":\n //Your code for a leaf node.\n break;\n\n case "introduce":\n // Your code for an introduce node.\n break;\n\n case "forget":\n //Your code for a forget node.\n break;\n\n case "join":\n // Your code for a join node.\n break;\n}');
+            .attr('id', 'editor')
+            .text('switch(type){\n case "leaf":\n //Your code for a leaf node.\n break;\n\n case "introduce":\n // Your code for an introduce node.\n break;\n\n case "forget":\n //Your code for a forget node.\n break;\n\n case "join":\n // Your code for a join node.\n break;\n}');
 
           const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
             value: 'function myScript(){return 100;}\n',
@@ -184,11 +191,6 @@ export default class ChapterHandler {
     
               /* Value of set with v */
               const setWithV = childTable[concatV];
-
-              console.log("without v");
-              console.log(setWithoutV);
-              console.log("with v");
-              console.log(setWithV);
     
               if (setWithoutV > setWithV) {
                 node.table[set] = setWithoutV;
@@ -215,59 +217,75 @@ export default class ChapterHandler {
 
           const formattedJSON = js_beautify(someString, { indent_size: 2 });
 
-          editor.setValue(formattedJSON);
-
           const root = niceTreeDecomposition.getRoot();
 
           let userInput = '';
           let current = 0;
           let customFunction = '';
 
-          sandboxSidebar.append('button')
-            .text('Run Code')
-            .attr('class', 'sandbox-button')
+          const misButtonContainer = sandboxSidebar
+            .append('div')
+            .attr('class', 'custom-container');
+
+
+          misButtonContainer.append('button')
+            .text('Save Code')
+            .attr('class', 'pure-material-button-contained')
             .on('click', () => {
               userInput = editor.getValue();
 
               customFunction = `
-            let i = 1;
+          let i = 1;
+          
+          root.eachAfter((currentNode) => {
+            if (current !== i++) return;
+
+            niceTreeDecomposition.animateNode(currentNode);
+            niceTreeDecomposition.animateLink(currentNode);
+
+            const node = currentNode.data;
+
+            node.table = {};
+
+            let childTable;
+
+            if ('children' in node) {
+              childTable = niceTreeDecomposition.getChildTable(node);
+            }
+
+            const subTree = niceTreeDecomposition.getSubTree(root, node)
             
-            root.eachAfter((currentNode) => {
-              if (current !== i++) return;
+            const allSubsets = getAllSubsets(node.vertices);
+            allSubsets.map((s) => s.sort());
 
-              niceTreeDecomposition.animateNode(currentNode);
-              niceTreeDecomposition.animateLink(currentNode);
+            let type = '';
 
-              const node = currentNode.data;
+            if ('children' in node === false) type = 'leaf';
+            else if (node.children.length === 2) type = 'join';
+            else if (node.vertices.length > node.children[0].vertices.length) type = 'introduce';
+            else if (node.vertices.length < node.children[0].vertices.length) type = 'forget';
 
-              node.table = {};
+            ${userInput}
 
-              let childTable;
+            console.log(node.table);
 
-              if ('children' in node) {
-                childTable = niceTreeDecomposition.getChildTable(node);
-              }
+            niceTreeDecomposition.drawTable(node);
 
-              const subTree = niceTreeDecomposition.getSubTree(root, node)
-              
-              const allSubsets = getAllSubsets(node.vertices);
-              allSubsets.map((s) => s.sort());
-  
-              let type = '';
-  
-              if ('children' in node === false) type = 'leaf';
-              else if (node.children.length === 2) type = 'join';
-              else if (node.vertices.length > node.children[0].vertices.length) type = 'introduce';
-              else if (node.vertices.length < node.children[0].vertices.length) type = 'forget';
-  
-              ${userInput}
-
-              console.log(node.table);
-
-              niceTreeDecomposition.drawTable(node);
-  
-            })`;
+          })`;
             });
+
+
+          misButtonContainer
+            .append('button')
+            .text('Reset to default code')
+            .attr('class', 'pure-material-button-contained')
+            .on('click', () => editor.setValue('switch(type){\n case "leaf":\n //Your code for a leaf node.\n break;\n\n case "introduce":\n // Your code for an introduce node.\n break;\n\n case "forget":\n //Your code for a forget node.\n break;\n\n case "join":\n // Your code for a join node.\n break;\n}'));
+
+          misButtonContainer
+            .append('button')
+            .text('Show Max Independent Set Code')
+            .attr('class', 'pure-material-button-contained')
+            .on('click', () => editor.setValue(formattedJSON));
 
           const controls = rightSide
             .append('div')
@@ -298,6 +316,8 @@ export default class ChapterHandler {
               if (current !== N) current %= N;
               eval(customFunction);
             });
+
+          renderMathInElement(document.body);
         },
         '7. Create Custom Algorithm',
       ),
@@ -576,9 +596,10 @@ export default class ChapterHandler {
     this.createChapter();
   }
 
-  goToChapter(chapter, isSandbox) {
+  goToChapter(chapter, isSandbox, isCustom) {
     if (isSandbox) {
       d3.select('.nav').style('flex', 0.05);
+      d3.select('#custom-algorithm-button').style('color', '#6d7e8e');
       window.history.replaceState({}, '', '?');
       d3.select('#main').selectAll('*').remove();
       window.history.replaceState({}, '', '');
@@ -598,6 +619,21 @@ export default class ChapterHandler {
         .text('Icon by Icons8');
       return;
     }
+
+    if (isCustom) {
+      d3.select('.nav').style('flex', 0.05);
+      d3.select('#main').selectAll('*').remove();
+      d3.select('#sandbox-button').style('color', '#6d7e8e');
+      d3.select('#custom-algorithm-button').style('color', '#1f1f1f');
+      window.history.replaceState({}, '', '?');
+      window.history.replaceState({}, '', '');
+      const params = new URLSearchParams(location.search);
+      params.set('custom', 'true');
+      window.history.replaceState({}, '', `?${params.toString()}`);
+      chapter.create();
+      return;
+    }
+
     d3.select('#sandbox-button').style('color', '#6d7e8e');
     this.currentChapter = chapter;
     this.createChapter();

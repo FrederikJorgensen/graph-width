@@ -123,6 +123,11 @@ body {
   opacity: 75%;
 }
 
+.custom-container {
+  display: flex;
+  justify-content: space-evenly;
+}
+
 .progress-item:hover {
   /* background: #e2e2e2; */
   height: 60%;
@@ -983,14 +988,18 @@ svg {
   background-color: #000;
   color: #fff;
   width: 100%;
-  padding: 12px 0;
+  padding: 8px 0;
   text-align: center;
   text-decoration: none;
   font-size: 1em;
   border: none;
   cursor: pointer;
-  margin-top: 20px;
+  margin-top: 10px;
   outline: none;
+}
+
+.CodeMirror {
+  /* background-color: #001528!important; */
 }
 
 .sandbox-button-disabled {

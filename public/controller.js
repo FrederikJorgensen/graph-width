@@ -57,7 +57,7 @@ d3.select('#sandbox-button').on('click', () => {
 });
 
 d3.select('#custom-algorithm-button').on('click', () => {
-  chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 2], true);
+  chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 2], false, true);
 });
 
 /* Close modal if clicked outside of modal box */
@@ -89,9 +89,14 @@ d3.select(window).on('load', async () => {
   const hasChapter = params.has('chapter');
   const chapterIndex = params.get('chapter') - 1;
   const hasSandbox = params.has('sandbox');
+  const hasCustom = params.has('custom');
 
   if (hasSandbox) {
     chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], hasSandbox);
+  }
+
+  if (hasCustom) {
+    chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 2], hasSandbox, hasCustom);
   }
 
   if (hasChapter && chapterIndex < chapterHandler.chapters.length) {

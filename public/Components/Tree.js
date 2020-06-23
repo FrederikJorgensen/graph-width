@@ -409,6 +409,7 @@ export default class Tree {
   }
 
   drawTable(node) {
+    console.log(node);
     const keys = Object.keys(node.table);
     const values = Object.values(node.table);
     let sb = '';
@@ -556,7 +557,7 @@ export default class Tree {
       wat.push(currentLink.target.data);
     });
 
-    this.svg.selectAll('line').style('stroke', (link) => {
+    this.svg.selectAll('line.tree-link').style('stroke', (link) => {
       if (wat.includes(link.source.data)) return 'orange';
     });
   }
@@ -573,7 +574,6 @@ export default class Tree {
     let i = 1;
     this.root.copy().eachAfter((currentNode) => {
       if (this.current !== i++) return;
-
 
       const node = currentNode.data;
       const subTree = getSubTree(this.root, currentNode.data);
