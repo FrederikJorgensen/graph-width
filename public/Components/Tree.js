@@ -409,7 +409,6 @@ export default class Tree {
   }
 
   drawTable(node) {
-    console.log(node);
     const keys = Object.keys(node.table);
     const values = Object.values(node.table);
     let sb = '';
@@ -1352,8 +1351,8 @@ export default class Tree {
       .attr('y1', (d) => d.source.y)
       .attr('x2', (d) => d.target.x)
       .attr('y2', (d) => d.target.y)
-      .lower();
-    // .attr('transform', `translate(${0}, ${30})`);
+      .lower()
+      .attr('transform', `translate(${0}, ${30})`);
 
     /* Get the node data and draw the nodes */
     if (this.type === 'normal-tree') {
@@ -1366,8 +1365,8 @@ export default class Tree {
         .attr('r', 18)
         .attr('cx', (d) => d.x)
         .attr('cy', (d) => d.y)
-        .attr('class', 'normal-tree-node');
-      // .attr('transform', `translate(${0}, ${30})`);
+        .attr('class', 'normal-tree-node')
+        .attr('transform', `translate(${0}, ${30})`);
     } else {
       svg
         .selectAll('rect')
@@ -1385,7 +1384,7 @@ export default class Tree {
         .attr('y', (d) => d.y)
         .attr('rx', 5)
         .attr('ry', 5)
-        // .attr('transform', `translate(${0}, ${30})`)
+        .attr('transform', `translate(${0}, ${30})`)
         .attr('class', 'tree-node')
         .style('fill', (d) => {
           if ('children' in d.data === false || d.data.children.length === 0) return myColor(9);
@@ -1407,7 +1406,7 @@ export default class Tree {
         if (type === 'normal-tree') {
           return '.-25em';
         }
-        return '-.7em';
+        return '17px';
       })
       .attr('class', () => {
         if (type === 'normal-tree') return 'label';
@@ -1422,8 +1421,6 @@ export default class Tree {
         return d.data.label;
       })
       .attr('transform', `translate(${0}, ${30})`);
-
-    // this.root.eachAfter((node) => node.data.vertices = []);
 
     this.setAllG();
   }

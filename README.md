@@ -25,6 +25,8 @@ We use a simple [switch statement](https://developer.mozilla.org/en-US/docs/Web/
 - Access the respective graph object of a tree decomposition by using <code>graph</code>.
 - To check if a vertex in a set is adjacent to any other vertex in the set use <code>graph.isVertexAdjacent(tree, set)</code> where tree is the tree rooted at this node and set is the set you want to check.
 - Get the forgotten vertex of a node by using <code>getForgottenVertex(node).</code>
+  
+The information you store <code>node.table</code> is what is going to displayed in the tooltip.
 
 ## Build your own chapter
 

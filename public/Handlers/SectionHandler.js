@@ -713,7 +713,7 @@ export default class SectionHandler {
            <strong>Step 4:</strong> Every node that has 1 child, let the parent be \\( X_i \\) and the child be \\( X_j \\)
            create introduce nodes that introduce the elements that are in \\( X_i \\) but not in \\( X_j \\). Create forget nodes for elements that are in \\( X_j \\) but not in \\( X_i \\).
            <br>
-           <strong>Step 5:</strong> Make leafs have size at most 1 by adding as many introduced nodes as needed.
+           <strong>Step 5:</strong> Make leaves have size at most 1 by adding as many introduced nodes as needed.
            </p>
            
           `);

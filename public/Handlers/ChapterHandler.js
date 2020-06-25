@@ -123,8 +123,8 @@ export default class ChapterHandler {
 
               <p>The algorithm performs a post-order traversel of the tree, you just need to specify what you want to happen at each specific node type.</p>
 
-              <p>Once you've written some code save it and run through it by using the controls under the nice tree decomposition to step through your algorithm
-              You may use your own custom JavaScript code or make use of our existing library functions which you can see <a href="https://github.com/FrederikJorgensen/graph-width-visualizer">here</a>.</p>
+              <p>Once you've written some code save it and run through it by using the controls under the nice tree decomposition to step through your algorithm.
+              You may use your own custom JavaScript code or make use of our existing library functions which you can see <a target="_blank" href="https://github.com/FrederikJorgensen/graph-width-visualizer#custom-algorithm">here</a>.</p>
             `).style('padding', '0 15px 0 15px');
 
           sandboxSidebar
@@ -156,7 +156,6 @@ export default class ChapterHandler {
 
             // Get the introduced vertex
             const introducedVertex = niceTreeDecomposition.getIntroducedVertex(node);
-          
 
             for (const set of allSubsets) {
               // We only care about the subsets containing the introduced vertex v
