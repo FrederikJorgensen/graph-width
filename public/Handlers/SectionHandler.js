@@ -698,6 +698,7 @@ export default class SectionHandler {
             window.graphContainer = graphContainer;
             window.treeContainer = treeContainer;
           }
+
           this.sidebar.addContent(`
           <p class="fact"><strong class="fact-title">Theorem:</strong> Given a graph \\( G \\) with \\( n \\) nodes and a tree decomposition of \\( G \\)
            with width \\( K \\) we can compute a nice tree decomposition of \\( G \\) with width \\( k \\) in polynomial time.</p>
