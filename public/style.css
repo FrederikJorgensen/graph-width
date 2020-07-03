@@ -7,7 +7,8 @@ html {
   margin: 0;
   user-select: none;
   font-family: Helvetica Neue, Calibri, Arial, sans-serif;
-  color: rgb(51, 51, 51);
+  /* color: rgb(51, 51, 51); */
+  color: white;
 }
 
 body {
@@ -62,6 +63,7 @@ body {
 .hamiltonianTable {
   /* position: absolute; */
   background-color: white;
+  color: black;
   border-collapse: collapse;
   font-size: 0.9em;
   /* min-width: 250px; */
@@ -242,7 +244,7 @@ body {
 }
 
 h2 {
-  font-weight: 600;
+  font-size: 30px;
 }
 
 .dragLine.hidden {
@@ -705,7 +707,7 @@ a {
 
 .content-container {
   height: 80%;
-  padding: 25px;
+  padding: 0 25px 0 25px;
   overflow-y: auto;
 }
 
@@ -723,11 +725,8 @@ hr {
   clear:both;
   display:block;
   width: 96%;               
-  /* background-color:#eee; */
   background-color: lightgray;
   height: 1px;
-  margin-top: 15px;
-  margin-bottom: 15px;
 }
 
 .d3-context-menu {
@@ -973,8 +972,8 @@ svg {
 .custom-algorithm-app-container {
   display: flex;
   width: 65%;
-  height: 90%;
-  margin-right: 25px;
+  height: 100%;
+  padding: 15px;
 }
 
 .sandbox-app-container {
@@ -1062,7 +1061,7 @@ svg {
 
 .left-side {
   width: 50%;
-  height: 90%;
+  height: 100%;
 }
 
 #sandbox-graph {
@@ -1081,7 +1080,7 @@ svg {
 
 .right-side {
   width: 50%;
-  height: 90%;
+  height: 100%;
 }
 
 #controls {
