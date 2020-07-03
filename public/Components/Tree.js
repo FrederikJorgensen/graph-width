@@ -1,3 +1,5 @@
+/* eslint-disable no-case-declarations */
+/* eslint-disable default-case */
 /* eslint-disable no-unused-expressions */
 /* eslint-disable no-extend-native */
 /* eslint-disable func-names */
@@ -13,7 +15,7 @@
 /* eslint-disable no-lonely-if */
 /* eslint-disable class-methods-use-this */
 
-import { hull, getAllSubsets } from '../Utilities/helpers.js';
+import { hull, getAllSubsets, deepClone } from '../Utilities/helpers.js';
 import { contextMenu as menu } from './TreeContextMenu.js';
 
 const arraysMatch = function (arr1, arr2) {
@@ -408,6 +410,80 @@ export default class Tree {
     this.graph.runMis(this.currentSubTree, set, 0, true);
   }
 
+  drawHamiltonianTable(node) {
+    const keys = [...node.table.keys()];
+    const values = [...node.table.values()];
+
+    const thead = String.raw`
+    <thead>
+      <tr>
+        <th>\( (d,M) \)</th>
+        <th>\( bool \)</th>
+      </tr>
+    </thead>
+    `;
+
+    console.log(keys);
+
+    let sb = '';
+
+    keys.forEach((key, index) => {
+      const value = values[index];
+      const map = key[0];
+      const entries = Array.from(Object.keys(map));
+      const matchings = key[1];
+
+      let temp = String.raw`\begin{pmatrix}`;
+
+      for (const entry of entries) {
+        const val = map[entry];
+        temp += String.raw`
+            ${entry[0]} → ${val}\\
+        `;
+      }
+
+      temp += String.raw`\end{pmatrix}`;
+
+      for (const m of matchings) {
+        temp += JSON.stringify(m);
+      }
+
+
+      sb += String.raw`<tr><td>\( ${temp} \)</td><td>${value ? 'true<span class="material-icons correct-answer">check</span>' : 'false<span class="material-icons wrong-answer">clear</span>'}</td></tr>`;
+    });
+
+
+    const start = `<table class="hamiltonianTable">${thead}<tbody>${sb}</tbody></table>`;
+
+
+    /*    const nodeSvg = d3.select(`#treeNode-${node.id}`);
+    const x = parseInt(nodeSvg.attr('x'), 10);
+    let y = parseInt(nodeSvg.attr('y'), 10);
+
+    y += 12.5;
+
+    d3.select('#tooltip-arrow')
+      .style('opacity', 1)
+      .attr('x1', x - 50)
+      .attr('y1', y)
+      .attr('x2', x)
+      .attr('y2', y)
+      .attr('transform', `translate(${0}, ${30})`);
+
+    const { top } = document.getElementById('tooltip-arrow').getBoundingClientRect();
+    const { left } = document.getElementById('tooltip-arrow').getBoundingClientRect(); */
+
+    d3.select('#dp-table')
+      .html(start);
+    // .style('opacity', 1)
+    // .style('left', `${left}px`)
+    // .style('top', `${top}px`)
+    // .style('padding', '0');
+
+
+    renderMathInElement(document.body);
+  }
+
   drawTable(node) {
     const keys = Object.keys(node.table);
     const values = Object.values(node.table);
@@ -568,6 +644,209 @@ export default class Tree {
     return contains;
   }
 
+  hamiltonianPath() {
+    let i = 1;
+
+    this.root.eachAfter((currentNode) => {
+      if (this.current !== i++) return;
+
+      this.animateNode(currentNode);
+      this.animateLink(currentNode);
+
+      const node = currentNode.data;
+      let type = '';
+      if ('children' in node === false) type = 'leaf';
+      else if (node.children.length === 2) type = 'join';
+      else if (node.vertices.length > node.children[0].vertices.length) type = 'introduce';
+      else if (node.vertices.length < node.children[0].vertices.length) type = 'forget';
+
+      const bag = node.vertices;
+
+      let child;
+      let childTable;
+      let childKeys;
+
+      if ('children' in node) {
+        child = this.getChild(node);
+        childTable = child.table;
+        childKeys = [...childTable.keys()];
+      }
+
+      let table = new Map();
+
+      switch (type) {
+        case 'leaf':
+          /* Not sure what to do here. */
+          break;
+        case 'introduce':
+          /* Get the introduced vertex */
+          const introducedVertex = this.getIntroducedVertex(node);
+
+          /* If the bag below this one is empty we know there is just 1 vertex and we want to initiliaze this bag */
+          if (child.vertices.length === 0) {
+            for (let i = 0; i <= 2; i++) {
+              // if (i === 1) continue;
+              const state = [];
+              // const d = new Map();
+              const d = {};
+              const firstVertex = bag[0];
+              d[firstVertex] = i;
+              const matchings = [];
+              const matching = [];
+              matchings.push(matching);
+              state.push(d);
+              state.push(matchings);
+
+              i === 1 ? table.set(state, false) : table.set(state, true);
+            }
+          } else {
+            for (const childKey of childKeys) {
+              for (let i = 0; i <= 2; i++) {
+                const d = childKey[0];
+
+                const newMap = deepClone(d);
+
+                // const newMap = new Map(d);
+                // newMap.set(introducedVertex, i);
+                newMap[introducedVertex] = i;
+                const newArray = [];
+                newArray.push(newMap, []);
+                table.set(newArray, true);
+              }
+            }
+
+
+            /*             for (const childState of childStates) {
+              const oldMap = childState[0];
+
+              for (let i = 0; i <= 2; i++) {
+                const state = [];
+                const matching = [];
+                const matchings = [];
+                const newMap = new Map(oldMap);
+
+                switch (i) {
+                  case 0:
+                    newMap.set(introducedVertex, 0);
+                    matchings.push(matching);
+                    state.push(newMap, matchings);
+                    states.push(state);
+                    break;
+                  case 1:
+
+                    for (const w of child.vertices) {
+                      if (this.graph.isEdge(w, introducedVertex)) {
+                        for (const cs of childStates) {
+                          const c = cs[0];
+                          const M = cs[1];
+                          for (const [key, value] of c.entries()) {
+                            if (key === w && value === 1) {
+                              newMap.set(introducedVertex, 1);
+                              state.push(newMap, matchings);
+                              states.push(state);
+                            }
+                          }
+                        }
+                      }
+                    }
+                    break;
+
+                  case 2:
+                    newMap.set(introducedVertex, 2);
+                    state.push(newMap, matchings);
+                    states.push(state);
+                    break;
+                }
+              }
+            } */
+          }
+          break;
+        case 'forget':
+          const forgottenVertex = this.getForgottenVertex(node);
+          const state = [];
+
+          for (const childKey of childKeys) {
+            const state = [];
+            const d = childKey[0];
+            const M = childKey[1];
+            delete d[forgottenVertex];
+
+            for (const a of M) {
+              const aIndex = M.indexOf(a);
+              if (a.includes(forgottenVertex)) M.splice(aIndex);
+            }
+
+            state.push(d, M);
+            table.set(state, true);
+          }
+
+          const keys = [...table.keys()];
+          const temp = [];
+
+          for (const key of keys) {
+            const obj = key[0];
+            const entry = JSON.stringify(obj);
+            temp.push(entry);
+          }
+
+          /* Remove duplicates from array */
+          const newArr = multiDimensionalUnique(temp);
+
+          /* Reset the table */
+          table = new Map();
+
+          /* Convert it back to an array of objects */
+          const arrayOfDegrees = [];
+          for (const a of newArr) {
+            const d = JSON.parse(a);
+            arrayOfDegrees.push(d);
+          }
+
+          /* Get matching if any */
+          for (const d of arrayOfDegrees) {
+            const state = [];
+            const keys = Object.keys(d);
+            const possible = [];
+            const matchings = [];
+
+            for (const key of keys) {
+              const value = d[key];
+              if (value === 1) possible.push(key);
+            }
+
+            console.log(possible);
+
+            if (possible.length > 1 && possible.length % 2 === 0) {
+              for (let i = 0; i < possible.length; i += 2) {
+                const matching = [];
+                const e1 = possible[i];
+                const e2 = possible[i + 1];
+                matching.push(parseInt(e1, 10), parseInt(e2, 10));
+                matchings.push(matching);
+              }
+              state.push(d, matchings);
+              table.set(state, true);
+            } else {
+              state.push(d, []);
+              table.set(state, false);
+            }
+          }
+
+
+          break;
+        case 'join':
+          const leftTable = childKeys;
+          const child2 = this.getChild2(node);
+          const rightTable = [...child2.table.keys()];
+
+          break;
+      }
+
+      node.table = table;
+      this.drawHamiltonianTable(node);
+    });
+  }
+
   threeColor() {
     const colorArray = ['red', 'green', 'blue'];
     let i = 1;
@@ -686,7 +965,6 @@ export default class Tree {
         this.graph.addNodeArrow(forgottenVertex, 'Forgotten Vertex');
         this.graph.resetNodeColors();
         this.graph.highlightNodeColor(forgottenVertex, 'rgb(251, 128, 114)');
-
 
         /* Get the position of the childs vertices */
         const ps = childClone.positionTracker;
@@ -849,6 +1127,18 @@ export default class Tree {
   runThreeColor() {
     this.current = 0;
     this.threeColor();
+  }
+
+  getChild(node) {
+    const child = node.children[0];
+    const clone1 = deepClone(child);
+    return clone1;
+  }
+
+  getChild2(node) {
+    const child = node.children[1];
+    const clone = deepClone(child);
+    return clone;
   }
 
   getChildTable(node) {
@@ -1206,6 +1496,15 @@ export default class Tree {
       .attr('class', 'table');
   }
 
+  addTable() {
+    if (this.table) this.table.remove();
+
+    this.table = d3.select('#main')
+      .append('table')
+      .attr('id', 'dp-table')
+      .attr('class', 'hamiltonianTable');
+  }
+
   addTooltip() {
     if (this.tooltip) this.tooltip.remove();
 
@@ -1259,21 +1558,28 @@ export default class Tree {
     this.current = 0;
   }
 
-  maxNext() {
+  enableHamiltonianPath() {
+    this.disableAllAlgorithms();
+    this.isHamiltonianPath = true;
+  }
+
+  next() {
     const N = this.root.descendants().length;
     this.current++;
     if (this.current !== N) this.current %= N;
     if (this.isMis) this.mis(this.current);
     if (this.isColor) this.threeColor(this.current);
+    if (this.isHamiltonianPath) this.hamiltonianPath(this.current);
   }
 
-  maxPrevious() {
+  previous() {
     if (this.current === 0) return;
     const N = this.root.descendants().length;
     --this.current;
     this.current %= N;
     if (this.isMis) this.mis(this.current);
     if (this.isColor) this.threeColor(this.current);
+    if (this.isHamiltonianPath) this.hamiltonianPath(this.current);
   }
 
   setAllG() {

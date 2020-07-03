@@ -50,3 +50,31 @@ export const getAllSubsets = (theArray) => theArray.reduce(
   ),
   [[]],
 );
+
+export function deepClone(obj) {
+  if (!obj || obj == true) // this also handles boolean as true and false
+  { return obj; }
+  const objType = typeof (obj);
+  if (objType == 'number' || objType == 'string') // add your immutables here
+  { return obj; }
+  const result = Array.isArray(obj) ? [] : !obj.constructor ? {} : new obj.constructor();
+  if (obj instanceof Map) for (var key of obj.keys()) result.set(key, deepClone(obj.get(key)));
+  for (var key in obj) if (obj.hasOwnProperty(key)) result[key] = deepClone(obj[key]);
+  return result;
+}
+
+export function compareMaps(map1, map2) {
+  let testVal;
+  if (map1.size !== map2.size) {
+    return false;
+  }
+  for (const [key, val] of map1) {
+    testVal = map2.get(key);
+    // in cases of an undefined value, make sure the key
+    // actually exists on the object so there are no false positives
+    if (testVal !== val || (testVal === undefined && !map2.has(key))) {
+      return false;
+    }
+  }
+  return true;
+}

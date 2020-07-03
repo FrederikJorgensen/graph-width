@@ -1,3 +1,7 @@
+:root {
+  --table-color: #15314B;
+}
+
 html {
   height: 100%;
   margin: 0;
@@ -42,6 +46,10 @@ body {
   cursor: pointer;
 }
 
+.logo-title {
+  background-size: 100% 50%;
+}
+
 .logo-container {
   display: flex;
   flex-direction: column;
@@ -51,9 +59,48 @@ body {
   width: 25%;
 }
 
+.hamiltonianTable {
+  /* position: absolute; */
+  background-color: white;
+  border-collapse: collapse;
+  font-size: 0.9em;
+  /* min-width: 250px; */
+  width: 100%;
+  border-radius: 5px 5px 0 0;
+  overflow: hidden;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+  /* transform: translate(-100%, -2px); */
+  z-index: 10;
+  overflow-y: auto;
+}
+
+.hamiltonianTable thead tr {
+  background-color: #15314B;
+  color: white;
+  text-align: left;
+  font-weight: bold;
+}
+
+.hamiltonianTable th,
+.hamiltonianTable td {
+    padding: 12px 15px;
+}
+
+.hamiltonianTable tbody tr {
+  border-bottom: 1px solid lightgray;
+}
+
+.hamiltonianTable tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.hamiltonianTable tbody tr:last-of-type {
+  border-bottom: 4px solid var(--table-color);
+}
+
 .subtitle {
   text-align: center;
-  margin-bottom: 50px;
+  font-style: italic;
 }
 
 .logo {
@@ -129,7 +176,6 @@ body {
 }
 
 .progress-item:hover {
-  /* background: #e2e2e2; */
   height: 60%;
   transition: height 100ms ease-in;
   cursor: pointer;
@@ -743,7 +789,6 @@ li {
   font-size: 14px;
   font-weight: 500;
   line-height: 36px;
-  overflow: hidden;
   outline: none;
   cursor: pointer;
   transition: box-shadow 0.2s;
@@ -887,14 +932,6 @@ svg {
   transform: translate(-100%, -50%);
 }
 
-#tooltip {
-  background-color: white;
-  border: 3.5px solid rgb(51, 51, 51);
-  z-index: 100000;
-  padding: 15px;
-  transform: translate(-100%, -2px);
-}
-
 .join {
   color: rgb(253,180,98);
 }
@@ -965,7 +1002,6 @@ svg {
 .custom-sidebar {
   display: flex;
   flex-direction: column;
-  /* height: fit-content; */
   overflow: hidden;
   width: 90%;
   height: 80%;
@@ -996,10 +1032,6 @@ svg {
   cursor: pointer;
   margin-top: 10px;
   outline: none;
-}
-
-.CodeMirror {
-  /* background-color: #001528!important; */
 }
 
 .sandbox-button-disabled {

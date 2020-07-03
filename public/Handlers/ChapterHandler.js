@@ -574,13 +574,13 @@ export default class ChapterHandler {
             .append('span')
             .text('keyboard_arrow_left')
             .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.maxPrevious());
+            .on('click', () => niceTreeDecomposition.previous());
 
           controlsContainer
             .append('span')
             .text('keyboard_arrow_right')
             .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.maxNext());
+            .on('click', () => niceTreeDecomposition.next());
         },
 
         '6. Sandbox',

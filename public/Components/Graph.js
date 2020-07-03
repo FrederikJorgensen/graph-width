@@ -164,6 +164,10 @@ export default class Graph {
     this.links = [];
   }
 
+  isEdge(w, v) {
+    return this.adjacencyList[`${w}-${v}`];
+  }
+
   isIntroducedVertexNeighbor(set, introducedVertex, adjacencyList) {
     for (const s of set) {
       if (adjacencyList[`${s}-${introducedVertex}`]) return true;

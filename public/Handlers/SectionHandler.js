@@ -1,3 +1,4 @@
+/* eslint-disable class-methods-use-this */
 /* eslint-disable no-return-assign */
 /* eslint-disable no-restricted-globals */
 import Section from '../Components/Section.js';
@@ -686,75 +687,6 @@ export default class SectionHandler {
       ),
       new Section(
         async () => {
-          if (!window.graphContainer && !window.treeContainer) {
-            const graphContainer = d3.select('#container')
-              .append('div')
-              .attr('id', 'graph-container');
-
-            const treeContainer = d3.select('#container')
-              .append('div')
-              .attr('id', 'tree-container');
-
-            window.graphContainer = graphContainer;
-            window.treeContainer = treeContainer;
-          }
-
-          this.sidebar.addContent(`
-          <p class="fact"><strong class="fact-title">Theorem:</strong> Given a graph \\( G \\) with \\( n \\) nodes and a tree decomposition of \\( G \\)
-           with width \\( K \\) we can compute a nice tree decomposition of \\( G \\) with width \\( k \\) in polynomial time.</p>
-
-           <p>We describe an algorithm as follows...</p>
-           <p>
-           <strong>Step 1:</strong> Choose an arbitrary node to be the root.
-           <br>
-           <strong>Step 2:</strong> Make every node have at most 2 children.
-           <br>
-           <strong>Step 3:</strong> Every node that has 2 children, turn them into a join node.
-           <br>
-           <strong>Step 4:</strong> Every node that has 1 child, let the parent be \\( X_i \\) and the child be \\( X_j \\)
-           create introduce nodes that introduce the elements that are in \\( X_i \\) but not in \\( X_j \\). Create forget nodes for elements that are in \\( X_j \\) but not in \\( X_i \\).
-           <br>
-           <strong>Step 5:</strong> Make leaves have size at most 1 by adding as many introduced nodes as needed.
-           </p>
-           
-          `);
-          this.sidebar.addExercise('Construct the nice tree decomposition of the tree decomposition.');
-
-          const td = {
-            nodes: [
-              {
-                id: 1,
-                label: '1 2 3',
-              },
-              {
-                id: 2,
-                label: '2 3 4',
-              },
-            ],
-            links: [
-              {
-                source: 1,
-                target: 2,
-              },
-            ],
-          };
-
-          const niceTreeDecompositionData = {
-            id: 1,
-            label: '',
-            vertices: [],
-            children: [],
-          };
-          const treeDecomposition = new Graph('graph-container');
-          treeDecomposition.loadGraph(td, 'tree');
-
-          const niceTreeDecomposition = new Tree('tree-container', 'nice', treeDecomposition);
-          niceTreeDecomposition.load(niceTreeDecompositionData, 'nice');
-        },
-        'chapter3',
-      ),
-      new Section(
-        async () => {
           this.sidebar.addContent(`
             <p>We now introduce how algorithms exploit these tree decompositions.</p>
 
@@ -970,13 +902,13 @@ export default class SectionHandler {
             .append('span')
             .text('keyboard_arrow_left')
             .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.maxPrevious());
+            .on('click', () => niceTreeDecomposition.previous());
 
           controlsContainer
             .append('span')
             .text('keyboard_arrow_right')
             .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.maxNext());
+            .on('click', () => niceTreeDecomposition.next());
         },
         'chapter4',
       ),
@@ -1077,15 +1009,48 @@ export default class SectionHandler {
             .append('span')
             .text('keyboard_arrow_left')
             .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.maxPrevious());
+            .on('click', () => niceTreeDecomposition.previous());
 
           controlsContainer
             .append('span')
             .text('keyboard_arrow_right')
             .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.maxNext());
+            .on('click', () => niceTreeDecomposition.next());
 
           this.sidebar.addButton('3-Coloring', () => niceTreeDecomposition.runThreeColor());
+        },
+        'chapter4',
+      ),
+      new Section(
+        async () => {
+          this.sidebar.addContent(`
+          <h2>Hamiltonian Path</h2>
+
+          <p>
+            <strong>Input:</strong> A graph \\( G \\) and a nice tree decomposition \\( T \\)
+            <br>
+            <strong>Output:</strong> If \\( G \\) contains a Hamiltonian path.
+          </p>
+
+          <table id="dp-table" class="hamiltonianTable"></table>
+          `);
+          this.addContainers();
+
+          const graph = new Graph('graph-container');
+          const niceTreeDecomposition = new Tree('tree-container');
+          graph.loadGraph(graph1);
+
+          await graph.computeTreeDecomposition();
+          await graph.readNiceTreeDecomposition();
+          const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
+          niceTreeDecomposition.load(niceTreeDecompositionData);
+          niceTreeDecomposition.setGraph(graph);
+          // niceTreeDecomposition.addTooltip();
+          // niceTreeDecomposition.addTable();
+          // niceTreeDecomposition.addArrow();
+          niceTreeDecomposition.enableHamiltonianPath();
+
+          this.addAlgorithmControls(() => niceTreeDecomposition.previous(), () => niceTreeDecomposition.next());
         },
         'chapter4',
       ),
@@ -1095,6 +1060,38 @@ export default class SectionHandler {
 
 
     if (this.currentChapter === 'chapter5') this.createCustomSection();
+  }
+
+  addAlgorithmControls(previous, next) {
+    const controlsContainer = d3.select('#output').append('div')
+      .attr('class', 'controls-container');
+
+    controlsContainer
+      .append('span')
+      .text('keyboard_arrow_left')
+      .attr('class', 'material-icons nav-arrows')
+      .on('click', previous);
+
+    controlsContainer
+      .append('span')
+      .text('keyboard_arrow_right')
+      .attr('class', 'material-icons nav-arrows')
+      .on('click', next);
+  }
+
+  addContainers() {
+    if (!window.graphContainer && !window.treeContainer) {
+      const graphContainer = d3.select('#container')
+        .append('div')
+        .attr('id', 'graph-container');
+
+      const treeContainer = d3.select('#container')
+        .append('div')
+        .attr('id', 'tree-container');
+
+      window.graphContainer = graphContainer;
+      window.treeContainer = treeContainer;
+    }
   }
 
   async sectionFunctionBuilder(n) {
@@ -1230,6 +1227,8 @@ export default class SectionHandler {
   }
 }
 
+// Abandoned sections blow.. Might come back to them.. Might not..
+
 /*
 new Section(
   async () => {
@@ -1260,4 +1259,74 @@ new Section(
     this.sidebar.addButton('Skip Forward', () => graph.skipForwardMaximumIndependentSet());
   },
   'chapter1',
+), */
+
+/* new Section(
+  async () => {
+    if (!window.graphContainer && !window.treeContainer) {
+      const graphContainer = d3.select('#container')
+        .append('div')
+        .attr('id', 'graph-container');
+
+      const treeContainer = d3.select('#container')
+        .append('div')
+        .attr('id', 'tree-container');
+
+      window.graphContainer = graphContainer;
+      window.treeContainer = treeContainer;
+    }
+
+    this.sidebar.addContent(`
+    <p class="fact"><strong class="fact-title">Theorem:</strong> Given a graph \\( G \\) with \\( n \\) nodes and a tree decomposition of \\( G \\)
+     with width \\( K \\) we can compute a nice tree decomposition of \\( G \\) with width \\( k \\) in polynomial time.</p>
+
+     <p>We describe an algorithm as follows...</p>
+     <p>
+     <strong>Step 1:</strong> Choose an arbitrary node to be the root.
+     <br>
+     <strong>Step 2:</strong> Make every node have at most 2 children.
+     <br>
+     <strong>Step 3:</strong> Every node that has 2 children, turn them into a join node.
+     <br>
+     <strong>Step 4:</strong> Every node that has 1 child, let the parent be \\( X_i \\) and the child be \\( X_j \\)
+     create introduce nodes that introduce the elements that are in \\( X_i \\) but not in \\( X_j \\). Create forget nodes for elements that are in \\( X_j \\) but not in \\( X_i \\).
+     <br>
+     <strong>Step 5:</strong> Make leaves have size at most 1 by adding as many introduced nodes as needed.
+     </p>
+
+    `);
+    this.sidebar.addExercise('Construct the nice tree decomposition of the tree decomposition.');
+
+    const td = {
+      nodes: [
+        {
+          id: 1,
+          label: '1 2 3',
+        },
+        {
+          id: 2,
+          label: '2 3 4',
+        },
+      ],
+      links: [
+        {
+          source: 1,
+          target: 2,
+        },
+      ],
+    };
+
+    const niceTreeDecompositionData = {
+      id: 1,
+      label: '',
+      vertices: [],
+      children: [],
+    };
+    const treeDecomposition = new Graph('graph-container');
+    treeDecomposition.loadGraph(td, 'tree');
+
+    const niceTreeDecomposition = new Tree('tree-container', 'nice', treeDecomposition);
+    niceTreeDecomposition.load(niceTreeDecompositionData, 'nice');
+  },
+  'chapter3',
 ), */
