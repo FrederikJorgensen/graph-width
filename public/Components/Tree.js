@@ -716,39 +716,42 @@ export default class Tree {
             }
 
 
-            /*             for (const childState of childStates) {
+            for (const childState of childKeys) {
               const oldMap = childState[0];
 
               for (let i = 0; i <= 2; i++) {
                 const state = [];
                 const matching = [];
                 const matchings = [];
-                const newMap = new Map(oldMap);
+                const newMap = {};
+                // const newMap = new Map(oldMap);
 
                 switch (i) {
                   case 0:
                     newMap.set(introducedVertex, 0);
                     matchings.push(matching);
                     state.push(newMap, matchings);
-                    states.push(state);
+                    // states.push(state);
                     break;
                   case 1:
 
                     for (const w of child.vertices) {
                       if (this.graph.isEdge(w, introducedVertex)) {
                         for (const cs of childStates) {
-                          const c = cs[0];
+                          const d = cs[0];
                           const M = cs[1];
-                          for (const [key, value] of c.entries()) {
-                            if (key === w && value === 1) {
-                              newMap.set(introducedVertex, 1);
-                              state.push(newMap, matchings);
-                              states.push(state);
-                            }
+
+                          if (d[w] === 1) {
+                            newMap[introducedVertex] = 1;
+                            state.push(newMap, matchings);
+                            // states.push(state);
                           }
+
+                          // Change the value of w
                         }
                       }
                     }
+
                     break;
 
                   case 2:
@@ -758,7 +761,7 @@ export default class Tree {
                     break;
                 }
               }
-            } */
+            }
           }
           break;
         case 'forget':

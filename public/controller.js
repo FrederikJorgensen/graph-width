@@ -121,7 +121,7 @@ d3.select('body').on('keydown', () => {
 d3.select('#main').style('background-color', '#1F2125');
 
 const svg = d3.select('#main').append('svg').attr('width', width).attr('height', height);
-const graph = generateRandomGraph(35, 20);
+const graph = generateRandomGraph(10, 10);
 
 svg.selectAll('line')
   .data(graph.links)
@@ -140,7 +140,7 @@ svg.selectAll('circle')
 const simulation = d3.forceSimulation()
   .force('x', d3.forceX(width / 2).strength(0.1))
   .force('y', d3.forceY(height / 2).strength(0.1))
-  .force('center', d3.forceCenter(width / 2, height / 2))
+  // .force('center', d3.forceCenter(width / 2, height / 2))
   .nodes(graph.nodes)
   .force('charge', d3.forceManyBody().strength(-450))
   .force('link', d3.forceLink(graph.links).id((d) => d.id).strength(0.3))

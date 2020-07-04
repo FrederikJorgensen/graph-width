@@ -82,7 +82,6 @@ export default class ChapterHandler {
             .append('hr')
             .style('margin-bottom', '0');
 
-
           const sandboxAppContainer = d3.select('#main')
             .append('div')
             .attr('class', 'custom-algorithm-app-container');
@@ -341,14 +340,8 @@ export default class ChapterHandler {
             .attr('class', 'sandbox-sidebar');
 
           sandboxSidebar
-            .append('h2')
-            .text('Graph Width Sandbox Mode')
-            .style('text-align', 'center')
-            .append('hr');
-
-          sandboxSidebar
             .append('text')
-            .text('Vertices:     ')
+            .text('Vertices: ')
             .append('span')
             .attr('id', 'v')
             .text('10');
@@ -390,11 +383,9 @@ export default class ChapterHandler {
               d3.select('#e').text(val);
             });
 
-          sandboxSidebar.append('h3').text('Graph Controls').attr('class', 'sandbox-sidebar-heading');
-
-          sandboxSidebar.append('button')
-            .text('Random Graph')
-            .attr('class', 'sandbox-button')
+          sandboxSidebar.append('span')
+            .text('replay')
+            .attr('class', 'material-icons')
             .on('click', () => {
               if (treeDecomposition.svg) treeDecomposition.clear();
               if (niceTreeDecomposition.svg) niceTreeDecomposition.clear();
@@ -410,9 +401,9 @@ export default class ChapterHandler {
             });
 
           sandboxSidebar
-            .append('button')
-            .text('Draw Graph')
-            .attr('class', 'sandbox-button')
+            .append('span')
+            .text('palette')
+            .attr('class', 'material-icons')
             .on('click', () => {
               graph.enableDrawing();
               graphLoaded = true;
@@ -423,9 +414,7 @@ export default class ChapterHandler {
             });
 
 
-          sandboxSidebar.append('h3').text('TD Controls').attr('class', 'sandbox-sidebar-heading');
-
-          sandboxSidebar
+          /*           sandboxSidebar
             .append('button')
             .text('Draw Tree Decomposition')
             .attr('id', 'draw-td-button')
@@ -433,13 +422,13 @@ export default class ChapterHandler {
             .on('click', () => {
               if (!graphLoaded) return;
               td.enableDrawing();
-            });
+            }); */
 
           sandboxSidebar
-            .append('button')
-            .text('Compute tree decomposition')
+            .append('span')
+            .text('device_hub')
             .attr('id', 'compute-td-button')
-            .attr('class', 'sandbox-button-disabled')
+            .attr('class', 'material-icons')
             .on('click', async () => {
               if (!graphLoaded) return;
               if (treeDecomposition.svg) treeDecomposition.clear();
@@ -453,13 +442,11 @@ export default class ChapterHandler {
               treeDecompositionLoaded = true;
             });
 
-          sandboxSidebar.append('h3').text('Nice TD Controls').attr('class', 'sandbox-sidebar-heading');
-
           sandboxSidebar
-            .append('button')
-            .text('Compute nice tree decomposition')
+            .append('span')
+            .text('timeline')
             .attr('id', 'compute-nicetd-button')
-            .attr('class', 'sandbox-button-disabled')
+            .attr('class', 'material-icons')
             .on('click', async () => {
               if (!treeDecompositionLoaded) return;
               if (niceTreeDecomposition.svg) niceTreeDecomposition.clear();
@@ -473,9 +460,7 @@ export default class ChapterHandler {
               d3.select('#max-inde-b').classed('sandbox-button-disabled', false);
             });
 
-          sandboxSidebar.append('h3').text('Algorithms').attr('class', 'sandbox-sidebar-heading');
-
-          sandboxSidebar
+          /*           sandboxSidebar
             .append('button')
             .text('3-Colorable')
             .attr('class', 'sandbox-button-disabled')
@@ -495,12 +480,12 @@ export default class ChapterHandler {
               if (!niceTreeDecompositionLoaded) return;
               d3.select('#algo-text').text('Current Algorithm = Max Independent Set');
               niceTreeDecomposition.enableMaximumIndependentSet();
-            });
+            }); */
 
           sandboxSidebar
-            .append('button')
-            .text('Clear All')
-            .attr('class', 'sandbox-button')
+            .append('span')
+            .text('clear')
+            .attr('class', 'material-icons')
             .on('click', async () => {
               this.graph = d3.select('#algo-text').text('Current Algorithm = None Selected');
               d3.select('#compute-td-button').classed('sandbox-button', false);
