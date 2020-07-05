@@ -19,7 +19,6 @@ export default class ChapterHandler {
     this.chapters = [
       new Chapter(
         (async () => {
-
         }),
         '1. Graph Separators',
         false,
@@ -39,71 +38,57 @@ export default class ChapterHandler {
       ),
       new Chapter(
         (async () => {
-
         }),
         '3. Nice Tree Decompositions',
         false,
       ),
       new Chapter(
         async () => {
-
         },
         '4. Algorithms on Tree Decompositions',
         false,
       ),
       new Chapter(
         async () => {
-          d3.select('#container')
+          const customLeft = d3.select('#main')
             .append('div')
-            .attr('id', 'graph-container');
+            .attr('class', 'custom-left');
 
-          d3.select('#container')
+          customLeft
             .append('div')
-            .attr('id', 'tree-container');
-        },
-        '5. Misc',
-        false,
-      ),
-      new Chapter(
-        async () => {
-          const sandboxSidebarContainer = d3.select('#main')
-            .append('div')
-            .attr('class', 'custom-algorithm-sidebar-container');
+            .attr('id', 'custom-graph')
+            .attr('class', 'custom-graph');
 
-          const sandboxSidebar = sandboxSidebarContainer
+          const codeBlock = customLeft.append('div')
+            .attr('class', 'code-block-container');
+
+          const customCodeAreaContainer = codeBlock
+            .append('div')
+            .attr('class', 'custom-code-container');
+
+          const codeHeader = customCodeAreaContainer
+            .append('div')
+            .attr('class', 'code-header');
+
+          const customCodeArea = customCodeAreaContainer
             .append('div')
             .attr('class', 'custom-sidebar');
 
-          sandboxSidebar
-            .append('h2')
-            .text('Create a custom algorithm')
-            .style('margin', '5px')
-            .style('text-align', 'center')
-            .append('hr')
-            .style('margin-bottom', '0');
-
-          const sandboxAppContainer = d3.select('#main')
+          const customRight = d3.select('#main')
             .append('div')
-            .attr('class', 'custom-algorithm-app-container');
+            .attr('class', 'custom-right');
 
-          sandboxAppContainer
+          const customNiceTreeContainer = customRight
             .append('div')
-            .attr('class', 'left-side')
-            .attr('id', 'left-side');
+            .attr('class', 'custom-nice-tree-container');
 
-          const rightSide = sandboxAppContainer
+          customNiceTreeContainer
             .append('div')
-            .attr('class', 'right-side')
-            .attr('id', 'right-side');
+            .attr('id', 'custom-nice-tree');
 
-
-          rightSide
-            .append('div')
-            .attr('id', 'sandbox-nice-tree-decomposition');
-
-          const graph = new Graph('left-side');
+          const graph = new Graph('custom-graph');
           graph.randomGraph();
-          const niceTreeDecomposition = new Tree('sandbox-nice-tree-decomposition');
+          const niceTreeDecomposition = new Tree('custom-nice-tree');
           await graph.computeTreeDecomposition();
           await graph.readNiceTreeDecomposition();
           const niceTdData = graph.getNiceTreeDecomposition();
@@ -111,22 +96,7 @@ export default class ChapterHandler {
           niceTreeDecomposition.addTooltip();
           niceTreeDecomposition.addArrow();
 
-          // sandboxSidebar.append('text-area');
-
-          sandboxSidebar
-            .append('text')
-            .html(`
-              <p>Here you can create a custom algorithm that runs on a nice tree decomposition.</p>
-
-              <p>Currently the only supported language is JavaScript.</p>
-
-              <p>The algorithm performs a post-order traversel of the tree, you just need to specify what you want to happen at each specific node type.</p>
-
-              <p>Once you've written some code save it and run through it by using the controls under the nice tree decomposition to step through your algorithm.
-              You may use your own custom JavaScript code or make use of our existing library functions which you can see <a target="_blank" href="https://github.com/FrederikJorgensen/graph-width-visualizer#custom-algorithm">here</a>.</p>
-            `).style('padding', '0 15px 0 15px');
-
-          sandboxSidebar
+          customCodeArea
             .append('textarea')
             .attr('id', 'editor')
             .text('switch(type){\n case "leaf":\n //Your code for a leaf node.\n break;\n\n case "introduce":\n // Your code for an introduce node.\n break;\n\n case "forget":\n //Your code for a forget node.\n break;\n\n case "join":\n // Your code for a join node.\n break;\n}');
@@ -140,7 +110,6 @@ export default class ChapterHandler {
           });
 
           editor.setSize('100%', '100%');
-
 
           const someString = `
           switch(type){ 
@@ -221,14 +190,10 @@ export default class ChapterHandler {
           let current = 0;
           let customFunction = '';
 
-          const misButtonContainer = sandboxSidebar
-            .append('div')
-            .attr('class', 'custom-container');
-
-
-          misButtonContainer.append('button')
-            .text('Save Code')
-            .attr('class', 'pure-material-button-contained')
+          codeHeader
+            .append('span')
+            .text('play_arrow')
+            .attr('class', 'material-icons')
             .on('click', () => {
               userInput = editor.getValue();
 
@@ -272,18 +237,18 @@ export default class ChapterHandler {
           })`;
             });
 
-
-          misButtonContainer
-            .append('button')
-            .text('Reset to default code')
-            .attr('class', 'pure-material-button-contained')
+          codeHeader
+            .append('span')
+            .text('replay')
+            .attr('class', 'material-icons')
             .on('click', () => editor.setValue('switch(type){\n case "leaf":\n //Your code for a leaf node.\n break;\n\n case "introduce":\n // Your code for an introduce node.\n break;\n\n case "forget":\n //Your code for a forget node.\n break;\n\n case "join":\n // Your code for a join node.\n break;\n}'));
 
-          misButtonContainer
+
+          /*           misButtonContainer
             .append('button')
             .text('Show Max Independent Set Code')
             .attr('class', 'pure-material-button-contained')
-            .on('click', () => editor.setValue(formattedJSON));
+            .on('click', () => editor.setValue(formattedJSON)); */
 
           const controls = rightSide
             .append('div')
@@ -323,7 +288,6 @@ export default class ChapterHandler {
         async () => {
           let graphLoaded = false;
           let treeDecompositionLoaded = false;
-          let niceTreeDecompositionLoaded = false;
 
           const graph = new Graph('sandbox-graph');
           const treeDecomposition = new Graph('sandbox-tree-decomposition');
@@ -331,104 +295,56 @@ export default class ChapterHandler {
 
           const td = new TreeDecomposition('sandbox-tree-decomposition', graph);
 
-          const sandboxSidebarContainer = d3.select('#main')
+          const sandboxSidebar = d3.select('#main')
             .append('div')
             .attr('class', 'sandbox-sidebar-container');
 
-          const sandboxSidebar = sandboxSidebarContainer
-            .append('div')
-            .attr('class', 'sandbox-sidebar');
+          sandboxSidebar.append('input')
+            .attr('value', 15)
+            .attr('id', 'vertices-number')
+            .attr('class', 'controls-number');
 
-          sandboxSidebar
-            .append('text')
-            .text('Vertices: ')
+          sandboxSidebar.append('input')
+            .attr('value', 15)
+            .attr('id', 'edges-number')
+            .attr('class', 'controls-number');
+
+          sandboxSidebar.append('div')
+            .attr('data-tooltip', 'Reload a random graph')
+            .attr('class', 'big')
             .append('span')
-            .attr('id', 'v')
-            .text('10');
-
-          sandboxSidebar
-            .append('input')
-            .attr('id', 'vertices-slider')
-            .attr('type', 'range')
-            .attr('min', 0)
-            .attr('max', 100)
-            .attr('step', 'any')
-            .attr('step', '1')
-            .attr('value', 10)
-            .attr('class', 'slider')
-            .on('input', () => {
-              const val = document.getElementById('vertices-slider').value;
-              d3.select('#v').text(val);
-            });
-
-          sandboxSidebar
-            .append('text')
-            .text('Edges:     ')
-            .append('span')
-            .attr('id', 'e')
-            .text('10');
-
-          sandboxSidebar
-            .append('input')
-            .attr('id', 'edges-slider')
-            .attr('type', 'range')
-            .attr('min', 0)
-            .attr('max', 100)
-            .attr('step', 'any')
-            .attr('step', '1')
-            .attr('value', 10)
-            .attr('class', 'slider')
-            .on('input', () => {
-              const val = document.getElementById('edges-slider').value;
-              d3.select('#e').text(val);
-            });
-
-          sandboxSidebar.append('span')
             .text('replay')
-            .attr('class', 'material-icons')
+            .attr('class', 'material-icons md-48')
             .on('click', () => {
               if (treeDecomposition.svg) treeDecomposition.clear();
               if (niceTreeDecomposition.svg) niceTreeDecomposition.clear();
 
-              const numberOfVertices = document.getElementById('vertices-slider').value;
-              const numberOfEdges = document.getElementById('edges-slider').value;
+              const numberOfVertices = document.getElementById('vertices-number').value;
+              const numberOfEdges = document.getElementById('edges-number').value;
               graph.randomGraph(numberOfVertices, numberOfEdges);
-              d3.select('#compute-td-button').classed('sandbox-button', true);
-              d3.select('#compute-td-button').classed('sandbox-button-disabled', false);
-              d3.select('#draw-td-button').classed('sandbox-button', true);
-              d3.select('#draw-td-button').classed('sandbox-button-disabled', false);
               graphLoaded = true;
             });
 
           sandboxSidebar
+            .append('div')
+            .attr('data-tooltip', 'Draw your own graph')
+            .attr('class', 'big')
             .append('span')
             .text('palette')
-            .attr('class', 'material-icons')
+            .attr('class', 'material-icons md-48')
             .on('click', () => {
               graph.enableDrawing();
               graphLoaded = true;
-              d3.select('#compute-td-button').classed('sandbox-button', true);
-              d3.select('#compute-td-button').classed('sandbox-button-disabled', false);
-              d3.select('#draw-td-button').classed('sandbox-button', true);
-              d3.select('#draw-td-button').classed('sandbox-button-disabled', false);
             });
 
-
-          /*           sandboxSidebar
-            .append('button')
-            .text('Draw Tree Decomposition')
-            .attr('id', 'draw-td-button')
-            .attr('class', 'sandbox-button-disabled')
-            .on('click', () => {
-              if (!graphLoaded) return;
-              td.enableDrawing();
-            }); */
-
           sandboxSidebar
+            .append('div')
+            .attr('data-tooltip', 'Compute a tree decomposition of the current graph')
+            .attr('class', 'big')
             .append('span')
             .text('device_hub')
             .attr('id', 'compute-td-button')
-            .attr('class', 'material-icons')
+            .attr('class', 'material-icons md-48')
             .on('click', async () => {
               if (!graphLoaded) return;
               if (treeDecomposition.svg) treeDecomposition.clear();
@@ -437,63 +353,34 @@ export default class ChapterHandler {
               await graph.readTreeDecomposition();
               const treeDecompositionData = graph.getTreeDecomposition();
               treeDecomposition.loadGraph(treeDecompositionData, 'tree', graph);
-              d3.select('#compute-nicetd-button').classed('sandbox-button', true);
-              d3.select('#compute-nicetd-button').classed('sandbox-button-disabled', false);
               treeDecompositionLoaded = true;
             });
 
           sandboxSidebar
+            .append('div')
+            .attr('data-tooltip', 'Compute a nice tree decomposition')
+            .attr('class', 'big')
             .append('span')
             .text('timeline')
             .attr('id', 'compute-nicetd-button')
-            .attr('class', 'material-icons')
+            .attr('class', 'material-icons md-48')
             .on('click', async () => {
               if (!treeDecompositionLoaded) return;
               if (niceTreeDecomposition.svg) niceTreeDecomposition.clear();
               await graph.readNiceTreeDecomposition();
               const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
               niceTreeDecomposition.load(niceTreeDecompositionData);
-              niceTreeDecompositionLoaded = true;
-              d3.select('#three-color-b').classed('sandbox-button', true);
-              d3.select('#three-color-b').classed('sandbox-button-disabled', false);
-              d3.select('#max-inde-b').classed('sandbox-button', true);
-              d3.select('#max-inde-b').classed('sandbox-button-disabled', false);
-            });
-
-          /*           sandboxSidebar
-            .append('button')
-            .text('3-Colorable')
-            .attr('class', 'sandbox-button-disabled')
-            .attr('id', 'three-color-b')
-            .on('click', () => {
-              if (!niceTreeDecompositionLoaded) return;
-              d3.select('#algo-text').text('Current Algorithm = 3-Colorable');
-              niceTreeDecomposition.enableThreeColor();
             });
 
           sandboxSidebar
-            .append('button')
-            .text('Max Independent Set')
-            .attr('class', 'sandbox-button-disabled')
-            .attr('id', 'max-inde-b')
-            .on('click', () => {
-              if (!niceTreeDecompositionLoaded) return;
-              d3.select('#algo-text').text('Current Algorithm = Max Independent Set');
-              niceTreeDecomposition.enableMaximumIndependentSet();
-            }); */
-
-          sandboxSidebar
+            .append('div')
+            .attr('data-tooltip', 'Clear all')
+            .attr('class', 'big')
             .append('span')
             .text('clear')
-            .attr('class', 'material-icons')
+            .attr('class', 'material-icons md-48')
             .on('click', async () => {
               this.graph = d3.select('#algo-text').text('Current Algorithm = None Selected');
-              d3.select('#compute-td-button').classed('sandbox-button', false);
-              d3.select('#compute-td-button').classed('sandbox-button-disabled', true);
-              d3.select('#compute-nicetd-button').classed('sandbox-button', false);
-              d3.select('#compute-nicetd-button').classed('sandbox-button-disabled', true);
-              d3.select('#three-color-b').classed('sandbox-button', false);
-              d3.select('#three-color-b').classed('sandbox-button-disabled', true);
               if (graph.svg) graph.clear();
               if (td) td.clear();
               d3.select('#output').html(null);
@@ -503,7 +390,6 @@ export default class ChapterHandler {
               if (niceTreeDecomposition.tooltip) niceTreeDecomposition.removeMisTable();
               graphLoaded = false;
               treeDecompositionLoaded = false;
-              niceTreeDecompositionLoaded = false;
             });
 
           const sandboxAppContainer = d3.select('#main')
@@ -518,32 +404,56 @@ export default class ChapterHandler {
             .append('div')
             .attr('class', 'right-side');
 
-          leftSide
+          const sandBoxGraphContainer = leftSide
             .append('div')
-            .attr('id', 'sandbox-graph')
+            .attr('class', 'sandbox-graph-container');
+
+          sandBoxGraphContainer
+            .append('div')
+            .attr('class', 'text-c')
             .append('text')
             .text('Graph')
             .attr('class', 'container-text');
 
-          leftSide
+          sandBoxGraphContainer
             .append('div')
-            .attr('id', 'sandbox-tree-decomposition')
+            .attr('id', 'sandbox-graph')
+            .attr('class', 'surface');
+
+          const sandBoxTreeContainer = leftSide
+            .append('div')
+            .attr('class', 'sandbox-graph-container');
+
+          sandBoxTreeContainer
+            .append('div')
+            .attr('class', 'text-c')
             .append('text')
             .text('Tree Decomposition')
             .attr('class', 'container-text');
 
-          leftSide
+          sandBoxTreeContainer
             .append('div')
-            .attr('id', 'output');
+            .attr('class', 'surface')
+            .attr('id', 'sandbox-tree-decomposition');
 
-          rightSide
+          const niceTreeContainer = rightSide
             .append('div')
-            .attr('id', 'sandbox-nice-tree-decomposition')
+            .attr('class', 'nice-tree-container');
+
+          niceTreeContainer
+            .append('div')
+            .attr('class', 'text-c')
             .append('text')
             .text('Nice Tree Decomposition')
             .attr('class', 'container-text');
 
-          const controls = rightSide
+          niceTreeContainer
+            .append('div')
+            .attr('class', 'surface')
+            .attr('id', 'sandbox-nice-tree-decomposition');
+
+
+          /*           const controls = rightSide
             .append('div')
             .attr('id', 'controls');
 
@@ -565,7 +475,7 @@ export default class ChapterHandler {
             .append('span')
             .text('keyboard_arrow_right')
             .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.next());
+            .on('click', () => niceTreeDecomposition.next()); */
         },
 
         '6. Sandbox',
@@ -574,16 +484,14 @@ export default class ChapterHandler {
   }
 
   startFirstLevel() {
-    d3.select('#main').style('flex', 0.95);
-    d3.select('.nav').style('flex', 0.05);
+    d3.select('.nav').style('height', '50px');
     this.currentChapter = this.chapters[0];
     this.createChapter();
   }
 
   goToChapter(chapter, isSandbox, isCustom) {
     if (isSandbox) {
-      d3.select('.nav').style('flex', 0.05);
-      d3.select('#custom-algorithm-button').style('color', '#6d7e8e');
+      d3.select('.nav').style('height', '50px');
       window.history.replaceState({}, '', '?');
       d3.select('#main').selectAll('*').remove();
       window.history.replaceState({}, '', '');
@@ -591,24 +499,12 @@ export default class ChapterHandler {
       params.set('sandbox', 'true');
       window.history.replaceState({}, '', `?${params.toString()}`);
       chapter.create();
-      /* Credit icon maker on every page */
-      d3.select('#main')
-        .append('div')
-        .style('position', 'absolute')
-        .style('z-index', 20)
-        .style('bottom', '10px')
-        .style('right', '10px')
-        .append('a')
-        .attr('href', 'https://icons8.com/icon/41215/graph-clique')
-        .text('Icon by Icons8');
       return;
     }
 
     if (isCustom) {
-      d3.select('.nav').style('flex', 0.05);
+      d3.select('.nav').style('height', '50px');
       d3.select('#main').selectAll('*').remove();
-      d3.select('#sandbox-button').style('color', '#6d7e8e');
-      d3.select('#custom-algorithm-button').style('color', '#1f1f1f');
       window.history.replaceState({}, '', '?');
       window.history.replaceState({}, '', '');
       const params = new URLSearchParams(location.search);
@@ -618,28 +514,14 @@ export default class ChapterHandler {
       return;
     }
 
-    d3.select('#sandbox-button').style('color', '#6d7e8e');
     this.currentChapter = chapter;
     this.createChapter();
   }
 
 
   createChapter() {
-    /* Remove everything in main, sidebar and app area */
     d3.select('#main').selectAll('*').remove();
 
-    /* Credit icon maker on every page */
-    d3.select('#main')
-      .append('div')
-      .style('position', 'absolute')
-      .style('z-index', 20)
-      .style('bottom', '10px')
-      .style('right', '10px')
-      .append('a')
-      .attr('href', 'https://icons8.com/icon/41215/graph-clique')
-      .text('Icon by Icons8');
-
-    /* Reset window globals */
     window.graphContainer = null;
     window.treeContainer = null;
 
@@ -670,8 +552,6 @@ export default class ChapterHandler {
     const chapterNumberString = `chapter${chapterNumber}`;
 
     const sectionHandler = new SectionHandler(sidebar, chapterNumberString);
-    // const section = new Section(window.n, 'chapter5');
-    // sectionHandler.addSection(section);
     this.sectionHandler = sectionHandler;
 
     const currentSection = this.sectionHandler.sections[currentSectionIndex];

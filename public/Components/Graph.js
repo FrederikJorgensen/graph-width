@@ -520,57 +520,6 @@ export default class Graph {
     return false;
   }
 
-  max(verticesInSubGraph, adj, set, isHovering) {
-    let maximumSet = 0;
-    let maximumIndependentSet = [];
-    let candidato = true;
-
-    for (let i = 2; i < verticesInSubGraph.length + 1; i++) {
-      const conjunto = generatePowerSet(verticesInSubGraph, i);
-
-      for (const c of conjunto) {
-        candidato = true;
-
-        const pares = generatePowerSet(c, 2);
-
-        for (const par of pares) {
-          const test1 = par[0];
-          const test2 = par[1];
-
-          for (const s of set) {
-            if (adj[`${test1}-${s}`]) {
-              candidato = false;
-              break;
-            }
-
-            if (adj[`${test2}-${s}`]) {
-              candidato = false;
-              break;
-            }
-          }
-
-          if (adj[`${test1}-${test2}`]) {
-            candidato = false;
-            break;
-          }
-        }
-
-        if (candidato && c.length > maximumSet) {
-          maximumSet = c.length;
-          maximumIndependentSet = c;
-        }
-      }
-    }
-    const v = parseInt(set[0], 10);
-    if (!Number.isNaN(v) && v !== undefined && !maximumIndependentSet.includes(v)) maximumIndependentSet.push(v);
-    if (isHovering) {
-      d3.selectAll('#graph-container circle').classed('highlighted-stroke', (node) => {
-        if (maximumIndependentSet.includes(node.id)) return true;
-      });
-    }
-    return maximumIndependentSet;
-  }
-
   returnAdj(links) {
     const adjacencyList = [];
     links.forEach((d) => {
@@ -614,82 +563,6 @@ export default class Graph {
     const tLinks = [];
 
     return { nodes: lol, links: tLinks };
-  }
-
-  async testCoherence() {
-    let vertices = d3.selectAll('#tree-container ellipse').data();
-    let edges = d3.selectAll('#tree-container line').data();
-
-    /* Make sure all nodes are unvisited */
-    vertices.forEach((vertex) => vertex.visited = false);
-
-    const stack = [];
-    const forgottenVertices = [];
-    stack.push(vertices[0]);
-    let currentVertex;
-
-    /* Run DFS post order */
-    while (stack.length) {
-      currentVertex = stack[stack.length - 1];
-
-      let tail = true;
-
-      const adjList = buildAdjList(vertices, edges);
-      const adj = adjList[currentVertex.id];
-
-      if (adj === undefined) {
-        stack.pop();
-        continue;
-      }
-
-      for (let i = 0; i < adj.length; i++) {
-        const v2 = adj[i];
-        if (!v2.visited) {
-          tail = false;
-          v2.visited = true;
-          stack.push(v2);
-          break;
-        }
-      }
-
-      if (tail) {
-        /* Check for forgotten vertices */
-
-        const parentBag = adjList[currentVertex.id];
-        const parentNode = parentBag[0];
-
-        for (let i = 0; i < currentVertex.vertices.length; i++) {
-          const n = currentVertex.vertices[i];
-
-          if (forgottenVertices.includes(n)) {
-            /* not valid coherence */
-          } else if (parentBag.length) {
-            const parentVertices = parentNode.vertices;
-
-            if (!parentVertices.includes(n)) {
-              forgottenVertices.push(n);
-            }
-          }
-        }
-
-        /* We visited this leaf now pop it off the stack */
-        stack.pop();
-
-        /* Once we visit a leaf we remove it */
-        vertices = removeNode(vertices, currentVertex);
-        edges = removeLinks(edges, currentVertex);
-
-        /* Animate it */
-        await this.highlightNodes(currentVertex, parentNode, forgottenVertices);
-        d3.selectAll('ellipse').transition().duration(this.animDuration).style('fill', '#2ca02c');
-        await this.animateDeleteNode(currentVertex);
-      }
-    }
-
-    return new Promise(async (resolve) => {
-      await timeout(3000);
-      resolve();
-    });
   }
 
   edgeCoverage() {
@@ -1838,12 +1711,7 @@ export default class Graph {
           if (d.id === 0) return 0;
         })
         .attr('r', 18)
-        .style('fill', () => {
-          if (type === 'tree') return '#2ca02c';
-          return '#1f77b4';
-        })
-        .style('stroke', 'rgb(51, 51, 51)')
-        .style('stroke-width', '3.5px')
+        .style('fill', '#1f77b4')
         .attr('class', 'nonhighlight')
         .call(d3.drag()
           .on('start', (v) => {

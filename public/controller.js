@@ -34,14 +34,11 @@ export const height = document.getElementById('main').offsetHeight;
 
 const colors = d3.scaleOrdinal(d3.schemeCategory10);
 
-
 const roadmap = new Roadmap();
 
 const logoContainer = d3.select('#main')
   .append('div')
   .attr('class', 'logo-container');
-  // .style('position', 'absolute')
-  // .style('top', `${height / 6}px`);
 
 logoContainer.append('h1')
   .text('GraphWidth.com')
@@ -63,30 +60,11 @@ logoContainer.append('button')
   .style('z-index', '20')
   .on('click', () => chapterHandler.startFirstLevel());
 
-d3.select('#main')
-  .append('div')
-  .style('position', 'absolute')
-  .style('z-index', 20)
-  .style('bottom', '10px')
-  .style('right', '10px')
-  .append('a')
-  .attr('href', 'https://icons8.com/icon/41215/graph-clique')
-  .text('Icon by Icons8');
-
 d3.select('#chapter-button').on('click', () => {
   roadmap.toggle();
 });
 
-d3.select('#github-button').on('click', () => {
-  window.open(
-    'https://github.com/FrederikJorgensen/graph-width-visualizer',
-    '_blank',
-  );
-});
-
 d3.select('#sandbox-button').on('click', () => {
-  d3.select('#chapter-button').style('color', '#6d7e8e');
-  d3.select('#sandbox-button').style('color', '#1f1f1f');
   chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], true);
 });
 
@@ -117,8 +95,6 @@ d3.select('body').on('keydown', () => {
     default:
   }
 });
-
-d3.select('#main').style('background-color', '#1F2125');
 
 const svg = d3.select('#main').append('svg').attr('width', width).attr('height', height);
 const graph = generateRandomGraph(10, 10);

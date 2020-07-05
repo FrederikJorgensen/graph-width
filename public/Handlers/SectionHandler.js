@@ -59,7 +59,6 @@ export default class SectionHandler {
 
           const graph = new Graph('container');
           graph.loadGraph(exampleGraph3);
-          graph.resetExercises();
           graph.toggleMinimalSeparatorExercise();
         },
 
@@ -81,7 +80,6 @@ export default class SectionHandler {
 
           const graph = new Graph('container');
           graph.loadGraph(exampleGraph3);
-          graph.resetExercises();
           graph.toggleBalanceSeparatorExercise();
         },
         'chapter1',
@@ -176,9 +174,6 @@ export default class SectionHandler {
 
           /* Handlers and stuff */
           this.sidebar.addButton('Replay animation', () => this.graph.runEdgeCoverage());
-          graph.stopAllTransitions();
-          treeDecomposition.stopAllTransitions();
-          graph.resetNodeStyling();
           treeDecomposition.resetTreeDecompositionStyles();
           graph.runEdgeCoverage();
         },
@@ -1045,9 +1040,6 @@ export default class SectionHandler {
           const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
           niceTreeDecomposition.load(niceTreeDecompositionData);
           niceTreeDecomposition.setGraph(graph);
-          // niceTreeDecomposition.addTooltip();
-          // niceTreeDecomposition.addTable();
-          // niceTreeDecomposition.addArrow();
           niceTreeDecomposition.enableHamiltonianPath();
 
           this.addAlgorithmControls(() => niceTreeDecomposition.previous(), () => niceTreeDecomposition.next());
@@ -1094,82 +1086,10 @@ export default class SectionHandler {
     }
   }
 
-  async sectionFunctionBuilder(n) {
-    for (const line of n) {
-      if (line.startsWith('#create-graph')) {
-        const nodes = [];
-        const links = [];
-        const tempSet = new Set();
-
-        const splitted = line.split(' ');
-        splitted.shift();
-        for (const s of splitted) {
-          const v1 = parseInt(s[0], 10);
-          const v2 = parseInt(s[2], 10);
-          tempSet.add(v1);
-          tempSet.add(v2);
-          const newLink = { source: v1, target: v2 };
-          links.push(newLink);
-        }
-
-        tempSet.forEach((node) => {
-          const newNode = { id: node };
-          nodes.push(newNode);
-        });
-
-        const graphData = { nodes, links };
-
-        const graph = new Graph('graph-container');
-        this.graph = graph;
-        graph.loadGraph(graphData);
-      }
-
-      if (line.startsWith('#p')) {
-        const newLine = line.replace('#p', '');
-        this.sidebar.addContent(newLine);
-        renderMathInElement(document.body);
-      }
-
-      if (line.startsWith('#compute-tree-decomposition')) {
-        const newLine = line.replace('#compute-tree-decomposition', '');
-        await this.graph.computeTreeDecomposition();
-        await this.graph.readTreeDecomposition();
-        const td = this.graph.getTreeDecomposition();
-        const treeDecomposition = new Graph('tree-container');
-        treeDecomposition.loadGraph(td, 'tree', this.graph);
-      }
-    }
-  }
-
-  async createCustomSection() {
-    await readLocalFile('./Chapters/content.txt');
-    this.sectionFunctionBuilder(window.n);
-
-    // const add = new Function('sb', 'this.sidebar.addContent(\'yeeep\');');
-    // add(this.sidebar);
-
-    /*   const v = eval(`
-      const graph = new Graph('container');
-      graph.randomGraph();
-    `); */
-
-    // console.log(this.sidebar, add);
-
-    // const section = new Section(add, 'chapter5');
-    this.addSection(section);
-
-    // readLocalFile;
-  }
-
-  addSection(section) {
-    this.sections.push(section);
-    this.currentSection = section;
-    this.createSection();
-  }
-
   createSection() {
     if (!this.currentSection) this.currentSection = this.sections[0];
-    d3.select('.nav').style('flex', 0.05);
+
+    d3.select('.nav').style('height', '50px');
 
     /* Query strings */
     window.history.replaceState({}, '', '?');
@@ -1185,9 +1105,7 @@ export default class SectionHandler {
     d3.select('#container').selectAll('svg').remove();
 
     if (this.sidebar) this.sidebar.clear();
-    // if (this.graph) this.graph.clear();
     if (this.tree) this.tree.clear();
-    // if (this.treeDecomposition) this.treeDecomposition.clear();
     d3.select('#output').selectAll('*').remove();
     d3.select('#tooltip').remove();
     d3.select('#tooltip-arrow').remove();
@@ -1226,107 +1144,3 @@ export default class SectionHandler {
     this.createSection();
   }
 }
-
-// Abandoned sections blow.. Might come back to them.. Might not..
-
-/*
-new Section(
-  async () => {
-    this.sidebar.addContent(`
-          <p>Why should we care about treewidth then?</p>
-
-         <p>Well we know that many problems which are considered hard to execute on graphs are a lot easier to execute on trees.</p>
-
-         <p>Which means if we can turn a given graph into a tree we can essentially compute the same problem on that tree of the graph.</p>
-
-         <p>First let us consider a classic graph problem: <strong>Maximum Independent Set</strong>.</p>
-
-         <p>Recall that a maximum independent set is the largest possible size of an independent set of a graph.</p>
-
-         <p>The algorithm you see here is a naive brute force algorithm that checks every subset of the graph and the running time is</p>
-          $$ O(2^n * n * (n-1)/2) $$
-
-          <p>As you can tell this algorithm is really slow as we check all subsets of the graph.</p>`);
-
-    d3.select('#output')
-      .append('div')
-      .attr('id', 'max-output');
-
-    const graph = new Graph('container');
-    graph.randomGraph();
-
-    this.sidebar.addButton('Run Max Independent Set', () => graph.runMaximumIndependentSet());
-    this.sidebar.addButton('Skip Forward', () => graph.skipForwardMaximumIndependentSet());
-  },
-  'chapter1',
-), */
-
-/* new Section(
-  async () => {
-    if (!window.graphContainer && !window.treeContainer) {
-      const graphContainer = d3.select('#container')
-        .append('div')
-        .attr('id', 'graph-container');
-
-      const treeContainer = d3.select('#container')
-        .append('div')
-        .attr('id', 'tree-container');
-
-      window.graphContainer = graphContainer;
-      window.treeContainer = treeContainer;
-    }
-
-    this.sidebar.addContent(`
-    <p class="fact"><strong class="fact-title">Theorem:</strong> Given a graph \\( G \\) with \\( n \\) nodes and a tree decomposition of \\( G \\)
-     with width \\( K \\) we can compute a nice tree decomposition of \\( G \\) with width \\( k \\) in polynomial time.</p>
-
-     <p>We describe an algorithm as follows...</p>
-     <p>
-     <strong>Step 1:</strong> Choose an arbitrary node to be the root.
-     <br>
-     <strong>Step 2:</strong> Make every node have at most 2 children.
-     <br>
-     <strong>Step 3:</strong> Every node that has 2 children, turn them into a join node.
-     <br>
-     <strong>Step 4:</strong> Every node that has 1 child, let the parent be \\( X_i \\) and the child be \\( X_j \\)
-     create introduce nodes that introduce the elements that are in \\( X_i \\) but not in \\( X_j \\). Create forget nodes for elements that are in \\( X_j \\) but not in \\( X_i \\).
-     <br>
-     <strong>Step 5:</strong> Make leaves have size at most 1 by adding as many introduced nodes as needed.
-     </p>
-
-    `);
-    this.sidebar.addExercise('Construct the nice tree decomposition of the tree decomposition.');
-
-    const td = {
-      nodes: [
-        {
-          id: 1,
-          label: '1 2 3',
-        },
-        {
-          id: 2,
-          label: '2 3 4',
-        },
-      ],
-      links: [
-        {
-          source: 1,
-          target: 2,
-        },
-      ],
-    };
-
-    const niceTreeDecompositionData = {
-      id: 1,
-      label: '',
-      vertices: [],
-      children: [],
-    };
-    const treeDecomposition = new Graph('graph-container');
-    treeDecomposition.loadGraph(td, 'tree');
-
-    const niceTreeDecomposition = new Tree('tree-container', 'nice', treeDecomposition);
-    niceTreeDecomposition.load(niceTreeDecompositionData, 'nice');
-  },
-  'chapter3',
-), */

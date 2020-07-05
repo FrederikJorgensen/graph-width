@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node src/app.js",
     "lint": "npx eslint public/js/td.js",
-    "dev": "nodemon src/app.js",
+    "dev": "node src/app.js",
     "build": "parcel build public/index.html --public-url ./"
   },
   "repository": {

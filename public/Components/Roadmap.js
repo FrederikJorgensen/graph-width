@@ -60,11 +60,9 @@ export default class Roadmap {
 
   toggle() {
     if (this.visible) {
-      d3.select('#chapter-button').style('color', '#6d7e8e');
       this.visible = false;
       this.hide();
     } else {
-      d3.select('#chapter-button').style('color', '#1f1f1f');
       this.visible = true;
       this.show();
     }
