@@ -40,18 +40,20 @@ const logoContainer = d3.select('#main')
   .append('div')
   .attr('class', 'logo-container');
 
-logoContainer.append('h1')
-  .text('GraphWidth.com')
-  .style('font-size', '50px')
+logoContainer
+  .append('h1')
+  .attr('class', 'homepage-title')
+  .text('GraphWidth')
+  .style('font-size', '34px')
+  .style('font-weiht', 'bold')
+  .style('color', 'white')
   .style('margin', 0)
   .style('z-index', 10)
   .style('color', 'white');
 
-logoContainer.append('h2')
+logoContainer
+  .append('p')
   .text('An interactive way to learn graph width measures.')
-  .style('color', 'white')
-  .style('opacity', '85%')
-  .style('z-index', '10')
   .attr('class', 'subtitle');
 
 logoContainer.append('button')
@@ -60,12 +62,24 @@ logoContainer.append('button')
   .style('z-index', '20')
   .on('click', () => chapterHandler.startFirstLevel());
 
-d3.select('#chapter-button').on('click', () => {
-  roadmap.toggle();
-});
-
 d3.select('#sandbox-button').on('click', () => {
   chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], true);
+});
+
+d3.select('#graph-separator-link').on('click', () => {
+  chapterHandler.goToChapter(chapterHandler.chapters[0], false, false, true);
+});
+
+d3.select('#treewidth-link').on('click', () => {
+  chapterHandler.goToChapter(chapterHandler.chapters[1], false, false, true);
+});
+
+d3.select('#nice-link').on('click', () => {
+  chapterHandler.goToChapter(chapterHandler.chapters[2], false, false, true);
+});
+
+d3.select('#algo-link').on('click', () => {
+  chapterHandler.goToChapter(chapterHandler.chapters[3], false, false, true);
 });
 
 d3.select('#custom-algorithm-button').on('click', () => {
@@ -97,7 +111,7 @@ d3.select('body').on('keydown', () => {
 });
 
 const svg = d3.select('#main').append('svg').attr('width', width).attr('height', height);
-const graph = generateRandomGraph(10, 10);
+const graph = generateRandomGraph(30, 20);
 
 svg.selectAll('line')
   .data(graph.links)
@@ -111,15 +125,15 @@ svg.selectAll('circle')
   .enter()
   .append('circle')
   .style('fill', (d) => colors(d.id))
-  .attr('r', 18);
+  .attr('r', 20);
 
 const simulation = d3.forceSimulation()
   .force('x', d3.forceX(width / 2).strength(0.1))
   .force('y', d3.forceY(height / 2).strength(0.1))
   .force('center', d3.forceCenter(width / 2, height / 2))
   .nodes(graph.nodes)
-  .force('charge', d3.forceManyBody().strength(-450))
-  .force('link', d3.forceLink(graph.links).id((d) => d.id).strength(0.3))
+  .force('charge', d3.forceManyBody().strength(-1100))
+  .force('link', d3.forceLink(graph.links).id((d) => d.id).strength(0.5))
   .on('tick', () => {
     svg.selectAll('circle').attr('cx', (d) => d.x).attr('cy', (d) => d.y);
 

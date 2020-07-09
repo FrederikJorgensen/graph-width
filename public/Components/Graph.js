@@ -652,7 +652,6 @@ export default class Graph {
           d3.selectAll('#graph-container circle')
             .style('fill', '#1f77b4');
           const allNodes = d3.selectAll('#graph-container circle').data();
-          if (node === allNodes[allNodes.length - 1]) resolve();
         });
 
       d3.selectAll('ellipse')
@@ -677,8 +676,8 @@ export default class Graph {
         .style('stroke-width', '6px')
         .on('end', () => {
           d3.selectAll('line')
-            .style('stroke', 'rgb(51, 51, 51)')
-            .style('stroke-width', '3.5px');
+            .style('stroke', 'white')
+            .style('stroke-width', '2px');
         });
 
 
@@ -790,8 +789,6 @@ export default class Graph {
       .classed('nonhighlight', true)
       .classed('not-separating-node', false)
       .classed('separating-node', false);
-
-    d3.selectAll('line').style('stroke', 'black');
   }
 
   colorSeparating() {
@@ -1419,8 +1416,6 @@ export default class Graph {
           enter.append('circle')
             .attr('r', 20)
             .style('fill', '#1f77b4')
-            .style('stroke', 'rgb(51, 51, 51)')
-            .style('stroke-width', '3.5px')
             .on('mouseover', () => this.disableAddNode())
             .on('mouseleave', () => this.enableAddNode())
             .on('mousedown', (d) => this.beginDrawLine(d))
@@ -1679,9 +1674,7 @@ export default class Graph {
         .append('ellipse')
         .attr('rx', (d) => d.label.length * 8)
         .attr('ry', 25)
-        .style('fill', '#2ca02c')
-        .style('stroke', 'rgb(51, 51, 51)')
-        .style('stroke-width', '3.5px');
+        .style('fill', '#2ca02c');
 
       svg.selectAll('g')
         .append('text')

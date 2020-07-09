@@ -18,10 +18,10 @@ html {
 
 body {
   height: 100%;
-  overflow: hidden;
   margin: 0;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .main {
@@ -37,21 +37,25 @@ body {
   height: 0px;
   display: flex;
   background-color: var(--surface);
-  box-shadow: 0 7px 9px -2px rgba(0,0,0,.2);
-  overflow: hidden;
+  box-shadow: 0 7px 9px -2px rgba(0,0,0,.9);
 }
 
 .nav-item {
   display: inline-flex;
-  justify-content: center;
   align-items: center;
   padding: 15px;
-  font-size: 18px;
+  font-size: 16px;
+  letter-spacing: .05em;
 }
 
-.nav-item:hover {
-  color: #1F1F1F;
-  transition: color 150ms ease-in;
+.github-logo {
+  margin-top: .5em;
+  color: #fff;
+}
+
+.nav a:hover{
+  background-color: var(--on-hover);
+  transition: background-color 150ms ease-in;
   cursor: pointer;
 }
 
@@ -62,6 +66,12 @@ body {
   align-items: center;
   height: 25%;
   width: 25%;
+  background-color: #141414;
+  border-radius: 25px;
+  z-index: 999;
+  -webkit-box-shadow: 0px 0px 78px -27px rgba(0,0,0,0.75);
+  -moz-box-shadow: 0px 0px 78px -27px rgba(0,0,0,0.75);
+  box-shadow: 0px 0px 78px -27px rgba(0,0,0,0.75);
 }
 
 .hamiltonianTable {
@@ -104,12 +114,16 @@ body {
 .subtitle {
   text-align: center;
   font-style: italic;
+  font-size: 24px;
+  opacity: 85%;
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
-  flex: 0.3;
+  flex: 1;
+  overflow: auto;
+  width: 30%;
   height: 100%;
   background-color: var(--surface);
   margin-right: 1em;
@@ -118,7 +132,6 @@ body {
 
 .progress-bar-container {
   margin-top: auto;
-  height: 5%;
   width: 100%;
   display: flex;
   justify-content: center;
@@ -153,9 +166,15 @@ body {
 }
 
 .custom-nice-tree-container {
-  height: 100%;
+  height: 95%;
   width: 100%;
   padding: 1em;
+}
+
+.custom-control-area {
+  height: 5%;
+  width: 100%;
+  padding: 0 1em 1em 1em;
 }
 
 #custom-nice-tree {
@@ -194,7 +213,7 @@ body {
 }
 
 #app-area {
-  flex: 0.7;
+  width: 70%;
   height: 100%
 }
 
@@ -318,19 +337,33 @@ td {
 }
 
 .mathdefault {
-  /* font-weight: bold; */
-  /* font-size: 40px; */
-  /* margin: 20px; */
+  font-size: 18px;
 }
 
 .katex {
-  margin: .15em;
+  font-size: 6px;
+  margin: .2em;
+  background-color: #15314b;
+  border-radius: 5px;
+  padding: .05em .3em .05em .3em;
+}
+
+.highlight {
+  background: url(Resources/brush_stroke.png);
+  background-repeat: no-repeat;
+  background-size: 100% 95%;
+  padding: 10px 50px;
 }
 
 .fact {
+  color: var(--surface);
   background-color: #dfd;
   border-radius: 10px;
   padding: 12.5px;
+}
+
+.fact span {
+  background-color: #dfd;
 }
 
 .fact-title {
@@ -408,6 +441,8 @@ svg {
   display: flex;
   flex-direction: column;
   margin: 20px 0 20px 0;
+  background-color: #2e2e2e;
+  border-radius: var(--border);
 }
 
 .choice {
@@ -417,7 +452,7 @@ svg {
   display: flex;
   align-items: center;
   min-height: 50px;
-  color: #333;
+  color: white;
   line-height: 1.2em;
   text-align: left;
 }
@@ -429,6 +464,22 @@ svg {
 .choice:hover {
   background-color: lightgray;
   cursor: pointer;
+}
+
+.choice:first-child {
+  border-top-left-radius: var(--border);
+  border-top-right-radius: var(--border);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.choice:last-child:hover {
+  background-color: lightgray;
+  cursor: pointer;
+  border-top-left-radius: 0;
+  border-top-right-radius: 0;
+  border-bottom-left-radius: var(--border);
+  border-bottom-right-radius: var(--border);
 }
 
 .speech-bubble-container {
@@ -587,10 +638,6 @@ svg {
   opacity: 60%;
 }
 
-a {
-  color: #1F1F1F;
-}
-
 .chapter-title {
   text-align: center;
 }
@@ -699,7 +746,7 @@ a {
 }
 
 .content-container {
-  height: 80%;
+  flex: 0 1 250px;
   padding: 0 25px 0 25px;
   overflow-y: auto;
 }
@@ -752,8 +799,16 @@ hr {
 	color: #fefefe;
 }
 
-li {
-  margin: 0 0 3px 0;
+.choice input[type="radio"] {
+  background-color: white !important;
+}
+
+[type="radio"]:not(:checked), [type="radio"]:checked {
+  opacity: 1;
+}
+
+.exercise-box span {
+  background-color: #d9e8ff;
 }
 
 .inout {
@@ -878,13 +933,11 @@ svg {
 
 .tree-node {
   fill: #2ca02c;
-  stroke: rgb(51, 51, 51);
-  stroke-width: 3.5;
 }
 
 .tree-link {
-  stroke: rgb(51, 51, 51);
-  stroke-width: 3.5px;
+  stroke: white;
+  stroke-width: 2.5px;
 }
 
 .label {
@@ -941,11 +994,6 @@ svg {
   font-weight: bold;
 }
 
-input {
-  color: var(--text-color);
-  text-align: center;
-}
-
 .main-sandbox {
   display: flex;
   flex: 1;
@@ -980,9 +1028,18 @@ input {
 }
 
 .custom-right {
-  display: flex;
   width: 50%;
   height: 100%;
+}
+
+.custom-controls {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: var(--surface);
+  width: 100%;
+  height: 100%;
+  border-radius: var(--border);
 }
 
 .sandbox-app-container {
@@ -993,7 +1050,6 @@ input {
 
 .custom-code-container {
   width: 100%;
-  /* height: 100%; */
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -1002,14 +1058,52 @@ input {
 .code-block-container {
   height: 100%;
   width: 100%;
-  padding: 1em;
+  padding: 1em 0 1em 1em;
   display: flex;
 }
 
+.cm-s-monokai.CodeMirror {
+  background-color: var(--surface);
+}
+
+.CodeMirror {
+  background-color: #001528 !important;
+  border-radius: 0 0 8px 8px;
+}
+
+.CodeMirror-gutter {
+  background-color: #001528;
+}
+
+.CodeMirror-linenumber {
+  color: white !important;
+}
+
 .code-header {
-  /* flex: .1; */
-  height: 50px;
-  background-color: #454545;
+  display: flex;
+  height: fit-content;
+  justify-content: flex-end;
+  align-items: center;
+  background-color: #15314b;
+  border-radius: 8px 8px 0 0;
+}
+
+.material-icons.code-buttons {
+  font-size: 35px;
+  padding: .1em;
+}
+
+.material-icons.code-buttons:hover {
+  background-color: #626ee3;
+  cursor: pointer;
+  transition: 150ms background-color ease-in;
+}
+
+.material-icons.code-buttons:last-child:hover {
+  background-color: #626ee3;
+  border-radius: 0 8px 0 0;
+  cursor: pointer;
+  transition: 150ms background-color ease-in;
 }
 
 .custom-sidebar {
@@ -1155,4 +1249,93 @@ input {
 .big:hover::after{
  --scale: 1;
  z-index: 500;
+}
+
+.nav-links {
+  margin-left: auto;
+  opacity: 0;
+}
+
+ul {
+  list-style: none; 
+}
+
+.chapter-button {
+  display: flex;
+  align-items: center;
+}
+
+img {
+  max-width: 100%;
+  max-height: 100%;
+  /* padding: .6em; */
+}
+
+.nav-comp {
+  margin-right: 1em;
+}
+
+ul li {
+  display: block;
+  position: relative;
+  float: left;
+}
+
+/* This hides the dropdowns */
+li ul {
+  display: none;
+  z-index: 99999;
+}
+
+ul li a {
+  display: block;
+  text-decoration: none;
+  white-space: nowrap;
+  color: #fff;
+}
+
+ul li a:hover {
+  background: #2c3e50;
+}
+
+/* Display the dropdown */
+li:hover > ul {
+  display: block; 
+  position: absolute;
+  border: 1px solid lightgray;
+
+}
+
+/* Remove float from dropdown lists */
+li:hover li {
+    float: none;
+}
+
+li:hover a {
+  background: var(--surface);
+}
+
+li:hover li a:hover {
+  background: #2c3e50;
+}
+
+.main-navigation li ul li {
+  border-top: 0;
+}
+/* Displays second level dropdowns to the right of the first level dropdown */
+ul ul ul {
+  left: 100%;
+  top: 0; 
+}
+
+/* Simple clearfix */
+
+ul:before,
+ul:after {
+    content: " "; /* 1 */
+    display: table; /* 2 */
+}
+
+ul:after {
+    clear: both;
 }

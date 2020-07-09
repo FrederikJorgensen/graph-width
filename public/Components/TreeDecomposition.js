@@ -151,10 +151,6 @@ export default class TreeDecomposition {
   }
 
   checkCoherence() {
-    console.log(this.nodes);
-    // if (this.nodes.length === 0 || this.links.length === 0) return false;
-
-
     /* Check if a node exists in multiple bags */
     for (let i = 0; i < this.graphOfTd.nodes.length; i++) {
       const currentNode = this.graphOfTd.nodes[i];
@@ -276,8 +272,6 @@ export default class TreeDecomposition {
             .attr('rx', 30)
             .attr('ry', 25)
             .style('fill', '#2ca02c')
-            .style('stroke', 'rgb(51, 51, 51)')
-            .style('stroke-width', '3.5px')
             .on('mouseover', () => this.disableAddNode())
             .on('mouseleave', () => this.enableAddNode())
             .on('mousedown', (d) => this.beginDrawLine(d))

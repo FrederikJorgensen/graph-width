@@ -67,7 +67,7 @@ export default class SectionHandler {
       new Section(
         async () => {
           this.sidebar.addContent(`
-          <p>Let \\( S \\) be a separator in some graph \\( G \\). We say that \\( S \\) is a balanced separator if every component of \\( G - S \\) has \\( \\leq V(G) \\).</p>
+          <p>Let \\( S \\) be a separator in some graph \\( G \\). We say that \\( S \\) is a balanced separator if every component of \\( G - S \\) has \\( \\leq V(G) / 2 \\)</p>
 
           <p>That is every component after you remove \\( S \\) should contain less than or equal amounts of vertices to the amount of vertices in the original graph divided by 2.</p>
           `);
@@ -223,7 +223,7 @@ export default class SectionHandler {
       ),
       new Section(
         async () => {
-          this.sidebar.addContent('This is another valid tree decomposition of the graph.');
+          this.sidebar.addContent('<p>This is another valid tree decomposition of the graph.</p>');
 
           const anotherTd = {
             nodes: [
@@ -533,7 +533,9 @@ export default class SectionHandler {
       ),
       new Section(
         async () => {
-          this.sidebar.addContent(`Lets test your knowledge of the tree decomposition properties.
+          this.sidebar.addContent(`
+          
+          <p>Lets test your knowledge of the tree decomposition properties.</p>
           
           <p><strong>Add bags</strong> for the tree decomposition by clicking anywhere in the highlighted space.</p>
           

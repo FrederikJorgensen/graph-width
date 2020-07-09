@@ -104,7 +104,7 @@ export default class ChapterHandler {
           const editor = CodeMirror.fromTextArea(document.getElementById('editor'), {
             value: 'function myScript(){return 100;}\n',
             mode: 'javascript',
-            theme: 'monokai',
+            theme: 'material-palenight',
             lineNumbers: true,
             autoCloseBrackets: true,
           });
@@ -193,7 +193,7 @@ export default class ChapterHandler {
           codeHeader
             .append('span')
             .text('play_arrow')
-            .attr('class', 'material-icons')
+            .attr('class', 'material-icons code-buttons')
             .on('click', () => {
               userInput = editor.getValue();
 
@@ -230,17 +230,14 @@ export default class ChapterHandler {
 
             ${userInput}
 
-            console.log(node.table);
-
             niceTreeDecomposition.drawTable(node);
-
           })`;
             });
 
           codeHeader
             .append('span')
             .text('replay')
-            .attr('class', 'material-icons')
+            .attr('class', 'material-icons code-buttons')
             .on('click', () => editor.setValue('switch(type){\n case "leaf":\n //Your code for a leaf node.\n break;\n\n case "introduce":\n // Your code for an introduce node.\n break;\n\n case "forget":\n //Your code for a forget node.\n break;\n\n case "join":\n // Your code for a join node.\n break;\n}'));
 
 
@@ -250,14 +247,16 @@ export default class ChapterHandler {
             .attr('class', 'pure-material-button-contained')
             .on('click', () => editor.setValue(formattedJSON)); */
 
-          const controls = rightSide
+
+          const controlsContainer = customRight
             .append('div')
-            .attr('id', 'controls');
+            .attr('class', 'custom-control-area');
 
-          const controlsContainer = controls.append('div')
-            .attr('class', 'controls-container');
+          const cc = controlsContainer
+            .append('div')
+            .attr('class', 'custom-controls');
 
-          controlsContainer
+          cc
             .append('span')
             .text('keyboard_arrow_left')
             .attr('class', 'material-icons nav-arrows')
@@ -269,7 +268,7 @@ export default class ChapterHandler {
               eval(customFunction);
             });
 
-          controlsContainer
+          cc
             .append('span')
             .text('keyboard_arrow_right')
             .attr('class', 'material-icons nav-arrows')
@@ -489,11 +488,12 @@ export default class ChapterHandler {
     this.createChapter();
   }
 
-  goToChapter(chapter, isSandbox, isCustom) {
+  goToChapter(chapter, isSandbox, isCustom, navLink) {
     if (isSandbox) {
       d3.select('.nav').style('height', '50px');
       window.history.replaceState({}, '', '?');
       d3.select('#main').selectAll('*').remove();
+      d3.select('.nav-links').style('opacity', 1);
       window.history.replaceState({}, '', '');
       const params = new URLSearchParams(location.search);
       params.set('sandbox', 'true');
@@ -505,6 +505,7 @@ export default class ChapterHandler {
     if (isCustom) {
       d3.select('.nav').style('height', '50px');
       d3.select('#main').selectAll('*').remove();
+      d3.select('.nav-links').style('opacity', 1);
       window.history.replaceState({}, '', '?');
       window.history.replaceState({}, '', '');
       const params = new URLSearchParams(location.search);
@@ -514,6 +515,11 @@ export default class ChapterHandler {
       return;
     }
 
+    if (navLink) {
+      window.history.replaceState({}, '', '?');
+      window.history.replaceState({}, '', '');
+    }
+
     this.currentChapter = chapter;
     this.createChapter();
   }
@@ -521,6 +527,7 @@ export default class ChapterHandler {
 
   createChapter() {
     d3.select('#main').selectAll('*').remove();
+    d3.select('.nav-links').style('opacity', 1);
 
     window.graphContainer = null;
     window.treeContainer = null;

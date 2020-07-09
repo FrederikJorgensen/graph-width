@@ -7,6 +7,7 @@ export default class Sidebar {
   }
 
   clear() {
+    this.content.html(null);
     d3.selectAll('.button-container').remove();
     d3.select('.quiz').remove();
     if (this.exerciseContainer) this.exerciseContainer.remove();
@@ -72,7 +73,7 @@ export default class Sidebar {
     const submitButton = this.submitContainer
       .append('button')
       .text('submit')
-      .attr('class', 'pure-material-button-contained')
+      .attr('class', 'waves-effect waves-light btn')
       .on('click', () => this.checkAnswer(this.currentGuess));
 
     this.submitButton = submitButton;
@@ -94,7 +95,7 @@ export default class Sidebar {
 
     const solutionButton = this.solutionButtonContainer.append('button')
       .text('Show Solution')
-      .attr('class', 'pure-material-button-contained')
+      .attr('class', 'waves-effect waves-light btn')
       .attr('id', 'solution-button')
       .on('click', () => this.toggleSolution());
 
@@ -139,7 +140,7 @@ export default class Sidebar {
     this.buttonContainer
       .append('button')
       .text(buttonText)
-      .attr('class', 'pure-material-button-contained')
+      .attr('class', 'waves-effect waves-light btn')
       .on('click', () => {
         event();
       });
@@ -147,11 +148,11 @@ export default class Sidebar {
 
   setTitle(title) {
     this.sidebarContainer
+      .append('div')
+      .attr('class', 'sidebar-title')
       .append('h2')
       .text(title)
-      .attr('class', 'chapter-title');
-
-    this.sidebarContainer
+      .attr('class', 'chapter-title')
       .append('hr');
   }
 
@@ -169,6 +170,7 @@ export default class Sidebar {
 
   addProgresBar() {
     const { sections } = this.sectionHandler;
+    if (sections.length === 1) return;
     this.sections = sections;
 
     this.progressBarContainer = this.sidebarContainer
