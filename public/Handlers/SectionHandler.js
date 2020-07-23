@@ -6,7 +6,7 @@ import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
 import TreeDecomposition from '../Components/TreeDecomposition.js';
 import {
-  graph1, exampleGraph, exampleGraph2, exampleGraph3, gridGraph, cliqueGraph,
+  graph1, exampleGraph, exampleGraph2, exampleGraph3, gridGraph, cliqueGraph, treeGraph, planarGraph, expanderGraph,
 } from '../Utilities/graphs.js';
 import { readLocalFile } from '../Utilities/helpers.js';
 
@@ -204,7 +204,7 @@ export default class SectionHandler {
       new Section(
         async () => {
           this.sidebar.addContent(`
-            <p>Since all 3 properties hold true we have proofed that the tree on the right side is a valid tree decomposition of the graph on the left side.</p>
+            <p>Since all 3 properties hold true we have prooved that the tree on the right side is a valid tree decomposition of the graph on the left side.</p>
 
             <p>Is this the only valid tree decomposition of this graph? <br><br> No, a graph can have multiple valid tree decompositions.</p>
             
@@ -564,6 +564,48 @@ export default class SectionHandler {
       new Section(
         async () => {
           this.sidebar.addContent(`
+           <p class="fact"><span class="fact-title">Fact:</span> For every \\( k \\geq 2\\), the treewidth of the \\( k\\) x \\( k \\) grid is exactly \\( k \\)</p>
+
+           <p>Consider the \\( 3\\) x \\( 3 \\) grid on the right. Intuitively we can see there is no way we can separate this graph using less than \\( 3 \\) vertices.</p>
+          
+          `);
+          const graph = new Graph('graph-container');
+          graph.loadGraph(gridGraph);
+
+          await graph.computeTreeDecomposition();
+          await graph.readTreeDecomposition();
+          const td1 = graph.getTreeDecomposition();
+          const treeDecomposition = new Graph('tree-container');
+          treeDecomposition.loadGraph(td1, 'tree', graph);
+        }, 'chapter2',
+      ),
+      new Section(
+        async () => {
+          this.sidebar.addContent(`
+          <p>Certain graph classes has a constant treewidth regardless of the number of vertices/edges in that particular graph.</p>
+
+          <p><strong>Trees</strong> have treewidth 1.</p>
+
+          <p>This is also the reason why we say that width is the largest bag - 1. For historical reasons the first people studying treewidth wanted trees to have width 1.</p>
+          `);
+
+          d3.select('#container').style('height', '100%');
+          d3.select('#output').style('height', '0');
+
+          const graph = new Graph('graph-container');
+          graph.loadGraph(treeGraph);
+
+          await graph.computeTreeDecomposition();
+          await graph.readTreeDecomposition();
+          const td1 = graph.getTreeDecomposition();
+          const treeDecomposition = new Graph('tree-container');
+          treeDecomposition.loadGraph(td1, 'tree', graph);
+        },
+        'chapter2',
+      ),
+      new Section(
+        async () => {
+          this.sidebar.addContent(`
            <p class="fact"><span class="fact-title">Fact:</span> The treewidth of clique \\( k \\) is \\( k - 1\\)</p>
 
            <p>As you can tell by the graph and its tree decomposition a clique has a large treewidth. An optimal tree decomposition of a clique is basically the trivial decomposition.</p>
@@ -580,14 +622,10 @@ export default class SectionHandler {
       new Section(
         async () => {
           this.sidebar.addContent(`
-           <p class="fact"><span class="fact-title">Fact:</span> For every \\( k \\geq 2\\), the treewidth of the \\( k\\) x \\( k \\) grid is exactly \\( k \\)</p>
-
-           <p>Consider the \\( 3\\) x \\( 3 \\) grid on the right. Intuitively we can see there is no way we can separate this graph using less than \\( 3 \\) vertices.</p>
-          
+           <p>Outerplanar graphs have treewidth \\( 2 \\).</p>
           `);
           const graph = new Graph('graph-container');
-          graph.loadGraph(gridGraph);
-
+          graph.loadGraph(graph1);
           await graph.computeTreeDecomposition();
           await graph.readTreeDecomposition();
           const td1 = graph.getTreeDecomposition();
@@ -595,6 +633,7 @@ export default class SectionHandler {
           treeDecomposition.loadGraph(td1, 'tree', graph);
         }, 'chapter2',
       ),
+
       new Section(
         async () => {
           this.sidebar.addContent(`
@@ -745,6 +784,8 @@ export default class SectionHandler {
               },
             ],
           };
+
+
           this.tree.load(treeData, 'normal-tree');
           this.tree.addTooltip();
           this.tree.addArrow();
@@ -890,8 +931,6 @@ export default class SectionHandler {
           niceTreeDecomposition.setGraph(graph);
           niceTreeDecomposition.enableMaximumIndependentSet();
 
-          this.sidebar.addButton('Max Independent Set', () => niceTreeDecomposition.mis());
-
           const controlsContainer = d3.select('#output').append('div')
             .attr('class', 'controls-container');
 
@@ -1013,8 +1052,6 @@ export default class SectionHandler {
             .text('keyboard_arrow_right')
             .attr('class', 'material-icons nav-arrows')
             .on('click', () => niceTreeDecomposition.next());
-
-          this.sidebar.addButton('3-Coloring', () => niceTreeDecomposition.runThreeColor());
         },
         'chapter4',
       ),
@@ -1091,7 +1128,10 @@ export default class SectionHandler {
   createSection() {
     if (!this.currentSection) this.currentSection = this.sections[0];
 
-    d3.select('.nav').style('height', '50px');
+    d3.select('#graph-container').classed('graph-classes', false);
+
+    d3.select('.nav').style('height', '5%');
+    d3.select('#main').style('height', '95%');
 
     /* Query strings */
     window.history.replaceState({}, '', '?');
@@ -1102,7 +1142,7 @@ export default class SectionHandler {
     window.history.replaceState({}, '', `?${params.toString()}`);
     /* Query strings end */
 
-    d3.select('#graph-container').selectAll('svg').remove();
+    d3.select('#graph-container').selectAll('*').remove();
     d3.select('#tree-container').selectAll('svg').remove();
     d3.select('#container').selectAll('svg').remove();
 

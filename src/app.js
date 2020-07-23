@@ -24,13 +24,15 @@ app.post('/compute', (req, res) => {
   writeGraph.writeGraphFile(graph);
   const command = 'cd src && java -jar src.jar graph.gr';
   const child = require('child_process').exec(command);
-  let treeInput = '';
+  let treeOutput = '';
   child.stdout.on('data', (data) => {
-    treeInput += data.toString();
+    treeOutput += data.toString();
   });
   child.on('exit', () => {
-    writeTreeDecomposition.writeTreeDecompositionFile(treeInput);
-    writeTreeDecomposition.writeNiceTreeDecomposition(treeInput);
+    // create object here
+    // send it back
+    writeTreeDecomposition.writeTreeDecompositionFile(treeOutput);
+    writeTreeDecomposition.writeNiceTreeDecomposition(treeOutput);
     res.send({ success: true });
   });
 });

@@ -441,6 +441,19 @@ export default class Graph {
     return { nodes: subGraphNodes, links: subGraphLinks };
   }
 
+  createSubgraphFromMatching(matching) {
+    // [[1,2], [2,3]]
+
+    const temp = [];
+    for (const pair of matching) {
+      temp.push(pair[0], pair[1]);
+
+      const link = { source: pair[0], target: pair[1] };
+    }
+
+    const subGraphNodes = this.nodes.filter((node) => temp.includes(node.id));
+  }
+
   highlightSubGraph(subGraph) {
     this.path2.style('opacity', 0);
     const { nodes } = subGraph;
@@ -784,7 +797,6 @@ export default class Graph {
 
   resetNodeStyling() {
     d3.selectAll('circle').style('fill', null);
-
     d3.selectAll('circle')
       .classed('nonhighlight', true)
       .classed('not-separating-node', false)
@@ -1057,7 +1069,6 @@ export default class Graph {
 
     /* Check if the new subgraph after deleteing the separating set is connected */
     const subg = this.checkConnectivity(subGraphNodes, subGraphLinks);
-
 
     if (subg.isDisconnected) {
       this.resetNodeStyling();

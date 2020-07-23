@@ -1,0 +1,105 @@
+case "introduce node":
+  foreach childState in childStates
+    add v as 0,1 or 2
+
+    case v is 0:
+    v → 0
+    Old matching → new matching
+     
+    case v is 1:
+      for each w in child bag
+        check if there exists an wv edge in G
+          if true:
+            case w is 0:
+              We make w → 1
+              We make v → 1 
+              Add the pair (w,v) to the matching
+            case w is 1:
+              Make v → 1
+              Make w → 2
+              Find pair that contains (u,w) make it (u,v)
+
+    case v is 2:
+    v → 2
+    Find 2 Endpoints, endpoints can have degree 0 and degree 1
+    u = 0 → 1
+    u’ = 0 → 1 
+    1 → 
+    0 → 
+
+case "forget node":
+
+     (1,2)
+       |
+    (1,2,3)
+
+  We forgot 3
+
+  
+  
+
+  
+  
+
+
+
+  for each childState in childState
+  remove v from d
+  remove v M
+   // if v is part of a pair in the Matching M is not valid and the partial solution is not shown
+
+   if M is valid
+     childState = true
+   else
+     childState = false
+
+case "join node":  
+  rightTableKeys = getRightTableKeys()
+  leftTableKeys = getLeftTableKeys()
+
+  check d for the start and end node
+
+  for(i = 0; i < leftTableKeys.length; i++)
+    leftState = leftTableKeys[i]
+    rightState = rightTableKeys[i]
+
+    leftD = leftState[0]
+    rightD = rightState[0]
+
+    currentTable = getSum(leftD, rightD)
+    values = currentTable.values()
+
+    for each value in values
+      if value <= 2
+
+   leftMatching = leftState[1]
+   rightMatching = rightState[1]
+
+   newMatching = leftMacthing.concat(rightMatching)
+
+   subGraph = createSubgraph(newMatching)
+
+   containsCycles(subGraph)
+  
+  
+
+S = start node, T = end node
+S can have degree 0 throughout the DP but once you forget S it must have degree 1. It must also be a pair in some matching.
+Same for T.
+
+Function that finds path until vertex degree 1.
+M’’ iterate over each pair in the matching and check the paths.
+Only check true states.
+
+Endpoint can be a vertex with degree 0 or 1.
+Forget node notes:
+Degree must be 2
+Or 1 if we are at the endpoint of a path
+
+DP algorithm for Hamiltonian Path
+state = (d, M)
+valid pair is 2 endpoints with degree 1 e.g. [6,7]
+invalid pair is an array with 1 element e.g [6]
+table is the actual DP table which consists of rows like: (d, M) = true
+
+Check v, w as start and end point, must be degree 1.

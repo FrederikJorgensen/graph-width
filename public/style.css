@@ -17,24 +17,26 @@ html {
 }
 
 body {
+  overflow: hidden;
   height: 100%;
   margin: 0;
   display: flex;
+  flex: 1;
   flex-direction: column;
-  overflow: hidden;
 }
 
 .main {
   display: flex;
   background-color: var(--main-bg);
-  flex: 1 0 auto;
   justify-content: center;
   align-items: center;
+  height: 100%;
   width: 100%;
 }
 
 .nav {
-  height: 0px;
+  height: 0%;
+  /* flex: 0; */
   display: flex;
   background-color: var(--surface);
   box-shadow: 0 7px 9px -2px rgba(0,0,0,.9);
@@ -265,9 +267,25 @@ h2 {
   stroke-width: 3px;
 }
 
+.graph-classes {
+  display: flex;
+  flex-direction: column;
+}
+
+.graph-class {
+  flex: 1;
+  border: 1px solid red;
+}
+
+strong {
+  font-weight: 1000;
+}
+
 .table {
+  width: auto;
   z-index: 1000;
   background-color: white;
+  color: rgb(51, 51, 51);
   position: absolute;
   border: 3.5px solid rgb(51, 51, 51);
   padding: 15px;
@@ -341,11 +359,11 @@ td {
 }
 
 .katex {
-  font-size: 6px;
-  margin: .2em;
-  background-color: #15314b;
-  border-radius: 5px;
-  padding: .05em .3em .05em .3em;
+  /* font-size: 6px; */
+  /* margin: .2em; */
+  /* background-color: #15314b; */
+  /* border-radius: 5px; */
+  padding: .05em .2em .05em .2em;
 }
 
 .highlight {
@@ -812,8 +830,9 @@ hr {
 }
 
 .inout {
-  background-color: lightblue;
-  padding: 10px;
+  background-color: #303030;
+  padding: 8px;
+  border-radius: 10px;
 }
 
 .pure-material-button-contained {
@@ -972,6 +991,7 @@ svg {
   position: absolute;
   border: 1.5px solid lightgray;
   background-color: white;
+  color: rgb(51, 51, 51);
   z-index: 100;
   padding: 4px;
   transform: translate(-100%, -50%);
@@ -1050,9 +1070,7 @@ svg {
 
 .custom-code-container {
   width: 100%;
-  display: flex;
-  flex-direction: column;
-  flex: 1;
+  height: 100%;
 }
 
 .code-block-container {
@@ -1081,11 +1099,15 @@ svg {
 
 .code-header {
   display: flex;
-  height: fit-content;
   justify-content: flex-end;
   align-items: center;
   background-color: #15314b;
   border-radius: 8px 8px 0 0;
+  height: 5%;
+}
+
+.hamiltonianTable tbody .katex {
+  background-color: white;
 }
 
 .material-icons.code-buttons {
@@ -1107,8 +1129,10 @@ svg {
 }
 
 .custom-sidebar {
-  display: flex;
-  flex: 1 0 auto;
+  height: 95%;
+  /* display: flex; */
+  /* flex: 0.8; */
+  /* max-height: 31%; */
 }
 
 .slider {

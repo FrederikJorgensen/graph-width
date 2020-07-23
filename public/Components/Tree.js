@@ -15,7 +15,9 @@
 /* eslint-disable no-lonely-if */
 /* eslint-disable class-methods-use-this */
 
-import { hull, getAllSubsets, deepClone } from '../Utilities/helpers.js';
+import {
+  hull, getAllSubsets, deepClone, sumObjectsByKey,
+} from '../Utilities/helpers.js';
 import { contextMenu as menu } from './TreeContextMenu.js';
 
 const arraysMatch = function (arr1, arr2) {
@@ -423,8 +425,6 @@ export default class Tree {
     </thead>
     `;
 
-    console.log(keys);
-
     let sb = '';
 
     keys.forEach((key, index) => {
@@ -482,6 +482,74 @@ export default class Tree {
 
 
     renderMathInElement(document.body);
+  }
+
+  dpTable(node) {
+    console.log(node);
+    const keys = [...node.table.keys()];
+    const values = [...node.table.values()];
+
+    const thead = String.raw`
+    <thead>
+      <tr>
+        <th>\( (d,M) \)</th>
+        <th>\( bool \)</th>
+      </tr>
+    </thead>
+    `;
+
+    let sb = '';
+
+    keys.forEach((key, index) => {
+      const value = values[index];
+      const map = key[0];
+      const entries = Array.from(Object.keys(map));
+      const matchings = key[1];
+
+      let temp = String.raw`\begin{pmatrix}`;
+
+      for (const entry of entries) {
+        const val = map[entry];
+        temp += String.raw`
+            ${entry[0]} → ${val}\\
+        `;
+      }
+
+      temp += String.raw`\end{pmatrix}`;
+
+      for (const m of matchings) {
+        temp += JSON.stringify(m);
+      }
+
+
+      sb += String.raw`<tr><td>\( ${temp} \)</td><td>${value ? 'true<span class="material-icons correct-answer">check</span>' : 'false<span class="material-icons wrong-answer">clear</span>'}</td></tr>`;
+    });
+
+
+    const start = `<table class="hamiltonianTable">${thead}<tbody>${sb}</tbody></table>`;
+
+    const nodeSvg = d3.select(`#treeNode-${node.id}`);
+    const x = parseInt(nodeSvg.attr('x'), 10);
+    let y = parseInt(nodeSvg.attr('y'), 10);
+
+    y += 12.5;
+
+    d3.select('#tooltip-arrow')
+      .style('opacity', 1)
+      .attr('x1', x - 50)
+      .attr('y1', y)
+      .attr('x2', x)
+      .attr('y2', y)
+      .attr('transform', `translate(${0}, ${30})`);
+
+    const { top } = document.getElementById('tooltip-arrow').getBoundingClientRect();
+    const { left } = document.getElementById('tooltip-arrow').getBoundingClientRect();
+
+    d3.select('#tooltip')
+      .html(start)
+      .style('opacity', 1)
+      .style('left', `${left}px`)
+      .style('top', `${top}px`);
   }
 
   drawTable(node) {
@@ -647,6 +715,9 @@ export default class Tree {
   hamiltonianPath() {
     let i = 1;
 
+    const START_VERTEX = 1;
+    const END_VERTEX = 5;
+
     this.root.eachAfter((currentNode) => {
       if (this.current !== i++) return;
 
@@ -660,188 +731,184 @@ export default class Tree {
       else if (node.vertices.length > node.children[0].vertices.length) type = 'introduce';
       else if (node.vertices.length < node.children[0].vertices.length) type = 'forget';
 
-      const bag = node.vertices;
+      const subTree = getSubTree(this.root, currentNode.data);
+
+      /* Get the induced subgraph of all the vertices in the current subtree */
+      const inducedSubgraph = this.graph.createSubgraph(subTree);
+
+      /* Highlight the induced subgraph */
+      this.graph.highlightSubGraph(inducedSubgraph);
 
       let child;
       let childTable;
-      let childKeys;
+      let childStates;
 
       if ('children' in node) {
         child = this.getChild(node);
         childTable = child.table;
-        childKeys = [...childTable.keys()];
+        childStates = [...childTable.keys()];
       }
 
-      let table = new Map();
+      const table = new Map();
 
       switch (type) {
         case 'leaf':
-          /* Not sure what to do here. */
           break;
         case 'introduce':
-          /* Get the introduced vertex */
           const introducedVertex = this.getIntroducedVertex(node);
 
-          /* If the bag below this one is empty we know there is just 1 vertex and we want to initiliaze this bag */
           if (child.vertices.length === 0) {
             for (let i = 0; i <= 2; i++) {
-              // if (i === 1) continue;
               const state = [];
-              // const d = new Map();
               const d = {};
-              const firstVertex = bag[0];
-              d[firstVertex] = i;
-              const matchings = [];
+              d[introducedVertex] = i;
               const matching = [];
-              matchings.push(matching);
-              state.push(d);
-              state.push(matchings);
-
-              i === 1 ? table.set(state, false) : table.set(state, true);
+              const pair = [];
+              pair.push(introducedVertex);
+              matching.push(pair);
+              state.push(d, matching);
+              table.set(state, false);
             }
           } else {
-            for (const childKey of childKeys) {
+            for (const childState of childStates) {
               for (let i = 0; i <= 2; i++) {
-                const d = childKey[0];
-
-                const newMap = deepClone(d);
-
-                // const newMap = new Map(d);
-                // newMap.set(introducedVertex, i);
-                newMap[introducedVertex] = i;
-                const newArray = [];
-                newArray.push(newMap, []);
-                table.set(newArray, true);
-              }
-            }
-
-
-            for (const childState of childKeys) {
-              const oldMap = childState[0];
-
-              for (let i = 0; i <= 2; i++) {
+                const d = deepClone(childState[0]);
+                const matching = deepClone(childState[1]);
                 const state = [];
-                const matching = [];
-                const matchings = [];
-                const newMap = {};
-                // const newMap = new Map(oldMap);
+                const pair = [];
 
                 switch (i) {
                   case 0:
-                    newMap.set(introducedVertex, 0);
-                    matchings.push(matching);
-                    state.push(newMap, matchings);
-                    // states.push(state);
+                    d[introducedVertex] = 0;
+                    pair.push(introducedVertex);
+                    matching.push(pair);
+                    state.push(d, matching);
+                    table.set(state, false);
                     break;
                   case 1:
-
                     for (const w of child.vertices) {
                       if (this.graph.isEdge(w, introducedVertex)) {
-                        for (const cs of childStates) {
-                          const d = cs[0];
-                          const M = cs[1];
+                        const degreeOfW = d[w];
 
-                          if (d[w] === 1) {
-                            newMap[introducedVertex] = 1;
-                            state.push(newMap, matchings);
-                            // states.push(state);
-                          }
-
-                          // Change the value of w
+                        switch (degreeOfW) {
+                          case 0:
+                            d[w] = 1;
+                            d[introducedVertex] = 1;
+                            pair.push(w, introducedVertex);
+                            matching.push(pair);
+                            state.push(d, matching);
+                            table.set(state, true);
+                            break;
+                          case 1:
+                            d[introducedVertex] = 1;
+                            d[w] = 2;
+                            for (const pair of matching) {
+                              if (pair.length > 1 && pair.includes(w)) {
+                                const pairIndex = matching.indexOf(pair);
+                                matching.splice(pairIndex, 1);
+                                const newPair = pair.filter((x) => x !== w);
+                                newPair.push(introducedVertex);
+                                matching.push(newPair);
+                                state.push(d, matching);
+                              } else {
+                                state.push(d, matching);
+                              }
+                            }
+                            table.set(state, true);
+                            break;
+                          case 2:
+                            break;
                         }
                       }
                     }
-
                     break;
 
                   case 2:
-                    newMap.set(introducedVertex, 2);
-                    state.push(newMap, matchings);
-                    states.push(state);
+                    d[introducedVertex] = 2;
+                    pair.push(introducedVertex);
+                    matching.push(pair);
+                    state.push(d, matching);
+                    table.set(state, false);
                     break;
                 }
               }
             }
           }
+
           break;
         case 'forget':
           const forgottenVertex = this.getForgottenVertex(node);
-          const state = [];
 
-          for (const childKey of childKeys) {
+          const duplicateTracker = [];
+
+          for (const childState of childStates) {
             const state = [];
-            const d = childKey[0];
-            const M = childKey[1];
+            const d = deepClone(childState[0]);
+            const matching = deepClone(childState[1]);
+
+            /* Drop the key value pair containing the forgotten vertex */
             delete d[forgottenVertex];
 
-            for (const a of M) {
-              const aIndex = M.indexOf(a);
-              if (a.includes(forgottenVertex)) M.splice(aIndex);
-            }
-
-            state.push(d, M);
-            table.set(state, true);
-          }
-
-          const keys = [...table.keys()];
-          const temp = [];
-
-          for (const key of keys) {
-            const obj = key[0];
-            const entry = JSON.stringify(obj);
-            temp.push(entry);
-          }
-
-          /* Remove duplicates from array */
-          const newArr = multiDimensionalUnique(temp);
-
-          /* Reset the table */
-          table = new Map();
-
-          /* Convert it back to an array of objects */
-          const arrayOfDegrees = [];
-          for (const a of newArr) {
-            const d = JSON.parse(a);
-            arrayOfDegrees.push(d);
-          }
-
-          /* Get matching if any */
-          for (const d of arrayOfDegrees) {
-            const state = [];
-            const keys = Object.keys(d);
-            const possible = [];
-            const matchings = [];
-
-            for (const key of keys) {
-              const value = d[key];
-              if (value === 1) possible.push(key);
-            }
-
-            console.log(possible);
-
-            if (possible.length > 1 && possible.length % 2 === 0) {
-              for (let i = 0; i < possible.length; i += 2) {
-                const matching = [];
-                const e1 = possible[i];
-                const e2 = possible[i + 1];
-                matching.push(parseInt(e1, 10), parseInt(e2, 10));
-                matchings.push(matching);
-              }
-              state.push(d, matchings);
-              table.set(state, true);
+            /* Make sure we don't keep track of duplicate states */
+            const stringD = JSON.stringify(d);
+            if (duplicateTracker.includes(stringD)) {
+              continue;
             } else {
-              state.push(d, []);
+              duplicateTracker.push(stringD);
+            }
+
+            /* Check if there exists pairs which contain the forgotten vertex, if so remove the pair from the matching */
+            for (const pair of matching) {
+              if (pair.length > 1 && pair.includes(forgottenVertex)) {
+                const pairIndex = matching.indexOf(pair);
+                matching.splice(pairIndex, 1);
+              }
+            }
+
+            /* Push the updated d & matching */
+            state.push(d, matching);
+
+            /* Remove all singletons from the matching */
+            const filtered = matching.filter((pair) => pair.length > 1);
+
+            if (filtered.length === 0) {
               table.set(state, false);
+            } else {
+              table.set(state, true);
             }
           }
-
-
           break;
         case 'join':
-          const leftTable = childKeys;
+          const leftTableKeys = childStates;
           const child2 = this.getChild2(node);
-          const rightTable = [...child2.table.keys()];
+          const rightTableKeys = [...child2.table.keys()];
 
+          for (let i = 0; i < leftTableKeys.length; i++) {
+            const state = [];
+            const leftState = leftTableKeys[i];
+            const rightState = rightTableKeys[i];
+
+            const leftD = leftState[0];
+            const rightD = rightState[0];
+
+            const combinedObject = sumObjectsByKey(leftD, rightD);
+            const values = Object.values(combinedObject);
+
+            let leq2 = true;
+
+            for (const value of values) {
+              if (value > 2) leq2 = false;
+            }
+
+            const hasCycle = false;
+
+            const leftMatching = leftState[1];
+            const rightMatching = rightState[1];
+            const newMatching = leftMatching.concat(rightMatching);
+
+            const subGraph = this.graph.createSubgraph();
+            // containsCycles(subGraph);
+          }
           break;
       }
 
@@ -1514,6 +1581,7 @@ export default class Tree {
     this.tooltip = d3.select('#main')
       .append('div')
       .attr('id', 'tooltip')
+      .attr('class', 'table')
       .style('position', 'absolute')
       .style('opacity', 0);
   }
@@ -1689,7 +1757,6 @@ export default class Tree {
         })
         .attr('height', 25)
         .attr('x', (d) => d.x - (d.data.label.split(',').length * 25 / 2))
-        // .attr('x', (d) => d.x)
         .attr('y', (d) => d.y)
         .attr('rx', 5)
         .attr('ry', 5)
@@ -1734,3 +1801,65 @@ export default class Tree {
     this.setAllG();
   }
 }
+
+/*
+          for (const childKey of childKeys) {
+            const state = [];
+            const d = childKey[0];
+            const M = childKey[1];
+            delete d[forgottenVertex];
+
+            for (const a of M) {
+              const aIndex = M.indexOf(a);
+              if (a.includes(forgottenVertex)) M.splice(aIndex);
+            }
+
+            state.push(d, M);
+            table.set(state, true);
+          }
+
+          const keys = [...table.keys()];
+          const temp = [];
+
+          for (const key of keys) {
+            const obj = key[0];
+            const entry = JSON.stringify(obj);
+            temp.push(entry);
+          }
+
+          const newArr = multiDimensionalUnique(temp);
+
+          table = new Map();
+
+          const arrayOfDegrees = [];
+          for (const a of newArr) {
+            const d = JSON.parse(a);
+            arrayOfDegrees.push(d);
+          }
+
+          for (const d of arrayOfDegrees) {
+            const state = [];
+            const keys = Object.keys(d);
+            const possible = [];
+            const matchings = [];
+
+            for (const key of keys) {
+              const value = d[key];
+              if (value === 1) possible.push(key);
+            }
+
+            if (possible.length > 1 && possible.length % 2 === 0) {
+              for (let i = 0; i < possible.length; i += 2) {
+                const matching = [];
+                const e1 = possible[i];
+                const e2 = possible[i + 1];
+                matching.push(parseInt(e1, 10), parseInt(e2, 10));
+                matchings.push(matching);
+              }
+              state.push(d, matchings);
+              table.set(state, true);
+            } else {
+              state.push(d, []);
+              table.set(state, false);
+            }
+          } */
