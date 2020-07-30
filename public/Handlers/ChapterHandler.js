@@ -45,7 +45,7 @@ export default class ChapterHandler {
       new Chapter(
         async () => {
         },
-        '4. Algorithms on Tree Decompositions',
+        '3. Algorithms on Tree Decompositions',
         false,
       ),
       new Chapter(

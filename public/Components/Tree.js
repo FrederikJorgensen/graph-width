@@ -69,7 +69,6 @@ function multiDimensionalUnique(arr) {
   return uniques;
 }
 
-
 function highlightVertex(nodeId) {
   resetStyles();
   d3.selectAll('circle')
@@ -431,7 +430,7 @@ export default class Tree {
       const value = values[index];
       const map = key[0];
       const entries = Array.from(Object.keys(map));
-      const matchings = key[1];
+      const matching = key[1];
 
       let temp = String.raw`\begin{pmatrix}`;
 
@@ -443,20 +442,13 @@ export default class Tree {
       }
 
       temp += String.raw`\end{pmatrix}`;
-
-      for (const m of matchings) {
-        temp += JSON.stringify(m);
-      }
-
-
+      temp += JSON.stringify(matching);
       sb += String.raw`<tr><td>\( ${temp} \)</td><td>${value ? 'true<span class="material-icons correct-answer">check</span>' : 'false<span class="material-icons wrong-answer">clear</span>'}</td></tr>`;
     });
 
+    const start = `<table id="dp-table" class="hamiltonianTable">${thead}<tbody>${sb}</tbody></table>`;
 
-    const start = `<table class="hamiltonianTable">${thead}<tbody>${sb}</tbody></table>`;
-
-
-    /*    const nodeSvg = d3.select(`#treeNode-${node.id}`);
+    const nodeSvg = d3.select(`#treeNode-${node.id}`);
     const x = parseInt(nodeSvg.attr('x'), 10);
     let y = parseInt(nodeSvg.attr('y'), 10);
 
@@ -471,21 +463,20 @@ export default class Tree {
       .attr('transform', `translate(${0}, ${30})`);
 
     const { top } = document.getElementById('tooltip-arrow').getBoundingClientRect();
-    const { left } = document.getElementById('tooltip-arrow').getBoundingClientRect(); */
+    const { left } = document.getElementById('tooltip-arrow').getBoundingClientRect();
 
-    d3.select('#dp-table')
-      .html(start);
-    // .style('opacity', 1)
-    // .style('left', `${left}px`)
-    // .style('top', `${top}px`)
-    // .style('padding', '0');
+    d3.select('#dp-container')
+      .html(start)
+      .style('opacity', 1)
+      .style('left', `${left}px`)
+      .style('top', `${top}px`)
+      .style('padding', '0');
 
 
     renderMathInElement(document.body);
   }
 
   dpTable(node) {
-    console.log(node);
     const keys = [...node.table.keys()];
     const values = [...node.table.values()];
 
@@ -767,13 +758,24 @@ export default class Tree {
               pair.push(introducedVertex);
               matching.push(pair);
               state.push(d, matching);
-              table.set(state, false);
+
+              switch (i) {
+                case 0:
+                  table.set(state, true);
+                  break;
+                case 1:
+                  table.set(state, false);
+                  break;
+                case 2:
+                  table.set(state, false);
+                  break;
+              }
             }
           } else {
             for (const childState of childStates) {
               for (let i = 0; i <= 2; i++) {
                 const d = deepClone(childState[0]);
-                const matching = deepClone(childState[1]);
+                let matching = deepClone(childState[1]);
                 const state = [];
                 const pair = [];
 
@@ -783,25 +785,33 @@ export default class Tree {
                     pair.push(introducedVertex);
                     matching.push(pair);
                     state.push(d, matching);
-                    table.set(state, false);
+
+                    // Set the state to be whatever the child state is.
+
+                    // Get the boolean for the old state
+                    const oldBool = childTable.get(childState);
+
+                    // Set it in our new table
+                    table.set(state, oldBool);
                     break;
                   case 1:
                     for (const w of child.vertices) {
                       if (this.graph.isEdge(w, introducedVertex)) {
                         const degreeOfW = d[w];
 
+                        d[introducedVertex] = 1;
+
                         switch (degreeOfW) {
                           case 0:
+                            // Remove w as a singleton from from the matching
+                            matching = matching.filter((x) => !x.includes(w));
                             d[w] = 1;
-                            d[introducedVertex] = 1;
                             pair.push(w, introducedVertex);
                             matching.push(pair);
                             state.push(d, matching);
                             table.set(state, true);
                             break;
                           case 1:
-                            d[introducedVertex] = 1;
-                            d[w] = 2;
                             for (const pair of matching) {
                               if (pair.length > 1 && pair.includes(w)) {
                                 const pairIndex = matching.indexOf(pair);
@@ -810,13 +820,17 @@ export default class Tree {
                                 newPair.push(introducedVertex);
                                 matching.push(newPair);
                                 state.push(d, matching);
+                                d[w] = 2;
+                                table.set(state, true);
                               } else {
-                                state.push(d, matching);
+                                // Proabably need to do something here
                               }
                             }
-                            table.set(state, true);
                             break;
                           case 2:
+                            // We need to find 2 edges that touches v
+
+
                             break;
                         }
                       }
@@ -894,20 +908,14 @@ export default class Tree {
             const combinedObject = sumObjectsByKey(leftD, rightD);
             const values = Object.values(combinedObject);
 
-            let leq2 = true;
-
             for (const value of values) {
               if (value > 2) leq2 = false;
             }
 
             const hasCycle = false;
-
             const leftMatching = leftState[1];
             const rightMatching = rightState[1];
             const newMatching = leftMatching.concat(rightMatching);
-
-            const subGraph = this.graph.createSubgraph();
-            // containsCycles(subGraph);
           }
           break;
       }

@@ -719,7 +719,7 @@ export default class SectionHandler {
           this.treeDecomposition.load(niceTreeDecompositionData);
           this.treeDecomposition.setGraph(this.graph);
         },
-        'chapter3',
+        'chapter4',
       ),
       new Section(
         async () => {
@@ -1065,10 +1065,16 @@ export default class SectionHandler {
             <br>
             <strong>Output:</strong> If \\( G \\) contains a Hamiltonian path.
           </p>
-
-          <table id="dp-table" class="hamiltonianTable"></table>
           `);
           this.addContainers();
+
+          d3.select('#main')
+            .append('div')
+            .attr('id', 'dp-container')
+            .attr('class', 'table-wrapper')
+            .append('table')
+            .attr('id', 'dp-table')
+            .attr('class', 'hamiltonianTable');
 
           const graph = new Graph('graph-container');
           const niceTreeDecomposition = new Tree('tree-container');
@@ -1079,6 +1085,7 @@ export default class SectionHandler {
           const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
           niceTreeDecomposition.load(niceTreeDecompositionData);
           niceTreeDecomposition.setGraph(graph);
+          niceTreeDecomposition.addArrow();
           niceTreeDecomposition.enableHamiltonianPath();
 
           this.addAlgorithmControls(() => niceTreeDecomposition.previous(), () => niceTreeDecomposition.next());
