@@ -938,13 +938,13 @@ export default class SectionHandler {
             .append('span')
             .text('keyboard_arrow_left')
             .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.previous());
+            .on('click', () => niceTreeDecomposition.previousDPStep());
 
           controlsContainer
             .append('span')
             .text('keyboard_arrow_right')
             .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.next());
+            .on('click', () => niceTreeDecomposition.nextStep());
         },
         'chapter4',
       ),
@@ -1045,13 +1045,13 @@ export default class SectionHandler {
             .append('span')
             .text('keyboard_arrow_left')
             .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.previous());
+            .on('click', () => niceTreeDecomposition.previousDPStep());
 
           controlsContainer
             .append('span')
             .text('keyboard_arrow_right')
             .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.next());
+            .on('click', () => niceTreeDecomposition.nextStep());
         },
         'chapter4',
       ),
@@ -1087,8 +1087,7 @@ export default class SectionHandler {
           niceTreeDecomposition.setGraph(graph);
           niceTreeDecomposition.addArrow();
           niceTreeDecomposition.enableHamiltonianPath();
-
-          this.addAlgorithmControls(() => niceTreeDecomposition.previous(), () => niceTreeDecomposition.next());
+          this.addAlgorithmControls(() => niceTreeDecomposition.previousDPStep(), () => niceTreeDecomposition.nextDPStep());
         },
         'chapter4',
       ),

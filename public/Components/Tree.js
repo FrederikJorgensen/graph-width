@@ -144,11 +144,12 @@ function getSubTree(rootOfSubtree, currentNode) {
 
 export default class Tree {
   constructor(container, type, graph) {
+    this.dpTable = new Map();
     this.container = container;
     this.isMis = false;
     this.isColor = false;
     this.root = null;
-    this.current = 0;
+    this.currentNodeIndex = 0;
     this.graph = null;
     this.type = type;
     this.graph = graph;
@@ -209,9 +210,9 @@ export default class Tree {
     return this.graph.links.every((link) => {
       this.root.eachAfter((node) => {
         if (
-          node.data.vertices &&
-          node.data.vertices.includes(link.source.id) &&
-          node.data.vertices.includes(link.target.id)
+          node.data.vertices
+          && node.data.vertices.includes(link.source.id)
+          && node.data.vertices.includes(link.target.id)
         ) {
           return true;
         }
@@ -237,7 +238,7 @@ export default class Tree {
         if (
           arraysMatch(
             bag.children[0].data.vertices,
-            bag.children[1].data.vertices
+            bag.children[1].data.vertices,
           )
         ) {
           isViableNodeType = true;
@@ -302,65 +303,60 @@ export default class Tree {
       .selectAll('line')
       .data(links, (d) => d.id)
       .join(
-        (enter) =>
-          enter
-            .append('line')
-            .lower()
-            .attr('class', 'tree-link')
-            .attr('x1', (d) => d.parent.x + 12.5)
-            .attr('y1', (d) => d.parent.y)
-            .attr('x2', (d) => d.x + 12.5)
-            .attr('y2', (d) => d.y),
-        (update) =>
-          update
-            .attr('x1', (d) => d.parent.x + 12.5)
-            .attr('y1', (d) => d.parent.y)
-            .attr('x2', (d) => d.x + 12.5)
-            .attr('y2', (d) => d.y),
-        (exit) => exit.remove()
+        (enter) => enter
+          .append('line')
+          .lower()
+          .attr('class', 'tree-link')
+          .attr('x1', (d) => d.parent.x + 12.5)
+          .attr('y1', (d) => d.parent.y)
+          .attr('x2', (d) => d.x + 12.5)
+          .attr('y2', (d) => d.y),
+        (update) => update
+          .attr('x1', (d) => d.parent.x + 12.5)
+          .attr('y1', (d) => d.parent.y)
+          .attr('x2', (d) => d.x + 12.5)
+          .attr('y2', (d) => d.y),
+        (exit) => exit.remove(),
       );
 
     this.svg
       .selectAll('rect')
       .data(nodes, (d) => d.id)
       .join(
-        (enter) =>
-          enter
-            .append('rect')
-            .attr('width', (d) => {
-              const splitted = d.data.label.split(',');
-              return splitted.length * 25;
-            })
-            .attr('height', 25)
-            .attr('x', (d) => d.x - (d.data.label.split(',').length * 25) / 2)
-            .attr('y', (d) => d.y)
-            // .attr('transform', (d) => `translate(${d.x},${d.y})`)
-            .attr('rx', 5)
-            .attr('ry', 5)
-            .attr('class', 'tree-node')
-            .on('contextmenu', d3.contextMenu(menu)),
-        (update) =>
-          update
-            .attr('x', (d) => d.x - (d.data.label.split(',').length * 25) / 2)
-            // .attr('x', (d) => d.x)
-            .attr('y', (d) => d.y),
-        (exit) => exit.remove()
+        (enter) => enter
+          .append('rect')
+          .attr('width', (d) => {
+            const splitted = d.data.label.split(',');
+            return splitted.length * 25;
+          })
+          .attr('height', 25)
+          .attr('x', (d) => d.x - (d.data.label.split(',').length * 25) / 2)
+          .attr('y', (d) => d.y)
+        // .attr('transform', (d) => `translate(${d.x},${d.y})`)
+          .attr('rx', 5)
+          .attr('ry', 5)
+          .attr('class', 'tree-node')
+          .on('contextmenu', d3.contextMenu(menu)),
+        (update) => update
+          .attr('x', (d) => d.x - (d.data.label.split(',').length * 25) / 2)
+        // .attr('x', (d) => d.x)
+          .attr('y', (d) => d.y),
+        (exit) => exit.remove(),
       );
 
     this.svg
       .selectAll('text')
       .data(nodes, (d) => d.label)
       .join(
-        (enter) =>
-          enter
-            .append('text')
-            .attr('x', (d) => d.x)
-            .attr('y', (d) => d.y)
-            .attr('dy', '1.1em')
-            .attr('class', 'graph-label')
-            .text((d) => d.data.label),
+        (enter) => enter
+          .append('text')
+          .attr('x', (d) => d.x)
+          .attr('y', (d) => d.y)
+          .attr('dy', '1.1em')
+          .attr('class', 'graph-label')
+          .text((d) => d.data.label),
         (update) => update.text((d) => d.data.label),
-        (exit) => exit.remove()
+        (exit) => exit.remove(),
       );
 
     this.checkNiceProperties();
@@ -438,21 +434,16 @@ export default class Tree {
     this.graph.runMis(this.currentSubTree, set, 0, true);
   }
 
-  drawHamiltonianTable(node) {
-    const keys = [...node.table.keys()];
-    const values = [...node.table.values()];
+  formatMapToTable(table) {
+    const keys = [...table.keys()];
+    const values = [...table.values()];
+    const tableHeader = this.createTableHeader();
+    const sb = this.buildString(keys, values);
+    const start = `<table id="dp-table" class="hamiltonianTable">${tableHeader}<tbody>${sb}</tbody></table>`;
+  }
 
-    const thead = String.raw`
-    <thead>
-      <tr>
-        <th>\( (d,M) \)</th>
-        <th>\( bool \)</th>
-      </tr>
-    </thead>
-    `;
-
+  buildString(keys, values) {
     let sb = '';
-
     keys.forEach((key, index) => {
       const value = values[index];
       const map = key[0];
@@ -473,12 +464,23 @@ export default class Tree {
       sb += String.raw`<tr><td>\( ${temp} \)</td><td>${
         value
           ? 'true<span class="material-icons correct-answer">check</span>'
-          : 'false<span class="material-icons wrong-answer">clear</span>'
-      }</td></tr>`;
+          : 'false<span class="material-icons wrong-answer">clear</span>'}</td></tr>`;
     });
+    return sb;
+  }
 
-    const start = `<table id="dp-table" class="hamiltonianTable">${thead}<tbody>${sb}</tbody></table>`;
+  createTableHeader() {
+    return String.raw`
+    <thead>
+      <tr>
+        <th>\( (d,M) \)</th>
+        <th>\( bool \)</th>
+      </tr>
+    </thead>
+    `;
+  }
 
+  drawHamiltonianTable(node, tableData) {
     const nodeSvg = d3.select(`#treeNode-${node.id}`);
     const x = parseInt(nodeSvg.attr('x'), 10);
     let y = parseInt(nodeSvg.attr('y'), 10);
@@ -501,7 +503,7 @@ export default class Tree {
       .getBoundingClientRect();
 
     d3.select('#dp-container')
-      .html(start)
+      .html(tableData)
       .style('opacity', 1)
       .style('left', `${left}px`)
       .style('top', `${top}px`)
@@ -642,7 +644,7 @@ export default class Tree {
     let i = 0;
     this.root.eachAfter(async (currentNode) => {
       i++;
-      if (this.current !== i) return;
+      if (this.currentNodeIndex !== i) return;
       const node = currentNode.data;
 
       /* We hit a leaf */
@@ -670,16 +672,14 @@ export default class Tree {
       if (node.children[0] !== undefined && 'children' in node.children[0]) {
         const left = node.children[0].children[0].largestSet;
         let right = 0;
-        if (node.children[0].children.length === 2)
-          right = node.children[0].children[1].largestSet;
+        if (node.children[0].children.length === 2) right = node.children[0].children[1].largestSet;
         maxSetIncl += left + right;
       }
 
       if (node.children[1] !== undefined && 'children' in node.children[1]) {
         const left = node.children[1].children[0].largestSet;
         let right = 0;
-        if (node.children[1].children.length === 2)
-          right = node.children[1].children[1].largestSet;
+        if (node.children[1].children.length === 2) right = node.children[1].children[1].largestSet;
 
         maxSetIncl += left + right;
       }
@@ -698,19 +698,19 @@ export default class Tree {
 
   nextStep() {
     const N = this.root.descendants().length;
-    this.current++;
-    if (this.current !== N) this.current %= N;
-    if (this.isMisNormalTree) this.misiterative(this.current);
-    if (this.isColor) this.threeColor(this.current);
+    this.currentNodeIndex++;
+    if (this.currentNodeIndex !== N) this.currentNodeIndex %= N;
+    if (this.isMisNormalTree) this.misiterative(this.currentNodeIndex);
+    if (this.isColor) this.threeColor(this.currentNodeIndex);
   }
 
   previousStep() {
-    if (this.current === 0) return;
+    if (this.currentNodeIndex === 0) return;
     const N = this.root.descendants().length;
-    --this.current;
-    this.current %= N;
-    if (this.isMisNormalTree) this.misiterative(this.current);
-    if (this.isColor) this.threeColor(this.current);
+    --this.currentNodeIndex;
+    this.currentNodeIndex %= N;
+    if (this.isMisNormalTree) this.misiterative(this.currentNodeIndex);
+    if (this.isColor) this.threeColor(this.currentNodeIndex);
   }
 
   animateNode(nodeToAnimate) {
@@ -749,228 +749,239 @@ export default class Tree {
     return contains;
   }
 
-  hamiltonianPath() {
-    let i = 1;
+  getNodeType(node) {
+    let type = '';
+    if ('children' in node === false) type = 'leaf';
+    else if (node.children.length === 2) type = 'join';
+    else if (node.vertices.length > node.children[0].vertices.length) type = 'introduce';
+    else if (node.vertices.length < node.children[0].vertices.length) type = 'forget';
+    return type;
+  }
 
-    const START_VERTEX = 1;
-    const END_VERTEX = 5;
+  createLeafNodeTable() {
+    const table = new Map();
+    const verticesDegrees = {};
+    const matching = [];
+    const state = [verticesDegrees, matching];
+    table.set(state, true);
+    return table;
+  }
 
-    this.root.eachAfter((currentNode) => {
-      if (this.current !== i++) return;
+  handleNodeAboveLeaf(introducedVertex, table) {
+    for (let i = 0; i <= 2; i++) {
+      const state = [];
+      const d = {};
+      d[introducedVertex] = i;
+      const matching = [];
+      const pair = [];
+      pair.push(introducedVertex);
+      matching.push(pair);
+      state.push(d, matching);
 
-      this.animateNode(currentNode);
-      this.animateLink(currentNode);
-
-      const node = currentNode.data;
-      let type = '';
-      if ('children' in node === false) type = 'leaf';
-      else if (node.children.length === 2) type = 'join';
-      else if (node.vertices.length > node.children[0].vertices.length)
-        type = 'introduce';
-      else if (node.vertices.length < node.children[0].vertices.length)
-        type = 'forget';
-
-      const subTree = getSubTree(this.root, currentNode.data);
-
-      /* Get the induced subgraph of all the vertices in the current subtree */
-      const inducedSubgraph = this.graph.createSubgraph(subTree);
-
-      /* Highlight the induced subgraph */
-      this.graph.highlightSubGraph(inducedSubgraph);
-
-      let child;
-      let childTable;
-      let childStates;
-
-      if ('children' in node) {
-        child = this.getChild(node);
-        childTable = child.table;
-        childStates = [...childTable.keys()];
-      }
-
-      const table = new Map();
-
-      switch (type) {
-        case 'leaf':
+      switch (i) {
+        case 0:
+          table.set(state, true);
           break;
-        case 'introduce':
-          const introducedVertex = this.getIntroducedVertex(node);
+        case 1:
+          table.set(state, false);
+          break;
+        case 2:
+          table.set(state, false);
+          break;
+      }
+    }
+    this.dpTable = table;
+  }
 
-          if (child.vertices.length === 0) {
-            for (let i = 0; i <= 2; i++) {
-              const state = [];
-              const d = {};
-              d[introducedVertex] = i;
-              const matching = [];
-              const pair = [];
-              pair.push(introducedVertex);
-              matching.push(pair);
-              state.push(d, matching);
+  handleIntroduceNode(introducedVertex, partialSolutions) {
+    for (const ps of partialSolutions) {
+      for (let i = 0; i <= 2; i++) {
+        const d = deepClone(ps[0]);
+        let matching = deepClone(ps[1]);
+        const state = [];
+        const pair = [];
 
-              switch (i) {
-                case 0:
-                  table.set(state, true);
-                  break;
-                case 1:
-                  table.set(state, false);
-                  break;
-                case 2:
-                  table.set(state, false);
-                  break;
-              }
-            }
-          } else {
-            for (const childState of childStates) {
-              for (let i = 0; i <= 2; i++) {
-                const d = deepClone(childState[0]);
-                let matching = deepClone(childState[1]);
-                const state = [];
-                const pair = [];
+        switch (i) {
+          case 0:
+            d[introducedVertex] = 0;
+            pair.push(introducedVertex);
+            matching.push(pair);
+            state.push(d, matching);
 
-                switch (i) {
+            // Set the state to be whatever the child state is.
+
+            // Get the boolean for the old state
+            const oldBool = childTable.get(ps);
+
+            // Set it in our new table
+            table.set(state, oldBool);
+            break;
+          case 1:
+            for (const w of child.vertices) {
+              if (this.graph.isEdge(w, introducedVertex)) {
+                const degreeOfW = d[w];
+
+                d[introducedVertex] = 1;
+
+                switch (degreeOfW) {
                   case 0:
-                    d[introducedVertex] = 0;
-                    pair.push(introducedVertex);
+                    // Remove w as a singleton from from the matching
+                    matching = matching.filter((x) => !x.includes(w));
+                    d[w] = 1;
+                    pair.push(w, introducedVertex);
                     matching.push(pair);
                     state.push(d, matching);
-
-                    // Set the state to be whatever the child state is.
-
-                    // Get the boolean for the old state
-                    const oldBool = childTable.get(childState);
-
-                    // Set it in our new table
-                    table.set(state, oldBool);
+                    table.set(state, true);
                     break;
                   case 1:
-                    for (const w of child.vertices) {
-                      if (this.graph.isEdge(w, introducedVertex)) {
-                        const degreeOfW = d[w];
-
-                        d[introducedVertex] = 1;
-
-                        switch (degreeOfW) {
-                          case 0:
-                            // Remove w as a singleton from from the matching
-                            matching = matching.filter((x) => !x.includes(w));
-                            d[w] = 1;
-                            pair.push(w, introducedVertex);
-                            matching.push(pair);
-                            state.push(d, matching);
-                            table.set(state, true);
-                            break;
-                          case 1:
-                            for (const pair of matching) {
-                              if (pair.length > 1 && pair.includes(w)) {
-                                const pairIndex = matching.indexOf(pair);
-                                matching.splice(pairIndex, 1);
-                                const newPair = pair.filter((x) => x !== w);
-                                newPair.push(introducedVertex);
-                                matching.push(newPair);
-                                state.push(d, matching);
-                                d[w] = 2;
-                                table.set(state, true);
-                              } else {
-                                // Proabably need to do something here
-                              }
-                            }
-                            break;
-                          case 2:
-                            // We need to find 2 edges that touches v
-
-                            p;
-
-                            break;
-                        }
+                    for (const pair of matching) {
+                      if (pair.length > 1 && pair.includes(w)) {
+                        const pairIndex = matching.indexOf(pair);
+                        matching.splice(pairIndex, 1);
+                        const newPair = pair.filter((x) => x !== w);
+                        newPair.push(introducedVertex);
+                        matching.push(newPair);
+                        state.push(d, matching);
+                        d[w] = 2;
+                        table.set(state, true);
+                      } else {
+                        // Proabably need to do something here
                       }
                     }
                     break;
-
                   case 2:
-                    d[introducedVertex] = 2;
-                    pair.push(introducedVertex);
-                    matching.push(pair);
-                    state.push(d, matching);
-                    table.set(state, false);
+                    // We need to find 2 edges that touches v
+
+                    p;
+
                     break;
                 }
               }
             }
-          }
+            break;
 
+          case 2:
+            d[introducedVertex] = 2;
+            pair.push(introducedVertex);
+            matching.push(pair);
+            state.push(d, matching);
+            table.set(state, false);
+            break;
+        }
+      }
+    }
+  }
+
+  handleForgetNode(forgottenVertex) {
+    const duplicateTracker = [];
+
+    for (const childState of partialSolutions) {
+      const state = [];
+      const d = deepClone(childState[0]);
+      const matching = deepClone(childState[1]);
+
+      /* Drop the key value pair containing the forgotten vertex */
+      delete d[forgottenVertex];
+
+      /* Make sure we don't keep track of duplicate states */
+      const stringD = JSON.stringify(d);
+      if (duplicateTracker.includes(stringD)) {
+        continue;
+      } else {
+        duplicateTracker.push(stringD);
+      }
+
+      /* Check if there exists pairs which contain the forgotten vertex, if so remove the pair from the matching */
+      for (const pair of matching) {
+        if (pair.length > 1 && pair.includes(forgottenVertex)) {
+          const pairIndex = matching.indexOf(pair);
+          matching.splice(pairIndex, 1);
+        }
+      }
+
+      /* Push the updated d & matching */
+      state.push(d, matching);
+
+      /* Remove all singletons from the matching */
+      const filtered = matching.filter((pair) => pair.length > 1);
+
+      if (filtered.length === 0) {
+        table.set(state, false);
+      } else {
+        table.set(state, true);
+      }
+    }
+  }
+
+  handleJoinNode() {
+    const leftTableKeys = childStates;
+    const child2 = this.getChild2(node);
+    const rightTableKeys = [...child2.table.keys()];
+
+    for (let i = 0; i < leftTableKeys.length; i++) {
+      const state = [];
+      const leftState = leftTableKeys[i];
+      const rightState = rightTableKeys[i];
+
+      const leftD = leftState[0];
+      const rightD = rightState[0];
+
+      const combinedObject = sumObjectsByKey(leftD, rightD);
+      const values = Object.values(combinedObject);
+
+      for (const value of values) {
+        if (value > 2) leq2 = false;
+      }
+
+      const hasCycle = false;
+      const leftMatching = leftState[1];
+      const rightMatching = rightState[1];
+      const newMatching = leftMatching.concat(rightMatching);
+    }
+  }
+
+  runHamiltonianPath() {
+    let i = 1;
+    this.root.eachAfter((currentNode) => {
+      if (this.currentNodeIndex !== i++) return;
+      this.animateNode(currentNode);
+      this.animateLink(currentNode);
+      const node = currentNode.data;
+      const type = this.getNodeType(node);
+      const subTree = getSubTree(this.root, node);
+      const inducedSubgraph = this.graph.createSubgraph(subTree);
+      this.graph.highlightSubGraph(inducedSubgraph);
+
+      let child;
+      let partialSolutions;
+      if ('children' in node) {
+        child = this.getChild(node);
+        // partialSolutions = [...child.table.keys()];
+      }
+
+      let dpTable = new Map();
+
+      switch (type) {
+        case 'leaf':
+          dpTable = this.createLeafNodeTable();
+          break;
+        case 'introduce':
+          const introducedVertex = this.getIntroducedVertex(node);
+          if (child.vertices.length === 0) this.handleNodeAboveLeaf(introducedVertex, dpTable);
+          else this.handleIntroduceNode(introducedVertex, partialSolutions);
           break;
         case 'forget':
           const forgottenVertex = this.getForgottenVertex(node);
-
-          const duplicateTracker = [];
-
-          for (const childState of childStates) {
-            const state = [];
-            const d = deepClone(childState[0]);
-            const matching = deepClone(childState[1]);
-
-            /* Drop the key value pair containing the forgotten vertex */
-            delete d[forgottenVertex];
-
-            /* Make sure we don't keep track of duplicate states */
-            const stringD = JSON.stringify(d);
-            if (duplicateTracker.includes(stringD)) {
-              continue;
-            } else {
-              duplicateTracker.push(stringD);
-            }
-
-            /* Check if there exists pairs which contain the forgotten vertex, if so remove the pair from the matching */
-            for (const pair of matching) {
-              if (pair.length > 1 && pair.includes(forgottenVertex)) {
-                const pairIndex = matching.indexOf(pair);
-                matching.splice(pairIndex, 1);
-              }
-            }
-
-            /* Push the updated d & matching */
-            state.push(d, matching);
-
-            /* Remove all singletons from the matching */
-            const filtered = matching.filter((pair) => pair.length > 1);
-
-            if (filtered.length === 0) {
-              table.set(state, false);
-            } else {
-              table.set(state, true);
-            }
-          }
+          this.handleForgetNode(forgottenVertex);
           break;
         case 'join':
-          const leftTableKeys = childStates;
-          const child2 = this.getChild2(node);
-          const rightTableKeys = [...child2.table.keys()];
-
-          for (let i = 0; i < leftTableKeys.length; i++) {
-            const state = [];
-            const leftState = leftTableKeys[i];
-            const rightState = rightTableKeys[i];
-
-            const leftD = leftState[0];
-            const rightD = rightState[0];
-
-            const combinedObject = sumObjectsByKey(leftD, rightD);
-            const values = Object.values(combinedObject);
-
-            for (const value of values) {
-              if (value > 2) leq2 = false;
-            }
-
-            const hasCycle = false;
-            const leftMatching = leftState[1];
-            const rightMatching = rightState[1];
-            const newMatching = leftMatching.concat(rightMatching);
-          }
+          this.handleJoinNode();
           break;
       }
-
-      node.table = table;
-      this.drawHamiltonianTable(node);
+      const tableData = this.formatMapToTable(dpTable);
+      this.drawHamiltonianTable(node, tableData);
+      // node.table = this.dpTable;
+      // this.drawHamiltonianTable(node);
     });
   }
 
@@ -978,7 +989,7 @@ export default class Tree {
     const colorArray = ['red', 'green', 'blue'];
     let i = 1;
     this.root.copy().eachAfter((currentNode) => {
-      if (this.current !== i++) return;
+      if (this.currentNodeIndex !== i++) return;
 
       const node = currentNode.data;
       const subTree = getSubTree(this.root, currentNode.data);
@@ -1045,7 +1056,7 @@ export default class Tree {
 
         /* Find the introduced vertex */
         const difference = node.vertices.filter(
-          (x) => !child.vertices.includes(x)
+          (x) => !child.vertices.includes(x),
         );
         const introducedVertex = difference[0];
 
@@ -1076,7 +1087,7 @@ export default class Tree {
                   childClone.positionTracker,
                   oldState,
                   color,
-                  subTree
+                  subTree,
                 )
               ) {
                 /* If we are here, we can safely add the color */
@@ -1101,7 +1112,7 @@ export default class Tree {
 
         /* Find the forgotten vertex */
         const forgottenVertex = child.vertices.filter(
-          (x) => !node.vertices.includes(x)
+          (x) => !node.vertices.includes(x),
         );
 
         this.graph.addNodeArrow(forgottenVertex, 'Forgotten Vertex');
@@ -1141,14 +1152,14 @@ export default class Tree {
 
         const child1SubTree = getSubTree(
           this.root,
-          currentNode.children[0].data
+          currentNode.children[0].data,
         );
         const child1SubGraph = this.graph.createSubgraph(child1SubTree);
         this.graph.highlightSubGraph(child1SubGraph);
 
         const child2SubTree = getSubTree(
           this.root,
-          currentNode.children[1].data
+          currentNode.children[1].data,
         );
         const child2SubGraph = this.graph.createSubgraph(child2SubTree);
         this.graph.highlightSubGraph2(child2SubGraph);
@@ -1156,14 +1167,12 @@ export default class Tree {
         if (child1States.length < child2States.length) {
           node.positionTracker = child1.positionTracker;
           for (const childState of child1States) {
-            if (this.isArrayInArray(child2States, childState))
-              newStates.push(childState);
+            if (this.isArrayInArray(child2States, childState)) newStates.push(childState);
           }
         } else {
           node.positionTracker = child2.positionTracker;
           for (const childState of child2States) {
-            if (this.isArrayInArray(child1States, childState))
-              newStates.push(childState);
+            if (this.isArrayInArray(child1States, childState)) newStates.push(childState);
           }
         }
         node.states = newStates;
@@ -1177,7 +1186,7 @@ export default class Tree {
 
         const child1SubTree = getSubTree(
           this.root,
-          currentNode.children[0].data
+          currentNode.children[0].data,
         );
 
         for (let i = 0; i < child1SubTree.length; i++) {
@@ -1203,7 +1212,7 @@ export default class Tree {
 
         const child2SubTree = getSubTree(
           this.root,
-          currentNode.children[1].data
+          currentNode.children[1].data,
         );
 
         for (let i = 0; i < child2SubTree.length; i++) {
@@ -1285,7 +1294,7 @@ export default class Tree {
   }
 
   runThreeColor() {
-    this.current = 0;
+    this.currentNodeIndex = 0;
     this.threeColor();
   }
 
@@ -1326,7 +1335,7 @@ export default class Tree {
   getForgottenVertex(node) {
     const childsVertices = node.children[0].vertices;
     const forgottenVertex = childsVertices.filter(
-      (x) => !node.vertices.includes(x)
+      (x) => !node.vertices.includes(x),
     );
     return forgottenVertex[0];
   }
@@ -1336,7 +1345,7 @@ export default class Tree {
     let i = 0;
     this.root.copy().eachAfter((currentNode) => {
       i++;
-      if (this.current !== i) return;
+      if (this.currentNodeIndex !== i) return;
 
       currentNode.data.table = {};
 
@@ -1437,14 +1446,14 @@ export default class Tree {
 
         const child1SubTree = getSubTree(
           this.root,
-          currentNode.children[0].data
+          currentNode.children[0].data,
         );
         const child1SubGraph = this.graph.createSubgraph(child1SubTree);
         this.graph.highlightSubGraph(child1SubGraph);
 
         const child2SubTree = getSubTree(
           this.root,
-          currentNode.children[1].data
+          currentNode.children[1].data,
         );
         const child2SubGraph = this.graph.createSubgraph(child2SubTree);
         this.graph.highlightSubGraph2(child2SubGraph);
@@ -1453,19 +1462,18 @@ export default class Tree {
           const child1value = child1Table[set];
           const child2value = child2Table[set];
           const currentNodeValue = set.length;
-          currentNode.data.table[set] =
-            child1value + child2value - currentNodeValue;
+          currentNode.data.table[set] = child1value + child2value - currentNodeValue;
         }
       }
 
       // Forget node
       if (
-        currentNode.data.vertices.length <
-        currentNode.data.children[0].vertices.length
+        currentNode.data.vertices.length
+        < currentNode.data.children[0].vertices.length
       ) {
         const childsVertices = currentNode.data.children[0].vertices;
         const forgottenVertex = childsVertices.filter(
-          (x) => !currentNode.data.vertices.includes(x)
+          (x) => !currentNode.data.vertices.includes(x),
         );
 
         this.graph.addNodeArrow(forgottenVertex, 'Forgotten Vertex');
@@ -1498,8 +1506,8 @@ export default class Tree {
 
       // Introduce node
       if (
-        currentNode.data.vertices.length >
-        currentNode.data.children[0].vertices.length
+        currentNode.data.vertices.length
+        > currentNode.data.children[0].vertices.length
       ) {
         // Get the child's table
         const child = currentNode.data.children[0];
@@ -1544,7 +1552,7 @@ export default class Tree {
 
         const child1SubTree = getSubTree(
           this.root,
-          currentNode.children[0].data
+          currentNode.children[0].data,
         );
 
         for (let i = 0; i < child1SubTree.length; i++) {
@@ -1570,7 +1578,7 @@ export default class Tree {
 
         const child2SubTree = getSubTree(
           this.root,
-          currentNode.children[1].data
+          currentNode.children[1].data,
         );
 
         for (let i = 0; i < child2SubTree.length; i++) {
@@ -1737,7 +1745,7 @@ export default class Tree {
     this.addTooltip();
 
     this.isMis = true;
-    this.current = 0;
+    this.currentNodeIndex = 0;
   }
 
   enableThreeColor() {
@@ -1748,7 +1756,7 @@ export default class Tree {
     this.addColorTable();
 
     this.isColor = true;
-    this.current = 0;
+    this.currentNodeIndex = 0;
   }
 
   enableHamiltonianPath() {
@@ -1756,23 +1764,23 @@ export default class Tree {
     this.isHamiltonianPath = true;
   }
 
-  next() {
-    const N = this.root.descendants().length;
-    this.current++;
-    if (this.current !== N) this.current %= N;
-    if (this.isMis) this.mis(this.current);
-    if (this.isColor) this.threeColor(this.current);
-    if (this.isHamiltonianPath) this.hamiltonianPath(this.current);
+  nextDPStep() {
+    const numberOfNodes = this.root.descendants().length;
+    this.currentNodeIndex++;
+    if (this.currentNodeIndex !== numberOfNodes) this.currentNodeIndex %= numberOfNodes;
+    if (this.isMis) this.mis(this.currentNodeIndex);
+    if (this.isColor) this.threeColor(this.currentNodeIndex);
+    if (this.isHamiltonianPath) this.runHamiltonianPath(this.currentNodeIndex);
   }
 
-  previous() {
-    if (this.current === 0) return;
+  previousDPStep() {
+    if (this.currentNodeIndex === 0) return;
     const N = this.root.descendants().length;
-    --this.current;
-    this.current %= N;
-    if (this.isMis) this.mis(this.current);
-    if (this.isColor) this.threeColor(this.current);
-    if (this.isHamiltonianPath) this.hamiltonianPath(this.current);
+    --this.currentNodeIndex;
+    this.currentNodeIndex %= N;
+    if (this.isMis) this.mis(this.currentNodeIndex);
+    if (this.isColor) this.threeColor(this.currentNodeIndex);
+    if (this.isHamiltonianPath) this.runHamiltonianPath(this.currentNodeIndex);
   }
 
   setAllG() {
@@ -1887,13 +1895,10 @@ export default class Tree {
         .attr('transform', `translate(${0}, ${30})`)
         .attr('class', 'tree-node')
         .style('fill', (d) => {
-          if ('children' in d.data === false || d.data.children.length === 0)
-            return myColor(9);
+          if ('children' in d.data === false || d.data.children.length === 0) return myColor(9);
           if (d.data.children.length === 2) return myColor(6);
-          if (d.data.vertices.length > d.data.children[0].vertices.length)
-            return myColor(5);
-          if (d.data.vertices.length < d.data.children[0].vertices.length)
-            return myColor(4);
+          if (d.data.vertices.length > d.data.children[0].vertices.length) return myColor(5);
+          if (d.data.vertices.length < d.data.children[0].vertices.length) return myColor(4);
         })
         .on('contextmenu', d3.contextMenu(menu));
     }
@@ -1917,13 +1922,10 @@ export default class Tree {
       })
       .text((d) => {
         if (type === 'normal-tree') return d.data.label;
-        if ('children' in d.data === false || d.data.children.length === 0)
-          return;
+        if ('children' in d.data === false || d.data.children.length === 0) return;
         if (d.data.children.length === 2) return `& ${d.data.label}`;
-        if (d.data.vertices.length > d.data.children[0].vertices.length)
-          return `+ ${d.data.label}`;
-        if (d.data.vertices.length < d.data.children[0].vertices.length)
-          return `- ${d.data.label}`;
+        if (d.data.vertices.length > d.data.children[0].vertices.length) return `+ ${d.data.label}`;
+        if (d.data.vertices.length < d.data.children[0].vertices.length) return `- ${d.data.label}`;
         return d.data.label;
       })
       .attr('transform', `translate(${0}, ${30})`);
