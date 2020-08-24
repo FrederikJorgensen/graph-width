@@ -19,7 +19,6 @@ import {
   hull,
   getAllSubsets,
   deepClone,
-  sumObjectsByKey,
 } from '../Utilities/helpers.js';
 import { contextMenu as menu } from './TreeContextMenu.js';
 
@@ -411,7 +410,7 @@ export default class Tree {
     d3.select('#tooltip-arrow').style('opacity', 0);
   }
 
-  remove() {
+  removeFromMatching() {
     this.svg.remove();
   }
 
@@ -434,51 +433,72 @@ export default class Tree {
     this.graph.runMis(this.currentSubTree, set, 0, true);
   }
 
-  formatMapToTable(table) {
-    const keys = [...table.keys()];
-    const values = [...table.values()];
+  convertMapToHTMLTable() {
+    const solutionTypes = [...this.dpTable.keys()];
+    const solutionTypesBooleans = [...this.dpTable.values()];
     const tableHeader = this.createTableHeader();
-    const sb = this.buildString(keys, values);
-    const start = `<table id="dp-table" class="hamiltonianTable">${tableHeader}<tbody>${sb}</tbody></table>`;
-  }
-
-  buildString(keys, values) {
-    let sb = '';
-    keys.forEach((key, index) => {
-      const value = values[index];
-      const map = key[0];
-      const entries = Array.from(Object.keys(map));
-      const matching = key[1];
-
-      let temp = String.raw`\begin{pmatrix}`;
-
-      for (const entry of entries) {
-        const val = map[entry];
-        temp += String.raw`
-            ${entry[0]} → ${val}\\
-        `;
-      }
-
-      temp += String.raw`\end{pmatrix}`;
-      temp += JSON.stringify(matching);
-      sb += String.raw`<tr><td>\( ${temp} \)</td><td>${
-        value
-          ? 'true<span class="material-icons correct-answer">check</span>'
-          : 'false<span class="material-icons wrong-answer">clear</span>'}</td></tr>`;
-    });
-    return sb;
+    const tableRows = this.createTableRows(solutionTypes, solutionTypesBooleans);
+    const htmlTable = this.createHTMLTable(tableHeader, tableRows);
+    return htmlTable;
   }
 
   createTableHeader() {
     return String.raw`
     <thead>
       <tr>
-        <th>\( (d,M) \)</th>
-        <th>\( bool \)</th>
+        <th>i</th>
+        <th>d</th>
+        <th>M</th>
+        <th>bool</th>
       </tr>
     </thead>
     `;
   }
+
+  createTableRows(solutionTypes, solutionTypesBooleans) {
+    let tableRowString = '';
+    solutionTypes.forEach((solutionType, i) => {
+      const isPartialSolution = solutionTypesBooleans[i];
+      const verticesDegrees = solutionType[0];
+      const matching = solutionType[1];
+      const degreeString = this.createDegreeString(verticesDegrees, matching);
+      const matchingString = this.createMatchingString(matching);
+      tableRowString += this.createRow(degreeString, matchingString, isPartialSolution, i);
+    });
+    return tableRowString;
+  }
+
+  createMatchingString(matching) {
+    let matchingString = '';
+    matching.forEach((pair) => {
+      matchingString += JSON.stringify(pair);
+    });
+    return matchingString;
+  }
+
+  createHTMLTable(tableHeader, tableRows) {
+    return `<table id="dp-table" class="hamiltonianTable">${tableHeader}<tbody>${tableRows}</tbody></table>`;
+  }
+
+  createDegreeString(verticesDegrees) {
+    const verticesIds = Array.from(Object.keys(verticesDegrees));
+    let matrixString = '';
+    for (const vertexId of verticesIds) {
+      const degree = verticesDegrees[vertexId];
+      matrixString += String.raw`${vertexId} → ${degree} <br>`;
+    }
+    return matrixString;
+  }
+
+  createRow(matrixString, matchingString, isPartialSolution, i) {
+    return String.raw`<tr><td>${++i}</td><td>${matrixString}</td>
+    <td>${matchingString}</td>
+    <td>${
+  isPartialSolution
+    ? 'true<span class="material-icons correct-answer">check</span>'
+    : 'false<span class="material-icons wrong-answer">clear</span>'}</td></tr>`;
+  }
+
 
   drawHamiltonianTable(node, tableData) {
     const nodeSvg = d3.select(`#treeNode-${node.id}`);
@@ -487,82 +507,30 @@ export default class Tree {
 
     y += 12.5;
 
-    d3.select('#tooltip-arrow')
-      .style('opacity', 1)
-      .attr('x1', x - 50)
-      .attr('y1', y)
-      .attr('x2', x)
-      .attr('y2', y)
-      .attr('transform', `translate(${0}, ${30})`);
+    this.moveTooltipArrow(x, y);
 
     const { top } = document
       .getElementById('tooltip-arrow')
       .getBoundingClientRect();
+
     const { left } = document
       .getElementById('tooltip-arrow')
       .getBoundingClientRect();
 
+    this.moveDpTable(tableData, left, top);
+    renderMathInElement(document.body);
+  }
+
+  moveDpTable(tableData, left, top) {
     d3.select('#dp-container')
       .html(tableData)
       .style('opacity', 1)
       .style('left', `${left}px`)
       .style('top', `${top}px`)
       .style('padding', '0');
-
-    renderMathInElement(document.body);
   }
 
-  dpTable(node) {
-    const keys = [...node.table.keys()];
-    const values = [...node.table.values()];
-
-    const thead = String.raw`
-    <thead>
-      <tr>
-        <th>\( (d,M) \)</th>
-        <th>\( bool \)</th>
-      </tr>
-    </thead>
-    `;
-
-    let sb = '';
-
-    keys.forEach((key, index) => {
-      const value = values[index];
-      const map = key[0];
-      const entries = Array.from(Object.keys(map));
-      const matchings = key[1];
-
-      let temp = String.raw`\begin{pmatrix}`;
-
-      for (const entry of entries) {
-        const val = map[entry];
-        temp += String.raw`
-            ${entry[0]} → ${val}\\
-        `;
-      }
-
-      temp += String.raw`\end{pmatrix}`;
-
-      for (const m of matchings) {
-        temp += JSON.stringify(m);
-      }
-
-      sb += String.raw`<tr><td>\( ${temp} \)</td><td>${
-        value
-          ? 'true<span class="material-icons correct-answer">check</span>'
-          : 'false<span class="material-icons wrong-answer">clear</span>'
-      }</td></tr>`;
-    });
-
-    const start = `<table class="hamiltonianTable">${thead}<tbody>${sb}</tbody></table>`;
-
-    const nodeSvg = d3.select(`#treeNode-${node.id}`);
-    const x = parseInt(nodeSvg.attr('x'), 10);
-    let y = parseInt(nodeSvg.attr('y'), 10);
-
-    y += 12.5;
-
+  moveTooltipArrow(x, y) {
     d3.select('#tooltip-arrow')
       .style('opacity', 1)
       .attr('x1', x - 50)
@@ -570,19 +538,6 @@ export default class Tree {
       .attr('x2', x)
       .attr('y2', y)
       .attr('transform', `translate(${0}, ${30})`);
-
-    const { top } = document
-      .getElementById('tooltip-arrow')
-      .getBoundingClientRect();
-    const { left } = document
-      .getElementById('tooltip-arrow')
-      .getBoundingClientRect();
-
-    d3.select('#tooltip')
-      .html(start)
-      .style('opacity', 1)
-      .style('left', `${left}px`)
-      .style('top', `${top}px`);
   }
 
   drawTable(node) {
@@ -759,162 +714,243 @@ export default class Tree {
   }
 
   createLeafNodeTable() {
-    const table = new Map();
+    // const table = new Map();
     const verticesDegrees = {};
     const matching = [];
     const state = [verticesDegrees, matching];
-    table.set(state, true);
-    return table;
+    this.dpTable.set(state, true);
+    // return table;
   }
 
-  handleNodeAboveLeaf(introducedVertex, table) {
+  setTableForNodeAboveLeaf() {
+    // const dpTable = new Map();
     for (let i = 0; i <= 2; i++) {
-      const state = [];
+      const solutionType = [];
       const d = {};
-      d[introducedVertex] = i;
+      d[this.introducedVertex] = i;
       const matching = [];
       const pair = [];
-      pair.push(introducedVertex);
+      pair.push(this.introducedVertex);
       matching.push(pair);
-      state.push(d, matching);
+      solutionType.push(d, matching);
 
       switch (i) {
         case 0:
-          table.set(state, true);
+          this.dpTable.set(solutionType, true);
           break;
         case 1:
-          table.set(state, false);
+          this.dpTable.set(solutionType, false);
           break;
         case 2:
-          table.set(state, false);
+          this.dpTable.set(solutionType, false);
           break;
       }
     }
-    this.dpTable = table;
   }
 
-  handleIntroduceNode(introducedVertex, partialSolutions) {
-    for (const ps of partialSolutions) {
+  createSolutionTypeForDegreeZero(verticesDegrees, matching, oldBool) {
+    const solutionType = [];
+    const pair = [];
+    verticesDegrees[this.introducedVertex] = 0;
+    pair.push(this.introducedVertex);
+    matching.push(pair);
+    solutionType.push(verticesDegrees, matching);
+    this.dpTable.set(solutionType, oldBool);
+  }
+
+  getKeysAsInts(obj) {
+    const keys = Object.keys(obj);
+
+    const intArray = [];
+
+    keys.forEach((key) => {
+      const int = parseInt(key, 10);
+      intArray.push(int);
+    });
+
+    return intArray;
+  }
+
+  setTableForIntroduceNode(partialSolutions, partialSolutionBooleans) {
+    partialSolutions.forEach((partialSolution, i) => {
+      const oldBool = partialSolutionBooleans[i];
+
       for (let i = 0; i <= 2; i++) {
-        const d = deepClone(ps[0]);
-        let matching = deepClone(ps[1]);
-        const state = [];
-        const pair = [];
+        const verticesDegrees = deepClone(partialSolution[0]);
+        const matching = deepClone(partialSolution[1]);
+        const childVertices = this.getKeysAsInts(verticesDegrees);
 
         switch (i) {
           case 0:
-            d[introducedVertex] = 0;
-            pair.push(introducedVertex);
-            matching.push(pair);
-            state.push(d, matching);
-
-            // Set the state to be whatever the child state is.
-
-            // Get the boolean for the old state
-            const oldBool = childTable.get(ps);
-
-            // Set it in our new table
-            table.set(state, oldBool);
+            this.createSolutionTypeForDegreeZero(verticesDegrees, matching, oldBool);
             break;
           case 1:
-            for (const w of child.vertices) {
-              if (this.graph.isEdge(w, introducedVertex)) {
-                const degreeOfW = d[w];
+            this.createSolutionTypeForDegreeOne(childVertices, verticesDegrees, matching);
+            break;
+          case 2:
+            this.createSolutionTypeForDegreeTwo(childVertices, verticesDegrees, matching);
+            break;
+        }
+      }
+    });
+  }
 
-                d[introducedVertex] = 1;
+  createSolutionTypeForDegreeTwo(childVertices, verticesDegrees, matching) {
+    const solutionType = [];
+    verticesDegrees[this.introducedVertex] = 2;
+    const neighbors = this.graph.getNeighbors(this.introducedVertex);
+    const neighborsInSubGraph = neighbors.filter((value) => childVertices.includes(value));
 
-                switch (degreeOfW) {
-                  case 0:
-                    // Remove w as a singleton from from the matching
-                    matching = matching.filter((x) => !x.includes(w));
-                    d[w] = 1;
-                    pair.push(w, introducedVertex);
-                    matching.push(pair);
-                    state.push(d, matching);
-                    table.set(state, true);
-                    break;
-                  case 1:
-                    for (const pair of matching) {
-                      if (pair.length > 1 && pair.includes(w)) {
-                        const pairIndex = matching.indexOf(pair);
-                        matching.splice(pairIndex, 1);
-                        const newPair = pair.filter((x) => x !== w);
-                        newPair.push(introducedVertex);
-                        matching.push(newPair);
-                        state.push(d, matching);
-                        d[w] = 2;
-                        table.set(state, true);
-                      } else {
-                        // Proabably need to do something here
-                      }
-                    }
-                    break;
-                  case 2:
-                    // We need to find 2 edges that touches v
+    if (neighborsInSubGraph.length === 2) {
+      const neighborOne = neighborsInSubGraph[0];
+      const neighborTwo = neighborsInSubGraph[1];
 
-                    p;
+      let oldVal = verticesDegrees[neighborOne];
+      let oldVal2 = verticesDegrees[neighborTwo];
 
-                    break;
-                }
+      verticesDegrees[neighborOne] = ++oldVal;
+      verticesDegrees[neighborTwo] = ++oldVal2;
+
+      solutionType.push(verticesDegrees, matching);
+
+      // pair.push(this.introducedVertex);
+      // matching.push(pair);
+      this.dpTable.set(solutionType, true);
+    } else {
+      matching.push([this.introducedVertex]);
+      solutionType.push(verticesDegrees, matching);
+      this.dpTable.set(solutionType, false);
+    }
+  }
+
+  createSolutionTypeForDegreeOne(childVertices, verticesDegrees, matching) {
+    for (const childVertex of childVertices) {
+      if (this.graph.isEdge(childVertex, this.introducedVertex)) {
+        const solutionType = [];
+        const degreeOfW = verticesDegrees[childVertex];
+        verticesDegrees[this.introducedVertex] = 1;
+
+        switch (degreeOfW) {
+          case 0:
+            verticesDegrees[childVertex] = 1;
+            matching = this.updateMatching(matching, childVertex);
+            solutionType.push(verticesDegrees, matching);
+            this.dpTable.set(solutionType, true);
+            break;
+          case 1:
+            for (const pair of matching) {
+              if (pair.includes(childVertex)) {
+                matching = this.removePairFromMatching(matching, pair);
+                const newPair = [this.introducedVertex, childVertex];
+                matching.push(newPair);
+                verticesDegrees[childVertex] = 2;
+                solutionType.push(verticesDegrees, matching);
+                // const newPair = pair.filter((x) => x !== childVertex);
+                // newPair.push(this.introducedVertex);
+                this.dpTable.set(solutionType, true);
+              } else {
+                solutionType.push(verticesDegrees, matching);
+                this.dpTable.set(solutionType, false);
               }
             }
             break;
-
           case 2:
-            d[introducedVertex] = 2;
-            pair.push(introducedVertex);
+            const pair = [this.introducedVertex];
             matching.push(pair);
-            state.push(d, matching);
-            table.set(state, false);
+            solutionType.push(verticesDegrees, matching);
+            this.dpTable.set(solutionType, false);
             break;
         }
       }
     }
   }
 
-  handleForgetNode(forgottenVertex) {
+  removePairFromMatching(matching, pair) {
+    const pairIndex = matching.indexOf(pair);
+    matching.splice(pairIndex, 1);
+    return matching;
+  }
+
+  updateMatching(matching, w) {
+    matching = matching.filter((pair) => !pair.includes(w));
+    const pair = [];
+    pair.push(w, this.introducedVertex);
+    matching.push(pair);
+    return matching;
+  }
+
+  isIntroducedVertexInMatching(matching) {
+    return matching.some((pair) => {
+      if (pair.length > 1 && pair.includes(this.introducedVertex)) return true;
+      else return false;
+    });
+  }
+
+  setTableForForgetNode(partialSolutions, partialSolutionBooleans) {
     const duplicateTracker = [];
 
-    for (const childState of partialSolutions) {
-      const state = [];
-      const d = deepClone(childState[0]);
-      const matching = deepClone(childState[1]);
+    partialSolutions.forEach((partialSolution, i) => {
+      const bool = partialSolutionBooleans[i];
+      const solutionType = [];
+      const degreeVertices = deepClone(partialSolution[0]);
+      let matching = deepClone(partialSolution[1]);
+      delete degreeVertices[this.forgottenVertex];
+      matching = this.removeForgottenVertexFromMatching(matching);
 
-      /* Drop the key value pair containing the forgotten vertex */
-      delete d[forgottenVertex];
 
-      /* Make sure we don't keep track of duplicate states */
-      const stringD = JSON.stringify(d);
-      if (duplicateTracker.includes(stringD)) {
-        continue;
+      const d = JSON.stringify(degreeVertices);
+
+      if (duplicateTracker.includes(d)) {
+
       } else {
-        duplicateTracker.push(stringD);
+        duplicateTracker.push(d);
+        solutionType.push(degreeVertices, matching);
+        this.dpTable.set(solutionType, false);
       }
 
-      /* Check if there exists pairs which contain the forgotten vertex, if so remove the pair from the matching */
-      for (const pair of matching) {
-        if (pair.length > 1 && pair.includes(forgottenVertex)) {
-          const pairIndex = matching.indexOf(pair);
-          matching.splice(pairIndex, 1);
+
+      /*       if (bool) {
+        if (this.isIntroducedVertexInMatching(matching)) {
+          matching = this.removeForgottenVertexFromMatching(matching);
+          this.dpTable.set(solutionType, false);
+        } else {
+          // something else
         }
-      }
-
-      /* Push the updated d & matching */
-      state.push(d, matching);
-
-      /* Remove all singletons from the matching */
-      const filtered = matching.filter((pair) => pair.length > 1);
-
-      if (filtered.length === 0) {
-        table.set(state, false);
       } else {
-        table.set(state, true);
+        solutionType.push(degreeVertices, matching);
+        this.dpTable.set(solutionType, false);
+      }
+ */
+      /* Make sure we don't keep track of duplicate states        matching = this.removeForgottenVertexFromMatching(matching);
+
+      solutionType.push(degreeVertices, matching); */
+
+      // const filtered = this.removeSingletonsFromMatching(matching);
+
+      /*       if (filtered.length === 0) {
+        this.dpTable.set(solutionType, false);
+      } else {
+        this.dpTable.set(solutionType, true);
+      } */
+    });
+  }
+
+  removeSingletonsFromMatching(matching) {
+    return matching.filter((pair) => pair.length > 1);
+  }
+
+  removeForgottenVertexFromMatching(matching) {
+    for (const pair of matching) {
+      if (pair.includes(this.forgottenVertex)) {
+        const pairIndex = matching.indexOf(pair);
+        matching.splice(pairIndex, 1);
       }
     }
+    return matching;
   }
 
   handleJoinNode() {
-    const leftTableKeys = childStates;
+    /*     const leftTableKeys = childStates;
     const child2 = this.getChild2(node);
     const rightTableKeys = [...child2.table.keys()];
 
@@ -937,7 +973,7 @@ export default class Tree {
       const leftMatching = leftState[1];
       const rightMatching = rightState[1];
       const newMatching = leftMatching.concat(rightMatching);
-    }
+    } */
   }
 
   runHamiltonianPath() {
@@ -954,34 +990,36 @@ export default class Tree {
 
       let child;
       let partialSolutions;
+      let partialSolutionBooleans;
       if ('children' in node) {
         child = this.getChild(node);
-        // partialSolutions = [...child.table.keys()];
+        if (child.table.size !== 0) {
+          partialSolutions = [...child.table.keys()];
+          partialSolutionBooleans = [...child.table.values()];
+        }
       }
-
-      let dpTable = new Map();
+      this.dpTable = new Map();
 
       switch (type) {
         case 'leaf':
-          dpTable = this.createLeafNodeTable();
+          this.createLeafNodeTable();
           break;
         case 'introduce':
-          const introducedVertex = this.getIntroducedVertex(node);
-          if (child.vertices.length === 0) this.handleNodeAboveLeaf(introducedVertex, dpTable);
-          else this.handleIntroduceNode(introducedVertex, partialSolutions);
+          this.introducedVertex = this.setIntroducedVertex(node);
+          if (child.vertices.length === 0) this.setTableForNodeAboveLeaf();
+          else this.setTableForIntroduceNode(partialSolutions, partialSolutionBooleans);
           break;
         case 'forget':
-          const forgottenVertex = this.getForgottenVertex(node);
-          this.handleForgetNode(forgottenVertex);
+          this.forgottenVertex = this.setForgottenVertex(node);
+          this.setTableForForgetNode(partialSolutions, partialSolutionBooleans);
           break;
         case 'join':
           this.handleJoinNode();
           break;
       }
-      const tableData = this.formatMapToTable(dpTable);
+      node.table = this.dpTable;
+      const tableData = this.convertMapToHTMLTable();
       this.drawHamiltonianTable(node, tableData);
-      // node.table = this.dpTable;
-      // this.drawHamiltonianTable(node);
     });
   }
 
@@ -1324,7 +1362,7 @@ export default class Tree {
     return childTable;
   }
 
-  getIntroducedVertex(node) {
+  setIntroducedVertex(node) {
     const { vertices } = node;
     const childsVertices = node.children[0].vertices;
     const difference = vertices.filter((x) => !childsVertices.includes(x));
@@ -1332,7 +1370,7 @@ export default class Tree {
     return introducedVertex;
   }
 
-  getForgottenVertex(node) {
+  setForgottenVertex(node) {
     const childsVertices = node.children[0].vertices;
     const forgottenVertex = childsVertices.filter(
       (x) => !node.vertices.includes(x),

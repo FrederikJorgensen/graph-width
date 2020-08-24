@@ -168,6 +168,15 @@ export default class Graph {
     return this.adjacencyList[`${w}-${v}`];
   }
 
+  getNeighbors(node) {
+    const temp = [];
+    this.links.forEach((link) => {
+      if (link.source.id === node) temp.push(link.target.id);
+      if (link.target.id === node) temp.push(link.source.id);
+    });
+    return temp;
+  }
+
   isIntroducedVertexNeighbor(set, introducedVertex, adjacencyList) {
     for (const s of set) {
       if (adjacencyList[`${s}-${introducedVertex}`]) return true;

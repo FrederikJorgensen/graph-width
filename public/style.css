@@ -79,8 +79,26 @@ body {
   position: absolute;
   transform: translate(-100%, -2px);
   z-index: 10;
-  width: 300px;
+  width: 20%;
+  height: 30%;
   overflow: auto;
+}
+
+#dp-container::-webkit-scrollbar-track {
+	box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
+	background-color: #F5F5F5;
+}
+
+#dp-container::-webkit-scrollbar {
+	width: 12px;
+	background-color: #F5F5F5;
+}
+
+#dp-container::-webkit-scrollbar-thumb {
+	box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
+	background-color: #15314B;
 }
 
 .hamiltonianTable {
@@ -90,6 +108,13 @@ body {
   font-size: 1.2em;
   border-radius: 5px 5px 0 0;
   box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+th {
+  position: sticky;
+  top: 0; /* Don't forget this, required for the stickiness */
+  background-color: #15314B;
+
 }
 
 .hamiltonianTable thead tr {
@@ -210,6 +235,7 @@ body {
 .material-icons.nav-arrows {
   font-size: 40px;
   color: #828282;
+  z-index: 10000;
 }
 
 .material-icons.nav-arrows:hover {

@@ -6,9 +6,8 @@ import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
 import TreeDecomposition from '../Components/TreeDecomposition.js';
 import {
-  graph1, exampleGraph, exampleGraph2, exampleGraph3, gridGraph, cliqueGraph, treeGraph, planarGraph, expanderGraph,
+  graph1, exampleGraph3, gridGraph, cliqueGraph, treeGraph, cycleGraph,
 } from '../Utilities/graphs.js';
-import { readLocalFile } from '../Utilities/helpers.js';
 
 export default class SectionHandler {
   constructor(sidebar, chapter) {
@@ -849,7 +848,7 @@ export default class SectionHandler {
 
           <p>Before explaining the algorithm lets introduce some notation that we will use from now on.</p>
 
-          <p>Consider any bag in the nice tree decompostion \\( i,...,l \\) let \\( G_i = (V_i,E_i) \\) be the induced subgraph of all vertices in the bags of the descendants of bag \\( i \\) in \\( T \\)</p>
+          <p>Consider any bag in the nice tree decomposition \\( i,...,l \\) let \\( G_i = (V_i,E_i) \\) be the induced subgraph of all vertices in the bags of the descendants of bag \\( i \\) in \\( T \\)</p>
 
           <p>For each node \\( i \\) we will compute a table \\( C_i \\)</p>
 
@@ -1078,7 +1077,8 @@ export default class SectionHandler {
 
           const graph = new Graph('graph-container');
           const niceTreeDecomposition = new Tree('tree-container');
-          graph.loadGraph(graph1);
+          // graph.loadGraph(graph1);
+          graph.loadGraph(cycleGraph);
 
           await graph.computeTreeDecomposition();
           await graph.readNiceTreeDecomposition();
@@ -1088,6 +1088,18 @@ export default class SectionHandler {
           niceTreeDecomposition.addArrow();
           niceTreeDecomposition.enableHamiltonianPath();
           this.addAlgorithmControls(() => niceTreeDecomposition.previousDPStep(), () => niceTreeDecomposition.nextDPStep());
+
+          d3.select('body').on('keydown', () => {
+            switch (event.key) {
+              case 'ArrowUp':
+                niceTreeDecomposition.nextDPStep();
+                break;
+              case 'ArrowDown':
+                niceTreeDecomposition.previousDPStep();
+                break;
+              default:
+            }
+          });
         },
         'chapter4',
       ),
@@ -1102,6 +1114,8 @@ export default class SectionHandler {
   addAlgorithmControls(previous, next) {
     const controlsContainer = d3.select('#output').append('div')
       .attr('class', 'controls-container');
+
+    controlsContainer.append('div').html('Use the up and down arrow keys to step through the algorithm.');
 
     controlsContainer
       .append('span')

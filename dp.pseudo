@@ -1,10 +1,9 @@
 case "introduce node":
-  foreach childState in childStates
-    add v as 0,1 or 2
+  foreach ps in partialSolutions
 
     case v is 0:
-    v → 0
-    Old matching → new matching
+      v → 0
+      Old matching → new matching
      
     case v is 1:
       for each w in child bag
@@ -18,28 +17,22 @@ case "introduce node":
               Find pair that contains (u,w) make it (u,v)
               Make v → 1
               Make w → 2
-            case w is 2:     
 
     case v is 2:
-    v → 2
-    
-    Find 2 Endpoints, endpoints can have degree 0 and degree 1
+      for each w in child bag
+        check if there exists
+
+        find 2 edges that are in different pairs
+        update from the matching
+        Find 2 Endpoints, endpoints can have degree 0 and degree 1
 
     u = 0 → 1
-    u’ = 0 → 1 
-    1 → 
-    0 → 
+    u’ = 0 → 1
+    1 →
+    0 →  */
+
 
 case "forget node":
-  foreach childState in childState
-  remove v from d
-  remove v M
-   // if v is part of a pair in the Matching M is not valid and the partial solution is not shown
-
-   if M is valid
-     childState = true
-   else
-     childState = false
 
 case "join node":  
   rightTableKeys = getRightTableKeys()
