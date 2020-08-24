@@ -181,189 +181,6 @@ export default class ChapterHandler {
             break;
           }`;
 
-          const hamiltonianPathString = `
-          
-          const bag = node.vertices;
-
-          let child;
-          let childTable;
-          let childKeys;
-
-          if ('children' in node) {
-            child = niceTreeDecomposition.getChild(node);
-            childTable = child.table;
-            childKeys = [...childTable.keys()];
-          }
-
-          let table = new Map();
-          
-          switch (type) {
-            case 'leaf':
-              break;
-            case 'introduce':
-              /* Get the introduced vertex */
-              const introducedVertex = niceTreeDecomposition.getIntroducedVertex(node);
-    
-              /* If the bag below this one is empty we know
-              there is just 1 vertex and we want to initiliaze this bag */
-              if (child.vertices.length === 0) {
-                for (let i = 0; i <= 2; i++) {
-                  const state = [];
-                  const d = {};
-                  const firstVertex = bag[0];
-                  d[firstVertex] = i;
-                  const matchings = [];
-                  const matching = [];
-                  matchings.push(matching);
-                  state.push(d);
-                  state.push(matchings);
-                  i === 1 ? table.set(state, false) : table.set(state, true);
-                }
-              } else {
-                for (const childKey of childKeys) {
-                  for (let i = 0; i <= 2; i++) {
-                    const d = childKey[0];
-                    const newMap = deepClone(d);
-                    newMap[introducedVertex] = i;
-                    const newArray = [];
-                    newArray.push(newMap, []);
-                    table.set(newArray, true);
-                  }
-                }
-    
-    
-                for (const childState of childKeys) {
-                  const oldMap = childState[0];
-    
-                  for (let i = 0; i <= 2; i++) {
-                    const state = [];
-                    const matching = [];
-                    const matchings = [];
-                    const newMap = {};
-                    // const newMap = new Map(oldMap);
-    
-                    switch (i) {
-                      case 0:
-                        newMap.set(introducedVertex, 0);
-                        matchings.push(matching);
-                        state.push(newMap, matchings);
-                        // states.push(state);
-                        break;
-                      case 1:
-    
-                        for (const w of child.vertices) {
-                          if (this.graph.isEdge(w, introducedVertex)) {
-                            for (const cs of childStates) {
-                              const d = cs[0];
-                              const M = cs[1];
-    
-                              if (d[w] === 1) {
-                                newMap[introducedVertex] = 1;
-                                state.push(newMap, matchings);
-                                // states.push(state);
-                              }
-    
-                              // Change the value of w
-                            }
-                          }
-                        }
-    
-                        break;
-    
-                      case 2:
-                        newMap.set(introducedVertex, 2);
-                        state.push(newMap, matchings);
-                        states.push(state);
-                        break;
-                    }
-                  }
-                }
-              }
-              break;
-            case 'forget':
-              const forgottenVertex = niceTreeDecomposition.getForgottenVertex(node);
-              const state = [];
-    
-              for (const childKey of childKeys) {
-                const state = [];
-                const d = childKey[0];
-                const M = childKey[1];
-                delete d[forgottenVertex];
-    
-                for (const a of M) {
-                  const aIndex = M.indexOf(a);
-                  if (a.includes(forgottenVertex)) M.splice(aIndex);
-                }
-    
-                state.push(d, M);
-                table.set(state, true);
-              }
-    
-              const keys = [...table.keys()];
-              const temp = [];
-    
-              for (const key of keys) {
-                const obj = key[0];
-                const entry = JSON.stringify(obj);
-                temp.push(entry);
-              }
-    
-              /* Remove duplicates from array */
-              const newArr = multiDimensionalUnique(temp);
-    
-              /* Reset the table */
-              table = new Map();
-    
-              /* Convert it back to an array of objects */
-              const arrayOfDegrees = [];
-              for (const a of newArr) {
-                const d = JSON.parse(a);
-                arrayOfDegrees.push(d);
-              }
-    
-              /* Get matching if any */
-              for (const d of arrayOfDegrees) {
-                const state = [];
-                const keys = Object.keys(d);
-                const possible = [];
-                const matchings = [];
-    
-                for (const key of keys) {
-                  const value = d[key];
-                  if (value === 1) possible.push(key);
-                }
-  
-    
-                if (possible.length > 1 && possible.length % 2 === 0) {
-                  for (let i = 0; i < possible.length; i += 2) {
-                    const matching = [];
-                    const e1 = possible[i];
-                    const e2 = possible[i + 1];
-                    matching.push(parseInt(e1, 10), parseInt(e2, 10));
-                    matchings.push(matching);
-                  }
-                  state.push(d, matchings);
-                  table.set(state, true);
-                } else {
-                  state.push(d, []);
-                  table.set(state, false);
-                }
-              }
-    
-    
-              break;
-            case 'join':
-              const leftTable = childKeys;
-              const child2 = niceTreeDecomposition.getChild2(node);
-              const rightTable = [...child2.table.keys()];
-    
-              break;
-          }`;
-
-          const formattedHamiltonian = js_beautify(hamiltonianPathString, { indent_size: 2 });
-          editor.setValue(formattedHamiltonian);
-
-          const formattedJSON = js_beautify(someString, { indent_size: 2 });
 
           const root = niceTreeDecomposition.getRoot();
 
@@ -401,12 +218,19 @@ export default class ChapterHandler {
              })`;
           });
 
+          const defaultString = 'switch(type){\n case "leaf":\n //Your code for a leaf node.\n break;\n\n case "introduce":\n // Your code for an introduce node.\n break;\n\n case "forget":\n //Your code for a forget node.\n break;\n\n case "join":\n // Your code for a join node.\n break;\n}';
+
+
+          const formattedHamiltonian = js_beautify(defaultString, { indent_size: 2 });
+          editor.setValue(formattedHamiltonian);
+
+          // const formattedJSON = js_beautify(someString, { indent_size: 2 });
 
           codeHeader
             .append('span')
             .text('replay')
             .attr('class', 'material-icons code-buttons')
-            .on('click', () => editor.setValue('switch(type){\n case "leaf":\n //Your code for a leaf node.\n break;\n\n case "introduce":\n // Your code for an introduce node.\n break;\n\n case "forget":\n //Your code for a forget node.\n break;\n\n case "join":\n // Your code for a join node.\n break;\n}'));
+            .on('click', () => editor.setValue(defaultString));
 
 
           /*           misButtonContainer

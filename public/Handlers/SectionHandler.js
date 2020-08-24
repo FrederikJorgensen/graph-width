@@ -495,44 +495,6 @@ export default class SectionHandler {
       new Section(
         async () => {
           this.sidebar.addContent(`
-          <p>Why are separators useful?</p>
-          
-          <p>Recall the property of coherence.</p>
-          
-          <p><strong>Coherence:</strong> Coherence ensures that it can be separated in a 'tree-like' way. </p>
-          
-          <p>If \\( T' \\) is a subtree of \\( T \\) we use \\( G_{T'} \\) to denote the subgraph of \\( G \\) induced by the nodes of in all pieces of associated with \\( T' \\).</p>
-          
-          <p>Lets now consider if we were to remove a node \\( t \\) of \\( T \\).</p>
-          
-          <p><strong>Theorem 1:</strong> Suppose that \\(T - t \\) has components \\( T_1 , ... , T_d \\).</p>
-
-          <p>Then the subgraphs induced $$ G_{T_1} - V_t , G_{T_2} - V_t,...,G_{T_d} - V_t $$
-          have no nodes in common, and there are no edges between them.</p>
-
-          <p><strong>Proof:</strong> We first prove that the induced subgraphs \\( G_{T_i} - V_t \\) do not share any vertices.</p>
-          
-          <p>If such a vertex was shared by the subgraphs then it would have to belong to 2 distinct subgraphs \\( G_{T_i} - V_t \\) and \\( G_{T_j} - V_t \\).</p>
-          
-          <p>That vertex would then belong to one of the bags in the subtree \\( T_i \\) and in some bag of the subtree \\( T_j \\).</p>
-
-          <p>Since the removed \\( t \\) lies on a path in \\( T \\) following the cohorence property we can see that such a vertex would neither belong to \\( T_i \\) nor \\( T_j \\).</p>
-            `);
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
-
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', graph);
-          treeDecomposition.toggleCoherenceProof();
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
           
           <p>Lets test your knowledge of the tree decomposition properties.</p>
           

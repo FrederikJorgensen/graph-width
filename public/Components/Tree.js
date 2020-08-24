@@ -900,28 +900,30 @@ export default class Tree {
 
       const d = JSON.stringify(degreeVertices);
 
-      if (duplicateTracker.includes(d)) {
-
-      } else {
+      if (!duplicateTracker.includes(d)) {
         duplicateTracker.push(d);
-        solutionType.push(degreeVertices, matching);
-        this.dpTable.set(solutionType, false);
-      }
 
 
-      /*       if (bool) {
-        if (this.isIntroducedVertexInMatching(matching)) {
-          matching = this.removeForgottenVertexFromMatching(matching);
-          this.dpTable.set(solutionType, false);
+        if (bool) {
+          if (this.isIntroducedVertexInMatching(matching)) {
+            matching = this.removeForgottenVertexFromMatching(matching);
+            this.dpTable.set(solutionType, false);
+          } else {
+            matching = this.removeForgottenVertexFromMatching(matching);
+            this.dpTable.set(solutionType, false);
+          }
         } else {
-          // something else
+          solutionType.push(degreeVertices, matching);
+          this.dpTable.set(solutionType, false);
         }
-      } else {
+
+
         solutionType.push(degreeVertices, matching);
         this.dpTable.set(solutionType, false);
       }
- */
-      /* Make sure we don't keep track of duplicate states        matching = this.removeForgottenVertexFromMatching(matching);
+
+
+      /* matching = this.removeForgottenVertexFromMatching(matching);
 
       solutionType.push(degreeVertices, matching); */
 
