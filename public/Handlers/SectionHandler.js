@@ -636,22 +636,17 @@ export default class SectionHandler {
           <p>Algorithms that exploit tree decompositions are often represented using a "nice tree decomposition".</p>
 
           <p><strong>Definition:</strong> A tree decomposition \\( (X,T) \\) where \\( X = (X_1,...,X_l) \\) is refered to as a nice tree decomposition if:</p>
-            <ul>
-              <li>Has all the properties of a tree decomposition</li>
-              <li>The tree \\( T\\) is <strong>rooted</strong></li>
-              <li>Every node of \\( T \\) has at most 2 children</li>
-              <p>Every node of \\( T \\) must be one of the following types:</p>
-              <li><strong><span class="leaf">Leaf node:<span></strong> \\( i \\)  is a leaf in \\( T \\) then \\( |X_i|\\) \\( \\leq \\) 1</li>
-              <li><strong><span class="join">& Join node:</span></strong>  \\( i \\) has two children \\( j \\) and \\( k \\), then \\( X_i = X_j = X_k \\)</li>
-              <li><strong><span class="introduce">+ Introduce node:</span></strong>  \\( i \\) has 1 child \\( j \\), then \\( X_i = X_j \\cup \\{ v \\} \\) for a vertex \\( \\{ v \\} \\)</li>
-              <li><strong><span class="forget">- Forget node:</span></strong> \\( i \\) has 1 child \\( j \\), then \\( X_i = X_j - \\{ v \\} \\) for a vertex \\( \\{ v \\} \\)</li>
-            </ul>
-
-            <p>On the right you see a nice tree decompostion of the current graph.</P>
-            
-            <p>Each node type of the tree is a different color and has a diffrent symbol to make it easier to tell the difference.</p>
-
-            <p>Spend some time getting familiar with the difference between the nodes. As we will be refering them a lot in the coming sections.</p>
+          <p>Has all the properties of a tree decomposition.</p>
+          <p>The tree \\( T\\) is <strong>rooted</strong></p>
+          <p>Every node of \\( T \\) has at most 2 children.</p>
+          <p>Every node of \\( T \\) must be one of the following types:</p>            
+          <p><strong><span class="leaf">Leaf node:<span></strong> \\( i \\)  is a leaf in \\( T \\) then \\( |X_i|\\) \\( \\leq \\) 1</p>
+          <p><strong><span class="join">& Join node:</span></strong>  \\( i \\) has two children \\( j \\) and \\( k \\), then \\( X_i = X_j = X_k \\)</p>
+          <p><strong><span class="introduce">+ Introduce node:</span></strong>  \\( i \\) has 1 child \\( j \\), then \\( X_i = X_j \\cup \\{ v \\} \\) for a vertex \\( \\{ v \\} \\)</p>
+          <p><strong><span class="forget">- Forget node:</span></strong> \\( i \\) has 1 child \\( j \\), then \\( X_i = X_j - \\{ v \\} \\) for a vertex \\( \\{ v \\} \\)</p>
+          <p>On the right you see a nice tree decompostion of the current graph.</P>
+          <p>Each node type of the tree is a different color and has a diffrent symbol to make it easier to tell the difference.</p>
+          <p>Spend some time getting familiar with the difference between the nodes. As we will be refering them a lot in the coming sections.</p>
           `);
 
           if (!window.graphContainer && !window.treeContainer) {
@@ -786,6 +781,7 @@ export default class SectionHandler {
           this.tree.setAllNodes();
           this.sidebar.addButton('Next Step', () => tree.nextStep());
           this.sidebar.addButton('Previous Step', () => tree.previousStep());
+          this.addArrowKeyFunctionality(tree);
         },
         'chapter4',
       ),
@@ -849,7 +845,7 @@ export default class SectionHandler {
               tree decompositions we can see that the the vertices in \\( X_i \\) is the intersection of the nodes in the 2 subtrees. We can then add the table entries from the children nodes' table and substract the ones we counted twice./p>
      
 
-              <p>If we hit a <strong>introduce node</strong> with child \\( j \\), then \\( X_i = X_j \\cup \\{ v \\} \\) and \\( S \\subseteq X_j \\)</p>
+              <p>If we hit a <strong>introduce node</strong> with child \\( j \\), then \\( X_i = X_j \\cup \\{ v \\} \\) and \\( S \\subseteq X_i \\)</p>
               <p>\\( C_i(S) = C_j(S)\\)</p>
              <p>
              $$
@@ -891,6 +887,8 @@ export default class SectionHandler {
           niceTreeDecomposition.load(niceTreeDecompositionData);
           niceTreeDecomposition.setGraph(graph);
           niceTreeDecomposition.enableMaximumIndependentSet();
+
+          this.addArrowKeyFunctionality(niceTreeDecomposition);
 
           const controlsContainer = d3.select('#output').append('div')
             .attr('class', 'controls-container');
@@ -999,6 +997,8 @@ export default class SectionHandler {
           niceTreeDecomposition.setGraph(graph);
           niceTreeDecomposition.enableThreeColor();
 
+          this.addArrowKeyFunctionality(niceTreeDecomposition);
+
           const controlsContainer = d3.select('#output').append('div')
             .attr('class', 'controls-container');
 
@@ -1052,17 +1052,7 @@ export default class SectionHandler {
           niceTreeDecomposition.enableHamiltonianPath();
           this.addAlgorithmControls(() => niceTreeDecomposition.previousDPStep(), () => niceTreeDecomposition.nextDPStep());
 
-          d3.select('body').on('keydown', () => {
-            switch (event.key) {
-              case 'ArrowUp':
-                niceTreeDecomposition.nextDPStep();
-                break;
-              case 'ArrowDown':
-                niceTreeDecomposition.previousDPStep();
-                break;
-              default:
-            }
-          });
+          this.addArrowKeyFunctionality(niceTreeDecomposition);
         },
         'chapter4',
       ),
@@ -1072,6 +1062,20 @@ export default class SectionHandler {
 
 
     if (this.currentChapter === 'chapter5') this.createCustomSection();
+  }
+
+  addArrowKeyFunctionality(tree) {
+    d3.select('body').on('keydown', () => {
+      switch (event.key) {
+        case 'ArrowUp':
+          tree.nextDPStep();
+          break;
+        case 'ArrowDown':
+          tree.previousDPStep();
+          break;
+        default:
+      }
+    });
   }
 
   addAlgorithmControls(previous, next) {
@@ -1110,9 +1114,7 @@ export default class SectionHandler {
 
   createSection() {
     if (!this.currentSection) this.currentSection = this.sections[0];
-
     d3.select('#graph-container').classed('graph-classes', false);
-
     d3.select('.nav').style('height', '5%');
     d3.select('#main').style('height', '95%');
 
@@ -1125,23 +1127,30 @@ export default class SectionHandler {
     window.history.replaceState({}, '', `?${params.toString()}`);
     /* Query strings end */
 
-    d3.select('#graph-container').selectAll('*').remove();
-    d3.select('#tree-container').selectAll('svg').remove();
-    d3.select('#container').selectAll('svg').remove();
+    this.removeElements();
 
     if (this.sidebar) this.sidebar.clear();
     if (this.tree) this.tree.clear();
+
+    this.sections.map((section) => section.isActive = false);
+    this.currentSection.isActive = true;
+    this.currentSection.create();
+    this.sidebar.updateProgressBar();
+  }
+
+  removeElements() {
+    d3.select('#graph-container').selectAll('*').remove();
+    d3.select('#tree-container').selectAll('svg').remove();
+    d3.select('#container').selectAll('svg').remove();
+    d3.select('#dp-container').remove();
+    d3.select('#color-table').remove();
+    d3.select('#graph-tooltip').remove();
     d3.select('#output').selectAll('*').remove();
     d3.select('#tooltip').remove();
     d3.select('#tooltip-arrow').remove();
     d3.select('#tree1').remove();
     d3.select('#tree2').remove();
     d3.select('#tree3').remove();
-
-    this.sections.map((section) => section.isActive = false);
-    this.currentSection.isActive = true;
-    this.currentSection.create();
-    this.sidebar.updateProgressBar();
   }
 
   goPreviousSection() {

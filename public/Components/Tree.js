@@ -1080,10 +1080,8 @@ export default class Tree {
 
       const child = node.children[0];
 
-      /* Get the induced subgraph of all the vertices in the current subtree */
       const inducedSubgraph = this.graph.createSubgraph(subTree);
 
-      /* Highlight the induced subgraph */
       this.graph.highlightSubGraph(inducedSubgraph);
 
       // this.graph.createSubgraph(subTree);
