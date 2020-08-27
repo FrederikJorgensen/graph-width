@@ -79,7 +79,7 @@ body {
   position: absolute;
   transform: translate(-100%, -2px);
   z-index: 10;
-  width: 20%;
+  width: 30%;
   height: 30%;
   overflow: auto;
 }

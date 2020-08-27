@@ -449,7 +449,6 @@ export default class Tree {
         <th>i</th>
         <th>d</th>
         <th>M</th>
-        <th>bool</th>
       </tr>
     </thead>
     `;
@@ -462,16 +461,26 @@ export default class Tree {
       const verticesDegrees = solutionType[0];
       const matching = solutionType[1];
       const degreeString = this.createDegreeString(verticesDegrees, matching);
-      const matchingString = this.createMatchingString(matching);
+      const matchingString = this.createMatchingString2(matching);
       tableRowString += this.createRow(degreeString, matchingString, isPartialSolution, i);
     });
     return tableRowString;
   }
 
+  createMatchingString2(matching) {
+    let matchingString = '[ ';
+    matching.forEach((pair, i) => {
+      if (pair.length !== 0) matchingString += JSON.stringify(pair);
+    });
+
+    matchingString += ' ]';
+    return matchingString;
+  }
+
   createMatchingString(matching) {
     let matchingString = '';
     matching.forEach((pair) => {
-      matchingString += JSON.stringify(pair);
+      if (pair.length !== 0) matchingString += JSON.stringify(pair);
     });
     return matchingString;
   }
@@ -491,12 +500,16 @@ export default class Tree {
   }
 
   createRow(matrixString, matchingString, isPartialSolution, i) {
-    return String.raw`<tr><td>${++i}</td><td>${matrixString}</td>
-    <td>${matchingString}</td>
-    <td>${
-  isPartialSolution
-    ? 'true<span class="material-icons correct-answer">check</span>'
-    : 'false<span class="material-icons wrong-answer">clear</span>'}</td></tr>`;
+    return String.raw`
+    <tr>
+      <td>${++i}</td><td>${matrixString}</td>
+      <td>${matchingString}</td>
+    </tr>`;
+
+    /*     <td>${
+      isPartialSolution
+        ? 'true<span class="material-icons correct-answer">check</span>'
+        : 'false<span class="material-icons wrong-answer">clear</span>'}</td> */
   }
 
 
@@ -723,29 +736,46 @@ export default class Tree {
   }
 
   setTableForNodeAboveLeaf() {
+    const solutionType = [];
+    const d = {};
+    d[this.introducedVertex] = 0;
+    const matching = [];
+    const pair = [];
+    pair.push(this.introducedVertex);
+    matching.push(pair);
+    solutionType.push(d, matching);
+    this.dpTable.set(solutionType, true);
+
+
     // const dpTable = new Map();
-    for (let i = 0; i <= 2; i++) {
+    /*     for (let i = 0; i <= 2; i++) {
       const solutionType = [];
       const d = {};
       d[this.introducedVertex] = i;
       const matching = [];
       const pair = [];
-      pair.push(this.introducedVertex);
-      matching.push(pair);
-      solutionType.push(d, matching);
 
       switch (i) {
         case 0:
+          pair.push(this.introducedVertex);
+          matching.push(pair);
+          solutionType.push(d, matching);
           this.dpTable.set(solutionType, true);
           break;
         case 1:
+          pair.push(this.introducedVertex);
+          matching.push(pair);
+          solutionType.push(d, matching);
           this.dpTable.set(solutionType, false);
           break;
         case 2:
+          // pair.push('');
+          matching.push(pair);
+          solutionType.push(d, matching);
           this.dpTable.set(solutionType, false);
           break;
       }
-    }
+    } */
   }
 
   createSolutionTypeForDegreeZero(verticesDegrees, matching, oldBool) {
@@ -771,9 +801,9 @@ export default class Tree {
     return intArray;
   }
 
-  setTableForIntroduceNode(partialSolutions, partialSolutionBooleans) {
+  setTableForIntroduceNode(partialSolutions, stateBooleans) {
     partialSolutions.forEach((partialSolution, i) => {
-      const oldBool = partialSolutionBooleans[i];
+      const oldBool = stateBooleans[i];
 
       for (let i = 0; i <= 2; i++) {
         const verticesDegrees = deepClone(partialSolution[0]);
@@ -796,8 +826,9 @@ export default class Tree {
   }
 
   createSolutionTypeForDegreeTwo(childVertices, verticesDegrees, matching) {
-    const solutionType = [];
     verticesDegrees[this.introducedVertex] = 2;
+
+    const solutionType = [];
     const neighbors = this.graph.getNeighbors(this.introducedVertex);
     const neighborsInSubGraph = neighbors.filter((value) => childVertices.includes(value));
 
@@ -811,24 +842,26 @@ export default class Tree {
       verticesDegrees[neighborOne] = ++oldVal;
       verticesDegrees[neighborTwo] = ++oldVal2;
 
-      solutionType.push(verticesDegrees, matching);
+      matching = matching.filter((pair) => !pair.includes(neighborOne));
+      matching = matching.filter((pair) => !pair.includes(neighborTwo));
 
-      // pair.push(this.introducedVertex);
-      // matching.push(pair);
-      this.dpTable.set(solutionType, true);
-    } else {
-      matching.push([this.introducedVertex]);
+      if (verticesDegrees[neighborOne] === 1 && verticesDegrees[neighborTwo] === 1) {
+        const pair = [neighborOne, neighborTwo];
+        matching.push(pair);
+      }
+
       solutionType.push(verticesDegrees, matching);
-      this.dpTable.set(solutionType, false);
+      this.dpTable.set(solutionType, true);
     }
   }
 
   createSolutionTypeForDegreeOne(childVertices, verticesDegrees, matching) {
+    verticesDegrees[this.introducedVertex] = 1;
+
     for (const childVertex of childVertices) {
       if (this.graph.isEdge(childVertex, this.introducedVertex)) {
         const solutionType = [];
         const degreeOfW = verticesDegrees[childVertex];
-        verticesDegrees[this.introducedVertex] = 1;
 
         switch (degreeOfW) {
           case 0:
@@ -838,15 +871,14 @@ export default class Tree {
             this.dpTable.set(solutionType, true);
             break;
           case 1:
-            for (const pair of matching) {
+            for (let pair of matching) {
               if (pair.includes(childVertex)) {
                 matching = this.removePairFromMatching(matching, pair);
-                const newPair = [this.introducedVertex, childVertex];
-                matching.push(newPair);
+                pair = pair.filter((x) => x !== childVertex);
+                pair.push(this.introducedVertex);
+                matching.push(pair);
                 verticesDegrees[childVertex] = 2;
                 solutionType.push(verticesDegrees, matching);
-                // const newPair = pair.filter((x) => x !== childVertex);
-                // newPair.push(this.introducedVertex);
                 this.dpTable.set(solutionType, true);
               } else {
                 solutionType.push(verticesDegrees, matching);
@@ -855,12 +887,13 @@ export default class Tree {
             }
             break;
           case 2:
-            const pair = [this.introducedVertex];
-            matching.push(pair);
+            matching.push('');
             solutionType.push(verticesDegrees, matching);
             this.dpTable.set(solutionType, false);
             break;
         }
+
+        return;
       }
     }
   }
@@ -886,54 +919,25 @@ export default class Tree {
     });
   }
 
-  setTableForForgetNode(partialSolutions, partialSolutionBooleans) {
-    const duplicateTracker = [];
+  isForgottenVertexInMatching(matching) {
+    return matching.some((pair) => {
+      if (pair.length > 1 && pair.includes(this.forgottenVertex)) return true;
+      else return false;
+    });
+  }
 
-    partialSolutions.forEach((partialSolution, i) => {
-      const bool = partialSolutionBooleans[i];
+  setTableForForgetNode(partialSolutions) {
+    partialSolutions.forEach((partialSolution) => {
       const solutionType = [];
       const degreeVertices = deepClone(partialSolution[0]);
       let matching = deepClone(partialSolution[1]);
       delete degreeVertices[this.forgottenVertex];
-      matching = this.removeForgottenVertexFromMatching(matching);
 
-
-      const d = JSON.stringify(degreeVertices);
-
-      if (!duplicateTracker.includes(d)) {
-        duplicateTracker.push(d);
-
-
-        if (bool) {
-          if (this.isIntroducedVertexInMatching(matching)) {
-            matching = this.removeForgottenVertexFromMatching(matching);
-            this.dpTable.set(solutionType, false);
-          } else {
-            matching = this.removeForgottenVertexFromMatching(matching);
-            this.dpTable.set(solutionType, false);
-          }
-        } else {
-          solutionType.push(degreeVertices, matching);
-          this.dpTable.set(solutionType, false);
-        }
-
-
+      if (!this.isForgottenVertexInMatching(matching)) {
+        matching = this.removeForgottenVertexFromMatching(matching);
         solutionType.push(degreeVertices, matching);
-        this.dpTable.set(solutionType, false);
-      }
-
-
-      /* matching = this.removeForgottenVertexFromMatching(matching);
-
-      solutionType.push(degreeVertices, matching); */
-
-      // const filtered = this.removeSingletonsFromMatching(matching);
-
-      /*       if (filtered.length === 0) {
-        this.dpTable.set(solutionType, false);
-      } else {
         this.dpTable.set(solutionType, true);
-      } */
+      }
     });
   }
 
@@ -1013,7 +1017,7 @@ export default class Tree {
           break;
         case 'forget':
           this.forgottenVertex = this.setForgottenVertex(node);
-          this.setTableForForgetNode(partialSolutions, partialSolutionBooleans);
+          this.setTableForForgetNode(partialSolutions);
           break;
         case 'join':
           this.handleJoinNode();

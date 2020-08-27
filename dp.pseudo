@@ -21,16 +21,8 @@ case "introduce node":
     case v is 2:
       for each w in child bag
         check if there exists
-
         find 2 edges that are in different pairs
-        update from the matching
         Find 2 Endpoints, endpoints can have degree 0 and degree 1
-
-    u = 0 → 1
-    u’ = 0 → 1
-    1 →
-    0 →  */
-
 
 case "forget node":
 
@@ -76,3 +68,22 @@ Degree must be 2
 Or 1 if we are at the endpoint of a path
 
 Check v, w as start and end point, must be degree 1.
+
+
+
+d       M
+a → 1   [ [a,b] ]
+b → 1
+
+We want to introduce the vertex c with degree 2.
+
+a → 2   []
+b → 2
+c -> 2
+
+
+
+
+
+
+
