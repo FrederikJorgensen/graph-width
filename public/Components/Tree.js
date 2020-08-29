@@ -331,14 +331,14 @@ export default class Tree {
           .attr('height', 25)
           .attr('x', (d) => d.x - (d.data.label.split(',').length * 25) / 2)
           .attr('y', (d) => d.y)
-        // .attr('transform', (d) => `translate(${d.x},${d.y})`)
+          // .attr('transform', (d) => `translate(${d.x},${d.y})`)
           .attr('rx', 5)
           .attr('ry', 5)
           .attr('class', 'tree-node')
           .on('contextmenu', d3.contextMenu(menu)),
         (update) => update
           .attr('x', (d) => d.x - (d.data.label.split(',').length * 25) / 2)
-        // .attr('x', (d) => d.x)
+          // .attr('x', (d) => d.x)
           .attr('y', (d) => d.y),
         (exit) => exit.remove(),
       );
@@ -469,7 +469,7 @@ export default class Tree {
 
   createMatchingString2(matching) {
     let matchingString = '[ ';
-    matching.forEach((pair, i) => {
+    matching.forEach((pair) => {
       if (pair.length !== 0) matchingString += JSON.stringify(pair);
     });
 
@@ -505,13 +505,7 @@ export default class Tree {
       <td>${++i}</td><td>${matrixString}</td>
       <td>${matchingString}</td>
     </tr>`;
-
-    /*     <td>${
-      isPartialSolution
-        ? 'true<span class="material-icons correct-answer">check</span>'
-        : 'false<span class="material-icons wrong-answer">clear</span>'}</td> */
   }
-
 
   drawHamiltonianTable(node, tableData) {
     const nodeSvg = d3.select(`#treeNode-${node.id}`);
@@ -727,12 +721,10 @@ export default class Tree {
   }
 
   createLeafNodeTable() {
-    // const table = new Map();
     const verticesDegrees = {};
     const matching = [];
     const state = [verticesDegrees, matching];
     this.dpTable.set(state, true);
-    // return table;
   }
 
   setTableForNodeAboveLeaf() {
@@ -745,37 +737,6 @@ export default class Tree {
     matching.push(pair);
     solutionType.push(d, matching);
     this.dpTable.set(solutionType, true);
-
-
-    // const dpTable = new Map();
-    /*     for (let i = 0; i <= 2; i++) {
-      const solutionType = [];
-      const d = {};
-      d[this.introducedVertex] = i;
-      const matching = [];
-      const pair = [];
-
-      switch (i) {
-        case 0:
-          pair.push(this.introducedVertex);
-          matching.push(pair);
-          solutionType.push(d, matching);
-          this.dpTable.set(solutionType, true);
-          break;
-        case 1:
-          pair.push(this.introducedVertex);
-          matching.push(pair);
-          solutionType.push(d, matching);
-          this.dpTable.set(solutionType, false);
-          break;
-        case 2:
-          // pair.push('');
-          matching.push(pair);
-          solutionType.push(d, matching);
-          this.dpTable.set(solutionType, false);
-          break;
-      }
-    } */
   }
 
   createSolutionTypeForDegreeZero(verticesDegrees, matching, oldBool) {
@@ -930,14 +891,22 @@ export default class Tree {
     partialSolutions.forEach((partialSolution) => {
       const solutionType = [];
       const degreeVertices = deepClone(partialSolution[0]);
-      let matching = deepClone(partialSolution[1]);
-      delete degreeVertices[this.forgottenVertex];
+      const matching = deepClone(partialSolution[1]);
 
-      if (!this.isForgottenVertexInMatching(matching)) {
-        matching = this.removeForgottenVertexFromMatching(matching);
+      const valueOfForgottenVertex = degreeVertices[this.forgottenVertex];
+      // delete degreeVertices[this.forgottenVertex];
+
+      if (valueOfForgottenVertex === 2) {
         solutionType.push(degreeVertices, matching);
         this.dpTable.set(solutionType, true);
       }
+
+
+      /*       if (!this.isForgottenVertexInMatching(matching)) {
+        matching = this.removeForgottenVertexFromMatching(matching);
+        solutionType.push(degreeVertices, matching);
+        this.dpTable.set(solutionType, true);
+      } */
     });
   }
 
@@ -1394,22 +1363,13 @@ export default class Tree {
       // this.animateNode(currentNode);
       // this.animateLink(currentNode);
 
-      // Get all the subsets of the current vertices in this tree node
       const allSubsets = getAllSubsets(currentNode.data.vertices);
       allSubsets.map((s) => s.sort());
-
-      // Get the subtree rooted at this node
       const subTree = getSubTree(this.root, currentNode.data);
-
-      /* Get the induced subgraph of all the vertices in the current subtree */
       const inducedSubgraph = this.graph.createSubgraph(subTree);
-
-      /* Highlight the induced subgraph */
       this.graph.highlightSubGraph(inducedSubgraph);
-
       this.currentSubTree = subTree;
 
-      // Leaf node
       if ('children' in currentNode.data === false) {
         this.graph.hideTooltip();
         this.graph.hideArrow();
@@ -1975,65 +1935,3 @@ export default class Tree {
     this.setAllG();
   }
 }
-
-/*
-          for (const childKey of childKeys) {
-            const state = [];
-            const d = childKey[0];
-            const M = childKey[1];
-            delete d[forgottenVertex];
-
-            for (const a of M) {
-              const aIndex = M.indexOf(a);
-              if (a.includes(forgottenVertex)) M.splice(aIndex);
-            }
-
-            state.push(d, M);
-            table.set(state, true);
-          }
-
-          const keys = [...table.keys()];
-          const temp = [];
-
-          for (const key of keys) {
-            const obj = key[0];
-            const entry = JSON.stringify(obj);
-            temp.push(entry);
-          }
-
-          const newArr = multiDimensionalUnique(temp);
-
-          table = new Map();
-
-          const arrayOfDegrees = [];
-          for (const a of newArr) {
-            const d = JSON.parse(a);
-            arrayOfDegrees.push(d);
-          }
-
-          for (const d of arrayOfDegrees) {
-            const state = [];
-            const keys = Object.keys(d);
-            const possible = [];
-            const matchings = [];
-
-            for (const key of keys) {
-              const value = d[key];
-              if (value === 1) possible.push(key);
-            }
-
-            if (possible.length > 1 && possible.length % 2 === 0) {
-              for (let i = 0; i < possible.length; i += 2) {
-                const matching = [];
-                const e1 = possible[i];
-                const e2 = possible[i + 1];
-                matching.push(parseInt(e1, 10), parseInt(e2, 10));
-                matchings.push(matching);
-              }
-              state.push(d, matchings);
-              table.set(state, true);
-            } else {
-              state.push(d, []);
-              table.set(state, false);
-            }
-          } */
