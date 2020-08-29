@@ -58,32 +58,7 @@ case "join node":
 
    containsCycles(subGraph)
     
-S can have degree 0 throughout the DP but once you forget S it must have degree 1. It must also be a pair in some matching.
-
-Function that finds path until vertex degree 1.
-
-M’’ iterate over each pair in the matching and check the paths.
-
-Degree must be 2
-Or 1 if we are at the endpoint of a path
-
-Check v, w as start and end point, must be degree 1.
-
-
-
-d       M
-a → 1   [ [a,b] ]
-b → 1
-
-We want to introduce the vertex c with degree 2.
-
-a → 2   []
-b → 2
-c -> 2
-
-
-
-
-
-
-
+- S can have degree 0 throughout the DP but once you forget S it must have degree 1. It must also be a pair in some matching.
+- Function that finds path until vertex degree 1.
+- M’’ iterate over each pair in the matching and check the paths.
+- Check v, w as start and end point, must be degree 1.

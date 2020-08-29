@@ -20,37 +20,29 @@ import {
   getAllSubsets,
   deepClone,
 } from '../Utilities/helpers.js';
+
 import { contextMenu as menu } from './TreeContextMenu.js';
 
 const arraysMatch = function (arr1, arr2) {
-  // Check if the arrays are the same length
   if (arr1.length !== arr2.length) return false;
 
-  // Check if all items exist and are in the same order
   for (let i = 0; i < arr1.length; i++) {
     if (arr1[i] !== arr2[i]) return false;
   }
 
-  // Otherwise, return true
   return true;
 };
 
 Set.prototype.subSet = function (otherSet) {
-  // if size of this set is greater
-  // than otherSet then it can'nt be
-  //  a subset
   if (this.size > otherSet.size) return false;
 
   for (const elem of this) {
-    // if any of the element of
-    // this is not present in the
-    // otherset then return false
     if (!otherSet.has(elem)) return false;
   }
   return true;
 };
 
-// Include in your code!
+
 const data = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 const myColor = d3.scaleOrdinal().domain(data).range(d3.schemeSet3);
 
@@ -263,18 +255,6 @@ export default class Tree {
   }
 
   checkNiceProperties() {
-    if (this.isBinary()) {
-      // console.log('is binary');
-    } else {
-      // console.log('not binary');
-    }
-
-    if (this.isNodeCoverage()) {
-      // console.log('node coverage true');
-    } else {
-      // console.log('node coverage false');
-    }
-
     if (this.checkNodeType()) {
       d3.select('#output').html(`
         All nodes are either a leaf, join, introduce or a forget node <span class="material-icons correct-answer">check</span>
@@ -410,10 +390,6 @@ export default class Tree {
     d3.select('#tooltip-arrow').style('opacity', 0);
   }
 
-  removeFromMatching() {
-    this.svg.remove();
-  }
-
   setGraph(graph) {
     this.graph = graph;
   }
@@ -461,27 +437,19 @@ export default class Tree {
       const verticesDegrees = solutionType[0];
       const matching = solutionType[1];
       const degreeString = this.createDegreeString(verticesDegrees, matching);
-      const matchingString = this.createMatchingString2(matching);
+      const matchingString = this.createMatchingString(matching);
       tableRowString += this.createRow(degreeString, matchingString, isPartialSolution, i);
     });
     return tableRowString;
   }
 
-  createMatchingString2(matching) {
+  createMatchingString(matching) {
     let matchingString = '[ ';
     matching.forEach((pair) => {
       if (pair.length !== 0) matchingString += JSON.stringify(pair);
     });
 
     matchingString += ' ]';
-    return matchingString;
-  }
-
-  createMatchingString(matching) {
-    let matchingString = '';
-    matching.forEach((pair) => {
-      if (pair.length !== 0) matchingString += JSON.stringify(pair);
-    });
     return matchingString;
   }
 
@@ -609,14 +577,12 @@ export default class Tree {
       if (this.currentNodeIndex !== i) return;
       const node = currentNode.data;
 
-      /* We hit a leaf */
       if ('children' in node === false) {
         moveTooltip(node);
         highlightVertex(node.id);
         node.largestSet = 1;
         return node.largestSet;
       }
-      /* Exclude current node */
 
       let maxSetExcl = 0;
 
@@ -630,7 +596,6 @@ export default class Tree {
 
       let maxSetIncl = 1;
 
-      /* Include current node */
       if (node.children[0] !== undefined && 'children' in node.children[0]) {
         const left = node.children[0].children[0].largestSet;
         let right = 0;
@@ -706,7 +671,6 @@ export default class Tree {
 
   isArrayInArray(arr, item) {
     const item_as_string = JSON.stringify(item);
-
     const contains = arr.some((ele) => JSON.stringify(ele) === item_as_string);
     return contains;
   }
@@ -892,21 +856,13 @@ export default class Tree {
       const solutionType = [];
       const degreeVertices = deepClone(partialSolution[0]);
       const matching = deepClone(partialSolution[1]);
-
       const valueOfForgottenVertex = degreeVertices[this.forgottenVertex];
-      // delete degreeVertices[this.forgottenVertex];
+      delete degreeVertices[this.forgottenVertex];
 
       if (valueOfForgottenVertex === 2) {
         solutionType.push(degreeVertices, matching);
         this.dpTable.set(solutionType, true);
       }
-
-
-      /*       if (!this.isForgottenVertexInMatching(matching)) {
-        matching = this.removeForgottenVertexFromMatching(matching);
-        solutionType.push(degreeVertices, matching);
-        this.dpTable.set(solutionType, true);
-      } */
     });
   }
 
