@@ -199,22 +199,14 @@ export default class Graph {
   }
 
   showSeparator(vertices) {
-    /* Keep track of the separating nodes for the overlay */
     this.separatorNodes = this.nodes.filter((node) => vertices.includes(node.id));
-
-    /* Make overlay visible */
     this.path.style('opacity', 0.3);
-
-    /* Get all the nodes that are not part of the separating set */
     const restNodes = this.nodes.filter((node) => !vertices.includes(node.id));
-
-    /* Get all the links after removing separating set */
     const restLinks = this.links.filter((link) => {
       if (vertices.includes(link.source.id)) return false;
       if (vertices.includes(link.target.id)) return false;
       return true;
     });
-    /* Check connectivity such that we can assign a cluster to each component */
     this.checkConnectivity(restNodes, restLinks);
 
     this.nodes.map((node) => {
@@ -235,15 +227,15 @@ export default class Graph {
     this.simulation.force('charge', d3.forceManyBody().strength(-1500));
 
     const groupingForce = forceInABox()
-      .strength(0.4) // Strength to foci
-      .template('force') // Either treemap or force
-      .groupBy('cluster') // Node attribute to group
+      .strength(0.4)
+      .template('force')
+      .groupBy('cluster')
       .links(this.links)
       .enableGrouping(true)
-      .linkStrengthInterCluster(0) // linkStrength between nodes of different clusters
-      .linkStrengthIntraCluster(0) // linkStrength between nodes of the same cluster
+      .linkStrengthInterCluster(0)
+      .linkStrengthIntraCluster(0)
       .forceLinkDistance(250)
-      .forceCharge(-2000); // Charge between the meta-nodes (Force template only)
+      .forceCharge(-2000);
 
     this.simulation.force('group', groupingForce);
     this.simulation.alpha(0.07).restart();
@@ -257,13 +249,13 @@ export default class Graph {
     this.nodes.forEach((node) => node.cluster = null);
 
     const groupingForce = forceInABox()
-      .strength(0) // Strength to foci
-      .template('force') // Either treemap or force
-      .groupBy('cluster') // Node attribute to group
+      .strength(0)
+      .template('force')
+      .groupBy('cluster')
       .links(this.links)
-      .linkStrengthInterCluster(0) // linkStrength between nodes of different clusters
-      .linkStrengthIntraCluster(0) // linkStrength between nodes of the same cluster
-      .forceCharge(0); // Charge between the meta-nodes (Force template only)
+      .linkStrengthInterCluster(0)
+      .linkStrengthIntraCluster(0)
+      .forceCharge(0);
 
     this.simulation
       .force('group', groupingForce)
@@ -448,19 +440,6 @@ export default class Graph {
         && subGraphNodeIds.includes(currentLink.target.id));
 
     return { nodes: subGraphNodes, links: subGraphLinks };
-  }
-
-  createSubgraphFromMatching(matching) {
-    // [[1,2], [2,3]]
-
-    const temp = [];
-    for (const pair of matching) {
-      temp.push(pair[0], pair[1]);
-
-      const link = { source: pair[0], target: pair[1] };
-    }
-
-    const subGraphNodes = this.nodes.filter((node) => temp.includes(node.id));
   }
 
   highlightSubGraph(subGraph) {
@@ -715,18 +694,13 @@ export default class Graph {
   }
 
   async runCoherence() {
-    /* Reset all the styling and stop any running transitions */
     this.resetLinkStyles();
     this.resetTextStyles();
     this.resetTreeDecompositionStyles();
     this.stopAllTransitions();
-
-    /* Run the the algorithm without animation if it is already running */
     this.cancel = true;
     await this.testCoherence();
     this.cancel = false;
-
-    /* Run the  algorithm normally with animation */
     await this.testCoherence();
     return new Promise((resolve) => resolve());
   }
@@ -829,16 +803,11 @@ export default class Graph {
   }
 
   isSeparatorSet(set) {
-    /* Remove the current separtor nodes */
     const subGraphNodes = this.nodes.filter((node) => !set.includes(node.id));
-
-    /* Remove the links from the separator node */
     const linksToRemove = this.links.filter((l) => {
       if (set.includes(l.target.id) || set.includes(l.source.id)) return true;
     });
     const subGraphLinks = this.links.filter((link) => !linksToRemove.includes(link));
-
-    /* Check if the new subgraph after deleting the separating set is connected */
     return this.checkConnectivity(subGraphNodes, subGraphLinks);
   }
 
@@ -853,7 +822,6 @@ export default class Graph {
         return;
       }
 
-      /* After removing a separating node check if the remaining vertices are still adjacent */
       if (this.selectedNodes.length > 1 && this.isSeparatingNodesAdjacent() === false) {
         this.resetNodeStyling();
         this.colorNotSeparating();

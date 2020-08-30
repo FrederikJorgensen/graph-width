@@ -929,6 +929,7 @@ export default class Tree {
           partialSolutionBooleans = [...child.table.values()];
         }
       }
+      
       this.dpTable = new Map();
 
       switch (type) {
