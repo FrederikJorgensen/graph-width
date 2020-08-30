@@ -89,7 +89,7 @@ body {
 }
 
 .tableTransparent {
-  opacity: 0.1;
+  opacity: 0;
 }
 
 #dp-container::-webkit-scrollbar-track {
