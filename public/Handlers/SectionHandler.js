@@ -1045,7 +1045,10 @@ export default class SectionHandler {
           await graph.computeTreeDecomposition();
           await graph.readNiceTreeDecomposition();
           const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
-          // console.log('niceTreeDecompositionData', niceTreeDecompositionData);
+
+
+          this.createTableVisibilityButton();
+
           niceTreeDecomposition.load(hamTD);
           niceTreeDecomposition.setGraph(graph);
           niceTreeDecomposition.addArrow();
@@ -1059,6 +1062,29 @@ export default class SectionHandler {
     ];
     this.sections = this.sections.filter((section) => section.chapter === this.currentChapter);
     if (this.currentChapter === 'chapter5') this.createCustomSection();
+  }
+
+  toggleTableVisibility() {
+    if (window.tableIsVisible) {
+      d3.select('#toggle-visibility-button').text('Show table');
+      d3.select('#dp-container').classed('tableVisible', false);
+      d3.select('#dp-container').classed('tableTransparent', true);
+      window.tableIsVisible = false;
+    } else {
+      d3.select('#toggle-visibility-button').text('Hide table');
+      d3.select('#dp-container').classed('tableTransparent', false);
+      d3.select('#dp-container').classed('tableVisible', true);
+      window.tableIsVisible = true;
+    }
+  }
+
+  createTableVisibilityButton() {
+    d3.select('#app-area')
+      .append('div')
+      .text('Hide Table')
+      .attr('id', 'toggle-visibility-button')
+      .attr('class', 'toggle-table-visibilty')
+      .on('click', () => this.toggleTableVisibility());
   }
 
   addArrowKeyFunctionality(tree) {

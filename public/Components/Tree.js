@@ -492,17 +492,17 @@ export default class Tree {
       .getElementById('tooltip-arrow')
       .getBoundingClientRect();
 
-    this.moveDpTable(tableData, left, top);
+    d3.select('#dp-container')
+      .html(tableData);
+
+    this.moveDpTable(left, top);
     renderMathInElement(document.body);
   }
 
-  moveDpTable(tableData, left, top) {
+  moveDpTable(left, top) {
     d3.select('#dp-container')
-      .html(tableData)
-      .style('opacity', 1)
       .style('left', `${left}px`)
-      .style('top', `${top}px`)
-      .style('padding', '0');
+      .style('top', `${top}px`);
   }
 
   moveTooltipArrow(x, y) {
@@ -929,7 +929,7 @@ export default class Tree {
           partialSolutionBooleans = [...child.table.values()];
         }
       }
-      
+
       this.dpTable = new Map();
 
       switch (type) {
@@ -1720,6 +1720,7 @@ export default class Tree {
 
   enableHamiltonianPath() {
     this.disableAllAlgorithms();
+    window.tableIsVisible = true;
     this.isHamiltonianPath = true;
   }
 
