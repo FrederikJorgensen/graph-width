@@ -337,7 +337,7 @@ strong {
   background-color: white;
   color: rgb(51, 51, 51);
   position: absolute;
-  /* border: 3.5px solid rgb(51, 51, 51); */
+  /* border: 1px solid rgb(51, 51, 51); */
   padding: 15px;
   transform: translate(-100%, -2px);
 }

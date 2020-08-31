@@ -747,7 +747,7 @@ export default class SectionHandler {
           this.tree.addArrow();
 
           this.sidebar.addContent(`
-          <p>Lets now look at how the <strong>Maximum Independent Set</strong> problem works on a tree.</p>
+          <p>Let's now look at how the <strong>Maximum Independent Set</strong> problem works on a tree.</p>
           
           <p>Using dynamic programming we can traverse the tree bottom-up and keep track of the 'state' of each node in the tree.</p>
 
@@ -1039,17 +1039,16 @@ export default class SectionHandler {
 
           const graph = new Graph('graph-container');
           const niceTreeDecomposition = new Tree('tree-container');
-          // graph.loadGraph(graph1);
-          graph.loadGraph(cycleGraph);
+          graph.loadGraph(graph1);
+          // graph.loadGraph(cycleGraph);
 
           await graph.computeTreeDecomposition();
           await graph.readNiceTreeDecomposition();
           const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
-
-
           this.createTableVisibilityButton();
 
-          niceTreeDecomposition.load(hamTD);
+          // niceTreeDecomposition.load(hamTD);
+          niceTreeDecomposition.load(niceTreeDecompositionData);
           niceTreeDecomposition.setGraph(graph);
           niceTreeDecomposition.addArrow();
           niceTreeDecomposition.enableHamiltonianPath();

@@ -430,15 +430,14 @@ export default class Tree {
     `;
   }
 
-  createTableRows(solutionTypes, solutionTypesBooleans) {
+  createTableRows(solutionTypes) {
     let tableRowString = '';
     solutionTypes.forEach((solutionType, i) => {
-      const isPartialSolution = solutionTypesBooleans[i];
       const verticesDegrees = solutionType[0];
       const matching = solutionType[1];
       const degreeString = this.createDegreeString(verticesDegrees, matching);
       const matchingString = this.createMatchingString(matching);
-      tableRowString += this.createRow(degreeString, matchingString, isPartialSolution, i);
+      tableRowString += this.createRow(degreeString, matchingString, i);
     });
     return tableRowString;
   }
@@ -467,7 +466,7 @@ export default class Tree {
     return matrixString;
   }
 
-  createRow(matrixString, matchingString, isPartialSolution, i) {
+  createRow(matrixString, matchingString, i) {
     return String.raw`
     <tr>
       <td>${++i}</td><td>${matrixString}</td>
@@ -703,14 +702,14 @@ export default class Tree {
     this.dpTable.set(solutionType, true);
   }
 
-  createSolutionTypeForDegreeZero(verticesDegrees, matching, oldBool) {
+  createSolutionTypeForDegreeZero(verticesDegrees, matching) {
     const solutionType = [];
     const pair = [];
     verticesDegrees[this.introducedVertex] = 0;
     pair.push(this.introducedVertex);
     matching.push(pair);
     solutionType.push(verticesDegrees, matching);
-    this.dpTable.set(solutionType, oldBool);
+    this.dpTable.set(solutionType, true);
   }
 
   getKeysAsInts(obj) {
@@ -726,10 +725,13 @@ export default class Tree {
     return intArray;
   }
 
-  setTableForIntroduceNode(partialSolutions, stateBooleans) {
-    partialSolutions.forEach((partialSolution, i) => {
-      const oldBool = stateBooleans[i];
+  setTableForIntroduceNode(partialSolutions) {
+    if (partialSolutions === undefined) {
+      this.setTableForNodeAboveLeaf();
+      return;
+    }
 
+    partialSolutions.forEach((partialSolution) => {
       for (let i = 0; i <= 2; i++) {
         const verticesDegrees = deepClone(partialSolution[0]);
         const matching = deepClone(partialSolution[1]);
@@ -737,7 +739,7 @@ export default class Tree {
 
         switch (i) {
           case 0:
-            this.createSolutionTypeForDegreeZero(verticesDegrees, matching, oldBool);
+            this.createSolutionTypeForDegreeZero(verticesDegrees, matching);
             break;
           case 1:
             this.createSolutionTypeForDegreeOne(childVertices, verticesDegrees, matching);
@@ -783,6 +785,8 @@ export default class Tree {
   createSolutionTypeForDegreeOne(childVertices, verticesDegrees, matching) {
     verticesDegrees[this.introducedVertex] = 1;
 
+    // if (this.introducedVertex === 3) debugger;
+
     for (const childVertex of childVertices) {
       if (this.graph.isEdge(childVertex, this.introducedVertex)) {
         const solutionType = [];
@@ -810,11 +814,6 @@ export default class Tree {
                 this.dpTable.set(solutionType, false);
               }
             }
-            break;
-          case 2:
-            matching.push('');
-            solutionType.push(verticesDegrees, matching);
-            this.dpTable.set(solutionType, false);
             break;
         }
 
@@ -880,7 +879,10 @@ export default class Tree {
     return matching;
   }
 
-  handleJoinNode() {
+  setTableForJoinNode(leftChildPartialSolutions, rightChildPartialSolutions) {
+    console.log('leftChildPartialSolutions', leftChildPartialSolutions);
+
+
     /*     const leftTableKeys = childStates;
     const child2 = this.getChild2(node);
     const rightTableKeys = [...child2.table.keys()];
@@ -946,7 +948,9 @@ export default class Tree {
           this.setTableForForgetNode(partialSolutions);
           break;
         case 'join':
-          this.handleJoinNode();
+          const child2 = this.getChild2(node);
+          const partialSolutions2 = [...child2.table.keys()];
+          this.setTableForJoinNode(partialSolutions, partialSolutions2);
           break;
       }
       node.table = this.dpTable;
@@ -1809,7 +1813,6 @@ export default class Tree {
       .attr('stroke-width', 16)
       .attr('opacity', 0);
 
-    /* Get the link data and draw the links */
     svg
       .selectAll('line')
       .data(root.links())
@@ -1836,6 +1839,9 @@ export default class Tree {
         .attr('cy', (d) => d.y)
         .attr('class', 'normal-tree-node')
         .attr('transform', `translate(${0}, ${30})`);
+
+      svg
+        .selectAll('line').style('stroke', 'rgb(51, 51, 51)');
     } else {
       svg
         .selectAll('rect')
