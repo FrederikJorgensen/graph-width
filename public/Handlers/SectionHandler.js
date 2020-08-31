@@ -6,7 +6,7 @@ import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
 import TreeDecomposition from '../Components/TreeDecomposition.js';
 import {
-  graph1, exampleGraph3, gridGraph, cliqueGraph, treeGraph, cycleGraph, hamTD,
+  graph1, exampleGraph3, gridGraph, cliqueGraph, treeGraph, cycleGraph, hamTD, hamTD2,
 } from '../Utilities/graphs.js';
 
 export default class SectionHandler {
@@ -1047,8 +1047,9 @@ export default class SectionHandler {
           const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
           this.createTableVisibilityButton();
 
+          // console.log(niceTreeDecompositionData);
           // niceTreeDecomposition.load(hamTD);
-          niceTreeDecomposition.load(niceTreeDecompositionData);
+          niceTreeDecomposition.load(hamTD2);
           niceTreeDecomposition.setGraph(graph);
           niceTreeDecomposition.addArrow();
           niceTreeDecomposition.enableHamiltonianPath();

@@ -376,3 +376,213 @@ export const hamTD = {
     },
   ],
 };
+
+export const hamTD2 = {
+  id: 4,
+  label: '',
+  vertices: [],
+  liss: 0,
+  children: [
+    {
+      id: 19,
+      label: '3',
+      vertices: [
+        3,
+      ],
+      liss: 0,
+      children: [
+        {
+          id: 11,
+          label: '3,5',
+          vertices: [
+            3,
+            5,
+          ],
+          liss: 0,
+          children: [
+            {
+              id: 16,
+              label: '3,5,6',
+              vertices: [
+                3,
+                5,
+                6,
+              ],
+              liss: 0,
+              children: [
+                {
+                  id: 14,
+                  label: '3,6',
+                  vertices: [
+                    3,
+                    6,
+                  ],
+                  liss: 0,
+                  children: [
+                    {
+                      id: 13,
+                      label: '3,4,6',
+                      vertices: [
+                        3,
+                        4,
+                        6,
+                      ],
+                      liss: 0,
+                      children: [
+                        {
+                          id: 7,
+                          label: '3,4,6',
+                          vertices: [
+                            3,
+                            4,
+                            6,
+                          ],
+                          liss: 0,
+                          children: [
+                            {
+                              id: 1,
+                              label: '4,6',
+                              vertices: [
+                                4,
+                                6,
+                              ],
+                              liss: 0,
+                              children: [
+                                {
+                                  id: 15,
+                                  label: '4,6,7',
+                                  vertices: [
+                                    4,
+                                    6,
+                                    7,
+                                  ],
+                                  liss: 0,
+                                  children: [
+                                    {
+                                      id: 2,
+                                      label: '6,7',
+                                      vertices: [
+                                        6,
+                                        7,
+                                      ],
+                                      liss: 0,
+                                      children: [
+                                        {
+                                          id: 3,
+                                          label: '7',
+                                          vertices: [
+                                            7,
+                                          ],
+                                          liss: 0,
+                                          children: [
+                                            {
+                                              id: 9,
+                                              label: '',
+                                              vertices: [],
+                                              liss: 0,
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                        {
+                          id: 20,
+                          label: '3,4,6',
+                          vertices: [
+                            3,
+                            4,
+                            6,
+                          ],
+                          liss: 0,
+                          children: [
+                            {
+                              id: 17,
+                              label: '3,4',
+                              vertices: [
+                                3,
+                                4,
+                              ],
+                              liss: 0,
+                              children: [
+                                {
+                                  id: 12,
+                                  label: '2,3,4',
+                                  vertices: [
+                                    2,
+                                    3,
+                                    4,
+                                  ],
+                                  liss: 0,
+                                  children: [
+                                    {
+                                      id: 18,
+                                      label: '2,4',
+                                      vertices: [
+                                        2,
+                                        4,
+                                      ],
+                                      liss: 0,
+                                      children: [
+                                        {
+                                          id: 5,
+                                          label: '2',
+                                          vertices: [
+                                            2,
+                                          ],
+                                          liss: 0,
+                                          children: [
+                                            {
+                                              id: 10,
+                                              label: '1,2',
+                                              vertices: [
+                                                1,
+                                                2,
+                                              ],
+                                              liss: 0,
+                                              children: [
+                                                {
+                                                  id: 6,
+                                                  label: '2',
+                                                  vertices: [
+                                                    2,
+                                                  ],
+                                                  liss: 0,
+                                                  children: [
+                                                    {
+                                                      id: 8,
+                                                      label: '',
+                                                      vertices: [],
+                                                      liss: 0,
+                                                    },
+                                                  ],
+                                                },
+                                              ],
+                                            },
+                                          ],
+                                        },
+                                      ],
+                                    },
+                                  ],
+                                },
+                              ],
+                            },
+                          ],
+                        },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    },
+  ],
+};
