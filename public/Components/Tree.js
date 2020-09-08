@@ -23,6 +23,15 @@ import {
 
 import { contextMenu as menu } from './TreeContextMenu.js';
 
+function sumObjectsByKey(...objs) {
+  return objs.reduce((a, b) => {
+    for (const k in b) {
+      if (b.hasOwnProperty(k)) a[k] = (a[k] || 0) + b[k];
+    }
+    return a;
+  }, {});
+}
+
 const arraysMatch = function (arr1, arr2) {
   if (arr1.length !== arr2.length) return false;
 
@@ -178,8 +187,6 @@ export default class Tree {
   }
 
   isNodeCoverage() {
-    // const nodeCoverage = true;
-
     const tempSet = new Set();
 
     this.graph.nodes.forEach((node) => {
@@ -785,8 +792,6 @@ export default class Tree {
   createSolutionTypeForDegreeOne(childVertices, verticesDegrees, matching) {
     verticesDegrees[this.introducedVertex] = 1;
 
-    // if (this.introducedVertex === 3) debugger;
-
     for (const childVertex of childVertices) {
       if (this.graph.isEdge(childVertex, this.introducedVertex)) {
         const solutionType = [];
@@ -879,34 +884,31 @@ export default class Tree {
     return matching;
   }
 
-  setTableForJoinNode(leftChildPartialSolutions, rightChildPartialSolutions) {
-    console.log('leftChildPartialSolutions', leftChildPartialSolutions);
+  setTableForJoinNode(leftStates, rightStates) {
+    leftStates.forEach((leftState) => {
+      rightStates.forEach((rightState) => {
+        const leftStateDegreeFunction = leftState[0];
+        const rightStateDegreeFunction = rightState[0];
+        const leftStateMatching = leftState[1];
+        const rightStateMatching = rightState[1];
 
+        const combinedObject = sumObjectsByKey(leftStateDegreeFunction, rightStateDegreeFunction);
+        this.isNewDegreeFunctionValid(combinedObject);
 
-    /*     const leftTableKeys = childStates;
-    const child2 = this.getChild2(node);
-    const rightTableKeys = [...child2.table.keys()];
+        const newMatching = leftStateMatching.concat(rightStateMatching);
+      });
+    });
+  }
 
-    for (let i = 0; i < leftTableKeys.length; i++) {
-      const state = [];
-      const leftState = leftTableKeys[i];
-      const rightState = rightTableKeys[i];
+  isNewDegreeFunctionValid(combinedObject) {
+    let isValid = true;
+    const degrees = Object.values(combinedObject);
 
-      const leftD = leftState[0];
-      const rightD = rightState[0];
+    degrees.forEach((degree) => {
+      if (degree > 2) isValid = false;
+    });
 
-      const combinedObject = sumObjectsByKey(leftD, rightD);
-      const values = Object.values(combinedObject);
-
-      for (const value of values) {
-        if (value > 2) leq2 = false;
-      }
-
-      const hasCycle = false;
-      const leftMatching = leftState[1];
-      const rightMatching = rightState[1];
-      const newMatching = leftMatching.concat(rightMatching);
-    } */
+    return isValid;
   }
 
   runHamiltonianPath() {
@@ -968,7 +970,6 @@ export default class Tree {
       const node = currentNode.data;
       const subTree = getSubTree(this.root, currentNode.data);
 
-      /* Leaf node */
       if ('children' in node === false) {
         this.graph.hideTooltip();
         this.graph.hideArrow();
@@ -1018,15 +1019,9 @@ export default class Tree {
 
       this.graph.highlightSubGraph(inducedSubgraph);
 
-      // this.graph.createSubgraph(subTree);
-
-      /* Introduce Node */
       if (node.vertices.length > child.vertices.length) {
-        /* Get child states */
         const childClone = JSON.parse(JSON.stringify(child));
         const childsStates = childClone.states;
-
-        /* Find the introduced vertex */
         const difference = node.vertices.filter(
           (x) => !child.vertices.includes(x),
         );
@@ -1036,7 +1031,6 @@ export default class Tree {
         this.graph.resetNodeColors();
         this.graph.highlightNodeColor(introducedVertex, 'rgb(128, 177, 211)');
 
-        /* Initialize new states */
         const newStates = [];
 
         if (child.vertices.length === 0) {
@@ -1076,13 +1070,10 @@ export default class Tree {
         }
       }
 
-      /* Forgot node */
       if (node.vertices.length < child.vertices.length) {
-        /* Get the child's data  */
         const childClone = JSON.parse(JSON.stringify(child));
         const childStates = childClone.states;
 
-        /* Find the forgotten vertex */
         const forgottenVertex = child.vertices.filter(
           (x) => !node.vertices.includes(x),
         );
@@ -1091,27 +1082,22 @@ export default class Tree {
         this.graph.resetNodeColors();
         this.graph.highlightNodeColor(forgottenVertex, 'rgb(251, 128, 114)');
 
-        /* Get the position of the childs vertices */
         const ps = childClone.positionTracker;
         const parsed = parseInt(forgottenVertex, 10);
         const forgottenVertexIndex = ps.indexOf(parsed);
 
-        /* Remove the forgotten vertex from position tracker */
         ps.splice(forgottenVertexIndex, 1);
         node.positionTracker = ps;
 
-        /* Remove the column in the table that includes forgotten vertices */
         for (const childState of childStates) {
           childState.splice(forgottenVertexIndex, 1);
         }
 
         const uw = multiDimensionalUnique(childStates);
 
-        /* Update this table's state with the new states */
         node.states = uw;
       }
 
-      /* Join node */
       if (node.children.length === 2) {
         const child1 = node.children[0];
         const child1Clone = JSON.parse(JSON.stringify(child1));
@@ -1318,12 +1304,7 @@ export default class Tree {
     this.root.copy().eachAfter((currentNode) => {
       i++;
       if (this.currentNodeIndex !== i) return;
-
       currentNode.data.table = {};
-
-      // this.animateNode(currentNode);
-      // this.animateLink(currentNode);
-
       const allSubsets = getAllSubsets(currentNode.data.vertices);
       allSubsets.map((s) => s.sort());
       const subTree = getSubTree(this.root, currentNode.data);

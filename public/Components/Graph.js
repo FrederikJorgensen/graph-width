@@ -399,19 +399,12 @@ export default class Graph {
   }
 
   checkIntroducedVertex(introducedNode, positionTracker, oldState, color, subTree) {
-    /* Get the subgraph rooted at this tree */
     const subGraph = this.createSubgraph(subTree);
-
-    /* Reset the coloring */
     subGraph.nodes.forEach((node) => node.color = null);
-
-    /* Color the nodes according to the oldState */
     for (let i = 0; i < positionTracker.length; i++) {
       const n = subGraph.nodes.find((node) => node.id === positionTracker[i]);
       n.color = oldState[i];
     }
-
-    /* Give the introduced vertex a color */
     const iNode = subGraph.nodes.find((node) => node.id === introducedNode);
     iNode.color = color;
 
@@ -533,20 +526,13 @@ export default class Graph {
   runMis(subTree, set, introducedVertex, isHovering) {
     if (set.length === 0) return 0;
     const subGraph = this.createSubgraph(subTree);
-
     const verticesInSubGraph = [];
     subGraph.nodes.forEach((node) => {
       verticesInSubGraph.push(node.id);
     });
-
     const adjacencyList = this.returnAdj(subGraph.links);
-
-    /* Check if the introduced vertex is a neighbor to any of the vertices in the set */
     if (this.isIntroducedVertexNeighbor(set, introducedVertex, adjacencyList)) return -9999;
-
-    /* Check if any vertex in the set is neighboring eachother */
     if (this.isNeighborInSet(set, adjacencyList)) return -9999;
-
     const mis = this.max(verticesInSubGraph, adjacencyList, set, isHovering);
     return mis.length;
   }
@@ -833,18 +819,11 @@ export default class Graph {
       this.selectedNodes.push(d.id);
     }
 
-    /* Original graph's vertices subtracting the vertex separator set */
     const balanceLimit = (this.nodes.length - this.selectedNodes.length) / 2;
-
-    /* Get the subgraph, sublinks and whether the graph is disconnected */
     const obj = this.isSeparatorSet(this.selectedNodes);
-
-    /* First check if the graph is disconnected */
     if (obj.isDisconnected === true) {
       const newnodes = obj.subGraphNodes;
       const connectedComponents = {};
-
-      /* Count the vertices in each component */
       for (const node of newnodes) {
         if ('cluster' in node) {
           const nc = node.cluster;
@@ -853,8 +832,6 @@ export default class Graph {
       }
 
       const componentLength = Object.values(connectedComponents);
-
-      /* Test each component length against the balance limit */
       for (const cl of componentLength) {
         if (cl > balanceLimit) {
           this.resetNodeStyling();
@@ -888,16 +865,11 @@ export default class Graph {
     } else {
       this.selectedNodes.push(d.id);
     }
-
-    /* Get all proper subsets of current selected separator */
     const allSubsets = getAllSubsets(this.selectedNodes);
     const allProperSubsets = allSubsets.filter(
       (subset) => subset.length !== this.selectedNodes.length && subset.length !== 0,
     );
 
-    /* Get the sub graph and whether it is disconnected */
-
-    /* Check if any the proper subsets is a separator in the graph */
     for (const set of allProperSubsets) {
       const sg = this.isSeparatorSet(set);
       if (sg.isDisconnected) {
@@ -980,11 +952,7 @@ export default class Graph {
     }
 
     this.componentCount = componentCount;
-
-    // d3.selectAll('circle.node').style('fill', (d) => colors(d.cluster));
-
     const isDisconnected = componentCount > 1;
-
     return { subGraphNodes, subGraphLinks, isDisconnected };
   }
 
@@ -1015,12 +983,9 @@ export default class Graph {
   }
 
   checkSeparator(d) {
-    /* If node clicked on is already in the separator set we remove it */
     if (this.selectedNodes.includes(d.id)) {
       const nodeInSeparatorSet = this.selectedNodes.indexOf(d.id);
       this.selectedNodes.splice(nodeInSeparatorSet, 1);
-
-      /* If the new separating set is empty reset the result and the styling */
       if (this.selectedNodes.length === 0) {
         d3.select('#separator-output').html('Click on a vertex to include it into the separator set.');
         this.resetNodeStyling();
@@ -1029,13 +994,10 @@ export default class Graph {
     } else {
       this.selectedNodes.push(d.id);
     }
-
-    /* Remove the current separator nodes */
     const subGraphNodes = this.nodes.filter(
       (node) => !this.selectedNodes.includes(node.id),
     );
 
-    /* Remove the links from the separator node */
     const linksToRemove = this.links.filter((l) => {
       if (
         this.selectedNodes.includes(l.target.id)
@@ -1043,8 +1005,6 @@ export default class Graph {
       ) return true;
     });
     const subGraphLinks = this.links.filter((link) => !linksToRemove.includes(link));
-
-    /* Check if the new subgraph after deleteing the separating set is connected */
     const subg = this.checkConnectivity(subGraphNodes, subGraphLinks);
 
     if (subg.isDisconnected) {
@@ -1285,7 +1245,6 @@ export default class Graph {
   checkCoherence() {
     if (this.nodes.length === 0 || this.links.length === 0) return false;
 
-    /* Check if a node exists in multiple bags */
     for (let i = 0; i < this.graphOfTd.nodes.length; i++) {
       const currentNode = this.graphOfTd.nodes[i];
       currentNode.counter = 0;
@@ -1303,7 +1262,6 @@ export default class Graph {
 
     for (let i = 0; i < multipleNodes.length; i++) {
       const node = multipleNodes[i];
-      /* find all bags with this node */
 
       const tempNodes = this.nodes.filter((bag) => {
         if (bag.vertices) return bag.vertices.includes(node.id);
@@ -1329,21 +1287,18 @@ export default class Graph {
       treeString = 'Tree decomposition must be a tree. <span class="material-icons wrong-answer">clear</span>';
     }
 
-    /* Check node coverage */
     if (this.areNodesInTree()) {
       nodeCoverageString = 'Node coverage  <span class="material-icons correct-answer">check</span>';
     } else {
       nodeCoverageString = 'Node coverage <span class="material-icons wrong-answer">clear</span>';
     }
 
-    /* Check edge coverage */
     if (this.isEveryGraphLinkInTree()) {
       edgeCoverageString = 'Edge coverage <span class="material-icons correct-answer">check</span>';
     } else {
       edgeCoverageString = 'Edge coverage <span class="material-icons wrong-answer">clear</span>';
     }
 
-    /* Check coherence property */
     if (this.checkCoherence()) {
       coherenceString = 'Coherence <span class="material-icons correct-answer">check</span>';
     } else {
@@ -1383,7 +1338,6 @@ export default class Graph {
 
   restart() {
     this.updateMasterList();
-    /* Enter, update, remove link SVGs */
     this.svg.selectAll('line')
       .data(this.links, (d) => `v${d.source.id}-v${d.target.id}`)
       .join(
@@ -1396,7 +1350,6 @@ export default class Graph {
         (exit) => exit.remove(),
       );
 
-    /* Enter, update, remove ellipse SVGs */
     this.svg.selectAll('circle')
       .data(this.nodes, (d) => d.id)
       .join(
@@ -1558,7 +1511,6 @@ export default class Graph {
 
   restartSimulation() {
     const simulation = d3.forceSimulation()
-      // .force('center', d3.forceCenter(this.width / 2, this.height / 2))
       .force('x', d3.forceX(this.width / 2).strength(0.1))
       .force('y', d3.forceY(this.height / 2).strength(0.1))
       .nodes(this.nodes)
@@ -1794,7 +1746,6 @@ export default class Graph {
 
   randomGraph(vertices, edges) {
     if (this.svg) this.clear();
-    // eslint-disable-next-line no-unused-vars
     let randomGraph;
     if (vertices === undefined && edges === undefined) randomGraph = generateRandomGraph(10, 10);
     else randomGraph = generateRandomGraph(vertices, edges);

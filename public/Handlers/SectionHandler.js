@@ -6,7 +6,7 @@ import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
 import TreeDecomposition from '../Components/TreeDecomposition.js';
 import {
-  graph1, exampleGraph3, gridGraph, cliqueGraph, treeGraph, cycleGraph, hamTD, hamTD2,
+  graph1, exampleGraph3, gridGraph, cliqueGraph, treeGraph, cycleGraph, hamTD, hamTD2, hamiltonianGraph,
 } from '../Utilities/graphs.js';
 
 export default class SectionHandler {
@@ -777,6 +777,8 @@ export default class SectionHandler {
           
           <p>Try going through the algorithm step by step to see how it works. The running time is \\( O(n) \\) as we only have to visit each tree node once.</p>
 `);
+
+          d3.select('#container').style('background-color', '#EEEEEE');
           renderMathInElement(document.body);
           this.tree.setAllNodes();
           this.sidebar.addButton('Next Step', () => tree.nextStep());
@@ -1019,12 +1021,12 @@ export default class SectionHandler {
       new Section(
         async () => {
           this.sidebar.addContent(`
-          <h2>Hamiltonian Path</h2>
+          <h2>Hamiltonian Cycle</h2>
 
           <p>
             <strong>Input:</strong> A graph \\( G \\) and a nice tree decomposition \\( T \\)
             <br>
-            <strong>Output:</strong> If \\( G \\) contains a Hamiltonian path.
+            <strong>Output:</strong> If \\( G \\) contains a hamiltonian cycle.
           </p>
           `);
           this.addContainers();
@@ -1036,25 +1038,17 @@ export default class SectionHandler {
             .append('table')
             .attr('id', 'dp-table')
             .attr('class', 'hamiltonianTable');
-
           const graph = new Graph('graph-container');
           const niceTreeDecomposition = new Tree('tree-container');
-          graph.loadGraph(graph1);
-          // graph.loadGraph(cycleGraph);
-
+          graph.loadGraph(cycleGraph);
           await graph.computeTreeDecomposition();
           await graph.readNiceTreeDecomposition();
-          const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
-          this.createTableVisibilityButton();
-
-          // console.log(niceTreeDecompositionData);
-          // niceTreeDecomposition.load(hamTD);
-          niceTreeDecomposition.load(hamTD2);
+          niceTreeDecomposition.load(hamTD);
           niceTreeDecomposition.setGraph(graph);
           niceTreeDecomposition.addArrow();
           niceTreeDecomposition.enableHamiltonianPath();
+          this.createTableVisibilityButton();
           this.addAlgorithmControls(() => niceTreeDecomposition.previousDPStep(), () => niceTreeDecomposition.nextDPStep());
-
           this.addArrowKeyFunctionality(niceTreeDecomposition);
         },
         'chapter4',

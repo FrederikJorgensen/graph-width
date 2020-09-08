@@ -1,10 +1,10 @@
 :root {
-  --table-color: #15314B;
+  --table-color: #15314b;
   --dark-mode-text: rgb(51, 51, 51);
   --main-bg: #121212;
-  --surface: #1E1E1E;
+  --surface: #1e1e1e;
   --on-hover: #7a7a7a;
-  --text-color: #E0E0E0;
+  --text-color: #e0e0e0;
   --border: 8px;
 }
 
@@ -38,7 +38,7 @@ body {
   height: 0%;
   display: flex;
   background-color: var(--surface);
-  box-shadow: 0 7px 9px -2px rgba(0,0,0,.9);
+  box-shadow: 0 7px 9px -2px rgba(0, 0, 0, 0.9);
 }
 
 .nav-item {
@@ -46,15 +46,15 @@ body {
   align-items: center;
   padding: 15px;
   font-size: 16px;
-  letter-spacing: .05em;
+  letter-spacing: 0.05em;
 }
 
 .github-logo {
-  margin-top: .5em;
+  margin-top: 0.5em;
   color: #fff;
 }
 
-.nav a:hover{
+.nav a:hover {
   background-color: var(--on-hover);
   transition: background-color 150ms ease-in;
   cursor: pointer;
@@ -70,9 +70,9 @@ body {
   background-color: #141414;
   border-radius: 25px;
   z-index: 999;
-  -webkit-box-shadow: 0px 0px 78px -27px rgba(0,0,0,0.75);
-  -moz-box-shadow: 0px 0px 78px -27px rgba(0,0,0,0.75);
-  box-shadow: 0px 0px 78px -27px rgba(0,0,0,0.75);
+  -webkit-box-shadow: 0px 0px 78px -27px rgba(0, 0, 0, 0.75);
+  -moz-box-shadow: 0px 0px 78px -27px rgba(0, 0, 0, 0.75);
+  box-shadow: 0px 0px 78px -27px rgba(0, 0, 0, 0.75);
 }
 
 .table-wrapper {
@@ -93,9 +93,9 @@ body {
 }
 
 #dp-container::-webkit-scrollbar-track {
-	box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-	background-color: #F5F5F5;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #f5f5f5;
 }
 
 .toggle-table-visibilty {
@@ -105,20 +105,24 @@ body {
   font-weight: bold;
   color: black;
   padding: 0 10px 0 10px;
-  background-color: #D3D3D3;
+  background-color: #d3d3d3;
   border-radius: 5px;
   z-index: 10000;
 }
 
+.toggle-table-visibilty:hover {
+  cursor: pointer;
+}
+
 #dp-container::-webkit-scrollbar {
-	width: 12px;
-	background-color: #F5F5F5;
+  width: 12px;
+  background-color: #f5f5f5;
 }
 
 #dp-container::-webkit-scrollbar-thumb {
-	box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-	-webkit-box-shadow: inset 0 0 6px rgba(0,0,0,.3);
-	background-color: #15314B;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+  background-color: #15314b;
 }
 
 .hamiltonianTable {
@@ -133,12 +137,11 @@ body {
 th {
   position: sticky;
   top: 0; /* Don't forget this, required for the stickiness */
-  background-color: #15314B;
-
+  background-color: #15314b;
 }
 
 .hamiltonianTable thead tr {
-  background-color: #15314B;
+  background-color: #15314b;
   color: white;
   text-align: left;
   font-weight: bold;
@@ -146,7 +149,7 @@ th {
 
 .hamiltonianTable th,
 .hamiltonianTable td {
-    padding: 12px 15px;
+  padding: 12px 15px;
 }
 
 .hamiltonianTable tbody tr {
@@ -244,7 +247,7 @@ th {
   display: flex;
   text-align: center;
   justify-content: space-between;
-  margin-top: auto
+  margin-top: auto;
 }
 
 #arrow {
@@ -259,14 +262,14 @@ th {
 }
 
 .material-icons.nav-arrows:hover {
-  color: orange; 
+  color: orange;
   cursor: pointer;
 }
 
 #app-area {
   position: relative;
   width: 70%;
-  height: 100%
+  height: 100%;
 }
 
 #container {
@@ -335,9 +338,9 @@ strong {
   width: auto;
   z-index: 1000;
   background-color: white;
+  border: 1px solid rgb(51, 51, 51);
   color: rgb(51, 51, 51);
   position: absolute;
-  /* border: 1px solid rgb(51, 51, 51); */
   padding: 15px;
   transform: translate(-100%, -2px);
 }
@@ -413,7 +416,7 @@ td {
   /* margin: .2em; */
   /* background-color: #15314b; */
   /* border-radius: 5px; */
-  padding: .05em .2em .05em .2em;
+  padding: 0.05em 0.2em 0.05em 0.2em;
 }
 
 .highlight {
@@ -471,8 +474,6 @@ td {
   background-color: lightseagreen;
 }
 
-
-
 #exercise-result {
   margin-top: 30px;
 }
@@ -482,7 +483,7 @@ svg {
 }
 
 .center-graph-td {
-  display: flex; 
+  display: flex;
   justify-content: center;
   align-items: center;
 }
@@ -496,14 +497,13 @@ svg {
 
 #graph-container {
   height: 100%;
-  width: 50%
+  width: 50%;
 }
 
 #tree-container {
   height: 100%;
   width: 50%;
 }
-
 
 .choices {
   display: flex;
@@ -557,7 +557,7 @@ svg {
   position: absolute;
   padding: 10px;
   width: 300px;
-  transform: translate(-50%, -50%); 
+  transform: translate(-50%, -50%);
   border: 1px solid lightgray;
   background-color: white;
 }
@@ -618,12 +618,12 @@ svg {
 }
 
 .result-container {
-  display: flex; 
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: lightblue;
-  margin-top: 20px; 
+  margin-top: 20px;
   margin-bottom: 20px;
   padding: 15px;
 }
@@ -632,7 +632,6 @@ svg {
   padding-top: 10px;
   padding-bottom: 10px;
 }
-
 
 .vertex-in-max-set {
   fill: green;
@@ -683,7 +682,7 @@ svg {
 }
 
 .nonhighlight {
- fill: #1f77b4;
+  fill: #1f77b4;
 }
 
 .separating-node {
@@ -716,11 +715,11 @@ svg {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0,0,0,0.8);
+  background-color: rgba(0, 0, 0, 0.8);
 }
 
 .roadmap-container {
-  position: relative; 
+  position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
@@ -761,9 +760,9 @@ svg {
 }
 
 .roadmap-item:hover {
- color: orange;
- transition: color 350ms;
- cursor: pointer;
+  color: orange;
+  transition: color 350ms;
+  cursor: pointer;
 }
 
 .roadmap-close {
@@ -781,8 +780,8 @@ svg {
 
 .home-link {
   z-index: 1000;
-  stroke:rgb(51, 51, 51);
-  opacity: .9;
+  stroke: rgb(51, 51, 51);
+  opacity: 0.9;
   stroke-width: 5px;
 }
 
@@ -810,7 +809,7 @@ svg {
 
 .random-container {
   display: flex;
-  flex: 0.2
+  flex: 0.2;
 }
 
 .content-container {
@@ -830,48 +829,49 @@ svg {
 
 hr {
   border: 0;
-  clear:both;
-  display:block;
-  width: 96%;               
+  clear: both;
+  display: block;
+  width: 96%;
   background-color: lightgray;
   height: 1px;
 }
 
 .d3-context-menu {
-	position: absolute;
-	display: none;
-	background-color: #f2f2f2;
-	border-radius: 4px;
+  position: absolute;
+  display: none;
+  background-color: #f2f2f2;
+  border-radius: 4px;
 
-	font-family: Arial, sans-serif;
-	font-size: 14px;
-	min-width: 150px;
-	border: 1px solid #d4d4d4;
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  min-width: 150px;
+  border: 1px solid #d4d4d4;
 
-	z-index:1200;
+  z-index: 1200;
 }
 
 .d3-context-menu ul {
-	list-style-type: none;
-	margin: 4px 0px;
-	padding: 0px;
-	cursor: default;
+  list-style-type: none;
+  margin: 4px 0px;
+  padding: 0px;
+  cursor: default;
 }
 
 .d3-context-menu ul li {
-	padding: 4px 16px;
+  padding: 4px 16px;
 }
 
 .d3-context-menu ul li:hover {
-	background-color: #4677f8;
-	color: #fefefe;
+  background-color: #4677f8;
+  color: #fefefe;
 }
 
-.choice input[type="radio"] {
+.choice input[type='radio'] {
   background-color: white !important;
 }
 
-[type="radio"]:not(:checked), [type="radio"]:checked {
+[type='radio']:not(:checked),
+[type='radio']:checked {
   opacity: 1;
 }
 
@@ -900,8 +900,16 @@ hr {
   text-transform: uppercase;
   color: rgb(var(--pure-material-onprimary-rgb, 255, 255, 255));
   background-color: rgb(var(--pure-material-primary-rgb, 33, 150, 243));
-  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
-  font-family: var(--pure-material-font, "Roboto", "Segoe UI", BlinkMacSystemFont, system-ui, -apple-system);
+  box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14),
+    0 1px 5px 0 rgba(0, 0, 0, 0.12);
+  font-family: var(
+    --pure-material-font,
+    'Roboto',
+    'Segoe UI',
+    BlinkMacSystemFont,
+    system-ui,
+    -apple-system
+  );
   font-size: 14px;
   font-weight: 500;
   line-height: 36px;
@@ -918,7 +926,7 @@ hr {
 
 /* Overlay */
 .pure-material-button-contained::before {
-  content: "";
+  content: '';
   position: absolute;
   top: 0;
   bottom: 0;
@@ -931,7 +939,7 @@ hr {
 
 /* Ripple */
 .pure-material-button-contained::after {
-  content: "";
+  content: '';
   position: absolute;
   left: 50%;
   top: 50%;
@@ -948,7 +956,8 @@ hr {
 /* Hover, Focus */
 .pure-material-button-contained:hover,
 .pure-material-button-contained:focus {
-  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14), 0 1px 10px 0 rgba(0, 0, 0, 0.12);
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.2), 0 4px 5px 0 rgba(0, 0, 0, 0.14),
+    0 1px 10px 0 rgba(0, 0, 0, 0.12);
 }
 
 .pure-material-button-contained:hover::before {
@@ -965,7 +974,8 @@ hr {
 
 /* Active */
 .pure-material-button-contained:active {
-  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2),
+    0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
 }
 
 .pure-material-button-contained:active::after {
@@ -1011,7 +1021,7 @@ svg {
 
 .label {
   fill: rgb(51, 51, 51);
-  font-family: "PT Sans", sans-serif;
+  font-family: 'PT Sans', sans-serif;
   font-size: 16px;
   font-weight: bold;
   text-anchor: middle;
@@ -1021,7 +1031,7 @@ svg {
 
 .graph-label {
   fill: #eee;
-  font-family: "PT Sans", sans-serif;
+  font-family: 'PT Sans', sans-serif;
   font-size: 16px;
   font-weight: bold;
   text-anchor: middle;
@@ -1048,15 +1058,15 @@ svg {
 }
 
 .join {
-  color: rgb(253,180,98);
+  color: rgb(253, 180, 98);
 }
 
 .introduce {
-  color: rgb(128,177,211);
+  color: rgb(128, 177, 211);
 }
 
 .forget {
-  color: rgb(251,128,114);
+  color: rgb(251, 128, 114);
 }
 
 .controls-number {
@@ -1078,18 +1088,18 @@ svg {
 
 .sandbox-sidebar-container {
   width: 50px;
-  display: flex; 
+  display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
   background-color: var(--surface);
   border-radius: var(--border);
-  padding: .2em;
+  padding: 0.2em;
   margin: 0 1em 0 1em;
 }
 
 .sandbox-sidebar-container > span {
-  margin: .1em;
+  margin: 0.1em;
 }
 
 .custom-left {
@@ -1162,7 +1172,7 @@ svg {
 
 .material-icons.code-buttons {
   font-size: 35px;
-  padding: .1em;
+  padding: 0.1em;
 }
 
 .material-icons.code-buttons:hover {
@@ -1209,7 +1219,7 @@ svg {
   pointer-events: none;
   display: inline-block;
   position: relative;
-  background-color:lightgray;
+  background-color: lightgray;
   color: #fff;
   width: 100%;
   padding: 12px 0;
@@ -1249,7 +1259,7 @@ svg {
 
 .sandbox-graph-container {
   display: flex;
-  flex: .5;
+  flex: 0.5;
   flex-direction: column;
   width: 100%;
   position: relative;
@@ -1299,12 +1309,12 @@ svg {
   position: relative;
 }
 
-.big::before, 
+.big::before,
 .big::after {
   --scale: 0;
   position: absolute;
   left: 125%;
-  transform:  scale(var(--scale));
+  transform: scale(var(--scale));
   transition: 150ms transform;
   transform-origin: left center;
 }
@@ -1312,17 +1322,17 @@ svg {
 .big::before {
   content: attr(data-tooltip);
   color: white;
-  padding: .5rem;
-  border-radius: .3rem;
+  padding: 0.5rem;
+  border-radius: 0.3rem;
   width: max-content;
   background: #474747;
   font-weight: bold;
 }
 
 .big:hover::before,
-.big:hover::after{
- --scale: 1;
- z-index: 500;
+.big:hover::after {
+  --scale: 1;
+  z-index: 500;
 }
 
 .nav-links {
@@ -1331,7 +1341,7 @@ svg {
 }
 
 ul {
-  list-style: none; 
+  list-style: none;
 }
 
 .chapter-button {
@@ -1374,15 +1384,14 @@ ul li a:hover {
 
 /* Display the dropdown */
 li:hover > ul {
-  display: block; 
+  display: block;
   position: absolute;
   border: 1px solid lightgray;
-
 }
 
 /* Remove float from dropdown lists */
 li:hover li {
-    float: none;
+  float: none;
 }
 
 li:hover a {
@@ -1396,20 +1405,18 @@ li:hover li a:hover {
 .main-navigation li ul li {
   border-top: 0;
 }
-/* Displays second level dropdowns to the right of the first level dropdown */
+
 ul ul ul {
   left: 100%;
-  top: 0; 
+  top: 0;
 }
-
-/* Simple clearfix */
 
 ul:before,
 ul:after {
-    content: " "; /* 1 */
-    display: table; /* 2 */
+  content: ' '; /* 1 */
+  display: table; /* 2 */
 }
 
 ul:after {
-    clear: both;
+  clear: both;
 }
