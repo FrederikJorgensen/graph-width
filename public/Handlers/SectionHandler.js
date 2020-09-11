@@ -6,8 +6,21 @@ import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
 import TreeDecomposition from '../Components/TreeDecomposition.js';
 import {
-  graph1, exampleGraph3, gridGraph, cliqueGraph, treeGraph, cycleGraph, hamTD, hamTD2,
+  graph1,
+  separatorGraph,
+  cliqueGraph,
+  treeGraph,
+  hamTD2,
+  gridGraph,
 } from '../Utilities/graphs.js';
+import { setNavbarHeight } from '../Utilities/helpers.js';
+
+function createSeparatorExerciseOutput() {
+  d3.select('#output')
+    .append('div')
+    .attr('id', 'separator-output')
+    .attr('class', 'separator-exercise-output');
+}
 
 export default class SectionHandler {
   constructor(sidebar, chapter) {
@@ -18,293 +31,252 @@ export default class SectionHandler {
     window.sectionHandler = this;
 
     this.sections = [
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+      new Section(async () => {
+        this.sidebar.addContent(`
           <p>Before we explore treewidth there is one concept that we must familiarize ourselves with.</p>
-
-          <p>That is the concept of a <strong>graph separator</strong>.</p>
-          
+          <p>That is the concept of a graph separator.</p>
           <p>We say that a set \\( S \\) is a graph separator in a graph \\( G \\) if the removal of that set from \\( G \\) leaves \\( G \\) into multiple connected components.</p>
-
           <p>In later chapters it becomes clear why we study graph separators. There are different types of graph separators we will cover those who are most relevant to treewidth in this chapter.</p>
-
-          <p><i>Click on a vertex in the graph to see if it separates the graph.</i></p>
           `);
-
-          this.sidebar.addExercise('Find one or multiple vertices that would separate the graph into different components.');
-
-          d3.select('#output')
-            .append('div')
-            .attr('id', 'separator-output');
-
-          const graph = new Graph('container');
-          graph.loadGraph(exampleGraph3);
-          graph.toggleSeparatorExercise();
-        },
-        'chapter1',
-      ),
+        this.sidebar.addExercise(
+          'Find one or multiple vertices that would separate the graph into different components.',
+        );
+        createSeparatorExerciseOutput();
+        const graph = new Graph('container');
+        graph.loadGraph(separatorGraph);
+        graph.enableSeparatorExercise();
+        this.sidebar.setTitle('Graph Separator');
+      }, 'chapter1'),
       new Section(
         async () => {
           this.sidebar.addContent(`
-          <p>Let \\( S \\) be a separator in some graph \\( G \\). We say that \\( S\\) is a <strong>minimal separator</strong> if no proper subset separates the graph \\( G \\)
-
+          <p>Let \\( S \\) be a separator in some graph \\( G \\). We say that \\( S\\) is a minimal separator if no proper subset separates the graph \\( G \\)
           <p>In other words if some graph has a separator set \\( S = \\{ a,b \\} \\) then \\( a \\) on its own cannot separate the graph neither can \\( b \\).</p>
           `);
           this.sidebar.addExercise('Find a minimal separator in the graph.');
-          d3.select('#output')
-            .append('div')
-            .attr('id', 'separator-output');
-
+          this.sidebar.setTitle('Minimal Separator');
+          createSeparatorExerciseOutput();
           const graph = new Graph('container');
-          graph.loadGraph(exampleGraph3);
-          graph.toggleMinimalSeparatorExercise();
+          graph.loadGraph(separatorGraph);
+          graph.enableMinimalSeparatorExercise();
         },
 
         'chapter1',
       ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+      new Section(async () => {
+        this.sidebar.addContent(`
           <p>Let \\( S \\) be a separator in some graph \\( G \\). We say that \\( S \\) is a balanced separator if every component of \\( G - S \\) has \\( \\leq V(G) / 2 \\)</p>
 
           <p>That is every component after you remove \\( S \\) should contain less than or equal amounts of vertices to the amount of vertices in the original graph divided by 2.</p>
           `);
 
-          this.sidebar.addExercise('Find a balanced separator in the graph.');
-
-          d3.select('#output')
-            .append('div')
-            .attr('id', 'separator-output');
-
-          const graph = new Graph('container');
-          graph.loadGraph(exampleGraph3);
-          graph.toggleBalanceSeparatorExercise();
-        },
-        'chapter1',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        this.sidebar.addExercise('Find a balanced separator in the graph.');
+        createSeparatorExerciseOutput();
+        const graph = new Graph('container');
+        graph.loadGraph(separatorGraph);
+        graph.enableBalanceSeparatorExercise();
+        this.sidebar.setTitle('Balanced Separator');
+      }, 'chapter1'),
+      new Section(async () => {
+        this.sidebar.addContent(`
           <p>Informally we can describe the <strong>treewidth</strong> of a graph to be a tree "build" from its separators that we saw in the previous chapter.</p>
-
           <p>More formally we define the treewidth of a graph using the notion of <strong>tree decompositions.</strong></p>
-
           <p>A tree decomposition of a graph is a mapping of that graph into a tree adhering to certain properties.</p>
-
           <p>On the right you see a graph \\( G \\) and one of its tree decompositions \\( T \\).
-            
-            `);
+          `);
 
-          const graph = new Graph('graph-container');
-          this.graph = graph;
-          this.graph.loadGraph(graph1, 'graph-container', 'graph');
+        const graph = new Graph('graph-container');
+        this.graph = graph;
+        this.graph.loadGraph(graph1, 'graph-container', 'graph');
 
-          await this.graph.computeTreeDecomposition();
-          await this.graph.readTreeDecomposition();
-          const td1 = this.graph.getTreeDecomposition();
+        await this.graph.computeTreeDecomposition();
+        await this.graph.readTreeDecomposition();
+        const td1 = this.graph.getTreeDecomposition();
 
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', this.graph);
-          this.treeDecomposition = treeDecomposition;
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree', this.graph);
+        this.treeDecomposition = treeDecomposition;
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
               <p>We refer to each node in the tree decomposition as a "bag".</p>
               
               <p>Each bag contains some vertices of the the graph.</p>
               `);
 
-          this.sidebar.addExercise('Try to hover over a bag to see its related vertices.');
+        this.sidebar.addExercise(
+          'Try to hover over a bag to see its related vertices.',
+        );
+        this.sidebar.setTitle('Bags');
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
 
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
-
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', graph);
-          treeDecomposition.toggleHoverEffect();
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree', graph);
+        treeDecomposition.toggleHoverEffect();
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
             <p>We say that a tree decomposition is valid if it contains the following 3 properties.</p>
 
             <p><strong>Property 1 (Node Coverage):</strong> Every vertex that appears in the graph must appear in some bag of the tree decomposition. </p>
             
             <p>We will check every vertex in the graph and highlight the bag in the tree decompostion containing that vertex.</p>
             `);
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', this.graph);
+        this.sidebar.setTitle('Tree decomposition properties');
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree', this.graph);
 
-          this.sidebar.addButton('Replay animation', () => this.graph.runNodeCoverage());
-          graph.runNodeCoverage();
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        this.sidebar.addButton('Replay animation', () => this.graph.runNodeCoverage());
+        graph.runNodeCoverage();
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
             Property 2 <strong>(Edge coverage):</strong> For every edge that appears in the graph there is some bag in the tree decomposition which contains the vertice
             s of both ends of the edge.<br/><br/> Lets check if this holds true for our graph and tree decomposition.
             `);
-          /* Graph stuff */
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-
-          /* Tree decomposition stuff */
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', graph);
-
-          /* Handlers and stuff */
-          this.sidebar.addButton('Replay animation', () => this.graph.runEdgeCoverage());
-          treeDecomposition.resetTreeDecompositionStyles();
-          graph.runEdgeCoverage();
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        this.sidebar.setTitle('Edge coverage');
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree', graph);
+        this.sidebar.addButton('Replay animation', () => this.graph.runEdgeCoverage());
+        treeDecomposition.resetTreeDecompositionStyles();
+        graph.runEdgeCoverage();
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
             <p><strong>Property 3 (Coherence):</strong> Lets consider 3 bags of the tree decomposition: \\( b_1 \\), \\( b_2 \\) and \\( b_3 \\) that form a path in the tree decomposition.</p>
 
             <p>If a vertex from the graph belongs to \\( b_1 \\) and \\( b_3 \\) it must also belong to \\( b_2 \\).</p>
             
             <p>Lets check this by going through the vertices in the graph like we did at property 1. And if a node is in multiple bags it MUST form a connected subtree in the tree decomposition.</p>
             `);
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
-
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', graph);
-          this.sidebar.addButton('Replay animation', () => graph.highlightCoherence());
-          graph.highlightCoherence();
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
+        this.sidebar.setTitle('Coherence');
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree', graph);
+        this.sidebar.addButton('Replay animation', () => graph.highlightCoherence());
+        graph.highlightCoherence();
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
             <p>Since all 3 properties hold true we have prooved that the tree on the right side is a valid tree decomposition of the graph on the left side.</p>
-
             <p>Is this the only valid tree decomposition of this graph? <br><br> No, a graph can have multiple valid tree decompositions.</p>
-            
             <p>Lets take a look at some other valid tree decompositions of this graph.</p>
-
             <p><strong>Example:</strong> The trivial tree decomposition of this graph contains all the graphs vertices in one bag.</p>
             `);
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
+        this.sidebar.setTitle('Trivial tree decomposition');
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
 
-          const treeDecomposition = new Graph('tree-container');
-          const trivialTreeDecomposition = graph.computeTrivialTreeDecomposition();
-          treeDecomposition.loadGraph(trivialTreeDecomposition, 'tree');
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent('<p>This is another valid tree decomposition of the graph.</p>');
+        const treeDecomposition = new Graph('tree-container');
+        const trivialTreeDecomposition = graph.computeTrivialTreeDecomposition();
+        treeDecomposition.loadGraph(trivialTreeDecomposition, 'tree');
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(
+          '<p>This is another valid tree decomposition of the graph.</p>',
+        );
+        this.sidebar.setTitle('Valid tree decompositions');
 
-          const anotherTd = {
-            nodes: [
-              { id: 1, label: '1 2' },
-              { id: 2, label: '2 3 4' },
-              { id: 3, label: '3 4 5 6 7' },
-            ],
-            links: [
-              { source: 1, target: 2 },
-              { source: 2, target: 3 },
-            ],
-          };
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
+        const anotherTd = {
+          nodes: [
+            { id: 1, label: '1 2' },
+            { id: 2, label: '2 3 4' },
+            { id: 3, label: '3 4 5 6 7' },
+          ],
+          links: [
+            { source: 1, target: 2 },
+            { source: 2, target: 3 },
+          ],
+        };
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
 
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(anotherTd, 'tree');
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addExercise('Is this a valid tree decomposition of the graph?');
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(anotherTd, 'tree');
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addExercise(
+          'Is this a valid tree decomposition of the graph?',
+        );
+        this.sidebar.setTitle('Valid tree decomposition quiz #1');
 
-          const td3 = {
-            nodes: [
-              { id: 1, label: '1 2' },
-              { id: 2, label: '2 3 4' },
-              { id: 3, label: '1 3 4 5 6 7' },
-            ],
-            links: [
-              { source: 1, target: 2 },
-              { source: 2, target: 3 },
-            ],
-          };
-          const graph = new Graph('graph-container');
+        const td3 = {
+          nodes: [
+            { id: 1, label: '1 2' },
+            { id: 2, label: '2 3 4' },
+            { id: 3, label: '1 3 4 5 6 7' },
+          ],
+          links: [
+            { source: 1, target: 2 },
+            { source: 2, target: 3 },
+          ],
+        };
+        const graph = new Graph('graph-container');
 
-          graph.loadGraph(graph1);
+        graph.loadGraph(graph1);
 
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td3, 'tree');
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td3, 'tree');
 
-          this.sidebar.addQuiz();
-          this.sidebar.addChoice('Yes', false);
-          this.sidebar.addChoice('No', true);
-          this.sidebar.addSolution('Since the vertex 1 is in 2 bags it must form a connected subtree but in this tree it does not. Recall property 3.');
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addExercise('Is this a valid tree decomposition of the graph?');
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
+        this.sidebar.addQuiz();
+        this.sidebar.addChoice('Yes', false);
+        this.sidebar.addChoice('No', true);
+        this.sidebar.addSolution(
+          'Since the vertex 1 is in 2 bags it must form a connected subtree but in this tree it does not. Recall property 3.',
+        );
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addExercise(
+          'Is this a valid tree decomposition of the graph?',
+        );
+        this.sidebar.setTitle('Valid tree decomposition quiz #2');
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
 
-          this.sidebar.addQuiz();
-          this.sidebar.addChoice('Yes.', true);
-          this.sidebar.addChoice('No.', false);
-          this.sidebar.addSolution('It satisfies all the properties of a tree decomposition thus it is valid.');
+        this.sidebar.addQuiz();
+        this.sidebar.addChoice('Yes.', true);
+        this.sidebar.addChoice('No.', false);
+        this.sidebar.addSolution(
+          'It satisfies all the properties of a tree decomposition thus it is valid.',
+        );
 
-          const td4 = {
-            nodes: [
-              { id: 1, label: '1 2' },
-              { id: 2, label: '2 3 4 5' },
-              { id: 3, label: '3 4 5' },
-              { id: 4, label: '4 5 6' },
-            ],
-            links: [
-              { source: 1, target: 2 },
-              { source: 2, target: 3 },
-              { source: 2, target: 4 },
-            ],
-          };
+        const td4 = {
+          nodes: [
+            { id: 1, label: '1 2' },
+            { id: 2, label: '2 3 4 5' },
+            { id: 3, label: '3 4 5' },
+            { id: 4, label: '4 5 6' },
+          ],
+          links: [
+            { source: 1, target: 2 },
+            { source: 2, target: 3 },
+            { source: 2, target: 4 },
+          ],
+        };
 
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td4, 'tree');
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td4, 'tree');
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
             <p>If there are different tree decompositions for a graph how do know which ones to use?</p>
 
             <p>We want to use the tree decompositions with the lowest possible vertices in it's largest bag, as this make many algorithms that exploit tree decomposition more effective.</p>
@@ -313,188 +285,194 @@ export default class SectionHandler {
 
             <p><strong>Definition:</strong> The <strong>treewidth</strong> of a graph is the minimum width amongst all the tree decompositions of \\( G \\).</p>
             `);
-          this.sidebar.addExercise('What is the width of the current tree decomposition?');
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
+        this.sidebar.addExercise(
+          'What is the width of the current tree decomposition?',
+        );
+        this.sidebar.setTitle('Width vs treewidth');
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
 
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree');
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree');
 
-          this.sidebar.addQuiz();
-          this.sidebar.addChoice('1', false);
-          this.sidebar.addChoice('2', true);
-          this.sidebar.addChoice('3', false);
-          this.sidebar.addSolution('The treewidth of a tree decomposition is the size of the largest bag - 1.');
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addExercise('What about this one? What is the width?');
+        this.sidebar.addQuiz();
+        this.sidebar.addChoice('1', false);
+        this.sidebar.addChoice('2', true);
+        this.sidebar.addChoice('3', false);
+        this.sidebar.addSolution(
+          'The treewidth of a tree decomposition is the size of the largest bag - 1.',
+        );
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addExercise('What about this one? What is the width?');
+        this.sidebar.setTitle('Width vs treewidth quiz #1');
 
-          const anotherTd = {
-            nodes: [
-              { id: 1, label: '1 2' },
-              { id: 2, label: '2 3 4' },
-              { id: 3, label: '3 4 5 6 7' },
-            ],
-            links: [
-              { source: 1, target: 2 },
-              { source: 2, target: 3 },
-            ],
-          };
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
+        const anotherTd = {
+          nodes: [
+            { id: 1, label: '1 2' },
+            { id: 2, label: '2 3 4' },
+            { id: 3, label: '3 4 5 6 7' },
+          ],
+          links: [
+            { source: 1, target: 2 },
+            { source: 2, target: 3 },
+          ],
+        };
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
 
-          this.sidebar.addQuiz();
-          this.sidebar.addChoice('2', false);
-          this.sidebar.addChoice('4', true);
-          this.sidebar.addChoice('5', false);
-          this.sidebar.addSolution('4 Since the largest bag contains 5 vertices.');
+        this.sidebar.addQuiz();
+        this.sidebar.addChoice('2', false);
+        this.sidebar.addChoice('4', true);
+        this.sidebar.addChoice('5', false);
+        this.sidebar.addSolution(
+          '4 Since the largest bag contains 5 vertices.',
+        );
 
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(anotherTd, 'tree');
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          const td3 = {
-            nodes: [
-              { id: 1, label: '1 2' },
-              { id: 2, label: '2 3 4' },
-              { id: 3, label: '1 3 4 5 6 7' },
-            ],
-            links: [
-              { source: 1, target: 2 },
-              { source: 2, target: 3 },
-            ],
-          };
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
-
-          this.sidebar.addExercise(`
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(anotherTd, 'tree');
+      }, 'chapter2'),
+      new Section(async () => {
+        const td3 = {
+          nodes: [
+            { id: 1, label: '1 2' },
+            { id: 2, label: '2 3 4' },
+            { id: 3, label: '1 3 4 5 6 7' },
+          ],
+          links: [
+            { source: 1, target: 2 },
+            { source: 2, target: 3 },
+          ],
+        };
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
+        this.sidebar.setTitle('Width vs treewidth quiz #2');
+        this.sidebar.addExercise(`
             Lets check one more. What is the width?            
             `);
-          this.sidebar.addQuiz();
-          this.sidebar.addChoice('2', false);
-          this.sidebar.addChoice('4', false);
-          this.sidebar.addChoice('5', true);
-          this.sidebar.addSolution('5 Since the largest bag contains 6 vertices.');
+        this.sidebar.addQuiz();
+        this.sidebar.addChoice('2', false);
+        this.sidebar.addChoice('4', false);
+        this.sidebar.addChoice('5', true);
+        this.sidebar.addSolution(
+          '5 Since the largest bag contains 6 vertices.',
+        );
 
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td3, 'tree');
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td3, 'tree');
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
             <p>Lets assume that the 3 tree decompositions you see on the right are ALL of the possible tree decompositions of the graph \\( G \\). (This is not true but for this exercise we will make this assumption)</p>
         
             `);
-          this.sidebar.addExercise('What is the <strong>treewidth</strong> of the <strong>graph \\( G \\)</strong>?');
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
+        this.sidebar.setTitle('Treewidth quiz #1');
 
-          d3.select('#tree-container')
-            .style('display', 'flex')
-            .style('flex-direction', 'column');
+        this.sidebar.addExercise(
+          'What is the <strong>treewidth</strong> of the <strong>graph \\( G \\)</strong>?',
+        );
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
 
-          d3.select('#tree-container').append('div')
-            .attr('id', 'tree1')
-            .style('display', 'flex')
-            .style('flex', '0.33');
+        d3.select('#tree-container')
+          .style('display', 'flex')
+          .style('flex-direction', 'column');
 
-          d3.select('#tree-container').append('div')
-            .attr('id', 'tree2')
-            .style('display', 'flex')
-            .style('flex', '0.33');
+        d3.select('#tree-container')
+          .append('div')
+          .attr('id', 'tree1')
+          .style('display', 'flex')
+          .style('flex', '0.33');
 
-          d3.select('#tree-container').append('div')
-            .attr('id', 'tree3')
-            .style('display', 'flex')
-            .style('flex', '0.33');
+        d3.select('#tree-container')
+          .append('div')
+          .attr('id', 'tree2')
+          .style('display', 'flex')
+          .style('flex', '0.33');
 
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
+        d3.select('#tree-container')
+          .append('div')
+          .attr('id', 'tree3')
+          .style('display', 'flex')
+          .style('flex', '0.33');
 
-          const td3 = {
-            nodes: [
-              { id: 1, label: '1 2' },
-              { id: 2, label: '2 3 4' },
-              { id: 3, label: '1 3 4 5 6 7' },
-            ],
-            links: [
-              { source: 1, target: 2 },
-              { source: 2, target: 3 },
-            ],
-          };
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
 
-          const td4 = {
-            nodes: [
-              { id: 1, label: '1 2' },
-              { id: 2, label: '2 3 4 5' },
-              { id: 3, label: '3 4 5' },
-              { id: 4, label: '4 5 6' },
-            ],
-            links: [
-              { source: 1, target: 2 },
-              { source: 2, target: 3 },
-              { source: 2, target: 4 },
-            ],
-          };
+        const td3 = {
+          nodes: [
+            { id: 1, label: '1 2' },
+            { id: 2, label: '2 3 4' },
+            { id: 3, label: '1 3 4 5 6 7' },
+          ],
+          links: [
+            { source: 1, target: 2 },
+            { source: 2, target: 3 },
+          ],
+        };
 
-          const tree1 = new Graph('tree1');
-          const tree2 = new Graph('tree2');
-          const tree3 = new Graph('tree3');
+        const td4 = {
+          nodes: [
+            { id: 1, label: '1 2' },
+            { id: 2, label: '2 3 4 5' },
+            { id: 3, label: '3 4 5' },
+            { id: 4, label: '4 5 6' },
+          ],
+          links: [
+            { source: 1, target: 2 },
+            { source: 2, target: 3 },
+            { source: 2, target: 4 },
+          ],
+        };
 
-          this.tree1 = tree1;
-          this.tree2 = tree2;
-          this.tree3 = tree3;
+        const tree1 = new Graph('tree1');
+        const tree2 = new Graph('tree2');
+        const tree3 = new Graph('tree3');
 
-          tree1.loadGraph(td1, 'tree');
-          tree2.loadGraph(td3, 'tree');
-          tree3.loadGraph(td4, 'tree');
+        this.tree1 = tree1;
+        this.tree2 = tree2;
+        this.tree3 = tree3;
 
-          this.sidebar.addQuiz();
-          this.sidebar.addChoice('2', true);
-          this.sidebar.addChoice('5', false);
-          this.sidebar.addChoice('3', false);
-          this.sidebar.addSolution('The correct answer is 2. Recall that the treewidth of a graph is the minimum width amonst all of the possible tree decompositions.');
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        tree1.loadGraph(td1, 'tree');
+        tree2.loadGraph(td3, 'tree');
+        tree3.loadGraph(td4, 'tree');
+
+        this.sidebar.addQuiz();
+        this.sidebar.addChoice('2', true);
+        this.sidebar.addChoice('5', false);
+        this.sidebar.addChoice('3', false);
+        this.sidebar.addSolution(
+          'The correct answer is 2. Recall that the treewidth of a graph is the minimum width amonst all of the possible tree decompositions.',
+        );
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
             <p>We will now put our attention towards understanding how graph separators work in tree decompositions. If you dont recall the concept of graph separators go through chapter 2.</p>
 
             <p>Each bag in the tree decomposition act as a separator in the graph.</p>
 
             <p>For example the bag containing 2 3 4 separates 1 and 5 6 7 in the graph.</p>
             `);
+        this.sidebar.setTitle('Separators in tree decompositions');
+        this.sidebar.addExercise(
+          'Hover over a bag in the tree decomposition to see how it separates the graph.',
+        );
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
 
-          this.sidebar.addExercise('Hover over a bag in the tree decomposition to see how it separates the graph.');
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
-
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', graph);
-          treeDecomposition.toggleSeparator();
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree', graph);
+        treeDecomposition.toggleSeparator();
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
           
           <p>Lets test your knowledge of the tree decomposition properties.</p>
           
@@ -510,94 +488,87 @@ export default class SectionHandler {
 
           <p><strong>Remove an edge</strong> by right-clicking on it.</p>
           `);
-          this.sidebar.addExercise('Draw the tree tree decompostion of the graph \\( G \\).');
+        this.sidebar.setTitle('Create the tree decomposition');
+        this.sidebar.addExercise(
+          'Draw the tree tree decompostion of the graph \\( G \\).',
+        );
 
-          const graph = new Graph('graph-container');
-          graph.randomGraph();
+        const graph = new Graph('graph-container');
+        graph.randomGraph();
 
-          const td = new TreeDecomposition('tree-container', graph);
-          this.td = td;
+        const td = new TreeDecomposition('tree-container', graph);
+        this.td = td;
 
-          td.enableDrawing();
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
-           <p class="fact"><span class="fact-title">Fact:</span> For every \\( k \\geq 2\\), the treewidth of the \\( k\\) x \\( k \\) grid is exactly \\( k \\)</p>
-
-           <p>Consider the \\( 3\\) x \\( 3 \\) grid on the right. Intuitively we can see there is no way we can separate this graph using less than \\( 3 \\) vertices.</p>
-          
+        td.enableDrawing();
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
+        <p>Consider the \\( 3\\) x \\( 3 \\) grid on the right. Intuitively we can see there is no way we can separate this graph using less than \\( 3 \\) vertices.</p>
+        <p class="fact"><span class="fact-title">Fact:</span> For every \\( k \\geq 2\\), the treewidth of the \\( k\\) x \\( k \\) grid is exactly \\( k \\)</p>
           `);
-          const graph = new Graph('graph-container');
-          graph.loadGraph(gridGraph);
+        this.sidebar.setTitle('Treewidth of grids');
+        const graph = new Graph('graph-container');
+        graph.loadGraph(gridGraph);
 
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', graph);
-        }, 'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree', graph);
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
           <p>Certain graph classes has a constant treewidth regardless of the number of vertices/edges in that particular graph.</p>
 
           <p><strong>Trees</strong> have treewidth 1.</p>
 
           <p>This is also the reason why we say that width is the largest bag - 1. For historical reasons the first people studying treewidth wanted trees to have width 1.</p>
           `);
+        this.sidebar.setTitle('Treewidth of trees');
 
-          d3.select('#container').style('height', '100%');
-          d3.select('#output').style('height', '0');
+        d3.select('#container').style('height', '100%');
+        d3.select('#output').style('height', '0');
 
-          const graph = new Graph('graph-container');
-          graph.loadGraph(treeGraph);
+        const graph = new Graph('graph-container');
+        graph.loadGraph(treeGraph);
 
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', graph);
-        },
-        'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree', graph);
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
            <p class="fact"><span class="fact-title">Fact:</span> The treewidth of clique \\( k \\) is \\( k - 1\\)</p>
 
            <p>As you can tell by the graph and its tree decomposition a clique has a large treewidth. An optimal tree decomposition of a clique is basically the trivial decomposition.</p>
           `);
-          const graph = new Graph('graph-container');
-          graph.loadGraph(cliqueGraph);
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', graph);
-        }, 'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        this.sidebar.setTitle('Treewidth of cliques');
+        const graph = new Graph('graph-container');
+        graph.loadGraph(cliqueGraph);
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree', graph);
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
            <p>Outerplanar graphs have treewidth \\( 2 \\).</p>
           `);
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', graph);
-        }, 'chapter2',
-      ),
+        this.sidebar.setTitle('Treewidth of outerplanar graphs');
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree', graph);
+      }, 'chapter2'),
 
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+      new Section(async () => {
+        this.sidebar.addContent(`
           <p>One part that you might have noticed that we left out is how do we construct these tree decompositions?</p>
 
           <p>This is because an algorithm that constructs a tree decomposition given a graph is far from a trivial thing to do.
@@ -620,19 +591,18 @@ export default class SectionHandler {
 
           <p>You can read more in their paper: <a href="https://drops.dagstuhl.de/opus/volltexte/2017/7605/pdf/LIPIcs-SEA-2017-28.pdf">Jdrasil: A Modular Library for Computing Tree Decompositions</a>.</p>
           `);
-          const graph = new Graph('graph-container');
-          graph.loadGraph(graph1);
+        this.sidebar.setTitle('Computing treewidth');
+        const graph = new Graph('graph-container');
+        graph.loadGraph(graph1);
 
-          await graph.computeTreeDecomposition();
-          await graph.readTreeDecomposition();
-          const td1 = graph.getTreeDecomposition();
-          const treeDecomposition = new Graph('tree-container');
-          treeDecomposition.loadGraph(td1, 'tree', graph);
-        }, 'chapter2',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td1 = graph.getTreeDecomposition();
+        const treeDecomposition = new Graph('tree-container');
+        treeDecomposition.loadGraph(td1, 'tree', graph);
+      }, 'chapter2'),
+      new Section(async () => {
+        this.sidebar.addContent(`
           <p>Algorithms that exploit tree decompositions are often represented using a "nice tree decomposition".</p>
 
           <p><strong>Definition:</strong> A tree decomposition \\( (X,T) \\) where \\( X = (X_1,...,X_l) \\) is refered to as a nice tree decomposition if:</p>
@@ -649,37 +619,36 @@ export default class SectionHandler {
           <p>Spend some time getting familiar with the difference between the nodes. As we will be refering them a lot in the coming sections.</p>
           `);
 
-          if (!window.graphContainer && !window.treeContainer) {
-            const graphContainer = d3.select('#container')
-              .append('div')
-              .attr('id', 'graph-container');
+        if (!window.graphContainer && !window.treeContainer) {
+          const graphContainer = d3
+            .select('#container')
+            .append('div')
+            .attr('id', 'graph-container');
 
-            const treeContainer = d3.select('#container')
-              .append('div')
-              .attr('id', 'tree-container');
+          const treeContainer = d3
+            .select('#container')
+            .append('div')
+            .attr('id', 'tree-container');
 
-            window.graphContainer = graphContainer;
-            window.treeContainer = treeContainer;
-          }
+          window.graphContainer = graphContainer;
+          window.treeContainer = treeContainer;
+        }
 
-          const graph = new Graph('graph-container');
-          this.graph = graph;
-          this.graph.randomGraph();
+        const graph = new Graph('graph-container');
+        this.graph = graph;
+        this.graph.randomGraph();
 
-          await this.graph.computeTreeDecomposition();
-          await this.graph.readNiceTreeDecomposition();
-          const niceTreeDecompositionData = this.graph.getNiceTreeDecomposition();
+        await this.graph.computeTreeDecomposition();
+        await this.graph.readNiceTreeDecomposition();
+        const niceTreeDecompositionData = this.graph.getNiceTreeDecomposition();
 
-          const niceTreeDecomposition = new Tree('tree-container');
-          this.treeDecomposition = niceTreeDecomposition;
-          this.treeDecomposition.load(niceTreeDecompositionData);
-          this.treeDecomposition.setGraph(this.graph);
-        },
-        'chapter4',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        const niceTreeDecomposition = new Tree('tree-container');
+        this.treeDecomposition = niceTreeDecomposition;
+        this.treeDecomposition.load(niceTreeDecompositionData);
+        this.treeDecomposition.setGraph(this.graph);
+      }, 'chapter3'),
+      new Section(async () => {
+        this.sidebar.addContent(`
             <p>We now introduce how algorithms exploit these tree decompositions.</p>
 
             <p>Most algorithms that run on tree decompositions use a <strong>bottom-up</strong> approach combined with <strong>dynamic programming</strong>.</p>
@@ -690,63 +659,56 @@ export default class SectionHandler {
 
             <p>We will start with a refresher on how <strong>dynamic programming</strong> works on "normal" trees.</p>
           `);
-        },
-        'chapter4',
-      ),
-      new Section(
-        async () => {
-          if (this.graph) this.graph.clear();
-          const tree = new Tree('container', 'normal-tree');
-          this.tree = tree;
-          this.tree.setMisNormalTree();
+      }, 'chapter4'),
+      new Section(async () => {
+        if (this.graph) this.graph.clear();
+        const tree = new Tree('container', 'normal-tree');
+        this.tree = tree;
+        this.tree.setMisNormalTree();
 
-          const treeData = {
-            id: 1,
-            label: 1,
-            children: [
-              {
-                id: 2,
-                label: 2,
-                children: [
-                  {
-                    id: 5,
-                    label: 5,
-                    children: [{ id: 10, label: 10 }],
-                  },
-                  {
-                    id: 7,
-                    label: 7,
-                    children: [
-                      { id: 8, label: 8 },
-                    ],
-                  },
-                ],
-              },
-              {
-                id: 3,
-                label: 3,
-                children: [
-                  {
-                    id: 4,
-                    label: 4,
-                    children: [
-                      { id: 9, label: 9 },
-                    ],
-                  },
-                  {
-                    id: 6, label: 6,
-                  },
-                ],
-              },
-            ],
-          };
+        const treeData = {
+          id: 1,
+          label: 1,
+          children: [
+            {
+              id: 2,
+              label: 2,
+              children: [
+                {
+                  id: 5,
+                  label: 5,
+                  children: [{ id: 10, label: 10 }],
+                },
+                {
+                  id: 7,
+                  label: 7,
+                  children: [{ id: 8, label: 8 }],
+                },
+              ],
+            },
+            {
+              id: 3,
+              label: 3,
+              children: [
+                {
+                  id: 4,
+                  label: 4,
+                  children: [{ id: 9, label: 9 }],
+                },
+                {
+                  id: 6,
+                  label: 6,
+                },
+              ],
+            },
+          ],
+        };
 
+        this.tree.load(treeData, 'normal-tree');
+        this.tree.addTooltip();
+        this.tree.addArrow();
 
-          this.tree.load(treeData, 'normal-tree');
-          this.tree.addTooltip();
-          this.tree.addArrow();
-
-          this.sidebar.addContent(`
+        this.sidebar.addContent(`
           <p>Let's now look at how the <strong>Maximum Independent Set</strong> problem works on a tree.</p>
           
           <p>Using dynamic programming we can traverse the tree bottom-up and keep track of the 'state' of each node in the tree.</p>
@@ -777,31 +739,29 @@ export default class SectionHandler {
           
           <p>Try going through the algorithm step by step to see how it works. The running time is \\( O(n) \\) as we only have to visit each tree node once.</p>
 `);
-          renderMathInElement(document.body);
-          this.tree.setAllNodes();
-          this.sidebar.addButton('Next Step', () => tree.nextStep());
-          this.sidebar.addButton('Previous Step', () => tree.previousStep());
-          this.addArrowKeyFunctionality(tree);
-        },
-        'chapter4',
-      ),
-      new Section(
-        async () => {
-          if (!window.graphContainer && !window.treeContainer) {
-            const graphContainer = d3.select('#container')
-              .append('div')
-              .attr('id', 'graph-container');
+        renderMathInElement(document.body);
+        this.tree.setAllNodes();
+        this.sidebar.addButton('Next Step', () => tree.nextStep());
+        this.sidebar.addButton('Previous Step', () => tree.previousStep());
+        this.addArrowKeyFunctionality(tree);
+      }, 'chapter3'),
+      new Section(async () => {
+        if (!window.graphContainer && !window.treeContainer) {
+          const graphContainer = d3
+            .select('#container')
+            .append('div')
+            .attr('id', 'graph-container');
 
-            const treeContainer = d3.select('#container')
-              .append('div')
-              .attr('id', 'tree-container');
+          const treeContainer = d3
+            .select('#container')
+            .append('div')
+            .attr('id', 'tree-container');
 
-            window.graphContainer = graphContainer;
-            window.treeContainer = treeContainer;
-          }
+          window.graphContainer = graphContainer;
+          window.treeContainer = treeContainer;
+        }
 
-
-          this.sidebar.addContent(`
+        this.sidebar.addContent(`
           <p>The first algorithm we will consider is an algorithm to find the Maximum Indpependent Set of a graph \\( G \\) given its nice tree decomposition with width \\( k \\).</p>
 
           <p>Before explaining the algorithm lets introduce some notation that we will use from now on.</p>
@@ -877,39 +837,38 @@ export default class SectionHandler {
           <p>Step through the algorithm by using the b
          `);
 
-          const graph = new Graph('graph-container');
-          const niceTreeDecomposition = new Tree('tree-container');
-          graph.loadGraph(graph1);
+        const graph = new Graph('graph-container');
+        const niceTreeDecomposition = new Tree('tree-container');
+        graph.loadGraph(graph1);
 
-          await graph.computeTreeDecomposition();
-          await graph.readNiceTreeDecomposition();
-          const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
-          niceTreeDecomposition.load(niceTreeDecompositionData);
-          niceTreeDecomposition.setGraph(graph);
-          niceTreeDecomposition.enableMaximumIndependentSet();
+        await graph.computeTreeDecomposition();
+        await graph.readNiceTreeDecomposition();
+        const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
+        niceTreeDecomposition.load(niceTreeDecompositionData);
+        niceTreeDecomposition.setGraph(graph);
+        niceTreeDecomposition.enableMaximumIndependentSet();
 
-          this.addArrowKeyFunctionality(niceTreeDecomposition);
+        this.addArrowKeyFunctionality(niceTreeDecomposition);
 
-          const controlsContainer = d3.select('#output').append('div')
-            .attr('class', 'controls-container');
+        const controlsContainer = d3
+          .select('#output')
+          .append('div')
+          .attr('class', 'controls-container');
 
-          controlsContainer
-            .append('span')
-            .text('keyboard_arrow_left')
-            .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.previousDPStep());
+        controlsContainer
+          .append('span')
+          .text('keyboard_arrow_left')
+          .attr('class', 'material-icons pagination-arrows')
+          .on('click', () => niceTreeDecomposition.previousDPStep());
 
-          controlsContainer
-            .append('span')
-            .text('keyboard_arrow_right')
-            .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.nextStep());
-        },
-        'chapter4',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        controlsContainer
+          .append('span')
+          .text('keyboard_arrow_right')
+          .attr('class', 'material-icons pagination-arrows')
+          .on('click', () => niceTreeDecomposition.nextStep());
+      }, 'chapter3'),
+      new Section(async () => {
+        this.sidebar.addContent(`
           <h2>3-Colorable Algorithm:</h2>
 
           <p>We say that a graph \\( G \\) is \\( k-colorable \\) if we can color the vertices with \\( k \\) colors such that no two adjacent vertices has the same color.</p>
@@ -973,52 +932,53 @@ export default class SectionHandler {
           
           `);
 
-          if (!window.graphContainer && !window.treeContainer) {
-            const graphContainer = d3.select('#container')
-              .append('div')
-              .attr('id', 'graph-container');
+        if (!window.graphContainer && !window.treeContainer) {
+          const graphContainer = d3
+            .select('#container')
+            .append('div')
+            .attr('id', 'graph-container');
 
-            const treeContainer = d3.select('#container')
-              .append('div')
-              .attr('id', 'tree-container');
+          const treeContainer = d3
+            .select('#container')
+            .append('div')
+            .attr('id', 'tree-container');
 
-            window.graphContainer = graphContainer;
-            window.treeContainer = treeContainer;
-          }
+          window.graphContainer = graphContainer;
+          window.treeContainer = treeContainer;
+        }
 
-          const graph = new Graph('graph-container');
-          const niceTreeDecomposition = new Tree('tree-container');
-          graph.loadGraph(graph1);
+        const graph = new Graph('graph-container');
+        const niceTreeDecomposition = new Tree('tree-container');
+        graph.loadGraph(graph1);
 
-          await graph.computeTreeDecomposition();
-          await graph.readNiceTreeDecomposition();
-          const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
-          niceTreeDecomposition.load(niceTreeDecompositionData);
-          niceTreeDecomposition.setGraph(graph);
-          niceTreeDecomposition.enableThreeColor();
+        await graph.computeTreeDecomposition();
+        await graph.readNiceTreeDecomposition();
+        const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
+        niceTreeDecomposition.load(niceTreeDecompositionData);
+        niceTreeDecomposition.setGraph(graph);
+        niceTreeDecomposition.enableThreeColor();
 
-          this.addArrowKeyFunctionality(niceTreeDecomposition);
+        this.addArrowKeyFunctionality(niceTreeDecomposition);
 
-          const controlsContainer = d3.select('#output').append('div')
-            .attr('class', 'controls-container');
+        const controlsContainer = d3
+          .select('#output')
+          .append('div')
+          .attr('class', 'controls-container');
 
-          controlsContainer
-            .append('span')
-            .text('keyboard_arrow_left')
-            .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.previousDPStep());
+        controlsContainer
+          .append('span')
+          .text('keyboard_arrow_left')
+          .attr('class', 'material-icons pagination-arrows')
+          .on('click', () => niceTreeDecomposition.previousDPStep());
 
-          controlsContainer
-            .append('span')
-            .text('keyboard_arrow_right')
-            .attr('class', 'material-icons nav-arrows')
-            .on('click', () => niceTreeDecomposition.nextStep());
-        },
-        'chapter4',
-      ),
-      new Section(
-        async () => {
-          this.sidebar.addContent(`
+        controlsContainer
+          .append('span')
+          .text('keyboard_arrow_right')
+          .attr('class', 'material-icons pagination-arrows')
+          .on('click', () => niceTreeDecomposition.nextStep());
+      }, 'chapter3'),
+      new Section(async () => {
+        this.sidebar.addContent(`
           <h2>Hamiltonian Path</h2>
 
           <p>
@@ -1027,41 +987,36 @@ export default class SectionHandler {
             <strong>Output:</strong> If \\( G \\) contains a Hamiltonian path.
           </p>
           `);
-          this.addContainers();
+        this.addContainers();
 
-          d3.select('#main')
-            .append('div')
-            .attr('id', 'dp-container')
-            .attr('class', 'table-wrapper')
-            .append('table')
-            .attr('id', 'dp-table')
-            .attr('class', 'hamiltonianTable');
-
-          const graph = new Graph('graph-container');
-          const niceTreeDecomposition = new Tree('tree-container');
-          graph.loadGraph(graph1);
-          // graph.loadGraph(cycleGraph);
-
-          await graph.computeTreeDecomposition();
-          await graph.readNiceTreeDecomposition();
-          const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
-          this.createTableVisibilityButton();
-
-          // console.log(niceTreeDecompositionData);
-          // niceTreeDecomposition.load(hamTD);
-          niceTreeDecomposition.load(hamTD2);
-          niceTreeDecomposition.setGraph(graph);
-          niceTreeDecomposition.addArrow();
-          niceTreeDecomposition.enableHamiltonianPath();
-          this.addAlgorithmControls(() => niceTreeDecomposition.previousDPStep(), () => niceTreeDecomposition.nextDPStep());
-
-          this.addArrowKeyFunctionality(niceTreeDecomposition);
-        },
-        'chapter4',
-      ),
+        d3.select('#main')
+          .append('div')
+          .attr('id', 'dp-container')
+          .attr('class', 'table-wrapper')
+          .append('table')
+          .attr('id', 'dp-table')
+          .attr('class', 'hamiltonianTable');
+        const graph = new Graph('graph-container');
+        const niceTreeDecomposition = new Tree('tree-container');
+        graph.loadGraph(graph1);
+        await graph.computeTreeDecomposition();
+        await graph.readNiceTreeDecomposition();
+        const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
+        niceTreeDecomposition.load(hamTD2);
+        niceTreeDecomposition.setGraph(graph);
+        niceTreeDecomposition.addArrow();
+        niceTreeDecomposition.enableHamiltonianPath();
+        this.createTableVisibilityButton();
+        this.addAlgorithmControls(
+          () => niceTreeDecomposition.previousDPStep(),
+          () => niceTreeDecomposition.nextDPStep(),
+        );
+        this.addArrowKeyFunctionality(niceTreeDecomposition);
+      }, 'chapter3'),
     ];
-    this.sections = this.sections.filter((section) => section.chapter === this.currentChapter);
-    if (this.currentChapter === 'chapter5') this.createCustomSection();
+    this.sections = this.sections.filter(
+      (section) => section.chapter === this.currentChapter,
+    );
   }
 
   toggleTableVisibility() {
@@ -1102,31 +1057,37 @@ export default class SectionHandler {
   }
 
   addAlgorithmControls(previous, next) {
-    const controlsContainer = d3.select('#output').append('div')
+    const controlsContainer = d3
+      .select('#output')
+      .append('div')
       .attr('class', 'controls-container');
 
-    controlsContainer.append('div').html('Use the up and down arrow keys to step through the algorithm.');
+    controlsContainer
+      .append('div')
+      .html('Use the up and down arrow keys to step through the algorithm.');
 
     controlsContainer
       .append('span')
       .text('keyboard_arrow_left')
-      .attr('class', 'material-icons nav-arrows')
+      .attr('class', 'material-icons pagination-arrows')
       .on('click', previous);
 
     controlsContainer
       .append('span')
       .text('keyboard_arrow_right')
-      .attr('class', 'material-icons nav-arrows')
+      .attr('class', 'material-icons pagination-arrows')
       .on('click', next);
   }
 
   addContainers() {
     if (!window.graphContainer && !window.treeContainer) {
-      const graphContainer = d3.select('#container')
+      const graphContainer = d3
+        .select('#container')
         .append('div')
         .attr('id', 'graph-container');
 
-      const treeContainer = d3.select('#container')
+      const treeContainer = d3
+        .select('#container')
         .append('div')
         .attr('id', 'tree-container');
 
@@ -1138,13 +1099,17 @@ export default class SectionHandler {
   createSection() {
     if (!this.currentSection) this.currentSection = this.sections[0];
     d3.select('#graph-container').classed('graph-classes', false);
-    d3.select('.nav').style('height', '5%');
-    d3.select('#main').style('height', '95%');
+    setNavbarHeight();
 
     /* Query strings */
     window.history.replaceState({}, '', '?');
     const params = new URLSearchParams(location.search);
-    params.set('chapter', window.chapterHandler.chapters.indexOf(window.chapterHandler.currentChapter) + 1);
+    params.set(
+      'chapter',
+      window.chapterHandler.chapters.indexOf(
+        window.chapterHandler.currentChapter,
+      ) + 1,
+    );
     params.set('section', this.currentSectionIndex + 1);
     params.toString();
     window.history.replaceState({}, '', `?${params.toString()}`);
@@ -1155,7 +1120,7 @@ export default class SectionHandler {
     if (this.sidebar) this.sidebar.clear();
     if (this.tree) this.tree.clear();
 
-    this.sections.map((section) => section.isActive = false);
+    this.sections.map((section) => (section.isActive = false));
     this.currentSection.isActive = true;
     this.currentSection.create();
     this.sidebar.updateProgressBar();

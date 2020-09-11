@@ -2,7 +2,6 @@
 /* eslint-disable max-len */
 /* eslint-disable no-restricted-globals */
 import ChapterHandler from './Handlers/ChapterHandler.js';
-import Roadmap from './Components/Roadmap.js';
 import generateRandomGraph from './Utilities/helpers.js';
 
 const chapterHandler = new ChapterHandler();
@@ -28,14 +27,9 @@ d3.select(window).on('load', async () => {
     chapterHandler.goToChapter(currentChapter, false);
   }
 });
-
 export const width = document.getElementById('main').offsetWidth;
 export const height = document.getElementById('main').offsetHeight;
-
 const colors = d3.scaleOrdinal(d3.schemeCategory10);
-
-const roadmap = new Roadmap();
-
 const logoContainer = d3.select('#main')
   .append('div')
   .attr('class', 'logo-container');
@@ -62,53 +56,6 @@ logoContainer.append('button')
   .style('z-index', '20')
   .on('click', () => chapterHandler.startFirstLevel());
 
-d3.select('#sandbox-button').on('click', () => {
-  chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], true);
-});
-
-d3.select('#graph-separator-link').on('click', () => {
-  chapterHandler.goToChapter(chapterHandler.chapters[0], false, false, true);
-});
-
-d3.select('#treewidth-link').on('click', () => {
-  chapterHandler.goToChapter(chapterHandler.chapters[1], false, false, true);
-});
-
-d3.select('#nice-link').on('click', () => {
-  chapterHandler.goToChapter(chapterHandler.chapters[2], false, false, true);
-});
-
-d3.select('#algo-link').on('click', () => {
-  chapterHandler.goToChapter(chapterHandler.chapters[3], false, false, true);
-});
-
-d3.select('#custom-algorithm-button').on('click', () => {
-  chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 2], false, true);
-});
-
-/* Close modal if clicked outside of modal box */
-window.onclick = function (event) {
-  const overlay = document.getElementById('overlay');
-  if (event.target === overlay) {
-    roadmap.toggle();
-  }
-};
-
-/* Handle key events */
-d3.select('body').on('keydown', () => {
-  switch (event.key) {
-    case 'Escape':
-      roadmap.toggle();
-      break;
-    case 'ArrowLeft':
-      if (window.sectionHandler) window.sectionHandler.goPreviousSection();
-      break;
-    case 'ArrowRight':
-      if (window.sectionHandler) window.sectionHandler.goNextSection();
-      break;
-    default:
-  }
-});
 
 const svg = d3.select('#main').append('svg').attr('width', width).attr('height', height);
 const graph = generateRandomGraph(30, 20);
@@ -144,3 +91,63 @@ const simulation = d3.forceSimulation()
   });
 
 simulation.force('link').links(graph.links);
+
+const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
+const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+
+if (currentTheme) {
+  document.documentElement.setAttribute('data-theme', currentTheme);
+
+  if (currentTheme === 'dark') {
+    toggleSwitch.checked = true;
+  }
+}
+
+function setNavButtons() {
+  d3.select('#sandbox-button').on('click', () => {
+    chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], true);
+  });
+
+  d3.select('#graph-separator-link').on('click', () => {
+    chapterHandler.goToChapter(chapterHandler.chapters[0], false, false, true);
+  });
+
+  d3.select('#treewidth-link').on('click', () => {
+    chapterHandler.goToChapter(chapterHandler.chapters[1], false, false, true);
+  });
+
+  d3.select('#algo-link').on('click', () => {
+    chapterHandler.goToChapter(chapterHandler.chapters[2], false, false, true);
+  });
+
+  d3.select('#custom-algorithm-button').on('click', () => {
+    chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 2], false, true);
+  });
+}
+
+function switchTheme(e) {
+  if (e.target.checked) {
+    document.documentElement.setAttribute('data-theme', 'dark');
+    localStorage.setItem('theme', 'dark');
+  } else {
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
+  }
+}
+
+toggleSwitch.addEventListener('change', switchTheme, false);
+
+/* Handle key events */
+d3.select('body').on('keydown', () => {
+  switch (event.key) {
+    case 'ArrowLeft':
+      if (window.sectionHandler) window.sectionHandler.goPreviousSection();
+      break;
+    case 'ArrowRight':
+      if (window.sectionHandler) window.sectionHandler.goNextSection();
+      break;
+    default:
+  }
+});
+
+setNavButtons();

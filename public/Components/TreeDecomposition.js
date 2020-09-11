@@ -1,4 +1,4 @@
-import { contextMenu as menu } from './ContextMenu.js';
+import { contextMenu as menu } from '../Utilities/ContextMenu.js';
 
 export default class TreeDecomposition {
   constructor(container, graph) {

@@ -2,7 +2,7 @@ export default class Sidebar {
   constructor(title) {
     this.title = title;
     this.draw();
-    this.setTitle(this.title);
+    this.addTitle(this.title);
     this.addContentArea();
   }
 
@@ -146,14 +146,17 @@ export default class Sidebar {
       });
   }
 
-  setTitle(title) {
+  addTitle(title) {
     this.sidebarContainer
       .append('div')
       .attr('class', 'sidebar-title')
       .append('h2')
       .text(title)
-      .attr('class', 'chapter-title')
-      .append('hr');
+      .attr('class', 'chapter-title');
+  }
+
+  setTitle(title) {
+    d3.select('.chapter-title').html(title);
   }
 
   addHandler(handler) {
@@ -170,21 +173,30 @@ export default class Sidebar {
 
   addProgresBar() {
     const { sections } = this.sectionHandler;
-    if (sections.length === 1) return;
     this.sections = sections;
+    const width = 100 / sections.length;
 
+    this.addProgressBarContainer();
+    this.addLeftPaginationArrow();
+    this.addPaginationRectangles(sections, width);
+    this.addRightPaginationArrow();
+  }
+
+  addProgressBarContainer() {
     this.progressBarContainer = this.sidebarContainer
       .append('div')
       .attr('class', 'progress-bar-container');
+  }
 
+  addRightPaginationArrow() {
     this.progressBarContainer
       .append('span')
-      .attr('class', 'material-icons nav-arrows')
-      .text('keyboard_arrow_left')
-      .on('click', () => this.sectionHandler.goPreviousSection());
+      .attr('class', 'material-icons pagination-arrows')
+      .text('keyboard_arrow_right')
+      .on('click', () => this.sectionHandler.goNextSection());
+  }
 
-    const w = 100 / sections.length;
-
+  addPaginationRectangles(sections, width) {
     this.progressBarContainer
       .selectAll('div')
       .data(sections)
@@ -192,17 +204,19 @@ export default class Sidebar {
         (enter) => enter
           .append('div')
           .attr('class', (d) => (d.isActive ? 'progress-item-active' : 'progress-item'))
-          .style('width', `${w}%`)
-          .on('click', (d) => this.sectionHandler.goToSection(d)),
+          .style('width', `${width}%`)
+          .on('click', (section) => this.sectionHandler.goToSection(section)),
         (update) => update,
         (exit) => exit.remove(),
       );
+  }
 
+  addLeftPaginationArrow() {
     this.progressBarContainer
       .append('span')
-      .attr('class', 'material-icons nav-arrows')
-      .text('keyboard_arrow_right')
-      .on('click', () => this.sectionHandler.goNextSection());
+      .attr('class', 'material-icons pagination-arrows')
+      .text('keyboard_arrow_left')
+      .on('click', () => this.sectionHandler.goPreviousSection());
   }
 
   updateProgressBar() {
@@ -215,26 +229,6 @@ export default class Sidebar {
         (update) => update.attr('class', (d) => (d.isActive ? 'progress-item-active' : 'progress-item')),
         (exit) => exit.remove(),
       );
-  }
-
-  addNavButtons() {
-    const navButtonsContainer = this.sidebarContainer
-      .append('div')
-      .attr('class', 'nav-buttons-container');
-
-    this.navButtonsContainer = navButtonsContainer;
-
-    this.navButtonsContainer
-      .append('span')
-      .attr('class', 'material-icons nav-arrows')
-      .text('keyboard_arrow_left')
-      .on('click', () => this.sectionHandler.goPreviousSection());
-
-    this.navButtonsContainer
-      .append('span')
-      .attr('class', 'material-icons nav-arrows')
-      .text('keyboard_arrow_right')
-      .on('click', () => this.sectionHandler.goNextSection());
   }
 
   addContentArea() {

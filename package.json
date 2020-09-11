@@ -22,6 +22,8 @@
     "eslint-config-airbnb-base": "^14.1.0",
     "eslint-plugin-import": "^2.20.2",
     "parcel-bundler": "^1.12.4",
+    "prettier-eslint-cli": "^5.0.0",
+    "prettier-stylelint": "^0.4.2",
     "webpack": "^4.43.0"
   },
   "dependencies": {
@@ -35,6 +37,7 @@
     "fs": "0.0.1-security",
     "g": "^2.0.1",
     "nodemon": "^2.0.3",
+    "prettier-eslint": "^11.0.0",
     "regenerator-runtime": "^0.13.5"
   }
 }

@@ -21,7 +21,7 @@ import {
   deepClone,
 } from '../Utilities/helpers.js';
 
-import { contextMenu as menu } from './TreeContextMenu.js';
+import { contextMenu as menu } from '../Utilities/TreeContextMenu.js';
 
 const arraysMatch = function (arr1, arr2) {
   if (arr1.length !== arr2.length) return false;
@@ -880,8 +880,6 @@ export default class Tree {
   }
 
   setTableForJoinNode(leftChildPartialSolutions, rightChildPartialSolutions) {
-    console.log('leftChildPartialSolutions', leftChildPartialSolutions);
-
 
     /*     const leftTableKeys = childStates;
     const child2 = this.getChild2(node);

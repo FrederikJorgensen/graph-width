@@ -5,15 +5,12 @@ export const contextMenu = function (d) {
       title: 'Insert Child Node',
       action(elm, d, i) {
         const value = prompt('Value:');
-
         const splitted = value.split(',');
         const temp = [];
         splitted.forEach((vertix) => {
           const v = parseInt(vertix, 10);
           temp.push(v);
         });
-        // d.data.vertices = temp;
-
         d.tree.addNode(d, value, temp);
       },
     },
