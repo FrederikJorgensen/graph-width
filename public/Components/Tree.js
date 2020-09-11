@@ -1671,8 +1671,8 @@ export default class Tree {
     this.tooltip = d3
       .select('#main')
       .append('div')
+      .attr('class', 'hamiltonianTable')
       .attr('id', 'tooltip')
-      .attr('class', 'table')
       .style('position', 'absolute')
       .style('opacity', 0);
   }
@@ -1824,7 +1824,6 @@ export default class Tree {
       .lower()
       .attr('transform', `translate(${0}, ${30})`);
 
-    /* Get the node data and draw the nodes */
     if (this.type === 'normal-tree') {
       svg
         .selectAll('circle')
@@ -1875,9 +1874,7 @@ export default class Tree {
       .attr('x', (d) => d.x)
       .attr('y', (d) => d.y)
       .attr('dy', () => {
-        if (type === 'normal-tree') {
-          return '.-25em';
-        }
+        if (type === 'normal-tree') return '5px';
         return '17px';
       })
       .attr('class', () => {
@@ -1887,9 +1884,9 @@ export default class Tree {
       .text((d) => {
         if (type === 'normal-tree') return d.data.label;
         if ('children' in d.data === false || d.data.children.length === 0) return;
-        if (d.data.children.length === 2) return `& ${d.data.label}`;
-        if (d.data.vertices.length > d.data.children[0].vertices.length) return `+ ${d.data.label}`;
-        if (d.data.vertices.length < d.data.children[0].vertices.length) return `- ${d.data.label}`;
+        if (d.data.children.length === 2) return `${d.data.label}`;
+        if (d.data.vertices.length > d.data.children[0].vertices.length) return `${d.data.label}`;
+        if (d.data.vertices.length < d.data.children[0].vertices.length) return `${d.data.label}`;
         return d.data.label;
       })
       .attr('transform', `translate(${0}, ${30})`);

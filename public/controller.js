@@ -7,6 +7,10 @@ import generateRandomGraph from './Utilities/helpers.js';
 const chapterHandler = new ChapterHandler();
 window.chapterHandler = chapterHandler;
 
+window.del = [
+  { left: '$', right: '$', display: true },
+];
+
 d3.select(window).on('load', async () => {
   const params = new URLSearchParams(location.search);
   const hasChapter = params.has('chapter');
@@ -37,23 +41,17 @@ const logoContainer = d3.select('#main')
 logoContainer
   .append('h1')
   .attr('class', 'homepage-title')
-  .text('GraphWidth')
-  .style('font-size', '34px')
-  .style('font-weiht', 'bold')
-  .style('color', 'white')
-  .style('margin', 0)
-  .style('z-index', 10)
-  .style('color', 'white');
+  .text('GraphWidth.com')
+  .attr('class', 'homepage-title');
 
 logoContainer
   .append('p')
   .text('An interactive way to learn graph width measures.')
-  .attr('class', 'subtitle');
+  .attr('class', 'homepage-subtitle');
 
 logoContainer.append('button')
   .text('Start Learning')
-  .attr('class', 'pure-material-button-contained')
-  .style('z-index', '20')
+  .attr('class', 'button')
   .on('click', () => chapterHandler.startFirstLevel());
 
 
@@ -145,6 +143,12 @@ d3.select('body').on('keydown', () => {
       break;
     case 'ArrowRight':
       if (window.sectionHandler) window.sectionHandler.goNextSection();
+      break;
+    case 'ArrowUp':
+      if (window.niceTreeDecomposition) window.niceTreeDecomposition.nextDPStep();
+      break;
+    case 'ArrowDown':
+      if (window.niceTreeDecomposition) window.niceTreeDecomposition.previousDPStep();
       break;
     default:
   }

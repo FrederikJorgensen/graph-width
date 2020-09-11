@@ -1,4 +1,4 @@
-# GraphWidth.com
+# [GraphWidth.com](http://www.graphwidth.com/)
 
 ![GraphWidth.com demo](promo_graph_width.gif)
 

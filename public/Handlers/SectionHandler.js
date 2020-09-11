@@ -12,6 +12,7 @@ import {
   treeGraph,
   hamTD2,
   gridGraph,
+  treeExampleForDynamicProgramming,
 } from '../Utilities/graphs.js';
 import { setNavbarHeight } from '../Utilities/helpers.js';
 
@@ -33,13 +34,39 @@ export default class SectionHandler {
     this.sections = [
       new Section(async () => {
         this.sidebar.addContent(`
-          <p>Before we explore treewidth there is one concept that we must familiarize ourselves with.</p>
-          <p>That is the concept of a graph separator.</p>
-          <p>We say that a set \\( S \\) is a graph separator in a graph \\( G \\) if the removal of that set from \\( G \\) leaves \\( G \\) into multiple connected components.</p>
-          <p>In later chapters it becomes clear why we study graph separators. There are different types of graph separators we will cover those who are most relevant to treewidth in this chapter.</p>
-          `);
+        In order to understand <i>treewidth</i> it is important to have studied the concept of graph separators.
+
+        <div class="math-table-wrapper">
+          <table class="hamiltonianTable">
+            <tbody>
+              <tr>
+                <td>$G$</td>
+                <td>Graph</td>
+              </tr>
+              <tr>
+                <td>$V(G)$</td>
+                <td>Vertices in the graph</td>
+              </tr>
+              <tr>
+                <td>$S$</td>
+                <td>A set of vertices in $G$</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <p>A set $S$ is said to be a separator in a graph $G$ if the removal of that set leaves the graph into multiple components.</p>
+        `);
+
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: false },
+            { left: '\\[', right: '\\]', display: true },
+          ],
+        });
         this.sidebar.addExercise(
-          'Find one or multiple vertices that would separate the graph into different components.',
+          'Find a separator in the graph.',
         );
         createSeparatorExerciseOutput();
         const graph = new Graph('container');
@@ -50,7 +77,8 @@ export default class SectionHandler {
       new Section(
         async () => {
           this.sidebar.addContent(`
-          <p>Let \\( S \\) be a separator in some graph \\( G \\). We say that \\( S\\) is a minimal separator if no proper subset separates the graph \\( G \\)
+          <p>Let \\( S \\) be a separator in a graph \\( G \\).</p>
+          <p>$S$ is a minimal separator if no proper subset of $S$ also separates the graph.</p>
           <p>In other words if some graph has a separator set \\( S = \\{ a,b \\} \\) then \\( a \\) on its own cannot separate the graph neither can \\( b \\).</p>
           `);
           this.sidebar.addExercise('Find a minimal separator in the graph.');
@@ -65,8 +93,8 @@ export default class SectionHandler {
       ),
       new Section(async () => {
         this.sidebar.addContent(`
-          <p>Let \\( S \\) be a separator in some graph \\( G \\). We say that \\( S \\) is a balanced separator if every component of \\( G - S \\) has \\( \\leq V(G) / 2 \\)</p>
-
+          <p>Let \\( S \\) be a separator in a graph \\( G \\).</p>
+          <p>We say that \\( S \\) is a balanced separator if every component of \\( G - S \\) has \\( \\leq V(G) / 2 \\)</p>
           <p>That is every component after you remove \\( S \\) should contain less than or equal amounts of vertices to the amount of vertices in the original graph divided by 2.</p>
           `);
 
@@ -79,8 +107,8 @@ export default class SectionHandler {
       }, 'chapter1'),
       new Section(async () => {
         this.sidebar.addContent(`
-          <p>Informally we can describe the <strong>treewidth</strong> of a graph to be a tree "build" from its separators that we saw in the previous chapter.</p>
-          <p>More formally we define the treewidth of a graph using the notion of <strong>tree decompositions.</strong></p>
+          <p>Informally we can describe the <i>treewidth</i> of a graph to be a tree "build" from its separators that we saw in the previous chapter.</p>
+          <p>More formally we define the treewidth of a graph using the notion of <i>tree decompositions.</i></p>
           <p>A tree decomposition of a graph is a mapping of that graph into a tree adhering to certain properties.</p>
           <p>On the right you see a graph \\( G \\) and one of its tree decompositions \\( T \\).
           `);
@@ -99,8 +127,7 @@ export default class SectionHandler {
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
-              <p>We refer to each node in the tree decomposition as a "bag".</p>
-              
+              <p>We refer to each node in the tree decomposition as a <i>bag</i>.</p>
               <p>Each bag contains some vertices of the the graph.</p>
               `);
 
@@ -120,13 +147,11 @@ export default class SectionHandler {
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
-            <p>We say that a tree decomposition is valid if it contains the following 3 properties.</p>
-
-            <p><strong>Property 1 (Node Coverage):</strong> Every vertex that appears in the graph must appear in some bag of the tree decomposition. </p>
-            
+            <p>We say that a tree decomposition is valid if it adheres to 3 properties: Node coverage, edge coverage and coherence.</p>
+            <p><strong>Node Coverage</strong>: Every vertex that appears in the graph must appear in some bag of the tree decomposition. </p>
             <p>We will check every vertex in the graph and highlight the bag in the tree decompostion containing that vertex.</p>
             `);
-        this.sidebar.setTitle('Tree decomposition properties');
+        this.sidebar.setTitle('Node coverage');
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
@@ -134,13 +159,12 @@ export default class SectionHandler {
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container');
         treeDecomposition.loadGraph(td1, 'tree', this.graph);
-
-        this.sidebar.addButton('Replay animation', () => this.graph.runNodeCoverage());
+        this.sidebar.addButton('<span class="material-icons">replay</span> Replay animation', () => this.graph.runNodeCoverage());
         graph.runNodeCoverage();
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
-            Property 2 <strong>(Edge coverage):</strong> For every edge that appears in the graph there is some bag in the tree decomposition which contains the vertice
+            <strong>Edge coverage:</strong> For every edge that appears in the graph there is some bag in the tree decomposition which contains the vertice
             s of both ends of the edge.<br/><br/> Lets check if this holds true for our graph and tree decomposition.
             `);
         this.sidebar.setTitle('Edge coverage');
@@ -151,17 +175,15 @@ export default class SectionHandler {
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container');
         treeDecomposition.loadGraph(td1, 'tree', graph);
-        this.sidebar.addButton('Replay animation', () => this.graph.runEdgeCoverage());
+        this.sidebar.addButton('<span class="material-icons">replay</span> Replay animation', () => this.graph.runEdgeCoverage());
         treeDecomposition.resetTreeDecompositionStyles();
         graph.runEdgeCoverage();
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
-            <p><strong>Property 3 (Coherence):</strong> Lets consider 3 bags of the tree decomposition: \\( b_1 \\), \\( b_2 \\) and \\( b_3 \\) that form a path in the tree decomposition.</p>
-
+            <p><strong>Coherence:</strong> Consider 3 bags of the tree decomposition: \\( b_1 \\), \\( b_2 \\) and \\( b_3 \\) which form a path in the tree decomposition.</p>
             <p>If a vertex from the graph belongs to \\( b_1 \\) and \\( b_3 \\) it must also belong to \\( b_2 \\).</p>
-            
-            <p>Lets check this by going through the vertices in the graph like we did at property 1. And if a node is in multiple bags it MUST form a connected subtree in the tree decomposition.</p>
+            <p>That is, if a node exists in multiple bags it must form a connected subtree.</p>
             `);
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
@@ -171,20 +193,18 @@ export default class SectionHandler {
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container');
         treeDecomposition.loadGraph(td1, 'tree', graph);
-        this.sidebar.addButton('Replay animation', () => graph.highlightCoherence());
+        this.sidebar.addButton('<span class="material-icons">replay</span> Replay animation', () => graph.highlightCoherence());
         graph.highlightCoherence();
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
-            <p>Since all 3 properties hold true we have prooved that the tree on the right side is a valid tree decomposition of the graph on the left side.</p>
-            <p>Is this the only valid tree decomposition of this graph? <br><br> No, a graph can have multiple valid tree decompositions.</p>
-            <p>Lets take a look at some other valid tree decompositions of this graph.</p>
-            <p><strong>Example:</strong> The trivial tree decomposition of this graph contains all the graphs vertices in one bag.</p>
+            <p>A graph can have multiple valid tree decompositions.</p>
+            <p>Lets take a look at some other valid tree decompositions of the graph.</p>
+            <p><strong>Example:</strong> The trivial tree decomposition of this graph contains all the graph's vertices in one bag.</p>
             `);
         this.sidebar.setTitle('Trivial tree decomposition');
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
-
         const treeDecomposition = new Graph('tree-container');
         const trivialTreeDecomposition = graph.computeTrivialTreeDecomposition();
         treeDecomposition.loadGraph(trivialTreeDecomposition, 'tree');
@@ -252,8 +272,8 @@ export default class SectionHandler {
         graph.loadGraph(graph1);
 
         this.sidebar.addQuiz();
-        this.sidebar.addChoice('Yes.', true);
-        this.sidebar.addChoice('No.', false);
+        this.sidebar.addChoice('Yes', true);
+        this.sidebar.addChoice('No', false);
         this.sidebar.addSolution(
           'It satisfies all the properties of a tree decomposition thus it is valid.',
         );
@@ -278,12 +298,9 @@ export default class SectionHandler {
       new Section(async () => {
         this.sidebar.addContent(`
             <p>If there are different tree decompositions for a graph how do know which ones to use?</p>
-
-            <p>We want to use the tree decompositions with the lowest possible vertices in it's largest bag, as this make many algorithms that exploit tree decomposition more effective.</p>
-
-            <p><strong>Definition:</strong> We say that the <strong>width</strong> of a tree decomposition is the the size of the largest bag of that tree decomposition - 1.</p>
-
-            <p><strong>Definition:</strong> The <strong>treewidth</strong> of a graph is the minimum width amongst all the tree decompositions of \\( G \\).</p>
+            <p>We want to use the tree decomposition with the lowest possible vertices in it's largest bag, as this makes many algorithms compute faster on the tree decomposition.</p>
+            <p class="fact"><span class="fact-title">Fact:</span> The <i>width</i> of a tree decomposition is the size of the largest bag minus 1.</p>
+            <p class="fact"><span class="fact-title">Fact:</span> The <i>treewidth</i> of a graph is the minimum width amongst all the tree decompositions of the graph.</p>
             `);
         this.sidebar.addExercise(
           'What is the width of the current tree decomposition?',
@@ -307,7 +324,7 @@ export default class SectionHandler {
         );
       }, 'chapter2'),
       new Section(async () => {
-        this.sidebar.addExercise('What about this one? What is the width?');
+        this.sidebar.addExercise('What is the width of the tree decomposition?');
         this.sidebar.setTitle('Width vs treewidth quiz #1');
 
         const anotherTd = {
@@ -350,9 +367,7 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
         this.sidebar.setTitle('Width vs treewidth quiz #2');
-        this.sidebar.addExercise(`
-            Lets check one more. What is the width?            
-            `);
+        this.sidebar.addExercise('What is the width of the tree decomposition?');
         this.sidebar.addQuiz();
         this.sidebar.addChoice('2', false);
         this.sidebar.addChoice('4', false);
@@ -366,13 +381,12 @@ export default class SectionHandler {
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
-            <p>Lets assume that the 3 tree decompositions you see on the right are ALL of the possible tree decompositions of the graph \\( G \\). (This is not true but for this exercise we will make this assumption)</p>
-        
+            <p>Lets assume that the 3 tree decompositions you see on the right are ALL of the possible tree decompositions of the graph \\( G \\)
+            (This is not true but for this exercise we will make this assumption.)</p>
             `);
         this.sidebar.setTitle('Treewidth quiz #1');
-
         this.sidebar.addExercise(
-          'What is the <strong>treewidth</strong> of the <strong>graph \\( G \\)</strong>?',
+          'What is the <i>treewidth</i> of the graph?',
         );
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
@@ -452,9 +466,7 @@ export default class SectionHandler {
       new Section(async () => {
         this.sidebar.addContent(`
             <p>We will now put our attention towards understanding how graph separators work in tree decompositions. If you dont recall the concept of graph separators go through chapter 2.</p>
-
             <p>Each bag in the tree decomposition act as a separator in the graph.</p>
-
             <p>For example the bag containing 2 3 4 separates 1 and 5 6 7 in the graph.</p>
             `);
         this.sidebar.setTitle('Separators in tree decompositions');
@@ -473,36 +485,27 @@ export default class SectionHandler {
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
-          
-          <p>Lets test your knowledge of the tree decomposition properties.</p>
-          
+          <p>Let's test your knowledge of the tree decomposition properties.</p>
           <p><strong>Add bags</strong> for the tree decomposition by clicking anywhere in the highlighted space.</p>
-          
           <p><strong>Add edges</strong> between bags by dragging and clicking on a node.</p>
-
           <p><strong>Change</strong> which vertices should be contained inside each bag by right-clicking and select set value. Separate each vertix using a comma.</p>
-
           <p>(Example: If you wanted 1, 2 and 3 contained in a bag, write it as such: 1,2,3)</p>
-
           <p><strong>Delete a bag</strong> by right-clicking and click delete bag.</p>
-
           <p><strong>Remove an edge</strong> by right-clicking on it.</p>
           `);
         this.sidebar.setTitle('Create the tree decomposition');
         this.sidebar.addExercise(
-          'Draw the tree tree decompostion of the graph \\( G \\).',
+          'Draw the tree tree decompostion of the graph.',
         );
-
         const graph = new Graph('graph-container');
         graph.randomGraph();
-
         const td = new TreeDecomposition('tree-container', graph);
         this.td = td;
-
         td.enableDrawing();
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
+        <p>Certain graph classes have constant treewidth regardless of the number of vertices/edges in that particular graph.</p>
         <p>Consider the \\( 3\\) x \\( 3 \\) grid on the right. Intuitively we can see there is no way we can separate this graph using less than \\( 3 \\) vertices.</p>
         <p class="fact"><span class="fact-title">Fact:</span> For every \\( k \\geq 2\\), the treewidth of the \\( k\\) x \\( k \\) grid is exactly \\( k \\)</p>
           `);
@@ -518,11 +521,8 @@ export default class SectionHandler {
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
-          <p>Certain graph classes has a constant treewidth regardless of the number of vertices/edges in that particular graph.</p>
-
-          <p><strong>Trees</strong> have treewidth 1.</p>
-
-          <p>This is also the reason why we say that width is the largest bag - 1. For historical reasons the first people studying treewidth wanted trees to have width 1.</p>
+          <p><i>Trees</i> have treewidth 1.</p>
+          <p>This is also the reason why we say that the width of the tree decomposition is the largest bag - 1. For historical reasons the first people studying treewidth wanted trees to have width 1.</p>
           `);
         this.sidebar.setTitle('Treewidth of trees');
 
@@ -540,9 +540,8 @@ export default class SectionHandler {
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
+           <p>As you can tell by the graph and its tree decomposition a clique has a large treewidth. An optimal tree decomposition of a clique is the trivial decomposition.</p>
            <p class="fact"><span class="fact-title">Fact:</span> The treewidth of clique \\( k \\) is \\( k - 1\\)</p>
-
-           <p>As you can tell by the graph and its tree decomposition a clique has a large treewidth. An optimal tree decomposition of a clique is basically the trivial decomposition.</p>
           `);
         this.sidebar.setTitle('Treewidth of cliques');
         const graph = new Graph('graph-container');
@@ -603,21 +602,64 @@ export default class SectionHandler {
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
-          <p>Algorithms that exploit tree decompositions are often represented using a "nice tree decomposition".</p>
+          <p>Algorithms that exploit tree decompositions are often represented using a variation of tree decompositions called nice tree decompositions.</p>
 
-          <p><strong>Definition:</strong> A tree decomposition \\( (X,T) \\) where \\( X = (X_1,...,X_l) \\) is refered to as a nice tree decomposition if:</p>
-          <p>Has all the properties of a tree decomposition.</p>
-          <p>The tree \\( T\\) is <strong>rooted</strong></p>
-          <p>Every node of \\( T \\) has at most 2 children.</p>
-          <p>Every node of \\( T \\) must be one of the following types:</p>            
-          <p><strong><span class="leaf">Leaf node:<span></strong> \\( i \\)  is a leaf in \\( T \\) then \\( |X_i|\\) \\( \\leq \\) 1</p>
-          <p><strong><span class="join">& Join node:</span></strong>  \\( i \\) has two children \\( j \\) and \\( k \\), then \\( X_i = X_j = X_k \\)</p>
-          <p><strong><span class="introduce">+ Introduce node:</span></strong>  \\( i \\) has 1 child \\( j \\), then \\( X_i = X_j \\cup \\{ v \\} \\) for a vertex \\( \\{ v \\} \\)</p>
-          <p><strong><span class="forget">- Forget node:</span></strong> \\( i \\) has 1 child \\( j \\), then \\( X_i = X_j - \\{ v \\} \\) for a vertex \\( \\{ v \\} \\)</p>
-          <p>On the right you see a nice tree decompostion of the current graph.</P>
-          <p>Each node type of the tree is a different color and has a diffrent symbol to make it easier to tell the difference.</p>
-          <p>Spend some time getting familiar with the difference between the nodes. As we will be refering them a lot in the coming sections.</p>
+          <p>
+            We denote:
+            <br/ >
+            $T$ for the tree decomposition.
+            <br />
+            $n$ for a node in $T$.
+            <br />
+            $B_n$ for the bag at node $n$.
+            <br />
+            $B_c$ for the bag at a child node $c$.
+            <br />
+            $v$ for a forgotten or introduced vertex.
+          </p>
+
+          <p>
+            A rooted tree decomposition $T$ of a graph $G$ is nice if every node
+            $n$ is of one of the following types:
+          </p>
+             
+           <p>
+            <svg class="lo" width="15" height="15">
+            <rect class="leaf-node-sample" width="15" height="15">
+            </svg>
+         <strong>Leaf node:</strong>
+            <br />
+            $n$ has no children and $B_n$ contains no vertices.
+           </p>
+
+          <p>
+          <svg class="lo" width="15" height="15">
+          <rect class="introduce-node-sample" width="15" height="15">
+          </svg>
+           <strong>Introduce node:</strong>
+           <br />
+           $n$ has a child $c$ then $B_n = B_c \\cup v $ where $v \\in B_c$.
+         </p>
+
+         <p>
+         <svg class="lo" width="15" height="15">
+         <rect class="forget-node-sample" width="15" height="15">
+         </svg>
+           <strong>Forget node:</strong>
+           <br />
+           $n$ has a child $c$ then $B_n = B_c - v$ where $v \\in B_c$.
+         </p>
+
+          <p>
+          <svg class="lo" width="15" height="15">
+          <rect class="join-node-sample" width="15" height="15">
+          </svg>
+            <strong>Join node:</strong>
+            <br/>
+            $n$ has two children $c_l$ and $c_r$ then $B_n = B_{c_l} = B_{c_r}$.
+          </p>
           `);
+        this.sidebar.setTitle('Nice Tree Decompositions');
 
         if (!window.graphContainer && !window.treeContainer) {
           const graphContainer = d3
@@ -648,102 +690,60 @@ export default class SectionHandler {
         this.treeDecomposition.setGraph(this.graph);
       }, 'chapter3'),
       new Section(async () => {
-        this.sidebar.addContent(`
-            <p>We now introduce how algorithms exploit these tree decompositions.</p>
-
-            <p>Most algorithms that run on tree decompositions use a <strong>bottom-up</strong> approach combined with <strong>dynamic programming</strong>.</p>
-            
-            <p>For each node in the tree decomposition we store some information in classical dynamic programming table. What we store in this table depends on the algorithm we are running and what type of node it is.</p>
-
-            <p>The important part is that we store relatively little information at each node because we have 'split' up the graph into subgraphs by the properties of a tree decomposition.</p>
-
-            <p>We will start with a refresher on how <strong>dynamic programming</strong> works on "normal" trees.</p>
-          `);
-      }, 'chapter4'),
-      new Section(async () => {
         if (this.graph) this.graph.clear();
         const tree = new Tree('container', 'normal-tree');
-        this.tree = tree;
-        this.tree.setMisNormalTree();
-
-        const treeData = {
-          id: 1,
-          label: 1,
-          children: [
-            {
-              id: 2,
-              label: 2,
-              children: [
-                {
-                  id: 5,
-                  label: 5,
-                  children: [{ id: 10, label: 10 }],
-                },
-                {
-                  id: 7,
-                  label: 7,
-                  children: [{ id: 8, label: 8 }],
-                },
-              ],
-            },
-            {
-              id: 3,
-              label: 3,
-              children: [
-                {
-                  id: 4,
-                  label: 4,
-                  children: [{ id: 9, label: 9 }],
-                },
-                {
-                  id: 6,
-                  label: 6,
-                },
-              ],
-            },
-          ],
-        };
-
-        this.tree.load(treeData, 'normal-tree');
-        this.tree.addTooltip();
-        this.tree.addArrow();
+        window.niceTreeDecomposition = tree;
+        tree.setMisNormalTree();
+        tree.load(treeExampleForDynamicProgramming, 'normal-tree');
+        tree.addTooltip();
+        tree.addArrow();
 
         this.sidebar.addContent(`
-          <p>Let's now look at how the <strong>Maximum Independent Set</strong> problem works on a tree.</p>
-          
-          <p>Using dynamic programming we can traverse the tree bottom-up and keep track of the 'state' of each node in the tree.</p>
-
-          <p>This way we are creating partial solutions throughout the algorithm, which is very efficient because we will only need to store and calculate very little data in each partial solution.</p>
-
-          <p>The algorithm works as follow:</p>
-
-          <p>
+        <p class="warning">This is not the best introduction to dynammic programming on tree decompositions since it makes use of grandchildren.
+        Dániel Marx provides a better example <a href="https://www.youtube.com/watch?v=RV5iQji_icQ&t=135" target="_blank">in this video @ 1:35</a>.</p>
+        <p>Most algorithms that exploit <i>tree decompositions</i> use dynammic programming. For this reason we will present a brief reminder on how dynammic programming works on general trees.</p>
+        <p>Let's now look at how the <i>maximum independent set</i> problem works on a tree.</p>
+        <div class="algorithm-description">
+        <p>
           <strong>Input:</strong> A tree.
           <br>
-          <strong>Output:</strong> Maximum Independent Set of the tree.
-          </p>
-          <h3>Step 1:</h3>
-          <p>Start by performing a post-order (bottom-up) traversal of the tree.</p>
-          <h3>Step 2:</h3>
+          <strong>Output:</strong> The <i>maximum independent set</i> of the tree.
+        </p>
+          <div>
+            <strong>Step 1:</strong>
+            <br />
+            Perform a post-order (bottom-up) traversal of the tree.
+          </div>
 
-          <p>We just need to take care of a few cases here:</p>
-          <ul>
-            <li>If the current node is a <strong>leaf</strong> we know it has no children so we set the maximum independent set to be 1.</li>
-            <li>For every other node we keep to rows in the table <strong>Max Set Incl</strong> which includes the current node so it cannot include its direct children but it can include the grandchildren.</li>
-            <li>The other entry is <strong>Max Set Excl</strong> which means we do not include the current node so we can include its direct children.</li>
-          </ul>
+          <div>
+            <p> <strong>Step 2:</strong> <br /> At each node $n$ we compute a dynammic programming table $C_n$ with two rows.</p>
+            <p>
+              If $n$ is a leaf:
+              <br />
+              Set both rows to 1.
+            </p>
+            <p>
+              If $n$ is not a leaf or a root node we calculate 2 rows:
+              <br />
+              <i>Max set incl.</i> we include $n$ and its grandchildren.
+              <br />
+              <i>Max set excl.</i> we do not include $n$ but we do include the children of $n$.
+            </p>
+            <p>Store the bigger of the 2.</p>
+          </div>
 
-          <p>Then we simply get the bigger of Max Set Incl or Max Set Excl for each subsolution</p>
-          <h3>Step 3:</h3>
-          <p>Get the bigger entry in the table of the root node to get the maximum independent set of the entire tree.</p>
-          
-          <p>Try going through the algorithm step by step to see how it works. The running time is \\( O(n) \\) as we only have to visit each tree node once.</p>
-`);
-        renderMathInElement(document.body);
-        this.tree.setAllNodes();
-        this.sidebar.addButton('Next Step', () => tree.nextStep());
-        this.sidebar.addButton('Previous Step', () => tree.previousStep());
-        this.addArrowKeyFunctionality(tree);
+          <div>
+            <p> <strong>Step 3:</strong> <br/>
+            Retrieve the largest entry in the root table $C_r$ to get the <i>maximum independent set</i> of the tree.</p>
+          </div>
+        <div>
+      `);
+        this.sidebar.setTitle('Dynamic Programming on Trees');
+        tree.setAllNodes();
+        this.addAlgorithmControls(
+          () => tree.previousStep(),
+          () => tree.nextStep(),
+        );
       }, 'chapter3'),
       new Section(async () => {
         if (!window.graphContainer && !window.treeContainer) {
@@ -762,83 +762,76 @@ export default class SectionHandler {
         }
 
         this.sidebar.addContent(`
-          <p>The first algorithm we will consider is an algorithm to find the Maximum Indpependent Set of a graph \\( G \\) given its nice tree decomposition with width \\( k \\).</p>
-
-          <p>Before explaining the algorithm lets introduce some notation that we will use from now on.</p>
-
-          <p>Consider any bag in the nice tree decomposition \\( i,...,l \\) let \\( G_i = (V_i,E_i) \\) be the induced subgraph of all vertices in the bags of the descendants of bag \\( i \\) in \\( T \\)</p>
-
-          <p>For each node \\( i \\) we will compute a table \\( C_i \\)</p>
-
-          <p>Each row in the table \\( C_i \\) consists of a subset \\( S \\subseteq X_i \\) in the first column and the size of the maximum independent set of that set in the second column. </p>
-          
-          <p>If a subset \\( S \\subseteq X_i \\) breaks the independence property, that is some vertices in the set is neighboring each other we omit this entry from the table.</p>
-
-          <p>Let's now describe the algorithm.</p>
-
-
-          <section>
-          <p><strong>Input:</strong> A nice tree decomposition of graph \\( G \\)</p>
-          <p><strong>Output:</strong> The size of the Maximum Independent Set of \\( G \\)</p>
-          </section>
-
-          <p><strong>Step 1:</strong> Perform a post-order (bottom-up) traversal of the tree.</p>
-
-          <p><strong>Step 2:</strong> Compute the table \\( C_i \\) for each node \\( i \\), depending on the type of node do the following:</p>
+        <p>
+        Each row in the table $C_n$ consists of a subset $S \\subseteq B_n$ in the
+        first column and the size of the maximum independent set of that set in
+        the second column. If a subset $S \\subseteq B_n$ breaks the independence
+        property we omit this entry from the table.
+      </p>
+      <div class="algorithm-description">
+        <p>
+          <strong>Input:</strong> A nice tree decomposition $T$ of a graph $G$.
+          <br />
+          <strong>Output:</strong> The size of the maximum independent set of $G$.
+        </p>
   
+        <div class="algorithm-description-node-type">
+          <p class="algorithm-description-step">Step 1:</p>
+          <hr />
+          Perform a post-order (bottom-up) traversal of $T$.
+        </div>
+  
+        <div>
+          <p class="algorithm-description-step">Step 2:</p>
+          <hr />
+          For each node $n \\in T$ compute the table $C_n$.
+          <br />
+        </div>
 
-              <p>If we hit a <strong>leaf node</strong> \\( i \\) with \\( X_i\\) \\( \\leq 1 \\)</p>
-              <p>\\( C_i(Ø) = 0 \\)</p>
-              <p>\\( C_i( \\{ v \\} ) = 1 \\)</p>
-              <p>That is we only consider two scenarios: either it has 0 vertices or exactly 1 vertex.</p>
-              <p>The empty set does not contain a MIS, thus we set the entry to 0. 
-              If the leaf contains a vertex then the size of the MIS is exactly 1, recall that the induced subgraph of a leaf consits of exactly 1 vertex.</p>
-
-              <p>If we hit a <strong>forget node</strong> \\( i \\) with child \\( j \\), then \\( X_i = X_j \\setminus \\{ v \\} \\) and \\( S \\subseteq X_i \\)</p>
-              <p>\\( C_i(S) = max \\{ C_j(S), C_j( S \\cup \\{ v \\} ) \\} \\)</p>
-              <p>We check if the sets of \\( X_i \\) is bigger with the forgotten vertex or without it and then keep the bigger one.</p>
-      
-              
-              <p>If we hit a <strong>join node</strong> \\( i \\) with 2 children \\( j_1 \\) and \\( j_ 2 \\), then \\( X_i = X_{j_1} = X_{j_2} \\) and \\( S \\subseteq X_i \\)</p>
-              <p>\\( C_i(S) = C_{j_1}(S) + C_{j_2}(S) - |S| \\)</p>
-              <p>As \\( X_i \\), \\(X_{j_1} \\) and \\( X_{j_2} \\) all contain the same vertices and recalling the coherence property of 
-              tree decompositions we can see that the the vertices in \\( X_i \\) is the intersection of the nodes in the 2 subtrees. We can then add the table entries from the children nodes' table and substract the ones we counted twice./p>
-     
-
-              <p>If we hit a <strong>introduce node</strong> with child \\( j \\), then \\( X_i = X_j \\cup \\{ v \\} \\) and \\( S \\subseteq X_i \\)</p>
-              <p>\\( C_i(S) = C_j(S)\\)</p>
-             <p>
-             $$
-             C_i(S \\cup \\{ v \\} ) = \\begin{cases}
-             −∞ & \\text{if } \\exists w \\in S : \\{ v,w \\} \\in E \\\\
-             C_j(S) + 1 & \\text{else } 
-            \\end{cases}
-             $$
-             </p>
-             <p>To compute the table of an introduce node we take over all the child node \\( X_j \\) table's entries. If a \\( v \\in S \\) we test if there are any 
-             vertices in the set that are adjacent and if so we know it is not an independent set and we set the value to be minus infinity. If it is not adjacent we add 1 to the existing entry.</p>
-
-          <p><strong>Step 3:</strong></p> Lastly we return the largest independent set in the table \\( C_r \\) of the root node.
-
-          <h2>Complexity</h2>
-          <p>Using post-order traversal we visit each node exactly once which takes time \\( O(n) \\).</p>
-
-          <p>We assume treewidth \\( k \\). So the largest bag must contain \\( k + 1 \\) vertices. Which means we need to compute at most \\( 2^{k+1} \\) rows for every table \\( C_i \\).
-          Therefor the running time of this algorithm is \\( O(2^{k+1} n) \\).</p>
-
-          <p>In conclusion, for graphs with bounded treewidth we can find the maximum independent set in linear time as:
-            <ul>
-              <li>We can compute a tree decomposition in linear time</li>
-              <li>Transform it into a nice tree decomposition in linear time</li>
-              <li>Run the algorithm in linear time</li>
-            </ul>
-          </p>
-
-          <p>Step through the algorithm by using the b
+        <div  class="algorithm-description-node-type">
+          <svg class="lo" width="15" height="15"><rect class="leaf-node-sample" width="15" height="15"></svg>
+          Leaf node $n$ where $B_n$ is empty.
+          <br />
+          $C_n(\\emptyset)=0$
+        </div>
+  
+        <div class="algorithm-description-node-type">
+          <svg class="lo" width="15" height="15"><rect class="introduce-node-sample" width="15" height="15"></svg>
+          Introduce node: We introduce $v$ to a bag $B_c$ to get bag $B_n$.
+          <br />
+          $C_n(S) = C_c(S)$
+          $$
+            C_n(S \\cup \\{ v \\} ) = \\begin{cases} −∞ &
+            \\text{if } \\exists w \\in S : \\{ v,w \\} \\in E(G) \\\\ C_c(S) + 1 &
+            \\text{else } \\end{cases}
+          $$
+        </div>
+  
+        <div class="algorithm-description-node-type">
+          <svg class="lo" width="15" height="15"><rect class="forget-node-sample" width="15" height="15"></svg>  
+          Forget node: We forget $v$ from $B_c$ to get bag $B_n$.
+          <br />
+          $C_n(S) = max \\{ C_c(S), C_c( S \\cup \\{ v \\} ) \\}$
+        </div>
+  
+        <div class="algorithm-description-node-type">
+          <svg class="lo" width="15" height="15"><rect class="join-node-sample" width="15" height="15"></svg>
+          Join node: We join node $l$ and $r$ to get node $n$. All the bags are the same that is: $B_n = B_{l} = B_{r}$.
+          <br />
+          $C_n(S) = B_{l}(S) + B_{r}(S) - |S|$
+        </div>
+  
+        <p>
+          <p class="algorithm-description-step">Step 3:</p>
+          <hr />
+          Retrieve the entry with largest the set from the root table $C_r$.
+        </p>
+      </div>
          `);
-
+        this.sidebar.setTitle('Maximum Indpependent Set');
         const graph = new Graph('graph-container');
         const niceTreeDecomposition = new Tree('tree-container');
+        window.niceTreeDecomposition = niceTreeDecomposition;
         graph.loadGraph(graph1);
 
         await graph.computeTreeDecomposition();
@@ -848,8 +841,6 @@ export default class SectionHandler {
         niceTreeDecomposition.setGraph(graph);
         niceTreeDecomposition.enableMaximumIndependentSet();
 
-        this.addArrowKeyFunctionality(niceTreeDecomposition);
-
         const controlsContainer = d3
           .select('#output')
           .append('div')
@@ -869,67 +860,71 @@ export default class SectionHandler {
       }, 'chapter3'),
       new Section(async () => {
         this.sidebar.addContent(`
-          <h2>3-Colorable Algorithm:</h2>
+        <p>
+          $B_n$ bag for node $n$.
+          <br>
+          $V_n$ vertices of the subtree rooted at bag $n$.
+        </p>
 
-          <p>We say that a graph \\( G \\) is \\( k-colorable \\) if we can color the vertices with \\( k \\) colors such that no two adjacent vertices has the same color.</p>
-
-          <p>For illustration purposes we will consider the example of 3-colorable.</p>
-
-          <section class="inout">
-          <p><strong>Input:</strong> A nice tree decomposition of graph \\( G \\)</p>
-          <p><strong>Output:</strong> If \\( G \\) is 3-colorable</p>
-          </section>
-
+        <p>
+          For every bag $n$ and coloring $c : B_n  \\to \\{ 1,2,3 \\}$ we define the table $A[n,c]$ to be true iff there exists a 3-coloring of $V_n$.
+        <p>
+          <div class="algorithm-description">
           <p>
-            \\( X_i \\) vertices appearing in the bag \\( x\\).
-            <br>
-            \\( V_x \\) vertices of the subtree rooted at bag \\( x \\).
+            <strong>Input:</strong> A nice tree decomposition $T$ of graph $G$.
+            <br />
+            <strong>Output:</strong> If $G$ is 3-colorable.
           </p>
 
-          <p>
-            For every bag \\( x \\) and coloring \\( c : X_i  →  \\{ 1,2,3 \\} \\) we define the table \\( A[i,c] \\) to be true if there exists a 3-coloring of \\( V_x \\).
-          <p>
+          <div>
+            <p class="algorithm-description-step">Step 1:</p>
+            <hr />
+            Perform a post-order (bottom-up) traversal of $T$.
+          </div>
 
-          <p><strong>Step 1:</strong> Perform a post-order traversel of the nice tree decomposition.</p>
+          <div>
+            <p class="algorithm-description-step">Step 2:</p>
+            <hr />
+            <div  class="algorithm-description-node-type">
+              <svg class="lo" width="15" height="15"><rect class="leaf-node-sample" width="15" height="15"></svg>
+              Leaf node $n$ where $B_n$ is empty.
+              <br />
+              The table at leaf node consists of the empty function $c$.
+            </div>
 
-          <p><strong>Step 2:</strong></p>
+            <div class="algorithm-description-node-type">
+              <svg class="lo" width="15" height="15"><rect class="introduce-node-sample" width="15" height="15"></svg>
+              Introduce node: We introduce $v$ to a bag $B_c$ to get bag $B_n$.
+              <br />
+              If \\( c(v) \\neq c(w) \\) for every adjacent \\( w \\) of \\( v \\)
+              <br>
+              then \\( A[n,c] = A[j,c'] \\) where \\( c' \\) is \\( c \\) restricted to \\( X_j \\)
+              <br>
+              That is, before we color an introduced node we check if any of its neighbors has the color we want to color it. If it does, we do not include it in the table.
+            </div>
 
-          <p><strong>Leaf node:</strong> As a leaf node \\( X_i \\) contains at most 1 vertex. There are only 3 possible states for the vertex \\( \\{ v \\} → \\{ 1,2,3 \\} \\).</p>
+            <div class="algorithm-description-node-type">
+              <svg class="lo" width="15" height="15"><rect class="forget-node-sample" width="15" height="15"></svg>  
+              Forget node: We forget $v$ from $B_c$ to get bag $B_n$.
+              <br />
+              $A[i,c]$ is true if $A[j,c']$ is true for one of the extensions of $c$ to $X_j$.
+              <br>
+              In other words we compute all the possible ways to color \\( X_i \\) and for each coloring we check if it can extended to \\( X_j \\) with at least one of the possible colors.
+            </div>
 
-          <p>
-            <strong>Introduce node</strong> \\( i \\) with child \\( j \\) with \\( X_i = X_j \\cup \\{ v \\} \\) for some vertex \\( v \\).
-            <br>
-            If \\( c(v) \\neq c(w) \\) for every adjacent \\( w \\) of \\( v \\)
-            <br>
-            then \\( A[i,c] = A[j,c'] \\) where \\( c' \\) is \\( c \\) restricted to \\( X_j \\)
-            <br>
-            That is, before we color an introduced node we check if any of its neighbors has the color we want to color it. If it does, we do not include it in the table.
-          </p>
+            <div class="algorithm-description-node-type">
+              <svg class="lo" width="15" height="15"><rect class="join-node-sample" width="15" height="15"></svg>
+              Join node: We join node $l$ and $r$ to get node $n$. All the bags are the same that is: $B_n = B_{l} = B_{r}$.
+              <br />
+              $A[i,c] = A[j_1,c] + A[j_2,c]$
+            </div>
 
-          <p>
-            <strong>Forget node</strong> \\( i \\) with 1 child \\( j \\) and \\( X_i = X_j \\setminus \\{ v \\} \\) and \\( S \\subseteq X_i \\)
-            <br>
-            \\( A[i,c] \\) is true if \\( A[j,c'] \\) is true for one of the extensions of \\( c \\) to \\( X_j \\).
-            <br>
-            In other words we compute all the possible ways to color \\( X_i \\) and for each coloring we check if it can extended to \\( X_j \\) with at least one of the possible colors.
-          </p>
-
-          <p>
-            <strong>Join node</strong> \\( i \\) with 2 children \\( j_1 \\) and \\( j_2 \\) \\( X_i  = X_{j_1} = X_{j_2} \\)
-            <br>
-            \\( A[i,c] = A[j_1,c] + A[j_2,c] \\)
-            <br>
-            Each independent subproblem must be consistent.
-          </p>
-
-          <p><strong>Step 3:</strong> To see if graph \\( G \\) is 3-colorable we look at the table of the root \\( A_r \\). If and only if it contains at least one true entry we know that graph \\( G \\)
-          is colorable, recall that the subgraph induced by the root is \\( G \\) including all vertices.</p>
-
-          <h2>Complexity</h2>
-          <p>The running time of performing a post-order traversal is \\( O(n) \\)</p>
-          <p>There are at most \\( 3^{k+1} \\) sub problems where \\( k\\) is treewidth. Thus, the running time is \\( O(3^{k+1}n) \\)</p>
-          
-          
+          </div>
+            <p class="algorithm-description-step">Step 3:</p>
+            <hr />
+            <p>If and only if the root table $A_r$ contains at least one true entry we know that graph $G$ is 3-colorable.</p>
+          </div>
+          </div>
           `);
 
         if (!window.graphContainer && !window.treeContainer) {
@@ -946,20 +941,17 @@ export default class SectionHandler {
           window.graphContainer = graphContainer;
           window.treeContainer = treeContainer;
         }
-
+        this.sidebar.setTitle('3-Colorable');
         const graph = new Graph('graph-container');
         const niceTreeDecomposition = new Tree('tree-container');
+        window.niceTreeDecomposition = niceTreeDecomposition;
         graph.loadGraph(graph1);
-
         await graph.computeTreeDecomposition();
         await graph.readNiceTreeDecomposition();
         const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
         niceTreeDecomposition.load(niceTreeDecompositionData);
         niceTreeDecomposition.setGraph(graph);
         niceTreeDecomposition.enableThreeColor();
-
-        this.addArrowKeyFunctionality(niceTreeDecomposition);
-
         const controlsContainer = d3
           .select('#output')
           .append('div')
@@ -979,8 +971,6 @@ export default class SectionHandler {
       }, 'chapter3'),
       new Section(async () => {
         this.sidebar.addContent(`
-          <h2>Hamiltonian Path</h2>
-
           <p>
             <strong>Input:</strong> A graph \\( G \\) and a nice tree decomposition \\( T \\)
             <br>
@@ -988,20 +978,14 @@ export default class SectionHandler {
           </p>
           `);
         this.addContainers();
-
-        d3.select('#main')
-          .append('div')
-          .attr('id', 'dp-container')
-          .attr('class', 'table-wrapper')
-          .append('table')
-          .attr('id', 'dp-table')
-          .attr('class', 'hamiltonianTable');
+        this.sidebar.setTitle('Hamiltonian Cycle');
+        createTableWrapper();
         const graph = new Graph('graph-container');
         const niceTreeDecomposition = new Tree('tree-container');
+        window.niceTreeDecomposition = niceTreeDecomposition;
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
         await graph.readNiceTreeDecomposition();
-        const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
         niceTreeDecomposition.load(hamTD2);
         niceTreeDecomposition.setGraph(graph);
         niceTreeDecomposition.addArrow();
@@ -1011,7 +995,6 @@ export default class SectionHandler {
           () => niceTreeDecomposition.previousDPStep(),
           () => niceTreeDecomposition.nextDPStep(),
         );
-        this.addArrowKeyFunctionality(niceTreeDecomposition);
       }, 'chapter3'),
     ];
     this.sections = this.sections.filter(
@@ -1042,29 +1025,11 @@ export default class SectionHandler {
       .on('click', () => this.toggleTableVisibility());
   }
 
-  addArrowKeyFunctionality(tree) {
-    d3.select('body').on('keydown', () => {
-      switch (event.key) {
-        case 'ArrowUp':
-          tree.nextDPStep();
-          break;
-        case 'ArrowDown':
-          tree.previousDPStep();
-          break;
-        default:
-      }
-    });
-  }
-
   addAlgorithmControls(previous, next) {
     const controlsContainer = d3
       .select('#output')
       .append('div')
       .attr('class', 'controls-container');
-
-    controlsContainer
-      .append('div')
-      .html('Use the up and down arrow keys to step through the algorithm.');
 
     controlsContainer
       .append('span')
@@ -1139,6 +1104,7 @@ export default class SectionHandler {
     d3.select('#tree1').remove();
     d3.select('#tree2').remove();
     d3.select('#tree3').remove();
+    d3.select('#toggle-visibility-button').remove();
   }
 
   goPreviousSection() {
@@ -1166,3 +1132,33 @@ export default class SectionHandler {
     this.createSection();
   }
 }
+function createTableWrapper() {
+  d3.select('#main')
+    .append('div')
+    .attr('id', 'dp-container')
+    .attr('class', 'table-wrapper')
+    .append('table')
+    .attr('id', 'dp-table')
+    .attr('class', 'hamiltonianTable');
+}
+
+
+/*
+This table has 1 entry that is the empty set which is 0.
+
+and $S \\subseteq B_n$.
+
+We start by taking over all the entries from table $C_c$ from $B_c$.
+    <br />
+    Then for those sets $v \\in S$ we check if $S$ now breaks the indepence property, if so, set the entry to be $-\\infty$ if not we add +1 to the existing entry.
+    <br />
+
+<p>
+  We check if the sets of $C_n$ is bigger with the forgotten vertex or
+  without it and then keep the bigger one. To compute the table of an
+  introduce node we take over all the child node $C_c$ table's entries. If
+  $v \\in S$ we test if there are any vertices in the set that are
+  adjacent and if so we know it is not an independent set and we set the
+  value to be minus infinity. If it is not adjacent we add 1 to the
+  existing entry.
+</p> */

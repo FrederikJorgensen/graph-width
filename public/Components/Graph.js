@@ -1017,14 +1017,17 @@ export default class Graph {
   }
 
   enableBalanceSeparatorExercise() {
+    this.resetSeparatorExerciseOutput();
     d3.selectAll('circle').on('click', (node) => this.checkBalanceSeparator(node));
   }
 
   enableMinimalSeparatorExercise() {
+    this.resetSeparatorExerciseOutput();
     d3.selectAll('circle').on('click', (node) => this.fol(node));
   }
 
   enableSeparatorExercise() {
+    this.resetSeparatorExerciseOutput();
     d3.selectAll('circle').on('click', (node) => {
       if (this.selectedNodes.includes(node.id)) {
         this.removeSelectedNodeFromSet(node);

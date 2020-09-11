@@ -617,3 +617,41 @@ export const hamTD2 = {
     },
   ],
 };
+
+export const treeExampleForDynamicProgramming = {
+  id: 1,
+  label: 1,
+  children: [
+    {
+      id: 2,
+      label: 2,
+      children: [
+        {
+          id: 5,
+          label: 5,
+          children: [{ id: 10, label: 10 }],
+        },
+        {
+          id: 7,
+          label: 7,
+          children: [{ id: 8, label: 8 }],
+        },
+      ],
+    },
+    {
+      id: 3,
+      label: 3,
+      children: [
+        {
+          id: 4,
+          label: 4,
+          children: [{ id: 9, label: 9 }],
+        },
+        {
+          id: 6,
+          label: 6,
+        },
+      ],
+    },
+  ],
+};

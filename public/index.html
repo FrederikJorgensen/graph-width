@@ -3,7 +3,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>GraphWidth - Learn Graph Width Measures Interactively</title>
+    <title>GraphWidth - An interactive way to learn graph width measures</title>
     <link
       rel="shortcut icon"
       type="image/x-icon"
@@ -156,12 +156,23 @@
       onload="renderMathInElement(document.body);"
     ></script>
 
+    <script>
+      document.addEventListener('DOMContentLoaded', () => {
+        renderMathInElement(document.body, {
+          delimiters: [
+            { left: '$$', right: '$$', display: true },
+            { left: '$', right: '$', display: true },
+          ],
+        });
+      });
+    </script>
+
     <!-- D3 -->
     <script src="https://d3js.org/d3.v5.min.js"></script>
-    <!--     <script
+    <script
       type="text/javascript"
       src="https://unpkg.com/force-in-a-box/dist/forceInABox.js"
-    ></script> -->
+    ></script>
 
     <!-- Deepcopy helper library -->
     <script

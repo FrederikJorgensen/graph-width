@@ -89,6 +89,7 @@ export function sumObjectsByKey(...objs) {
 }
 
 export function setNavbarHeight() {
-  d3.select('.nav').style('height', '4%');
+  d3.select('.nav-wrapper').style('height', '4%');
+  d3.select('.nav-wrapper').style('visibility', 'visible');
   d3.select('#main').style('height', '96%');
 }

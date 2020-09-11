@@ -2,7 +2,9 @@ export default class Sidebar {
   constructor(title) {
     this.title = title;
     this.draw();
+    this.addTitleContainer();
     this.addTitle(this.title);
+    this.addHorizontalLine();
     this.addContentArea();
   }
 
@@ -73,7 +75,7 @@ export default class Sidebar {
     const submitButton = this.submitContainer
       .append('button')
       .text('submit')
-      .attr('class', 'waves-effect waves-light btn')
+      .attr('class', 'button')
       .on('click', () => this.checkAnswer(this.currentGuess));
 
     this.submitButton = submitButton;
@@ -95,7 +97,7 @@ export default class Sidebar {
 
     const solutionButton = this.solutionButtonContainer.append('button')
       .text('Show Solution')
-      .attr('class', 'waves-effect waves-light btn')
+      .attr('class', 'button')
       .attr('id', 'solution-button')
       .on('click', () => this.toggleSolution());
 
@@ -139,17 +141,28 @@ export default class Sidebar {
 
     this.buttonContainer
       .append('button')
-      .text(buttonText)
-      .attr('class', 'waves-effect waves-light btn')
+      .html(buttonText)
+      .attr('class', 'button')
       .on('click', () => {
         event();
       });
   }
 
-  addTitle(title) {
-    this.sidebarContainer
+  addTitleContainer() {
+    const titleContainer = this.sidebarContainer
       .append('div')
-      .attr('class', 'sidebar-title')
+      .attr('class', 'sidebar-title-container');
+    this.titleContainer = titleContainer;
+  }
+
+  addHorizontalLine() {
+    this.titleContainer
+      .append('hr')
+      .attr('class', 'new4');
+  }
+
+  addTitle(title) {
+    this.titleContainer
       .append('h2')
       .text(title)
       .attr('class', 'chapter-title');

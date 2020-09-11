@@ -7,6 +7,13 @@ export default class Section {
 
   create() {
     this.createSection();
-    renderMathInElement(document.body);
+    renderMathInElement(document.body, window.del);
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\\[', right: '\\]', display: true },
+      ],
+    });
   }
 }
