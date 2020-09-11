@@ -2,8 +2,7 @@
 
 ![GraphWidth.com demo](promo_graph_width.gif)
 
-[GraphWidth.com](http://www.graphwidth.com/) is a full-stack application aimed at anyone with an interest in graph width measures and their applications. The teaching is done through short & precise interactive lectures. Along with a
-'sandbox mode' for those who wish to explore the concepts without guidance.
+[GraphWidth.com](http://www.graphwidth.com/) is a full-stack application that teaches the concept of graph width measures through visualization.
 
 ## Chapters
 
