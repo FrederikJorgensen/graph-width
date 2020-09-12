@@ -79,6 +79,13 @@ export function compareMaps(map1, map2) {
   return true;
 }
 
+export function isMapInArray(map, array) {
+  for (const m of array) {
+    if (compareMaps(map, m)) return true;
+  }
+  return false;
+}
+
 export function sumObjectsByKey(...objs) {
   return objs.reduce((a, b) => {
     for (const k in b) {

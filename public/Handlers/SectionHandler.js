@@ -7,6 +7,7 @@ import Tree from '../Components/Tree.js';
 import TreeDecomposition from '../Components/TreeDecomposition.js';
 import {
   graph1,
+  cycleGraph,
   separatorGraph,
   cliqueGraph,
   treeGraph,
@@ -35,36 +36,8 @@ export default class SectionHandler {
       new Section(async () => {
         this.sidebar.addContent(`
         In order to understand <i>treewidth</i> it is important to have studied the concept of graph separators.
-
-        <div class="math-table-wrapper">
-          <table class="hamiltonianTable">
-            <tbody>
-              <tr>
-                <td>$G$</td>
-                <td>Graph</td>
-              </tr>
-              <tr>
-                <td>$V(G)$</td>
-                <td>Vertices in the graph</td>
-              </tr>
-              <tr>
-                <td>$S$</td>
-                <td>A set of vertices in $G$</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
         <p>A set $S$ is said to be a separator in a graph $G$ if the removal of that set leaves the graph into multiple components.</p>
         `);
-
-        renderMathInElement(document.body, {
-          delimiters: [
-            { left: '$$', right: '$$', display: true },
-            { left: '$', right: '$', display: false },
-            { left: '\\[', right: '\\]', display: true },
-          ],
-        });
         this.sidebar.addExercise(
           'Find a separator in the graph.',
         );
@@ -699,8 +672,8 @@ export default class SectionHandler {
         tree.addArrow();
 
         this.sidebar.addContent(`
-        <p class="warning">This is not the best introduction to dynammic programming on tree decompositions since it makes use of grandchildren.
-        Dániel Marx provides a better example <a href="https://www.youtube.com/watch?v=RV5iQji_icQ&t=135" target="_blank">in this video @ 1:35</a>.</p>
+        <p class="warning"><i>This is not the best introduction to dynammic programming on tree decompositions since it makes use of grandchildren.
+        Dániel Marx provides a better example <a href="https://www.youtube.com/watch?v=RV5iQji_icQ&t=135" target="_blank">in this video @ 1:35</a></i>.</p>
         <p>Most algorithms that exploit <i>tree decompositions</i> use dynammic programming. For this reason we will present a brief reminder on how dynammic programming works on general trees.</p>
         <p>Let's now look at how the <i>maximum independent set</i> problem works on a tree.</p>
         <div class="algorithm-description">
@@ -710,13 +683,15 @@ export default class SectionHandler {
           <strong>Output:</strong> The <i>maximum independent set</i> of the tree.
         </p>
           <div>
-            <strong>Step 1:</strong>
-            <br />
+            <p class="algorithm-description-step">Step 1:</p>
+            <hr />
             Perform a post-order (bottom-up) traversal of the tree.
           </div>
 
           <div>
-            <p> <strong>Step 2:</strong> <br /> At each node $n$ we compute a dynammic programming table $C_n$ with two rows.</p>
+            <p class="algorithm-description-step">Step 2:</p>
+            <hr />
+            At each node $n$ we compute a dynamic programming table $C_n$ with two rows.</p>
             <p>
               If $n$ is a leaf:
               <br />
@@ -731,12 +706,14 @@ export default class SectionHandler {
             </p>
             <p>Store the bigger of the 2.</p>
           </div>
-
+    
           <div>
-            <p> <strong>Step 3:</strong> <br/>
+            <p class="algorithm-description-step">Step 3:</p>
+            <hr />
             Retrieve the largest entry in the root table $C_r$ to get the <i>maximum independent set</i> of the tree.</p>
           </div>
-        <div>
+          </div>
+        
       `);
         this.sidebar.setTitle('Dynamic Programming on Trees');
         tree.setAllNodes();
@@ -760,14 +737,12 @@ export default class SectionHandler {
           window.graphContainer = graphContainer;
           window.treeContainer = treeContainer;
         }
-
         this.sidebar.addContent(`
         <p>
         Each row in the table $C_n$ consists of a subset $S \\subseteq B_n$ in the
         first column and the size of the maximum independent set of that set in
-        the second column. If a subset $S \\subseteq B_n$ breaks the independence
-        property we omit this entry from the table.
-      </p>
+        the second column. If $S$ breaks the independence property we omit this entry from the table.
+        </p>
       <div class="algorithm-description">
         <p>
           <strong>Input:</strong> A nice tree decomposition $T$ of a graph $G$.
@@ -824,39 +799,28 @@ export default class SectionHandler {
         <p>
           <p class="algorithm-description-step">Step 3:</p>
           <hr />
-          Retrieve the entry with largest the set from the root table $C_r$.
+          Retrieve the entry with the largest set from the root table $C_r$.
         </p>
       </div>
          `);
-        this.sidebar.setTitle('Maximum Indpependent Set');
         const graph = new Graph('graph-container');
         const niceTreeDecomposition = new Tree('tree-container');
         window.niceTreeDecomposition = niceTreeDecomposition;
         graph.loadGraph(graph1);
-
         await graph.computeTreeDecomposition();
         await graph.readNiceTreeDecomposition();
         const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
         niceTreeDecomposition.load(niceTreeDecompositionData);
         niceTreeDecomposition.setGraph(graph);
         niceTreeDecomposition.enableMaximumIndependentSet();
-
-        const controlsContainer = d3
-          .select('#output')
-          .append('div')
-          .attr('class', 'controls-container');
-
-        controlsContainer
-          .append('span')
-          .text('keyboard_arrow_left')
-          .attr('class', 'material-icons pagination-arrows')
-          .on('click', () => niceTreeDecomposition.previousDPStep());
-
-        controlsContainer
-          .append('span')
-          .text('keyboard_arrow_right')
-          .attr('class', 'material-icons pagination-arrows')
-          .on('click', () => niceTreeDecomposition.nextStep());
+        this.sidebar.setTitle('Maximum Indpependent Set');
+        createTableWrapper();
+        createTable();
+        this.createTableVisibilityButton();
+        this.addAlgorithmControls(
+          () => niceTreeDecomposition.previousDPStep(),
+          () => niceTreeDecomposition.nextDPStep(),
+        );
       }, 'chapter3'),
       new Section(async () => {
         this.sidebar.addContent(`
@@ -916,7 +880,7 @@ export default class SectionHandler {
               <svg class="lo" width="15" height="15"><rect class="join-node-sample" width="15" height="15"></svg>
               Join node: We join node $l$ and $r$ to get node $n$. All the bags are the same that is: $B_n = B_{l} = B_{r}$.
               <br />
-              $A[i,c] = A[j_1,c] + A[j_2,c]$
+              $A[n,c] = A[1,c] + A[r,c]$
             </div>
 
           </div>
@@ -942,6 +906,7 @@ export default class SectionHandler {
           window.treeContainer = treeContainer;
         }
         this.sidebar.setTitle('3-Colorable');
+        this.createTableVisibilityButton();
         const graph = new Graph('graph-container');
         const niceTreeDecomposition = new Tree('tree-container');
         window.niceTreeDecomposition = niceTreeDecomposition;
@@ -972,24 +937,24 @@ export default class SectionHandler {
       new Section(async () => {
         this.sidebar.addContent(`
           <p>
-            <strong>Input:</strong> A graph \\( G \\) and a nice tree decomposition \\( T \\)
+            <strong>Input:</strong> A graph $G$ and a nice tree decomposition $T$.
             <br>
-            <strong>Output:</strong> If \\( G \\) contains a Hamiltonian path.
+            <strong>Output:</strong> If $G$ contains a Hamiltonian cycle.
           </p>
           `);
         this.addContainers();
         this.sidebar.setTitle('Hamiltonian Cycle');
-        createTableWrapper();
         const graph = new Graph('graph-container');
         const niceTreeDecomposition = new Tree('tree-container');
         window.niceTreeDecomposition = niceTreeDecomposition;
-        graph.loadGraph(graph1);
+        graph.loadGraph(cycleGraph);
         await graph.computeTreeDecomposition();
         await graph.readNiceTreeDecomposition();
-        niceTreeDecomposition.load(hamTD2);
+        const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
+        niceTreeDecomposition.load(niceTreeDecompositionData);
         niceTreeDecomposition.setGraph(graph);
         niceTreeDecomposition.addArrow();
-        niceTreeDecomposition.enableHamiltonianPath();
+        niceTreeDecomposition.enableHamiltonianCycle();
         this.createTableVisibilityButton();
         this.addAlgorithmControls(
           () => niceTreeDecomposition.previousDPStep(),
@@ -1005,13 +970,15 @@ export default class SectionHandler {
   toggleTableVisibility() {
     if (window.tableIsVisible) {
       d3.select('#toggle-visibility-button').text('Show table');
-      d3.select('#dp-container').classed('tableVisible', false);
-      d3.select('#dp-container').classed('tableTransparent', true);
+      d3.select('#tableX').classed('tableVisible', false);
+      d3.select('#tableX').classed('tableTransparent', true);
+      d3.select('#tooltip-arrow').style('opacity', 0);
       window.tableIsVisible = false;
     } else {
       d3.select('#toggle-visibility-button').text('Hide table');
-      d3.select('#dp-container').classed('tableTransparent', false);
-      d3.select('#dp-container').classed('tableVisible', true);
+      d3.select('#tableX').classed('tableTransparent', false);
+      d3.select('#tableX').classed('tableVisible', true);
+      d3.select('#tooltip-arrow').style('opacity', 1);
       window.tableIsVisible = true;
     }
   }
@@ -1021,7 +988,7 @@ export default class SectionHandler {
       .append('div')
       .text('Hide Table')
       .attr('id', 'toggle-visibility-button')
-      .attr('class', 'toggle-table-visibilty')
+      .attr('class', 'button toggle-table-visibilty')
       .on('click', () => this.toggleTableVisibility());
   }
 
@@ -1105,6 +1072,7 @@ export default class SectionHandler {
     d3.select('#tree2').remove();
     d3.select('#tree3').remove();
     d3.select('#toggle-visibility-button').remove();
+    d3.select('#tableX').remove();
   }
 
   goPreviousSection() {
@@ -1136,7 +1104,11 @@ function createTableWrapper() {
   d3.select('#main')
     .append('div')
     .attr('id', 'dp-container')
-    .attr('class', 'table-wrapper')
+    .attr('class', 'table-wrapper');
+}
+
+function createTable() {
+  d3.select('#dp-container')
     .append('table')
     .attr('id', 'dp-table')
     .attr('class', 'hamiltonianTable');

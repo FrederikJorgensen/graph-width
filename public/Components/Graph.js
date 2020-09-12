@@ -13,7 +13,7 @@
 /* eslint-disable consistent-return */
 /* eslint-disable no-useless-return */
 /* eslint-disable no-bitwise */
-import generateRandomGraph from '../Utilities/helpers.js';
+import generateRandomGraph, { deepClone } from '../Utilities/helpers.js';
 import * as readTree from '../Utilities/readTree.js';
 import { contextMenu as menu } from '../Utilities/ContextMenu.js';
 
@@ -429,15 +429,49 @@ export default class Graph {
     return true;
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  checkIfIntroducedVertex(childState, subTree) {
+    const subGraph = this.createSubgraph(subTree);
+    this.resetColorsInSubgraph(subGraph);
+    const vertices = [...childState.keys()];
+
+    for (const vertex of vertices) {
+      const nodeToColor = this.findNodeToColor(subGraph, vertex);
+      const color = childState.get(vertex);
+      nodeToColor.color = color;
+    }
+
+    for (const link of subGraph.links) {
+      if (link.source.color !== null && !link.target.color !== null) {
+        if (link.source.color === link.target.color) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  findNodeToColor(subGraph, vertex) {
+    return subGraph.nodes.find((node) => node.id === vertex);
+  }
+
+  resetColorsInSubgraph(subGraph) {
+    subGraph.nodes.map((node) => node.color = null);
+  }
+
   checkIntroducedVertex(introducedNode, positionTracker, oldState, color, subTree) {
     const subGraph = this.createSubgraph(subTree);
-    subGraph.nodes.forEach((node) => node.color = null);
+    subGraph.nodes.map((node) => node.color = null);
+
     for (let i = 0; i < positionTracker.length; i++) {
       const n = subGraph.nodes.find((node) => node.id === positionTracker[i]);
       n.color = oldState[i];
     }
     const iNode = subGraph.nodes.find((node) => node.id === introducedNode);
+
     iNode.color = color;
+
+
     for (const link of subGraph.links) {
       if (link.source.color !== null && !link.target.color !== null) {
         if (link.source.color === link.target.color) {

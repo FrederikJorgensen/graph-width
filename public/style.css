@@ -82,23 +82,6 @@ body {
   opacity: 85%;
 }
 
-.table-wrapper {
-  position: absolute;
-  transform: translate(-100%, -2px);
-  z-index: 10;
-  width: 30%;
-  height: 30%;
-  overflow: auto;
-}
-
-.tableVisible {
-  opacity: 1;
-}
-
-.tableTransparent {
-  opacity: 0;
-}
-
 .generate-random-graph {
   position: absolute;
   top: 10px;
@@ -132,11 +115,6 @@ body {
   position: absolute;
   top: 10px;
   left: 10px;
-  font-weight: bold;
-  color: black;
-  padding: 0 10px 0 10px;
-  background-color: #d3d3d3;
-  border-radius: 5px;
   z-index: 10000;
 }
 
@@ -163,45 +141,6 @@ body {
   justify-content: center;
   align-items: center;
   margin: 1rem;
-}
-.hamiltonianTable {
-  font-size: inherit;
-  background-color: white;
-  color: black;
-  border-collapse: collapse;
-  border-radius: 5px 5px 0 0;
-  box-shadow: var(--shadow);
-  border: 1px solid lightgray;
-}
-
-th {
-  position: sticky;
-  top: 0;
-  background-color: #15314b;
-}
-
-.hamiltonianTable thead tr {
-  background-color: #15314b;
-  color: white;
-  text-align: left;
-  font-weight: bold;
-}
-
-.hamiltonianTable th,
-.hamiltonianTable td {
-  padding: 12px 15px;
-}
-
-.hamiltonianTable tbody tr {
-  border-bottom: 1px solid lightgray;
-}
-
-.hamiltonianTable tbody tr:nth-of-type(even) {
-  background-color: #f3f3f3;
-}
-
-.hamiltonianTable tbody tr:last-of-type {
-  border-bottom: 4px solid var(--table-color);
 }
 
 .custom-container {
@@ -298,20 +237,6 @@ th {
 
 strong {
   font-weight: 1000;
-}
-
-.table {
-  width: auto;
-  z-index: 1000;
-  background-color: white;
-  color: rgb(51, 51, 51);
-  position: absolute;
-  padding: 15px;
-  transform: translate(-100%, -2px);
-}
-
-.table td {
-  padding: 0 25px;
 }
 
 .red {
@@ -794,10 +719,6 @@ svg {
   height: 5%;
 }
 
-.hamiltonianTable tbody .katex {
-  background-color: white;
-}
-
 .material-icons.code-buttons {
   font-size: 35px;
   padding: 0.1em;
@@ -818,52 +739,6 @@ svg {
 
 .custom-sidebar {
   height: 95%;
-}
-
-.slider {
-  height: auto;
-}
-
-.sandbox-button {
-  display: inline-block;
-  position: relative;
-  background-color: #000;
-  color: #fff;
-  width: 100%;
-  padding: 8px 0;
-  text-align: center;
-  text-decoration: none;
-  font-size: 1em;
-  border: none;
-  cursor: pointer;
-  margin-top: 10px;
-  outline: none;
-}
-
-.sandbox-button-disabled {
-  pointer-events: none;
-  display: inline-block;
-  position: relative;
-  background-color: lightgray;
-  color: #fff;
-  width: 100%;
-  padding: 12px 0;
-  text-align: center;
-  text-decoration: none;
-  font-size: 1em;
-  border: none;
-  cursor: pointer;
-  margin-top: 20px;
-  margin-bottom: 20px;
-}
-
-.sandbox-button-disabled:hover {
-  cursor: not-allowed;
-}
-
-.sandbox-button:hover {
-  transition: background-color 0.3s;
-  background-color: #555;
 }
 
 .left-side {
@@ -1185,10 +1060,6 @@ hr.new4 {
   }
 }
 
-.example-table-text {
-  text-align: center;
-}
-
 ul {
   background: var(--dropdown-item);
   list-style: none;
@@ -1234,4 +1105,67 @@ ul li ul:hover {
 ul li ul li {
   clear: both;
   width: 100%;
+}
+
+/* DP Table */
+.hamiltonianTable {
+  position: absolute;
+  font-size: inherit;
+  background-color: white;
+  color: black;
+  border-collapse: collapse;
+  border-radius: 5px 5px 0 0;
+  box-shadow: var(--shadow);
+  border: 1px solid lightgray;
+}
+
+th {
+  position: sticky;
+  top: 0;
+  background-color: #15314b;
+}
+
+.hamiltonianTable thead tr {
+  background-color: #15314b;
+  color: white;
+  text-align: left;
+  font-weight: bold;
+}
+
+.hamiltonianTable th,
+.hamiltonianTable td {
+  padding: 12px 15px;
+}
+
+.hamiltonianTable tbody tr {
+  border-bottom: 1px solid lightgray;
+}
+
+.hamiltonianTable tbody tr:nth-of-type(even) {
+  background-color: #f3f3f3;
+}
+
+.hamiltonianTable tbody tr:last-of-type {
+  border-bottom: 4px solid var(--table-color);
+}
+
+.table-wrapper {
+  position: absolute;
+  z-index: 10;
+  width: 30%;
+  height: 30%;
+  overflow: auto;
+  transform: translate(100%, 2px);
+}
+
+.tableVisible {
+  opacity: 1;
+}
+
+.tableTransparent {
+  opacity: 0;
+}
+
+.hamiltonianTable tbody .katex {
+  background-color: white;
 }
