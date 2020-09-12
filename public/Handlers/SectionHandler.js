@@ -35,7 +35,7 @@ export default class SectionHandler {
     this.sections = [
       new Section(async () => {
         this.sidebar.addContent(`
-        In order to understand <i>treewidth</i> it is important to have studied the concept of graph separators.
+        In order to learn <i>treewidth</i> it is important to understand the concept of a graph separator.
         <p>A set $S$ is said to be a separator in a graph $G$ if the removal of that set leaves the graph into multiple components.</p>
         `);
         this.sidebar.addExercise(
@@ -936,11 +936,134 @@ export default class SectionHandler {
       }, 'chapter3'),
       new Section(async () => {
         this.sidebar.addContent(`
-          <p>
-            <strong>Input:</strong> A graph $G$ and a nice tree decomposition $T$.
-            <br>
-            <strong>Output:</strong> If $G$ contains a Hamiltonian cycle.
+          <div>
+          <p>Here is presented an algorithm for finding whether or not a graph has a <i>Hamiltonian cycle</i> given a graph.</p>
+          <p>Consider a graph and its tree decomposition:
+          <br />
+          - We define the tree decomposition as $T$
+          <br />
+          - $B_n$ for the bag at a node $n \\in T$. 
+          <br />
+          - $B_{\\downarrow n}$ for all vertices contained in all the bags below (and including) $n \\in T$.
           </p>
+          
+          <p>
+            Each state at node $n \\in T$ is a pair $(d,M)$ where:
+            <br />
+            - $d$ is a function that labels each vertex $v \\in B_n$ with a degree we want to see in a partial solution.
+            <br />
+            - $M$ is matching of the vertices that are labeled 0 or 1 by the function $d$.
+          </p>
+
+          <p>
+            A state at node $n$ is supposed to be $true$ iff a partial solution of the state $(d,M)$ can be realized in the sub-graph induced by $B_{\\downarrow n}$.
+          </p>
+
+          <p>
+          A vertex is considered an endpoint if it has been prescribed degree 0 or 1 by $d$.
+          </p>
+
+          </div>
+          <div class="algorithm-description">
+            <p>
+              <strong>Input:</strong> A graph $G$ and a nice tree decomposition $T$.
+              <br>
+              <strong>Output:</strong> If $G$ contains a Hamiltonian cycle.
+            </p>
+
+            <div>
+              <p class="algorithm-description-step">Step 1:</p>
+              <hr />
+              Perform a post-order (bottom-up) traversal of $T$.
+            </div>
+
+            <div>
+              <p class="algorithm-description-step">Step 2:</p>
+              <hr />
+              For each node $n \\in T$ compute the table $C_n$.
+            </div>
+
+            <div  class="algorithm-description-node-type">
+              <svg class="lo" width="15" height="15"><rect class="leaf-node-sample" width="15" height="15"></svg>
+              Leaf node $n$ where $B_n$ is empty.
+              <br />
+              Contains one state $(d,M)$ where $d$ is the empty function and $M$ is the empty matching.
+            </div>
+
+            <div class="algorithm-description-node-type">
+              <svg class="lo" width="15" height="15"><rect class="introduce-node-sample" width="15" height="15"></svg>
+              Introduce node: We introduce $v$ to a bag $B_c$ to get bag $B_n$.
+              <br />
+              <br />
+              $d(v)=0$ in this case we added $v$ as an isolated vertex. We add $v$ to the degree function and add $v$ as a singleton to $M$.
+              <br />
+              <br />
+              $d(1)=1$ in this case we added $v$ as a path endpoint. We now need to check if there exists an edge $wv$ in $G$.
+              If we find such an edge we then need to check the degree of $w$ in $(d',M')$.
+              <div class="w">
+              If $d(w)=0$
+              <br />
+              Set $w \\to 1$
+              <br />
+              Set $v \\to 1$
+              <br />
+              Add the pair $(w,v)$ to the matching $M$.
+              <br />
+              Set this state to $true$
+              <br />
+              If $d(w)=1$
+              <br />
+              We need to find a pair $(u,w)$ in $M'$ and change it to $(u,v)$.
+              <br />
+              Set $v \\to 1$
+              <br />
+              Set $w \\to 2$
+              <br />
+              Set this state to $true$
+              </div>
+              <br />
+              $d(v)=2$ in this we added $v$ as an inner vertex of a path.
+              We need to find two edges $vw_1$ and $vw_2$ in $G$. If such two edges exist we need to update $d$ and $M$ and set the state to $true$:
+              <br />
+              $d(w_1) = d'(w_1)+1$
+              <br />
+              $d(w_2) = d'(w_2)+1$
+              <br />
+              If $d(w_1)$ and $d(w_2)$ updated degrees are 1 we also need to add this to $M$.
+            </div>
+
+            <div class="algorithm-description-node-type">
+              <svg class="lo" width="15" height="15"><rect class="forget-node-sample" width="15" height="15"></svg>  
+              Forget node: We forget $v$ from $B_c$ to get bag $B_n$.
+              <br />
+              For all true states $(d',M')$ of $B_c$ do the following:
+              <br />
+              - Set states with $d(v)=2$ to $true$.
+              <br />
+              - To get $(d,M)$ remove $v$ from $d'$ and from $M'$.
+            </div>
+
+            <div class="algorithm-description-node-type">
+              <svg class="lo" width="15" height="15"><rect class="join-node-sample" width="15" height="15"></svg>
+              Join node: We join node $l$ and $r$ to get node $n$. All the bags are the same that is: $B_n = B_{l} = B_{r}$.
+              <br />
+              The states $s_l(d',M')$ of $B_l$ and the states $s_r(d'',M'')$ of $B_r$ are already known. We now want to compute the states $s_n(d,M)$ for $B_n$.
+              First iterate over all states $s_l(d',M')$ of $B_l$ and $s_r(d'',M'')$ and check for the following:
+              <br />
+              - Is $d(v')+d(v'') \\leq 2$ for all $v \\in B_n$? 
+              <br />
+              - Does $M' \\cup M''$ contain a cycle?
+              <br />
+              If both requirements pass then this is a true state and $d(v)=d'(v)+d''(v)$ and $M=M' \\cup M''$.
+            </div>
+
+            <p class="algorithm-description-step">Step 3:</p>
+            <hr />
+            During the algorithm at a given node $n$ in $T$ if there exists no state (excluding leaf and root nodes) that means we found a sub-graph in the graph whose presence
+            rules out a Hamiltonian cycle in the overall graph.
+            If however there exists a state in the root node there exists a Hamiltonian cycle in the graph. 
+            </div>
+          </div>
           `);
         this.addContainers();
         this.sidebar.setTitle('Hamiltonian Cycle');

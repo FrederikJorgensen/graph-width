@@ -458,30 +458,6 @@ export default class Tree {
     </tr>`;
   }
 
-  drawHamiltonianTable(node, tableData) {
-    const nodeSvg = d3.select(`#treeNode-${node.id}`);
-    const x = parseInt(nodeSvg.attr('x'), 10);
-    let y = parseInt(nodeSvg.attr('y'), 10);
-
-    y += 12.5;
-
-    this.moveTooltipArrow(x, y);
-
-    const { top } = document
-      .getElementById('tooltip-arrow')
-      .getBoundingClientRect();
-
-    const { left } = document
-      .getElementById('tooltip-arrow')
-      .getBoundingClientRect();
-
-    d3.select('#dp-container')
-      .html(tableData);
-
-    this.moveDpTable(left, top);
-    renderMathInElement(document.body);
-  }
-
   moveDpTable(left, top) {
     d3.select('#dp-container')
       .style('left', `${left}px`)
@@ -937,7 +913,6 @@ export default class Tree {
       const tableData = this.convertMapToHTMLTable();
       this.moveTableArrow(node);
       this.moveTable(tableData);
-      // this.drawHamiltonianTable(node, tableData);
     });
   }
 
