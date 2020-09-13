@@ -150,9 +150,22 @@ d3.select('body').on('keydown', () => {
       break;
     case 'ArrowUp':
       if (window.niceTreeDecomposition) window.niceTreeDecomposition.nextDPStep();
+      if (window.isCustomAlgorithm) {
+        const N = window.root.descendants().length;
+        window.current++;
+        if (window.current !== N) window.current %= N;
+        eval(window.customFunction);
+      }
       break;
     case 'ArrowDown':
       if (window.niceTreeDecomposition) window.niceTreeDecomposition.previousDPStep();
+      if (window.isCustomAlgorithm) {
+        if (window.current === 0) return;
+        const N = window.root.descendants().length;
+        --window.current;
+        window.current %= N;
+        eval(window.customFunction);
+      }
       break;
     case 'r':
       if (chapterHandler.graph) chapterHandler.handleCreateNewGraph();

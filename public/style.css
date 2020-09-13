@@ -62,8 +62,6 @@ body {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  /* height: 25%; */
-  /* width: 25%; */
   background-color: var(--surface);
   border-radius: 25px;
   z-index: 999;
@@ -262,7 +260,7 @@ body {
   border-radius: var(--border);
   padding: 1rem;
   line-height: 22px;
-  font-size: 1.1rem;
+  font-size: 1rem;
   margin: 1rem 0;
 }
 
@@ -632,98 +630,6 @@ svg {
   font-weight: bold;
 }
 
-.main-sandbox {
-  display: flex;
-  flex: 1;
-  width: 100%;
-  top: 0px;
-  align-items: center;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
-  overflow: hidden;
-}
-
-.sandbox-sidebar-container {
-  width: 50px;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--surface);
-  border-radius: var(--border);
-  padding: 0.2em;
-  margin: 0 1em 0 1em;
-}
-
-.sandbox-sidebar-container > span {
-  margin: 0.1em;
-}
-
-.custom-left {
-  height: 100%;
-  width: 50%;
-}
-
-.custom-right {
-  width: 50%;
-  height: 100%;
-}
-
-.custom-controls {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: var(--surface);
-  width: 100%;
-  height: 100%;
-  border-radius: var(--border);
-}
-
-.sandbox-app-container {
-  display: flex;
-  flex: 1 0 auto;
-  height: 100%;
-}
-
-.custom-code-container {
-  width: 100%;
-  height: 100%;
-}
-
-.code-block-container {
-  height: 100%;
-  width: 100%;
-  padding: 1em 0 1em 1em;
-  display: flex;
-}
-
-.cm-s-monokai.CodeMirror {
-  background-color: var(--surface);
-}
-
-.CodeMirror {
-  background-color: #001528 !important;
-  border-radius: 0 0 8px 8px;
-}
-
-.CodeMirror-gutter {
-  background-color: #001528;
-}
-
-.CodeMirror-linenumber {
-  color: white !important;
-}
-
-.code-header {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  background-color: #15314b;
-  border-radius: 8px 8px 0 0;
-  height: 5%;
-}
-
 .material-icons.code-buttons {
   font-size: 35px;
   padding: 0.1em;
@@ -740,10 +646,6 @@ svg {
   border-radius: 0 8px 0 0;
   cursor: pointer;
   transition: 150ms background-color ease-in;
-}
-
-.custom-sidebar {
-  height: 95%;
 }
 
 #controls {
@@ -1061,6 +963,7 @@ ul li ul li {
   border-radius: 5px 5px 0 0;
   box-shadow: var(--shadow);
   border: 1px solid lightgray;
+  z-index: 10000000000;
 }
 
 th {
@@ -1189,4 +1092,70 @@ th {
   left: 0.5rem;
   bottom: 0.5rem;
   display: flex;
+}
+
+/* Custom algorithm page */
+.custom-algorithm-grid {
+  height: 98%;
+  width: 98%;
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+.code-header {
+  border-radius: 8px 8px 0 0;
+  background: #15314b;
+  height: 5%;
+}
+
+.code-container {
+  height: 95%;
+  width: 100%;
+}
+
+.custom-algorithm-grid svg {
+  position: absolute;
+}
+
+.custom-code-container {
+  width: 100%;
+  height: 100%;
+}
+
+.code-block-container {
+  height: 100%;
+  width: 100%;
+  padding: 1em 0 1em 1em;
+  display: flex;
+}
+
+.cm-s-monokai.CodeMirror {
+  background-color: var(--surface);
+}
+
+.CodeMirror {
+  background-color: #001528 !important;
+  border-radius: 0 0 8px 8px;
+  height: 100% !important;
+  width: 100% !important;
+}
+
+.CodeMirror-gutter {
+  background-color: #001528;
+}
+
+.CodeMirror-linenumber {
+  color: white !important;
+}
+
+#test {
+  position: absolute;
+  bottom: 1rem;
+  left: 1rem;
+}
+
+.code-card {
+  display: flex;
+  flex-direction: column;
 }

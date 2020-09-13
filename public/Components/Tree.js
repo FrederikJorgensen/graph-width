@@ -1,3 +1,4 @@
+/* eslint-disable guard-for-in */
 /* eslint-disable no-case-declarations */
 /* eslint-disable default-case */
 /* eslint-disable no-unused-expressions */
@@ -1039,6 +1040,18 @@ export default class Tree {
     return newStates;
   }
 
+  createCustomAlgorithmHtmlTableString(dpTable) {
+    const keys = Object.keys(dpTable);
+
+    let rowString = '';
+
+    for (const key of keys) {
+      rowString += `<tr><td>${key}</td><td>${dpTable[key]}</td></tr>`;
+    }
+    const header = '<thead><tr><td>1</td><td>2</td></tr></thead>';
+    return `<table class="hamiltonianTable">${header}<tbody>${rowString}</tbody></table>`;
+  }
+
   createThreeColorTableHtmlString(node) {
     const header = '<thead><tr><td><i>c</i></td></tr></thead>';
 
@@ -1398,6 +1411,14 @@ export default class Tree {
     this.root.eachAfter((node) => {
       node.tree = this;
     });
+  }
+
+  getSubTree(rootOfSubtree, currentNode) {
+    let subTree;
+    rootOfSubtree.each((d) => {
+      if (d.data.id === currentNode.id) subTree = d.descendants();
+    });
+    return subTree;
   }
 
   load(treeData, type) {

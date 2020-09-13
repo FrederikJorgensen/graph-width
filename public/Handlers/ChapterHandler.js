@@ -7,10 +7,9 @@
 
 import Chapter from '../Components/Chapter.js';
 import Sidebar from '../Components/Sidebar.js';
-import SectionHandler from './SectionHandler.js';
 import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
-import TreeDecomposition from '../Components/TreeDecomposition.js';
+import SectionHandler from './SectionHandler.js';
 import { getAllSubsets, setNavbarHeight } from '../Utilities/helpers.js';
 
 function removeEverythingExceptLoader() {
@@ -67,6 +66,73 @@ function createGraphButtonContainer() {
     .attr('class', 'graph-buttons-container');
 }
 
+function createDefaultCodeEditorString() {
+  return `
+  switch(type){
+    case "leaf":
+    // Example of how to set the dynamic programming tabl.
+    node.table['{1,2}'] = true
+    //Your code for a leaf node.
+    break;
+    case "introduce":
+    // Your code for an introduce node.
+    break;
+    case "forget":
+    //Your code for a forget node.
+    break;
+    case "join":
+    // Your code for a join node.
+    break;
+  }
+  /* 
+    You can control what's shown in the dynamic programming table by
+    changing the node.table object.
+    Example node.table['{1,2}'] = true.
+    Will show the table with '{1,2}' in the first column
+    and 'true' in the second column
+  */
+  `;
+}
+
+function createCustomAlgorithmNiceTreeDecompositionContainer() {
+  d3.select('.custom-algorithm-grid')
+    .append('div')
+    .attr('class', 'card card-tall')
+    .attr('id', 'nice-tree-decomposition-container');
+}
+
+function createCustomAlgorithmCodeEditorContainer() {
+  const neww = d3.select('.custom-algorithm-grid')
+    .append('div')
+    .attr('class', 'card code-card');
+
+  neww.append('div')
+    .attr('class', 'code-header');
+
+  neww.append('div')
+    .attr('class', 'code-container')
+    .attr('id', 'code-editor');
+}
+
+function createCustomAlgorithmGraphContainer() {
+  d3.select('.custom-algorithm-grid')
+    .append('div')
+    .attr('class', 'card')
+    .attr('id', 'custom-graph');
+}
+
+function createCustomAlgorithmGrid() {
+  d3.select('#main').append('div').attr('class', 'custom-algorithm-grid');
+}
+
+function createCodeEditor(formattedDeaultCodeEditorString) {
+  d3.select('#code-editor')
+    .append('textarea')
+    .attr('id', 'editor')
+    .text(formattedDeaultCodeEditorString);
+}
+
+
 export default class ChapterHandler {
   constructor() {
     this.currentChapter = 1;
@@ -82,61 +148,19 @@ export default class ChapterHandler {
       ),
       new Chapter(async () => {}, 'Algorithms on Tree Decompositions', false),
       new Chapter(async () => {
-        const customLeft = d3
-          .select('#main')
-          .append('div')
-          .attr('class', 'custom-left');
+        window.isCustomAlgorithm = true;
+        createCustomAlgorithmGrid();
 
-        customLeft
-          .append('div')
-          .attr('id', 'custom-graph')
-          .attr('class', 'custom-graph');
+        d3.se;
 
-        const codeBlock = customLeft
-          .append('div')
-          .attr('class', 'code-block-container');
+        createCustomAlgorithmCodeEditorContainer();
+        createCustomAlgorithmGraphContainer();
+        createCustomAlgorithmNiceTreeDecompositionContainer();
+        const defaultCodeEditorString = createDefaultCodeEditorString();
+        const formattedDeaultCodeEditorString = js_beautify(defaultCodeEditorString, { indent_size: 2 });
+        createCodeEditor(formattedDeaultCodeEditorString);
 
-        const customCodeAreaContainer = codeBlock
-          .append('div')
-          .attr('class', 'custom-code-container');
-
-        const codeHeader = customCodeAreaContainer
-          .append('div')
-          .attr('class', 'code-header');
-
-        const customCodeArea = customCodeAreaContainer
-          .append('div')
-          .attr('class', 'custom-sidebar');
-
-        const customRight = d3
-          .select('#main')
-          .append('div')
-          .attr('class', 'custom-right');
-
-        const customNiceTreeContainer = customRight
-          .append('div')
-          .attr('class', 'custom-nice-tree-container');
-
-        customNiceTreeContainer.append('div').attr('id', 'custom-nice-tree');
-
-        const graph = new Graph('custom-graph');
-        graph.randomGraph();
-        const niceTreeDecomposition = new Tree('custom-nice-tree');
-        await graph.computeTreeDecomposition();
-        await graph.readNiceTreeDecomposition();
-        const niceTdData = graph.getNiceTreeDecomposition();
-        niceTreeDecomposition.load(niceTdData);
-        niceTreeDecomposition.addTooltip();
-        niceTreeDecomposition.addArrow();
-
-        customCodeArea
-          .append('textarea')
-          .attr('id', 'editor')
-          .text(
-            'switch(type){\n case "leaf":\n //Your code for a leaf node.\n break;\n\n case "introduce":\n // Your code for an introduce node.\n break;\n\n case "forget":\n //Your code for a forget node.\n break;\n\n case "join":\n // Your code for a join node.\n break;\n}',
-          );
-
-        const editor = CodeMirror.fromTextArea(
+        const codeEditor = CodeMirror.fromTextArea(
           document.getElementById('editor'),
           {
             mode: 'javascript',
@@ -146,24 +170,38 @@ export default class ChapterHandler {
           },
         );
 
-        editor.setSize('100%', '100%');
+        codeEditor.setSize('100%', '100%');
+
+        const graph = new Graph('custom-graph');
+        graph.randomGraph();
+        const niceTreeDecomposition = new Tree('nice-tree-decomposition-container');
+        niceTreeDecomposition.setGraph(graph);
+        window.niceTreeDecomposition = niceTreeDecomposition;
+        await graph.computeTreeDecomposition();
+        await graph.readNiceTreeDecomposition();
+        const niceTdData = graph.getNiceTreeDecomposition();
+        niceTreeDecomposition.load(niceTdData);
+        niceTreeDecomposition.addArrow();
+
         const root = niceTreeDecomposition.getRoot();
-        niceTreeDecomposition.addTooltip();
-        let current = 0;
+        window.root = root;
+
+        window.current = 0;
+
         let customFunction = '';
-        editor.on('change', () => {
-          const userInput = editor.getValue();
+        codeEditor.on('change', () => {
+          const userInput = codeEditor.getValue();
 
           customFunction = `
-            let i = 1;
-            
+            let i = 0;
+
             root.eachAfter((currentNode) => {
-              if (current !== i++) return;
-
-              niceTreeDecomposition.animateNode(currentNode);
-              niceTreeDecomposition.animateLink(currentNode);
-
+              if (window.current !== ++i) return;
               const node = currentNode.data;
+              const subTree = niceTreeDecomposition.getSubTree(niceTreeDecomposition.root, node);
+              const inducedSubgraph = niceTreeDecomposition.graph.createSubgraph(subTree);
+              niceTreeDecomposition.graph.highlightSubGraph(inducedSubgraph);
+              node.table = {};
 
               let type = '';
 
@@ -174,53 +212,25 @@ export default class ChapterHandler {
 
               ${userInput}
 
-              niceTreeDecomposition.dpTable(node);
+              const htmlString = niceTreeDecomposition.createCustomAlgorithmHtmlTableString(node.table);
+              niceTreeDecomposition.moveTableArrow(node);
+              niceTreeDecomposition.moveTable(htmlString);
              })`;
+
+          window.customFunction = customFunction;
         });
 
-        const defaultString = 'switch(type){\n case "leaf":\n //Your code for a leaf node.\n break;\n\n case "introduce":\n // Your code for an introduce node.\n break;\n\n case "forget":\n //Your code for a forget node.\n break;\n\n case "join":\n // Your code for a join node.\n break;\n}';
-
-        const formattedHamiltonian = js_beautify(defaultString, {
-          indent_size: 2,
-        });
-        editor.setValue(formattedHamiltonian);
-
-        codeHeader
+        d3.select('#nice-tree-decomposition-container')
           .append('span')
-          .text('replay')
-          .attr('class', 'material-icons code-buttons')
-          .on('click', () => editor.setValue(defaultString));
-
-        const controlsContainer = customRight
-          .append('div')
-          .attr('class', 'custom-control-area');
-
-        const cc = controlsContainer
-          .append('div')
-          .attr('class', 'custom-controls');
-
-        cc.append('span')
-          .text('keyboard_arrow_left')
-          .attr('class', 'material-icons pagination-arrows')
-          .on('click', () => {
-            if (current === 0) return;
-            const N = root.descendants().length;
-            --current;
-            current %= N;
-            eval(customFunction);
-          });
-
-        cc.append('span')
           .text('keyboard_arrow_right')
           .attr('class', 'material-icons pagination-arrows')
+          .attr('id', 'test')
           .on('click', () => {
             const N = root.descendants().length;
-            current++;
-            if (current !== N) current %= N;
+            window.current++;
+            if (window.current !== N) window.current %= N;
             eval(customFunction);
           });
-
-        renderMathInElement(document.body);
       }, 'Create Custom Algorithm', false),
       new Chapter(
         async () => {
@@ -340,10 +350,14 @@ export default class ChapterHandler {
       .append('span')
       .text('palette')
       .attr('class', 'material-icons md-48 custom-button')
-      .on('click', () => {
-        this.graph.enableDrawing();
-        this.graphLoaded = true;
-      });
+      .on('click', () => this.handleDrawGraph());
+  }
+
+  handleDrawGraph() {
+    if (this.treeDecomposition) this.treeDecomposition.clear();
+    if (this.niceTreeDecomposition) this.niceTreeDecomposition.clear();
+    this.graph.enableDrawing();
+    this.graphLoaded = true;
   }
 
   startFirstLevel() {
@@ -390,6 +404,7 @@ export default class ChapterHandler {
 
   createChapter() {
     removeEverythingExceptLoader();
+    window.isCustomAlgorithm = false;
     window.graphContainer = null;
     window.treeContainer = null;
     createCenterContainer();
