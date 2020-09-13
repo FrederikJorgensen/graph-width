@@ -7,30 +7,34 @@ import generateRandomGraph from './Utilities/helpers.js';
 const chapterHandler = new ChapterHandler();
 window.chapterHandler = chapterHandler;
 
-window.del = [
-  { left: '$', right: '$', display: true },
-];
+function addOverlay() {
+  d3.select('#main')
+    .append('span')
+    .attr('id', 'overlay')
+    .attr('class', 'overlay')
+    .append('div')
+    .attr('class', 'loader')
+    .attr('id', 'loader');
+}
+
+addOverlay();
 
 d3.select(window).on('load', async () => {
   const params = new URLSearchParams(location.search);
-  const hasChapter = params.has('chapter');
+  const isChapter = params.has('chapter');
   const chapterIndex = params.get('chapter') - 1;
-  const hasSandbox = params.has('sandbox');
-  const hasCustom = params.has('custom');
+  const isSandboxPage = params.has('sandbox');
+  const isCustomAlgorithmPage = params.has('custom');
 
-  if (hasSandbox) {
-    chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], hasSandbox);
-  }
-
-  if (hasCustom) {
-    chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 2], hasSandbox, hasCustom);
-  }
-
-  if (hasChapter && chapterIndex < chapterHandler.chapters.length) {
+  if (params.toString() === '') d3.select('#overlay').remove();
+  if (isSandboxPage) chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], isSandboxPage);
+  if (isCustomAlgorithmPage)chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 2], isSandboxPage, isCustomAlgorithmPage);
+  if (isChapter && chapterIndex < chapterHandler.chapters.length) {
     const currentChapter = chapterHandler.chapters[chapterIndex];
     chapterHandler.goToChapter(currentChapter, false);
   }
 });
+
 export const width = document.getElementById('main').offsetWidth;
 export const height = document.getElementById('main').offsetHeight;
 const colors = d3.scaleOrdinal(d3.schemeCategory10);

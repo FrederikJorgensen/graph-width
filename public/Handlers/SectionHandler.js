@@ -11,9 +11,10 @@ import {
   separatorGraph,
   cliqueGraph,
   treeGraph,
-  hamTD2,
   gridGraph,
   treeExampleForDynamicProgramming,
+  nonValidTreeDecomposition,
+  validTreeDecomposition,
 } from '../Utilities/graphs.js';
 import { setNavbarHeight } from '../Utilities/helpers.js';
 
@@ -23,6 +24,59 @@ function createSeparatorExerciseOutput() {
     .attr('id', 'separator-output')
     .attr('class', 'separator-exercise-output');
 }
+
+function createTableWrapper() {
+  d3.select('#main')
+    .append('div')
+    .attr('id', 'dp-container')
+    .attr('class', 'table-wrapper');
+}
+
+function createTable() {
+  d3.select('#dp-container')
+    .append('table')
+    .attr('id', 'dp-table')
+    .attr('class', 'hamiltonianTable');
+}
+
+function setupContainersForTreeDecompositions() {
+  d3.select('#tree-container')
+    .style('display', 'flex')
+    .style('flex-direction', 'column');
+
+  d3.select('#tree-container')
+    .append('div')
+    .attr('id', 'tree1')
+    .style('display', 'flex')
+    .style('flex', '0.33');
+
+  d3.select('#tree-container')
+    .append('div')
+    .attr('id', 'tree2')
+    .style('display', 'flex')
+    .style('flex', '0.33');
+
+  d3.select('#tree-container')
+    .append('div')
+    .attr('id', 'tree3')
+    .style('display', 'flex')
+    .style('flex', '0.33');
+}
+
+function setupTreeContainer() {
+  return d3
+    .select('#container')
+    .append('div')
+    .attr('id', 'tree-container');
+}
+
+function createGraphContainer() {
+  return d3
+    .select('#container')
+    .append('div')
+    .attr('id', 'graph-container');
+}
+
 
 export default class SectionHandler {
   constructor(sidebar, chapter) {
@@ -50,9 +104,9 @@ export default class SectionHandler {
       new Section(
         async () => {
           this.sidebar.addContent(`
-          <p>Let \\( S \\) be a separator in a graph \\( G \\).</p>
+          <p>Let $S$ be a separator in a graph $G$.</p>
           <p>$S$ is a minimal separator if no proper subset of $S$ also separates the graph.</p>
-          <p>In other words if some graph has a separator set \\( S = \\{ a,b \\} \\) then \\( a \\) on its own cannot separate the graph neither can \\( b \\).</p>
+          <p>In other words if some graph has a separator set $S = \\{ a,b \\}$ then $a$ on its own cannot separate the graph neither can $b$.</p>
           `);
           this.sidebar.addExercise('Find a minimal separator in the graph.');
           this.sidebar.setTitle('Minimal Separator');
@@ -66,9 +120,9 @@ export default class SectionHandler {
       ),
       new Section(async () => {
         this.sidebar.addContent(`
-          <p>Let \\( S \\) be a separator in a graph \\( G \\).</p>
-          <p>We say that \\( S \\) is a balanced separator if every component of \\( G - S \\) has \\( \\leq V(G) / 2 \\)</p>
-          <p>That is every component after you remove \\( S \\) should contain less than or equal amounts of vertices to the amount of vertices in the original graph divided by 2.</p>
+          <p>Let $S$ be a separator in a graph $G$.</p>
+          <p>We say that $S$ is a balanced separator if every component of $G - S$ has $ \\leq V(G) / 2 $</p>
+          <p>That is every component after you remove $S$ should contain less than or equal amounts of vertices to the amount of vertices in the original graph divided by 2.</p>
           `);
 
         this.sidebar.addExercise('Find a balanced separator in the graph.');
@@ -89,11 +143,9 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         this.graph = graph;
         this.graph.loadGraph(graph1, 'graph-container', 'graph');
-
         await this.graph.computeTreeDecomposition();
         await this.graph.readTreeDecomposition();
         const td1 = this.graph.getTreeDecomposition();
-
         const treeDecomposition = new Graph('tree-container');
         treeDecomposition.loadGraph(td1, 'tree', this.graph);
         this.treeDecomposition = treeDecomposition;
@@ -110,7 +162,6 @@ export default class SectionHandler {
         this.sidebar.setTitle('Bags');
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
-
         await graph.computeTreeDecomposition();
         await graph.readTreeDecomposition();
         const td1 = graph.getTreeDecomposition();
@@ -210,31 +261,14 @@ export default class SectionHandler {
           'Is this a valid tree decomposition of the graph?',
         );
         this.sidebar.setTitle('Valid tree decomposition quiz #1');
-
-        const td3 = {
-          nodes: [
-            { id: 1, label: '1 2' },
-            { id: 2, label: '2 3 4' },
-            { id: 3, label: '1 3 4 5 6 7' },
-          ],
-          links: [
-            { source: 1, target: 2 },
-            { source: 2, target: 3 },
-          ],
-        };
         const graph = new Graph('graph-container');
-
         graph.loadGraph(graph1);
-
         const treeDecomposition = new Graph('tree-container');
-        treeDecomposition.loadGraph(td3, 'tree');
-
+        treeDecomposition.loadGraph(nonValidTreeDecomposition, 'tree');
         this.sidebar.addQuiz();
         this.sidebar.addChoice('Yes', false);
         this.sidebar.addChoice('No', true);
-        this.sidebar.addSolution(
-          'Since the vertex 1 is in 2 bags it must form a connected subtree but in this tree it does not. Recall property 3.',
-        );
+        this.sidebar.addSolution('Since the vertex 1 is in 2 bags it must form a connected subtree but in this tree it does not. Recall property 3.');
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addExercise(
@@ -243,30 +277,14 @@ export default class SectionHandler {
         this.sidebar.setTitle('Valid tree decomposition quiz #2');
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
-
         this.sidebar.addQuiz();
         this.sidebar.addChoice('Yes', true);
         this.sidebar.addChoice('No', false);
         this.sidebar.addSolution(
           'It satisfies all the properties of a tree decomposition thus it is valid.',
         );
-
-        const td4 = {
-          nodes: [
-            { id: 1, label: '1 2' },
-            { id: 2, label: '2 3 4 5' },
-            { id: 3, label: '3 4 5' },
-            { id: 4, label: '4 5 6' },
-          ],
-          links: [
-            { source: 1, target: 2 },
-            { source: 2, target: 3 },
-            { source: 2, target: 4 },
-          ],
-        };
-
         const treeDecomposition = new Graph('tree-container');
-        treeDecomposition.loadGraph(td4, 'tree');
+        treeDecomposition.loadGraph(validTreeDecomposition, 'tree');
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
@@ -281,13 +299,11 @@ export default class SectionHandler {
         this.sidebar.setTitle('Width vs treewidth');
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
-
         await graph.computeTreeDecomposition();
         await graph.readTreeDecomposition();
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container');
         treeDecomposition.loadGraph(td1, 'tree');
-
         this.sidebar.addQuiz();
         this.sidebar.addChoice('1', false);
         this.sidebar.addChoice('2', true);
@@ -363,29 +379,7 @@ export default class SectionHandler {
         );
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
-
-        d3.select('#tree-container')
-          .style('display', 'flex')
-          .style('flex-direction', 'column');
-
-        d3.select('#tree-container')
-          .append('div')
-          .attr('id', 'tree1')
-          .style('display', 'flex')
-          .style('flex', '0.33');
-
-        d3.select('#tree-container')
-          .append('div')
-          .attr('id', 'tree2')
-          .style('display', 'flex')
-          .style('flex', '0.33');
-
-        d3.select('#tree-container')
-          .append('div')
-          .attr('id', 'tree3')
-          .style('display', 'flex')
-          .style('flex', '0.33');
-
+        setupContainersForTreeDecompositions();
         await graph.computeTreeDecomposition();
         await graph.readTreeDecomposition();
         const td1 = graph.getTreeDecomposition();
@@ -566,7 +560,6 @@ export default class SectionHandler {
         this.sidebar.setTitle('Computing treewidth');
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
-
         await graph.computeTreeDecomposition();
         await graph.readTreeDecomposition();
         const td1 = graph.getTreeDecomposition();
@@ -724,15 +717,8 @@ export default class SectionHandler {
       }, 'chapter3'),
       new Section(async () => {
         if (!window.graphContainer && !window.treeContainer) {
-          const graphContainer = d3
-            .select('#container')
-            .append('div')
-            .attr('id', 'graph-container');
-
-          const treeContainer = d3
-            .select('#container')
-            .append('div')
-            .attr('id', 'tree-container');
+          const graphContainer = createGraphContainer();
+          const treeContainer = setupTreeContainer();
 
           window.graphContainer = graphContainer;
           window.treeContainer = treeContainer;
@@ -937,7 +923,7 @@ export default class SectionHandler {
       new Section(async () => {
         this.sidebar.addContent(`
           <div>
-          <p>Here is presented an algorithm for finding whether or not a graph has a <i>Hamiltonian cycle</i> given a graph.</p>
+          <p>Here is presented an algorithm for finding whether or not a graph has a <i>Hamiltonian cycle</i> given a graph and a tree decomposition.</p>
           <p>Consider a graph and its tree decomposition:
           <br />
           - We define the tree decomposition as $T$
@@ -1153,10 +1139,26 @@ export default class SectionHandler {
 
   createSection() {
     if (!this.currentSection) this.currentSection = this.sections[0];
+    if (this.sidebar) this.sidebar.clear();
+    if (this.tree) this.tree.clear();
     d3.select('#graph-container').classed('graph-classes', false);
-    setNavbarHeight();
+    this.handleQueryString();
+    this.removeElements();
+    this.sections.map((section) => (section.isActive = false));
+    this.currentSection.isActive = true;
+    this.currentSection.create();
+    this.sidebar.updateProgressBar();
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\\[', right: '\\]', display: true },
+      ],
+    });
+    renderMathInElement(document.body);
+  }
 
-    /* Query strings */
+  handleQueryString() {
     window.history.replaceState({}, '', '?');
     const params = new URLSearchParams(location.search);
     params.set(
@@ -1168,17 +1170,6 @@ export default class SectionHandler {
     params.set('section', this.currentSectionIndex + 1);
     params.toString();
     window.history.replaceState({}, '', `?${params.toString()}`);
-    /* Query strings end */
-
-    this.removeElements();
-
-    if (this.sidebar) this.sidebar.clear();
-    if (this.tree) this.tree.clear();
-
-    this.sections.map((section) => (section.isActive = false));
-    this.currentSection.isActive = true;
-    this.currentSection.create();
-    this.sidebar.updateProgressBar();
   }
 
   removeElements() {
@@ -1223,37 +1214,3 @@ export default class SectionHandler {
     this.createSection();
   }
 }
-function createTableWrapper() {
-  d3.select('#main')
-    .append('div')
-    .attr('id', 'dp-container')
-    .attr('class', 'table-wrapper');
-}
-
-function createTable() {
-  d3.select('#dp-container')
-    .append('table')
-    .attr('id', 'dp-table')
-    .attr('class', 'hamiltonianTable');
-}
-
-
-/*
-This table has 1 entry that is the empty set which is 0.
-
-and $S \\subseteq B_n$.
-
-We start by taking over all the entries from table $C_c$ from $B_c$.
-    <br />
-    Then for those sets $v \\in S$ we check if $S$ now breaks the indepence property, if so, set the entry to be $-\\infty$ if not we add +1 to the existing entry.
-    <br />
-
-<p>
-  We check if the sets of $C_n$ is bigger with the forgotten vertex or
-  without it and then keep the bigger one. To compute the table of an
-  introduce node we take over all the child node $C_c$ table's entries. If
-  $v \\in S$ we test if there are any vertices in the set that are
-  adjacent and if so we know it is not an independent set and we set the
-  value to be minus infinity. If it is not adjacent we add 1 to the
-  existing entry.
-</p> */

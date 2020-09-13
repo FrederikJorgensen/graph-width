@@ -13,6 +13,26 @@ import Tree from '../Components/Tree.js';
 import TreeDecomposition from '../Components/TreeDecomposition.js';
 import { getAllSubsets, setNavbarHeight } from '../Utilities/helpers.js';
 
+function removeEverythingExceptLoader() {
+  d3.select('#main').selectAll('*:not(#overlay):not(#loader)').remove();
+}
+
+function createOutputContainer() {
+  d3.select('#app-area').append('div').attr('id', 'output');
+}
+
+function createVisualContainer() {
+  d3.select('#app-area').append('div').attr('id', 'container');
+}
+
+function createAppAreaContainer() {
+  d3.select('#center-container').append('div').attr('id', 'app-area');
+}
+
+function createCenterContainer() {
+  d3.select('#main').append('div').attr('id', 'center-container');
+}
+
 export default class ChapterHandler {
   constructor() {
     this.currentChapter = 1;
@@ -402,16 +422,14 @@ export default class ChapterHandler {
   }
 
   createChapter() {
-    d3.select('#main').selectAll('*').remove();
-    d3.select('.nav-links').style('opacity', 1);
-    setNavbarHeight();
+    removeEverythingExceptLoader();
     window.graphContainer = null;
     window.treeContainer = null;
-    d3.select('#main').append('div').attr('id', 'center-container');
+    createCenterContainer();
     const sidebar = new Sidebar(this.currentChapter.name);
-    d3.select('#center-container').append('div').attr('id', 'app-area');
-    d3.select('#app-area').append('div').attr('id', 'container');
-    d3.select('#app-area').append('div').attr('id', 'output');
+    createAppAreaContainer();
+    createVisualContainer();
+    createOutputContainer();
     this.currentChapter.create();
     const params = new URLSearchParams(location.search);
     const currentSectionIndex = params.get('section') - 1;

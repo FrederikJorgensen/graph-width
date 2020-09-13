@@ -458,7 +458,7 @@ svg {
   display: flex;
   justify-content: center;
   align-items: center;
-  background-color: rgba(0, 0, 0, 0.8);
+  background-color: lightgray;
 }
 
 .home-link {
@@ -1032,6 +1032,11 @@ hr.new4 {
   cursor: pointer;
 }
 
+.overlay {
+  width: 100%;
+  height: 100%;
+}
+
 /*--------------------------------- Navbar Stuff Only ---------------------------------*/
 .nav-wrapper {
   display: flex;
@@ -1054,13 +1059,13 @@ hr.new4 {
   padding: 0 1rem 0 1rem;
 }
 
-@media (min-width: 1600px) {
+@media (min-width: 1800px) {
   .nav {
     width: 80%;
   }
 }
 
-@media (max-width: 1600px) {
+@media (max-width: 1800px) {
   .nav {
     width: 100%;
   }
@@ -1174,4 +1179,23 @@ th {
 
 .hamiltonianTable tbody .katex {
   background-color: white;
+}
+
+/* Spinner Loader */
+.loader {
+  border: 16px solid #f3f3f3; /* Light grey */
+  border-top: 16px solid #3498db; /* Blue */
+  border-radius: 50%;
+  width: 120px;
+  height: 120px;
+  animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }

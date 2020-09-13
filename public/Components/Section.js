@@ -1,3 +1,11 @@
+import { setNavbarHeight } from '../Utilities/helpers.js';
+
+function later(delay) {
+  return new Promise(((resolve) => {
+    setTimeout(resolve, delay);
+  }));
+}
+
 export default class Section {
   constructor(section, chapter, isActive) {
     this.createSection = section;
@@ -5,15 +13,10 @@ export default class Section {
     this.isActive = isActive;
   }
 
-  create() {
-    this.createSection();
-    renderMathInElement(document.body, window.del);
-    renderMathInElement(document.body, {
-      delimiters: [
-        { left: '$$', right: '$$', display: true },
-        { left: '$', right: '$', display: false },
-        { left: '\\[', right: '\\]', display: true },
-      ],
-    });
+  async create() {
+    await this.createSection();
+    setNavbarHeight();
+    // await later(5000);
+    d3.select('#overlay').remove();
   }
 }

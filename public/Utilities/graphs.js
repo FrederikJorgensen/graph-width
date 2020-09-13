@@ -1,3 +1,29 @@
+export const nonValidTreeDecomposition = {
+  nodes: [
+    { id: 1, label: '1 2' },
+    { id: 2, label: '2 3 4' },
+    { id: 3, label: '1 3 4 5 6 7' },
+  ],
+  links: [
+    { source: 1, target: 2 },
+    { source: 2, target: 3 },
+  ],
+};
+
+export const validTreeDecomposition = {
+  nodes: [
+    { id: 1, label: '1 2' },
+    { id: 2, label: '2 3 4 5' },
+    { id: 3, label: '3 4 5' },
+    { id: 4, label: '4 5 6' },
+  ],
+  links: [
+    { source: 1, target: 2 },
+    { source: 2, target: 3 },
+    { source: 2, target: 4 },
+  ],
+};
+
 export const separatorGraph = {
   nodes: [
     { id: 1 },
