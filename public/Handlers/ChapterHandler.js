@@ -33,6 +33,40 @@ function createCenterContainer() {
   d3.select('#main').append('div').attr('id', 'center-container');
 }
 
+function createSandboxGrid() {
+  d3.select('#main')
+    .append('div')
+    .attr('class', 'sandbox-grid');
+}
+
+function createNiceTreeDecompositionContainer() {
+  d3.select('.sandbox-grid')
+    .append('div')
+    .attr('class', 'card card-tall')
+    .attr('id', 'nice-tree-decomposition-container');
+}
+
+function createTreeDecompositionContainer() {
+  d3.select('.sandbox-grid')
+
+    .append('div')
+    .attr('class', 'card')
+    .attr('id', 'tree-decomposition-container');
+}
+
+function createGraphContainer() {
+  d3.select('.sandbox-grid')
+    .append('div')
+    .attr('class', 'card')
+    .attr('id', 'sandbox-graph-container');
+}
+
+function createGraphButtonContainer() {
+  d3.select('#sandbox-graph-container')
+    .append('div')
+    .attr('class', 'graph-buttons-container');
+}
+
 export default class ChapterHandler {
   constructor() {
     this.currentChapter = 1;
@@ -190,193 +224,126 @@ export default class ChapterHandler {
       }, 'Create Custom Algorithm', false),
       new Chapter(
         async () => {
-          let graphLoaded = false;
-          let treeDecompositionLoaded = false;
+          createSandboxGrid();
+          createGraphContainer();
+          createTreeDecompositionContainer();
+          createNiceTreeDecompositionContainer();
 
-          const graph = new Graph('sandbox-graph');
-          const treeDecomposition = new Graph('sandbox-tree-decomposition');
-          const niceTreeDecomposition = new Tree(
-            'sandbox-nice-tree-decomposition',
-            'nice',
-            graph,
-          );
+          const graph = new Graph('sandbox-graph-container');
+          this.graph = graph;
 
-          const td = new TreeDecomposition('sandbox-tree-decomposition', graph);
+          const treeDecomposition = new Graph('tree-decomposition-container');
+          this.treeDecomposition = treeDecomposition;
 
-          const sandboxSidebar = d3
-            .select('#main')
-            .append('div')
-            .attr('class', 'sandbox-sidebar-container');
+          const niceTreeDecomposition = new Tree('nice-tree-decomposition-container');
+          this.niceTreeDecomposition = niceTreeDecomposition;
 
-          sandboxSidebar
-            .append('input')
-            .attr('value', 15)
-            .attr('id', 'vertices-number')
-            .attr('class', 'controls-number');
-
-          sandboxSidebar
-            .append('input')
-            .attr('value', 15)
-            .attr('id', 'edges-number')
-            .attr('class', 'controls-number');
-
-          sandboxSidebar
-            .append('div')
-            .attr('data-tooltip', 'Reload a random graph')
-            .attr('class', 'big')
-            .append('span')
-            .text('replay')
-            .attr('class', 'material-icons md-48')
-            .on('click', () => {
-              if (treeDecomposition.svg) treeDecomposition.clear();
-              if (niceTreeDecomposition.svg) niceTreeDecomposition.clear();
-
-              const numberOfVertices = document.getElementById(
-                'vertices-number',
-              ).value;
-              const numberOfEdges = document.getElementById('edges-number')
-                .value;
-              graph.randomGraph(numberOfVertices, numberOfEdges);
-              graphLoaded = true;
-            });
-
-          sandboxSidebar
-            .append('div')
-            .attr('data-tooltip', 'Draw your own graph')
-            .attr('class', 'big')
-            .append('span')
-            .text('palette')
-            .attr('class', 'material-icons md-48')
-            .on('click', () => {
-              graph.enableDrawing();
-              graphLoaded = true;
-            });
-
-          sandboxSidebar
-            .append('div')
-            .attr(
-              'data-tooltip',
-              'Compute a tree decomposition of the current graph',
-            )
-            .attr('class', 'big')
-            .append('span')
-            .text('device_hub')
-            .attr('id', 'compute-td-button')
-            .attr('class', 'material-icons md-48')
-            .on('click', async () => {
-              if (!graphLoaded) return;
-              if (treeDecomposition.svg) treeDecomposition.clear();
-              if (niceTreeDecomposition.svg) niceTreeDecomposition.clear();
-              await graph.computeTreeDecomposition();
-              await graph.readTreeDecomposition();
-              const treeDecompositionData = graph.getTreeDecomposition();
-              treeDecomposition.loadGraph(treeDecompositionData, 'tree', graph);
-              treeDecompositionLoaded = true;
-            });
-
-          sandboxSidebar
-            .append('div')
-            .attr('data-tooltip', 'Compute a nice tree decomposition')
-            .attr('class', 'big')
-            .append('span')
-            .text('timeline')
-            .attr('id', 'compute-nicetd-button')
-            .attr('class', 'material-icons md-48')
-            .on('click', async () => {
-              if (!treeDecompositionLoaded) return;
-              if (niceTreeDecomposition.svg) niceTreeDecomposition.clear();
-              await graph.readNiceTreeDecomposition();
-              const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
-              niceTreeDecomposition.load(niceTreeDecompositionData);
-            });
-
-          sandboxSidebar
-            .append('div')
-            .attr('data-tooltip', 'Clear all')
-            .attr('class', 'big')
-            .append('span')
-            .text('clear')
-            .attr('class', 'material-icons md-48')
-            .on('click', async () => {
-              this.graph = d3
-                .select('#algo-text')
-                .text('Current Algorithm = None Selected');
-              if (graph.svg) graph.clear();
-              if (td) td.clear();
-              d3.select('#output').html(null);
-              if (treeDecomposition.svg) treeDecomposition.clear();
-              if (niceTreeDecomposition.svg) niceTreeDecomposition.clear();
-              if (niceTreeDecomposition.colorTable) niceTreeDecomposition.removeColorTable();
-              if (niceTreeDecomposition.tooltip) niceTreeDecomposition.removeMisTable();
-              graphLoaded = false;
-              treeDecompositionLoaded = false;
-            });
-
-          const sandboxAppContainer = d3
-            .select('#main')
-            .append('div')
-            .attr('class', 'sandbox-app-container');
-
-          const leftSide = sandboxAppContainer
-            .append('div')
-            .attr('class', 'left-side');
-
-          const rightSide = sandboxAppContainer
-            .append('div')
-            .attr('class', 'right-side');
-
-          const sandBoxGraphContainer = leftSide
-            .append('div')
-            .attr('class', 'sandbox-graph-container');
-
-          sandBoxGraphContainer
-            .append('div')
-            .attr('class', 'text-c')
-            .append('text')
-            .text('Graph')
-            .attr('class', 'container-text');
-
-          sandBoxGraphContainer
-            .append('div')
-            .attr('id', 'sandbox-graph')
-            .attr('class', 'surface');
-
-          const sandBoxTreeContainer = leftSide
-            .append('div')
-            .attr('class', 'sandbox-graph-container');
-
-          sandBoxTreeContainer
-            .append('div')
-            .attr('class', 'text-c')
-            .append('text')
-            .text('Tree Decomposition')
-            .attr('class', 'container-text');
-
-          sandBoxTreeContainer
-            .append('div')
-            .attr('class', 'surface')
-            .attr('id', 'sandbox-tree-decomposition');
-
-          const niceTreeContainer = rightSide
-            .append('div')
-            .attr('class', 'nice-tree-container');
-
-          niceTreeContainer
-            .append('div')
-            .attr('class', 'text-c')
-            .append('text')
-            .text('Nice Tree Decomposition')
-            .attr('class', 'container-text');
-
-          niceTreeContainer
-            .append('div')
-            .attr('class', 'surface')
-            .attr('id', 'sandbox-nice-tree-decomposition');
+          // createInputForVertices();
+          // createInputForEdges();
+          // this.createClearAllButton(sandboxSidebar, graph, td, treeDecomposition, niceTreeDecomposition);
+          this.createGraphButtons();
+          this.createComputeTreeDecompositionButton();
+          this.createComputeNiceTreeDecompositionButton();
         },
 
         '6. Sandbox',
       ),
     ];
+  }
+
+  createGraphButtons() {
+    createGraphButtonContainer();
+    this.createReloadGraphButton();
+    this.createDrawGraphButton();
+  }
+
+  createReloadGraphButton() {
+    d3.select('.graph-buttons-container')
+      .append('span')
+      .text('replay')
+      .attr('class', 'material-icons md-48 custom-button')
+      .on('click', () => this.handleCreateNewGraph());
+  }
+
+  handleCreateNewGraph() {
+    // const numberOfVertices = document.getElementById('vertices-number').value;
+    // const numberOfEdges = document.getElementById('edges-number').value;
+    if (this.treeDecomposition) this.treeDecomposition.clear();
+    if (this.niceTreeDecomposition) this.niceTreeDecomposition.clear();
+    const numberOfVertices = 10;
+    const numberOfEdges = 10;
+    this.graph.randomGraph(numberOfVertices, numberOfEdges);
+    this.treeDecompositionLoaded = false;
+    this.graphLoaded = true;
+  }
+
+  createClearAllButton(sandboxSidebar, graph, td, treeDecomposition, niceTreeDecomposition) {
+    sandboxSidebar
+      .append('div')
+      .attr('data-tooltip', 'Clear all')
+      .attr('class', 'big')
+      .append('span')
+      .text('clear')
+      .attr('class', 'material-icons md-48')
+      .on('click', async () => {
+        this.graph = d3
+          .select('#algo-text')
+          .text('Current Algorithm = None Selected');
+        if (graph.svg) graph.clear();
+        if (td) td.clear();
+        d3.select('#output').html(null);
+        if (treeDecomposition.svg) treeDecomposition.clear();
+        if (niceTreeDecomposition.svg) niceTreeDecomposition.clear();
+        if (niceTreeDecomposition.colorTable) niceTreeDecomposition.removeColorTable();
+        if (niceTreeDecomposition.tooltip) niceTreeDecomposition.removeMisTable();
+        this.graphLoaded = false;
+        this.treeDecompositionLoaded = false;
+      });
+  }
+
+  async handleComputeNiceTreeDecomposition() {
+    if (!this.treeDecompositionLoaded) return;
+    await this.graph.readNiceTreeDecomposition();
+    const niceTreeDecompositionData = this.graph.getNiceTreeDecomposition();
+    this.niceTreeDecomposition.load(niceTreeDecompositionData);
+  }
+
+  createComputeNiceTreeDecompositionButton() {
+    d3.select('#nice-tree-decomposition-container')
+      .append('span')
+      .text('timeline')
+      .attr('id', 'compute-nicetd-button')
+      .attr('class', 'material-icons md-48 draw-graph-button custom-button')
+      .on('click', async () => this.handleComputeNiceTreeDecomposition());
+  }
+
+  async handleComputeTreeDecomposition() {
+    if (!this.graphLoaded) return;
+    await this.graph.computeTreeDecomposition();
+    await this.graph.readTreeDecomposition();
+    const treeDecompositionData = this.graph.getTreeDecomposition();
+    this.treeDecomposition.loadGraph(treeDecompositionData, 'tree');
+    this.treeDecompositionLoaded = true;
+  }
+
+  createComputeTreeDecompositionButton() {
+    d3.select('#tree-decomposition-container')
+      .append('span')
+      .text('device_hub')
+      .attr('id', 'compute-td-button')
+      .attr('class', 'material-icons md-48 draw-graph-button custom-button')
+      .on('click', async () => this.handleComputeTreeDecomposition());
+  }
+
+  createDrawGraphButton() {
+    d3.select('.graph-buttons-container')
+      .append('span')
+      .text('palette')
+      .attr('class', 'material-icons md-48 custom-button')
+      .on('click', () => {
+        this.graph.enableDrawing();
+        this.graphLoaded = true;
+      });
   }
 
   startFirstLevel() {

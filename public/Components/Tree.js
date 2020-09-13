@@ -367,7 +367,7 @@ export default class Tree {
   }
 
   clear() {
-    this.svg.remove();
+    if (this.svg) this.svg.remove();
   }
 
   hideTooltip() {

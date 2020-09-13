@@ -154,6 +154,15 @@ d3.select('body').on('keydown', () => {
     case 'ArrowDown':
       if (window.niceTreeDecomposition) window.niceTreeDecomposition.previousDPStep();
       break;
+    case 'r':
+      if (chapterHandler.graph) chapterHandler.handleCreateNewGraph();
+      break;
+    case 't':
+      if (chapterHandler.treeDecomposition) chapterHandler.handleComputeTreeDecomposition();
+      break;
+    case 'n':
+      if (chapterHandler.niceTreeDecomposition) chapterHandler.handleComputeNiceTreeDecomposition();
+      break;
     default:
   }
 });

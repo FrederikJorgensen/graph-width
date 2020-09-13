@@ -1145,7 +1145,7 @@ export default class Graph {
   }
 
   clear() {
-    this.svg.remove();
+    if (this.svg) this.svg.remove();
     this.nodes = [];
     this.links = [];
     this.lastNodeId = 0;
@@ -1567,8 +1567,8 @@ export default class Graph {
   }
 
   loadGraph(graph, type, graphOfTd) {
-    this.graphOfTd = graphOfTd;
     if (this.svg) this.clear();
+    this.graphOfTd = graphOfTd;
     this.graph = graph;
     this.nodes = graph.nodes;
     this.links = graph.links;
