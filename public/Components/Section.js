@@ -1,11 +1,5 @@
 import { setNavbarHeight } from '../Utilities/helpers.js';
 
-function later(delay) {
-  return new Promise(((resolve) => {
-    setTimeout(resolve, delay);
-  }));
-}
-
 export default class Section {
   constructor(section, chapter, isActive) {
     this.createSection = section;
@@ -16,7 +10,6 @@ export default class Section {
   async create() {
     await this.createSection();
     setNavbarHeight();
-    // await later(5000);
     d3.select('#overlay').remove();
   }
 }

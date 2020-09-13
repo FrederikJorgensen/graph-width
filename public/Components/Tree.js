@@ -872,6 +872,7 @@ export default class Tree {
       const type = this.getNodeType(node);
       const subTree = getSubTree(this.root, node);
       const inducedSubgraph = this.graph.createSubgraph(subTree);
+      this.graph.resetNodeColors();
       this.graph.highlightSubGraph(inducedSubgraph);
 
       let child;
@@ -893,6 +894,8 @@ export default class Tree {
           break;
         case 'introduce':
           this.setIntroducedVertex(node);
+          this.graph.addNodeArrow(this.introducedVertex, 'Introduced vertex');
+          this.graph.highlightNodeColor(this.introducedVertex, 'rgb(128, 177, 211)');
           if (child.vertices.length === 0) {
             this.setTableForNodeAboveLeaf();
           } else {
@@ -901,6 +904,8 @@ export default class Tree {
           break;
         case 'forget':
           this.setForgottenVertex(node);
+          this.graph.addNodeArrow(this.forgottenVertex, 'Forgotten vertex');
+          this.graph.highlightNodeColor(this.forgottenVertex, 'rgb(251, 128, 114)');
           this.setTableForForgetNode(partialSolutions);
           break;
         case 'join':
@@ -1035,7 +1040,7 @@ export default class Tree {
   }
 
   createThreeColorTableHtmlString(node) {
-    const header = '<thead><tr><td>c → {R, G, B}</td></tr></thead>';
+    const header = '<thead><tr><td><i>c</i></td></tr></thead>';
 
     let rowString = '';
     const { states } = node;

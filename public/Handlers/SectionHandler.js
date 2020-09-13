@@ -17,6 +17,7 @@ import {
   validTreeDecomposition,
 } from '../Utilities/graphs.js';
 import { setNavbarHeight } from '../Utilities/helpers.js';
+import { addOverlay } from '../controller.js';
 
 function createSeparatorExerciseOutput() {
   d3.select('#output')
@@ -810,18 +811,29 @@ export default class SectionHandler {
       }, 'chapter3'),
       new Section(async () => {
         this.sidebar.addContent(`
+        <p>We present an algorithm for finding out if a graph is <i>3-colorable</i> given a graph and a tree decomposition.</p>
         <p>
-          $B_n$ bag for node $n$.
+          <strong>Notation:</strong>
           <br>
-          $V_n$ vertices of the subtree rooted at bag $n$.
+          $T$ for the tree decomposition.
+          <br>
+          $B_n$ bag for a node $n$ in $T$.
+          <br>
+          $B_{\\downarrow n}$ for all vertices contained in all the bags below (and including) $n \\in T$.
+          <br>
+          $G_n$ for the induced sub-graph of the vertices in $B_{\\downarrow n}$.
+          <br>
+          $c$ is a function that labels each vertex $v \\in B_n$ one of the following colors: <span class="red">red</span>, <span class="green">green</span> or <span class="blue">blue</span>.
         </p>
 
         <p>
-          For every bag $n$ and coloring $c : B_n  \\to \\{ 1,2,3 \\}$ we define the table $A[n,c]$ to be true iff there exists a 3-coloring of $V_n$.
+          <strong>What we want to see in a partial solution:</strong>
+          <br>
+          We define $c$ to be true if there exists a 3-coloring $c'$ of $G_n$ such that $c(v)=c'(v)$ for every $v \\in B_n$.
         <p>
           <div class="algorithm-description">
           <p>
-            <strong>Input:</strong> A nice tree decomposition $T$ of graph $G$.
+            <strong>Input:</strong> A graph $G$ and its nice tree decomposition $T$.
             <br />
             <strong>Output:</strong> If $G$ is 3-colorable.
           </p>
@@ -836,36 +848,28 @@ export default class SectionHandler {
             <p class="algorithm-description-step">Step 2:</p>
             <hr />
             <div  class="algorithm-description-node-type">
-              <svg class="lo" width="15" height="15"><rect class="leaf-node-sample" width="15" height="15"></svg>
-              Leaf node $n$ where $B_n$ is empty.
-              <br />
+              <p><svg class="lo" width="15" height="15"><rect class="leaf-node-sample" width="15" height="15"></svg>
+              Leaf node $n$ where $B_n$ is empty.</p>
               The table at leaf node consists of the empty function $c$.
             </div>
 
             <div class="algorithm-description-node-type">
-              <svg class="lo" width="15" height="15"><rect class="introduce-node-sample" width="15" height="15"></svg>
-              Introduce node: We introduce $v$ to a bag $B_c$ to get bag $B_n$.
-              <br />
-              If \\( c(v) \\neq c(w) \\) for every adjacent \\( w \\) of \\( v \\)
-              <br>
-              then \\( A[n,c] = A[j,c'] \\) where \\( c' \\) is \\( c \\) restricted to \\( X_j \\)
-              <br>
-              That is, before we color an introduced node we check if any of its neighbors has the color we want to color it. If it does, we do not include it in the table.
+              <p><svg class="lo" width="15" height="15"><rect class="introduce-node-sample" width="15" height="15"></svg>
+              Introduce node: We introduce $v$ to a bag $B_c$ to get bag $B_n$.</p>
+              If $c(v) \\neq c(w)$ for every adjacent $w$ of $v$ then set $c$ to $true$.
             </div>
 
             <div class="algorithm-description-node-type">
-              <svg class="lo" width="15" height="15"><rect class="forget-node-sample" width="15" height="15"></svg>  
-              Forget node: We forget $v$ from $B_c$ to get bag $B_n$.
-              <br />
-              $A[i,c]$ is true if $A[j,c']$ is true for one of the extensions of $c$ to $X_j$.
+              <p><svg class="lo" width="15" height="15"><rect class="forget-node-sample" width="15" height="15"></svg>  
+              Forget node: We forget $v$ from $B_c$ to get bag $B_n$.</p>
+              $c$ is true if $c'$ is true for one of the extensions of $c$ to $B_c$.
               <br>
-              In other words we compute all the possible ways to color \\( X_i \\) and for each coloring we check if it can extended to \\( X_j \\) with at least one of the possible colors.
+              In other words we compute all the possible ways to color $B_n$ and for each coloring we check if it can extended to $B_c$ with at least one of the possible colors.
             </div>
 
             <div class="algorithm-description-node-type">
-              <svg class="lo" width="15" height="15"><rect class="join-node-sample" width="15" height="15"></svg>
-              Join node: We join node $l$ and $r$ to get node $n$. All the bags are the same that is: $B_n = B_{l} = B_{r}$.
-              <br />
+              <p><svg class="lo" width="15" height="15"><rect class="join-node-sample" width="15" height="15"></svg>
+              Join node: We join node $l$ and $r$ to get node $n$. All the bags are the same that is: $B_n = B_{l} = B_{r}$.</p>
               $A[n,c] = A[1,c] + A[r,c]$
             </div>
 

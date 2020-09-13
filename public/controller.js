@@ -7,7 +7,7 @@ import generateRandomGraph from './Utilities/helpers.js';
 const chapterHandler = new ChapterHandler();
 window.chapterHandler = chapterHandler;
 
-function addOverlay() {
+export function addOverlay() {
   d3.select('#main')
     .append('span')
     .attr('id', 'overlay')
