@@ -19,6 +19,30 @@ import {
 import { setNavbarHeight } from '../Utilities/helpers.js';
 import { addOverlay } from '../controller.js';
 
+
+function setupTreeContainer() {
+  return d3
+    .select('#container')
+    .append('div')
+    .attr('id', 'tree-container');
+}
+
+function createGraphContainer() {
+  return d3
+    .select('#container')
+    .append('div')
+    .attr('id', 'graph-container');
+}
+
+function setupGraphAndTreeContainers() {
+  const graphContainer = createGraphContainer();
+  const treeContainer = setupTreeContainer();
+
+  window.graphContainer = graphContainer;
+  window.treeContainer = treeContainer;
+}
+
+
 function createSeparatorExerciseOutput() {
   d3.select('#output')
     .append('div')
@@ -62,20 +86,6 @@ function setupContainersForTreeDecompositions() {
     .attr('id', 'tree3')
     .style('display', 'flex')
     .style('flex', '0.33');
-}
-
-function setupTreeContainer() {
-  return d3
-    .select('#container')
-    .append('div')
-    .attr('id', 'tree-container');
-}
-
-function createGraphContainer() {
-  return d3
-    .select('#container')
-    .append('div')
-    .attr('id', 'graph-container');
 }
 
 
@@ -443,7 +453,6 @@ export default class SectionHandler {
         );
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
-
         await graph.computeTreeDecomposition();
         await graph.readTreeDecomposition();
         const td1 = graph.getTreeDecomposition();
@@ -568,11 +577,12 @@ export default class SectionHandler {
         treeDecomposition.loadGraph(td1, 'tree', graph);
       }, 'chapter2'),
       new Section(async () => {
+        if (!window.graphContainer && !window.treeContainer) setupGraphAndTreeContainers();
         this.sidebar.addContent(`
           <p>Algorithms that exploit tree decompositions are often represented using a variation of tree decompositions called nice tree decompositions.</p>
 
           <p>
-            We denote:
+            <strong>Notation:</strong>
             <br/ >
             $T$ for the tree decomposition.
             <br />
@@ -596,7 +606,7 @@ export default class SectionHandler {
             </svg>
          <strong>Leaf node:</strong>
             <br />
-            $n$ has no children and $B_n$ contains no vertices.
+            $n$ has no children and $B_n$ contains no vertices
            </p>
 
           <p>
@@ -605,7 +615,7 @@ export default class SectionHandler {
           </svg>
            <strong>Introduce node:</strong>
            <br />
-           $n$ has a child $c$ then $B_n = B_c \\cup v $ where $v \\in B_c$.
+           $n$ has a child $c$ then $B_n = B_c \\cup v $ where $v \\in B_c$
          </p>
 
          <p>
@@ -614,7 +624,7 @@ export default class SectionHandler {
          </svg>
            <strong>Forget node:</strong>
            <br />
-           $n$ has a child $c$ then $B_n = B_c - v$ where $v \\in B_c$.
+           $n$ has a child $c$ then $B_n = B_c - v$ where $v \\in B_c$
          </p>
 
           <p>
@@ -623,26 +633,10 @@ export default class SectionHandler {
           </svg>
             <strong>Join node:</strong>
             <br/>
-            $n$ has two children $c_l$ and $c_r$ then $B_n = B_{c_l} = B_{c_r}$.
+            $n$ has two children $l$ and $r$ then $B_n = B_{l} = B_{r}$
           </p>
           `);
         this.sidebar.setTitle('Nice Tree Decompositions');
-
-        if (!window.graphContainer && !window.treeContainer) {
-          const graphContainer = d3
-            .select('#container')
-            .append('div')
-            .attr('id', 'graph-container');
-
-          const treeContainer = d3
-            .select('#container')
-            .append('div')
-            .attr('id', 'tree-container');
-
-          window.graphContainer = graphContainer;
-          window.treeContainer = treeContainer;
-        }
-
         const graph = new Graph('graph-container');
         this.graph = graph;
         this.graph.randomGraph();
@@ -657,7 +651,10 @@ export default class SectionHandler {
         this.treeDecomposition.setGraph(this.graph);
       }, 'chapter3'),
       new Section(async () => {
-        if (this.graph) this.graph.clear();
+        d3.select('#graph-container').remove();
+        d3.select('#tree-container').remove();
+        window.graphContainer = null;
+        window.treeContainer = null;
         const tree = new Tree('container', 'normal-tree');
         window.niceTreeDecomposition = tree;
         tree.setMisNormalTree();
@@ -666,7 +663,7 @@ export default class SectionHandler {
         tree.addArrow();
 
         this.sidebar.addContent(`
-        <p class="warning"><i>This is not the best introduction to dynammic programming on tree decompositions since it makes use of grandchildren.
+        <p class="warning"><i>This is not the best introduction to dynamic programming on tree decompositions since it makes use of grandchildren.
         Dániel Marx provides a better example <a href="https://www.youtube.com/watch?v=RV5iQji_icQ&t=135" target="_blank">in this video @ 1:35</a></i>.</p>
         <p>Most algorithms that exploit <i>tree decompositions</i> use dynammic programming. For this reason we will present a brief reminder on how dynammic programming works on general trees.</p>
         <p>Let's now look at how the <i>maximum independent set</i> problem works on a tree.</p>
@@ -717,13 +714,7 @@ export default class SectionHandler {
         );
       }, 'chapter3'),
       new Section(async () => {
-        if (!window.graphContainer && !window.treeContainer) {
-          const graphContainer = createGraphContainer();
-          const treeContainer = setupTreeContainer();
-
-          window.graphContainer = graphContainer;
-          window.treeContainer = treeContainer;
-        }
+        if (!window.graphContainer && !window.treeContainer) setupGraphAndTreeContainers();
         this.sidebar.addContent(`
         <p>
         Each row in the table $C_n$ consists of a subset $S \\subseteq B_n$ in the
@@ -810,6 +801,7 @@ export default class SectionHandler {
         );
       }, 'chapter3'),
       new Section(async () => {
+        if (!window.graphContainer && !window.treeContainer) setupGraphAndTreeContainers();
         this.sidebar.addContent(`
         <p>We present an algorithm for finding out if a graph is <i>3-colorable</i> given a graph and a tree decomposition.</p>
         <p>
@@ -880,21 +872,6 @@ export default class SectionHandler {
           </div>
           </div>
           `);
-
-        if (!window.graphContainer && !window.treeContainer) {
-          const graphContainer = d3
-            .select('#container')
-            .append('div')
-            .attr('id', 'graph-container');
-
-          const treeContainer = d3
-            .select('#container')
-            .append('div')
-            .attr('id', 'tree-container');
-
-          window.graphContainer = graphContainer;
-          window.treeContainer = treeContainer;
-        }
         this.sidebar.setTitle('3-Colorable');
         this.createTableVisibilityButton();
         const graph = new Graph('graph-container');
@@ -907,24 +884,13 @@ export default class SectionHandler {
         niceTreeDecomposition.load(niceTreeDecompositionData);
         niceTreeDecomposition.setGraph(graph);
         niceTreeDecomposition.enableThreeColor();
-        const controlsContainer = d3
-          .select('#output')
-          .append('div')
-          .attr('class', 'controls-container');
-
-        controlsContainer
-          .append('span')
-          .text('keyboard_arrow_left')
-          .attr('class', 'material-icons pagination-arrows')
-          .on('click', () => niceTreeDecomposition.previousDPStep());
-
-        controlsContainer
-          .append('span')
-          .text('keyboard_arrow_right')
-          .attr('class', 'material-icons pagination-arrows')
-          .on('click', () => niceTreeDecomposition.nextStep());
+        this.addAlgorithmControls(
+          () => niceTreeDecomposition.previousDPStep(),
+          () => niceTreeDecomposition.nextDPStep(),
+        );
       }, 'chapter3'),
       new Section(async () => {
+        if (!window.graphContainer && !window.treeContainer) setupGraphAndTreeContainers();
         this.sidebar.addContent(`
           <div>
           <p>Here is presented an algorithm for finding whether or not a graph has a <i>Hamiltonian cycle</i> given a graph and a tree decomposition.</p>
@@ -1107,21 +1073,22 @@ export default class SectionHandler {
 
   addAlgorithmControls(previous, next) {
     const controlsContainer = d3
-      .select('#output')
+      .select('#output-surface')
       .append('div')
       .attr('class', 'controls-container');
 
     controlsContainer
       .append('span')
-      .text('keyboard_arrow_left')
+      .text('keyboard_arrow_up')
       .attr('class', 'material-icons pagination-arrows')
-      .on('click', previous);
+      .attr('id', 'arrow-up')
+      .on('click', next);
 
     controlsContainer
       .append('span')
-      .text('keyboard_arrow_right')
+      .text('keyboard_arrow_down')
       .attr('class', 'material-icons pagination-arrows')
-      .on('click', next);
+      .on('click', previous);
   }
 
   addContainers() {
@@ -1147,6 +1114,11 @@ export default class SectionHandler {
     if (this.tree) this.tree.clear();
     d3.select('#graph-container').classed('graph-classes', false);
     this.handleQueryString();
+    if (this.currentSectionIndex + 1 === 1) {
+      d3.select('#container').style('height', '100%');
+    } else {
+      d3.select('#container').style('height', '93%');
+    }
     this.removeElements();
     this.sections.map((section) => (section.isActive = false));
     this.currentSection.isActive = true;
@@ -1183,7 +1155,7 @@ export default class SectionHandler {
     d3.select('#dp-container').remove();
     d3.select('#color-table').remove();
     d3.select('#graph-tooltip').remove();
-    d3.select('#output').selectAll('*').remove();
+    d3.select('#output-surface').selectAll('*').remove();
     d3.select('#tooltip').remove();
     d3.select('#tooltip-arrow').remove();
     d3.select('#tree1').remove();

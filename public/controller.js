@@ -149,6 +149,8 @@ d3.select('body').on('keydown', () => {
       if (window.sectionHandler) window.sectionHandler.goNextSection();
       break;
     case 'ArrowUp':
+      d3.select('#arrow-up').style('animation', 'animation: pulse-animation 0.5s');
+      // d3.select('#arrow-up').classed('pulse', false);
       if (window.niceTreeDecomposition) window.niceTreeDecomposition.nextDPStep();
       if (window.isCustomAlgorithm) {
         const N = window.root.descendants().length;

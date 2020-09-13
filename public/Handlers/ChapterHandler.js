@@ -17,7 +17,9 @@ function removeEverythingExceptLoader() {
 }
 
 function createOutputContainer() {
-  d3.select('#app-area').append('div').attr('id', 'output');
+  const lol = d3.select('#app-area')
+    .append('div')
+    .attr('id', 'output');
 }
 
 function createVisualContainer() {
@@ -106,10 +108,14 @@ function createCustomAlgorithmCodeEditorContainer() {
     .append('div')
     .attr('class', 'card code-card');
 
-  neww.append('div')
+  const realContainer = neww
+    .append('div')
+    .attr('class', 'real-container');
+
+  realContainer.append('div')
     .attr('class', 'code-header');
 
-  neww.append('div')
+  realContainer.append('div')
     .attr('class', 'code-container')
     .attr('id', 'code-editor');
 }
@@ -150,9 +156,6 @@ export default class ChapterHandler {
       new Chapter(async () => {
         window.isCustomAlgorithm = true;
         createCustomAlgorithmGrid();
-
-        d3.se;
-
         createCustomAlgorithmCodeEditorContainer();
         createCustomAlgorithmGraphContainer();
         createCustomAlgorithmNiceTreeDecompositionContainer();
@@ -411,11 +414,19 @@ export default class ChapterHandler {
     const sidebar = new Sidebar(this.currentChapter.name);
     createAppAreaContainer();
     createVisualContainer();
-    createOutputContainer();
     this.currentChapter.create();
     const params = new URLSearchParams(location.search);
     const currentSectionIndex = params.get('section') - 1;
     const chapterNumber = this.chapters.indexOf(this.currentChapter) + 1;
+
+    if (chapterNumber !== 2) {
+      createOutputContainer();
+      createOutputSurface();
+      // console.log('he');
+    } else {
+      d3.select('#container').style('height', '100%');
+    }
+
     const chapterNumberString = `chapter${chapterNumber}`;
     const sectionHandler = new SectionHandler(sidebar, chapterNumberString);
     this.sectionHandler = sectionHandler;
@@ -433,4 +444,8 @@ export default class ChapterHandler {
     this.chapters.map((c) => (c.isActive = false));
     this.currentChapter.isActive = true;
   }
+}
+
+function createOutputSurface() {
+  d3.select('#output').append('div').attr('id', 'output-surface');
 }

@@ -202,29 +202,38 @@ body {
 }
 
 #output {
+  width: 100%;
+  height: 7%;
   display: flex;
   justify-content: center;
   align-items: center;
+}
+
+#output-surface {
+  display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 85%;
   width: 100%;
-  height: 7%;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  border-radius: var(--border);
 }
 
 @media (min-width: 1800px) {
   #center-container {
     display: flex;
-    height: 95%;
+    height: 98%;
     width: 80%;
-    padding: 1em;
   }
 }
 
 @media (max-width: 1800px) {
   #center-container {
     display: flex;
-    height: 95%;
-    width: 100%;
-    padding: 1em;
+    height: 98%;
+    width: 98%;
   }
 }
 
@@ -446,7 +455,6 @@ svg {
 .chapter-title {
   text-align: center;
   color: var(--text-color);
-  font-weight: 600;
 }
 
 .overlay {
@@ -628,6 +636,13 @@ svg {
 .controls-number {
   font-size: 26px;
   font-weight: bold;
+}
+
+.controls-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
 }
 
 .material-icons.code-buttons {
@@ -1103,6 +1118,12 @@ th {
   grid-template-columns: 1fr 1fr;
 }
 
+.real-container {
+  position: absolute;
+  height: 100%;
+  width: 100%;
+}
+
 .code-header {
   border-radius: 8px 8px 0 0;
   background: #15314b;
@@ -1159,3 +1180,4 @@ th {
   display: flex;
   flex-direction: column;
 }
+

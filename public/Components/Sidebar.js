@@ -163,7 +163,7 @@ export default class Sidebar {
 
   addTitle(title) {
     this.titleContainer
-      .append('h2')
+      .append('h3')
       .text(title)
       .attr('class', 'chapter-title');
   }
