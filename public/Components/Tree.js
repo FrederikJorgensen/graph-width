@@ -330,11 +330,47 @@ export default class Tree {
   }
 
   createSvg() {
-    console.log('this.height', this.height);
     this.svg = d3
       .select(`#${this.container}`)
       .append('svg')
       .attr('width', this.width)
       .attr('height', '100%');
+  }
+
+  setAllNodes() {
+    this.root.eachAfter((node) => {
+      node.largestSet = 0;
+    });
+  }
+
+  createCustomAlgorithmHtmlTableString(table) {
+    const keys = [...Object.keys(table)];
+
+    let tableBody = '';
+
+    for (const key of keys) {
+      const value = table[key];
+      tableBody += `
+        <tr>
+          <td>${key}</td>
+          <td>${value}</td>
+        </tr>`;
+    }
+
+    const tableHeader = `
+    <thead>
+      <tr>
+        <td>#1</td>
+        <td>#2</td>
+      </tr>
+    </thead>`;
+
+    const tableHtmlString = `
+      <table class="hamiltonianTable">
+        ${tableHeader}
+        ${tableBody}
+      </table>`;
+
+    return tableHtmlString;
   }
 }

@@ -991,7 +991,7 @@ export default class Graph {
     }
   }
 
-  clear() {
+  removeSvg() {
     if (this.svg) this.svg.remove();
     this.nodes = [];
     this.links = [];
@@ -1345,7 +1345,7 @@ export default class Graph {
   }
 
   enableDrawing() {
-    if (this.svg) this.clear();
+    if (this.svg) this.removeSvg();
     const w = document.getElementById(this.container).offsetWidth;
     const h = document.getElementById(this.container).offsetHeight;
     this.width = w;
@@ -1405,7 +1405,7 @@ export default class Graph {
   }
 
   loadGraph(graph) {
-    if (this.svg) this.clear();
+    if (this.svg) this.removeSvg();
     this.createSvg();
     this.graph = graph;
     this.nodes = graph.nodes;
@@ -1599,7 +1599,7 @@ export default class Graph {
   }
 
   randomGraph(vertices, edges) {
-    if (this.svg) this.clear();
+    if (this.svg) this.removeSvg();
     let randomGraph;
     if (vertices === undefined && edges === undefined) randomGraph = generateRandomGraph(10, 10);
     else randomGraph = generateRandomGraph(vertices, edges);

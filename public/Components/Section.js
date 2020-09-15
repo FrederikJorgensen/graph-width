@@ -11,5 +11,7 @@ export default class Section {
     await this.createSection();
     setNavbarHeight();
     d3.select('#overlay').remove();
+    d3.select('.overlay').remove();
+    window.isSectionLoaded = true;
   }
 }

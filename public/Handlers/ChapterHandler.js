@@ -285,7 +285,7 @@ export default class ChapterHandler {
   handleCreateNewGraph() {
     // const numberOfVertices = document.getElementById('vertices-number').value;
     // const numberOfEdges = document.getElementById('edges-number').value;
-    if (this.treeDecomposition) this.treeDecomposition.clear();
+    if (this.treeDecomposition) this.treeDecomposition.removeSvg();
     if (this.niceTreeDecomposition) this.niceTreeDecomposition.removeSvg();
     const numberOfVertices = 10;
     const numberOfEdges = 10;
@@ -306,8 +306,8 @@ export default class ChapterHandler {
         this.graph = d3
           .select('#algo-text')
           .text('Current Algorithm = None Selected');
-        if (graph.svg) graph.clear();
-        if (td) td.clear();
+        if (graph.svg) graph.removeSvg();
+        if (td) td.removeSvg();
         d3.select('#output').html(null);
         if (treeDecomposition.svg) treeDecomposition.clear();
         if (niceTreeDecomposition.svg) niceTreeDecomposition.clear();
@@ -361,8 +361,8 @@ export default class ChapterHandler {
   }
 
   handleDrawGraph() {
-    if (this.treeDecomposition) this.treeDecomposition.clear();
-    if (this.niceTreeDecomposition) this.niceTreeDecomposition.clear();
+    if (this.treeDecomposition) this.treeDecomposition.removeSvg();
+    if (this.niceTreeDecomposition) this.niceTreeDecomposition.removeSvg();
     this.graph.enableDrawing();
     this.graphLoaded = true;
   }

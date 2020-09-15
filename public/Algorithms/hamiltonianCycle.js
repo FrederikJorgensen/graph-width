@@ -244,6 +244,9 @@ export default function hamiltonianCycle(tree) {
 
     switch (tree.nodeType) {
       case 'leaf':
+        tree.graph.hideTooltip();
+        tree.graph.hideArrow();
+        tree.graph.hideHull();
         node.table = createLeafNodeTable();
         break;
       case 'introduce':

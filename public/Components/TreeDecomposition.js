@@ -302,6 +302,10 @@ export default class TreeDecomposition {
     this.checkTreeDecomposition();
   }
 
+  setGraph(graph) {
+    this.graph = graph;
+  }
+
   setg() {
     this.nodes.forEach((node) => {
       node.graph = this;

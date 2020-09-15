@@ -11,7 +11,7 @@ export default class Sidebar {
   clear() {
     this.content.html(null);
     d3.selectAll('.button-container').remove();
-    d3.select('.quiz').remove();
+    d3.select('#quiz').remove();
     if (this.exerciseContainer) this.exerciseContainer.remove();
   }
 
@@ -107,7 +107,8 @@ export default class Sidebar {
   addQuiz() {
     const quiz = this.contentContainer
       .append('div')
-      .attr('class', 'quiz');
+      .attr('class', 'quiz')
+      .attr('id', 'quiz');
 
     this.quiz = quiz;
     const choices = this.quiz.append('div').attr('class', 'choices');
@@ -254,5 +255,12 @@ export default class Sidebar {
 
   addContent(text) {
     this.content.html(text);
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\\[', right: '\\]', display: true },
+      ],
+    });
   }
 }

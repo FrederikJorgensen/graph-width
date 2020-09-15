@@ -16,6 +16,7 @@ import {
   nonValidTreeDecomposition,
   validTreeDecomposition,
 } from '../Utilities/graphs.js';
+import { addOverlay } from '../controller.js';
 
 function createOutputContainer() {
   d3.select('#app-area')
@@ -290,11 +291,11 @@ export default class SectionHandler {
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
-            <p>If there are different tree decompositions for a graph how do know which ones to use?</p>
-            <p>We want to use the tree decomposition with the lowest possible vertices in it's largest bag, as this makes many algorithms compute faster on the tree decomposition.</p>
-            <p class="fact"><span class="fact-title">Fact:</span> The <i>width</i> of a tree decomposition is the size of the largest bag minus 1.</p>
-            <p class="fact"><span class="fact-title">Fact:</span> The <i>treewidth</i> of a graph is the minimum width amongst all the tree decompositions of the graph.</p>
-            `);
+        <p>If there are different tree decompositions for a graph how do know which ones to use?</p>
+        <p>We want to use the tree decomposition with the lowest possible vertices in it's largest bag, as this makes many algorithms compute faster on the tree decomposition.</p>
+        <p class="fact"><span class="fact-title">Fact:</span> The <i>width</i> of a tree decomposition is the size of the largest bag minus 1.</p>
+        <p class="fact"><span class="fact-title">Fact:</span> The <i>treewidth</i> of a graph is the minimum width amongst all the tree decompositions of the graph.</p>
+        `);
         this.sidebar.addExercise(
           'What is the width of the current tree decomposition?',
         );
@@ -310,6 +311,11 @@ export default class SectionHandler {
         this.sidebar.addChoice('1', false);
         this.sidebar.addChoice('2', true);
         this.sidebar.addChoice('3', false);
+        function timeout(ms) {
+          return new Promise((resolve) => setTimeout(resolve, ms));
+        }
+        console.log('should be first');
+        await timeout(1500);
         this.sidebar.addSolution(
           'The treewidth of a tree decomposition is the size of the largest bag - 1.',
         );
@@ -1095,7 +1101,9 @@ export default class SectionHandler {
     }
   }
 
-  createSection() {
+  async createSection() {
+    window.isSectionLoaded = false;
+    addOverlay();
     if (!this.currentSection) this.currentSection = this.sections[0];
     if (this.sidebar) this.sidebar.clear();
     if (this.tree) this.tree.clear();
@@ -1109,26 +1117,14 @@ export default class SectionHandler {
       createOutputSurface();
     }
 
-    if (window.chapterNumber === 2 && window.sectionNumber !== 15) {
-      console.log('here');
-      d3.select('#container').style('height', '100%');
-    }
-
+    if (window.chapterNumber === 2 && window.sectionNumber !== 15) d3.select('#container').style('height', '100%');
     d3.select('#graph-container').classed('graph-classes', false);
     this.handleQueryString();
     this.removeElements();
     this.sections.map((section) => (section.isActive = false));
     this.currentSection.isActive = true;
-    this.currentSection.create();
     this.sidebar.updateProgressBar();
-    renderMathInElement(document.body, {
-      delimiters: [
-        { left: '$$', right: '$$', display: true },
-        { left: '$', right: '$', display: false },
-        { left: '\\[', right: '\\]', display: true },
-      ],
-    });
-    renderMathInElement(document.body);
+    await this.currentSection.create();
   }
 
   handleQueryString() {
@@ -1162,18 +1158,28 @@ export default class SectionHandler {
     d3.select('#tableX').remove();
   }
 
-  goPreviousSection() {
+  async goPreviousSection() {
+    if (window.isSectionLoaded === false) {
+      console.log('here');
+      return;
+    }
+    if (!window.isSectionLoaded) return;
     if (this.currentSectionIndex === 0) return;
     this.currentSectionIndex--;
     this.currentSection = this.sections[this.currentSectionIndex];
-    this.createSection();
+    await this.createSection();
   }
 
-  goNextSection() {
+  async goNextSection() {
+    if (window.isSectionLoaded === false) {
+      console.log('here');
+      return;
+    }
+
     if (this.currentSectionIndex === this.sections.length - 1) return;
     this.currentSectionIndex++;
     this.currentSection = this.sections[this.currentSectionIndex];
-    this.createSection();
+    await this.createSection();
   }
 
   goToSection(section) {
