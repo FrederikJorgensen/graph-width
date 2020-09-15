@@ -249,7 +249,7 @@ export default class ChapterHandler {
           const graph = new Graph('sandbox-graph-container');
           this.graph = graph;
 
-          const treeDecomposition = new Graph('tree-decomposition-container');
+          const treeDecomposition = new Graph('tree-decomposition-container', 'tree');
           this.treeDecomposition = treeDecomposition;
 
           const niceTreeDecomposition = new Tree('nice-tree-decomposition-container');
