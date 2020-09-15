@@ -1,23 +1,38 @@
-/* eslint-disable no-unused-expressions */
-/* eslint-disable func-names */
-/* eslint-disable no-undef */
-/* eslint-disable no-shadow */
-/* eslint-disable no-continue */
-/* eslint-disable no-use-before-define */
-/* eslint-disable max-len */
-/* eslint-disable no-return-assign */
-/* eslint-disable array-callback-return */
-/* eslint-disable prefer-promise-reject-errors */
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-async-promise-executor */
-/* eslint-disable consistent-return */
-/* eslint-disable no-useless-return */
-/* eslint-disable no-bitwise */
-import generateRandomGraph, { deepClone } from '../Utilities/helpers.js';
 import * as readTree from '../Utilities/readTree.js';
 import { contextMenu as menu } from '../Utilities/ContextMenu.js';
+import generateRandomGraph from '../Utilities/helpers.js';
 
 const colors = d3.scaleOrdinal(d3.schemeCategory10);
+
+function resetTreeDecompositionStyles() {
+  d3.selectAll('ellipse')
+    .style('fill', '#2ca02c')
+    .attr('rx', 35)
+    .attr('ry', 25)
+    .style('opacity', 1);
+}
+
+function returnAdj(links) {
+  const adjacencyList = [];
+  links.forEach((d) => {
+    adjacencyList[`${d.source.id}-${d.target.id}`] = true;
+    adjacencyList[`${d.target.id}-${d.source.id}`] = true;
+  });
+  return adjacencyList;
+}
+
+
+function resetLinkStyles() {
+  d3.selectAll('#tree-container line').style('opacity', 1);
+}
+
+function findNodeToColor(subGraph, vertex) {
+  return subGraph.nodes.find((node) => node.id === vertex);
+}
+
+function resetColorsInSubgraph(subGraph) {
+  subGraph.nodes.map((node) => node.color = null);
+}
 
 function resetSeparatorExerciseText() {
   d3.select('#separator-output').html('Click on a vertex to include it into the separator set.');
@@ -29,57 +44,10 @@ function hull(points) {
   return d3.polygonHull(points);
 }
 
-function generatePowerSet(array, n) {
-  const result = [];
-
-  for (let i = 1; i < (1 << array.length); i++) {
-    const subset = [];
-    for (let j = 0; j < array.length; j++) if (i & (1 << j)) subset.push(array[j]);
-
-    if (subset.length === n) result.push(subset);
-  }
-
-  return result;
-}
-
-function highlightVertex(nodeId) {
-  d3.select(`#graph-node-${nodeId}`)
-    .transition()
-    .duration(200)
-    .style('fill', 'orange');
-}
-
-function removeHighlightVertex(nodeId) {
-  d3.select(`#graph-node-${nodeId}`)
-    .transition()
-    .duration(200)
-    .style('fill', '#1f77b4');
-}
-
 function timeout(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function repeat(nodesToHighlight, animationSpeed) {
-  return new Promise(async (resolve) => {
-    let i = 0;
-    while (i < 5) {
-      d3.selectAll('circle')
-        .filter((node) => nodesToHighlight.includes(node))
-        .transition()
-        .duration(200)
-        .style('fill', 'orange')
-        .transition()
-        .duration(200)
-        .style('fill', '#1f77b4');
-      i++;
-      await timeout(animationSpeed);
-      if (i === 4) {
-        resolve();
-      }
-    }
-  });
-}
 
 function errorSvg() {
   return `<svg class="exercise-icon incorrect-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -163,8 +131,12 @@ const stopAllTransitions = () => {
 };
 
 export default class Graph {
-  constructor(container) {
+  constructor(container, type, graphOfTd) {
     this.container = container;
+    this.type = type;
+    this.graphOfTd = graphOfTd;
+    this.width = document.getElementById(this.container).offsetWidth;
+    this.height = document.getElementById(this.container).offsetHeight;
     this.maxStop = false;
     this.animationSpeed = 500;
     this.selectedNodes = [];
@@ -191,32 +163,18 @@ export default class Graph {
   }
 
   async runEdgeCoverage() {
-    d3.select('.math-container').html(null);
     this.anim = 0;
-    this.resetLinkStyles();
-    this.resetTreeDecompositionStyles();
+    resetLinkStyles();
+    resetTreeDecompositionStyles();
     stopAllTransitions();
     await this.edgeCoverage();
-    d3.select('.math-container').html(`<span class="material-icons correct-answer">check</span> Since every edge and its adjacent vertices appear in some 
-    bag of the tree decomposition it also satifies <strong>property 2</strong>.
-    <br><br>
-    NOTE: It's possible not all the bags in the tree decomposition is highlighted if the graph contains isolated vertices since they obviously do not have an edge and therefor we don't test it.`);
   }
 
   async runNodeCoverage() {
-    d3.select('.math-container').html(null);
     stopAllTransitions();
-    this.resetTreeDecompositionStyles();
+    resetTreeDecompositionStyles();
     this.anim = 0;
     await this.testNodeCoverage();
-    d3.select('.math-container').html('<span class="material-icons correct-answer">check</span> Every vertex in the graph appears in some bag of the tree decomposition, so it satifies <strong>property 1</strong>.');
-  }
-
-  isIntroducedVertexNeighbor(set, introducedVertex, adjacencyList) {
-    for (const s of set) {
-      if (adjacencyList[`${s}-${introducedVertex}`]) return true;
-    }
-    return false;
   }
 
   isEdge(w, v) {
@@ -240,7 +198,7 @@ export default class Graph {
       verticesInSubGraph.push(node.id);
     });
 
-    const adjacencyList = this.returnAdj(subGraph.links);
+    const adjacencyList = returnAdj(subGraph.links);
 
     if (this.isNeighborInSet(array, adjacencyList)) return true;
     return false;
@@ -255,8 +213,8 @@ export default class Graph {
       if (vertices.includes(link.target.id)) return false;
       return true;
     });
-    this.isSubGraphDisconnected(restNodes, restLinks);
 
+    this.isSubGraphDisconnected({ nodes: restNodes, links: restLinks });
     this.nodes.map((node) => {
       if ('cluster' in node === false || node.cluster === null) {
         node.cluster = 1;
@@ -309,78 +267,9 @@ export default class Graph {
     this.simulation.alpha(0.1).restart();
   }
 
-  showCoherence(vertices) {
-    d3.selectAll('circle')
-      .filter((node) => vertices.includes(node.id))
-      .transition()
-      .duration(300)
-      .style('opacity', 0.4);
-
-    d3.selectAll('#graph-container text')
-      .filter((node) => vertices.includes(node.id))
-      .transition()
-      .duration(300)
-      .style('opacity', 0.4);
-
-    d3.selectAll('#graph-container line')
-      .filter((link) => vertices.includes(link.source.id) || vertices.includes(link.target.id))
-      .transition()
-      .duration(300)
-      .style('opacity', 0.4);
-  }
-
-  hideCoherence() {
-    d3.selectAll('circle')
-      .filter((node) => node.id !== 0)
-      .transition()
-      .duration(300)
-      .style('opacity', 1);
-
-    d3.selectAll('line')
-      .transition()
-      .duration(300)
-      .style('opacity', 1);
-
-    d3.selectAll('#graph-container text')
-      .filter((node) => node.id !== 0)
-      .transition()
-      .duration(300)
-      .style('opacity', 1);
-  }
-
-  toggleCoherenceProof() {
-    d3.selectAll('ellipse').on('mouseover', (d) => this.graphOfTd.showCoherence(d.vertices));
-    d3.selectAll('ellipse').on('mouseout', () => this.graphOfTd.hideCoherence());
-  }
-
   toggleSeparator() {
     d3.selectAll('ellipse').on('mouseover', (d) => this.graphOfTd.showSeparator(d.vertices));
     d3.selectAll('ellipse').on('mouseout', () => this.graphOfTd.hideSeparator());
-  }
-
-  async animateDeleteNode(node) {
-    if (this.cancel) return;
-
-    d3.selectAll('#tree-container line')
-      .filter((d) => (d.source === node) || (d.target === node))
-      .transition()
-      .duration(this.animDuration)
-      .style('opacity', 0);
-
-    d3
-      .selectAll('#tree-container text')
-      .filter((d) => d === node)
-      .transition()
-      .duration(this.animDuration)
-      .style('opacity', 0);
-
-    await d3
-      .selectAll('#tree-container ellipse')
-      .filter((d) => d === node)
-      .transition()
-      .duration(this.animDuration)
-      .style('opacity', 0)
-      .end();
   }
 
   visitBag(bagId) {
@@ -429,14 +318,13 @@ export default class Graph {
     return true;
   }
 
-  // eslint-disable-next-line class-methods-use-this
   checkIfIntroducedVertex(childState, subTree) {
     const subGraph = this.createSubgraph(subTree);
-    this.resetColorsInSubgraph(subGraph);
+    resetColorsInSubgraph(subGraph);
     const vertices = [...childState.keys()];
 
     for (const vertex of vertices) {
-      const nodeToColor = this.findNodeToColor(subGraph, vertex);
+      const nodeToColor = findNodeToColor(subGraph, vertex);
       const color = childState.get(vertex);
       nodeToColor.color = color;
     }
@@ -449,14 +337,6 @@ export default class Graph {
       }
     }
     return false;
-  }
-
-  findNodeToColor(subGraph, vertex) {
-    return subGraph.nodes.find((node) => node.id === vertex);
-  }
-
-  resetColorsInSubgraph(subGraph) {
-    subGraph.nodes.map((node) => node.color = null);
   }
 
   checkIntroducedVertex(introducedNode, positionTracker, oldState, color, subTree) {
@@ -500,19 +380,9 @@ export default class Graph {
   }
 
   highlightSubGraph(subGraph) {
-    this.path2.style('opacity', 0);
     const { nodes } = subGraph;
-
     this.path.style('opacity', 0.5);
     this.separatorNodes = nodes;
-    this.simulation.restart();
-  }
-
-  highlightSubGraph2(subGraph) {
-    const { nodes } = subGraph;
-
-    this.path2.style('opacity', 0.5);
-    this.separatorNodes2 = nodes;
     this.simulation.restart();
   }
 
@@ -578,29 +448,6 @@ export default class Graph {
     return false;
   }
 
-  returnAdj(links) {
-    const adjacencyList = [];
-    links.forEach((d) => {
-      adjacencyList[`${d.source.id}-${d.target.id}`] = true;
-      adjacencyList[`${d.target.id}-${d.source.id}`] = true;
-    });
-    return adjacencyList;
-  }
-
-  runMis(subTree, set, introducedVertex, isHovering) {
-    if (set.length === 0) return 0;
-    const subGraph = this.createSubgraph(subTree);
-    const verticesInSubGraph = [];
-    subGraph.nodes.forEach((node) => {
-      verticesInSubGraph.push(node.id);
-    });
-    const adjacencyList = this.returnAdj(subGraph.links);
-    if (this.isIntroducedVertexNeighbor(set, introducedVertex, adjacencyList)) return -9999;
-    if (this.isNeighborInSet(set, adjacencyList)) return -9999;
-    const mis = this.max(verticesInSubGraph, adjacencyList, set, isHovering);
-    return mis.length;
-  }
-
   computeTrivialTreeDecomposition() {
     const bag = [];
     const nodes = [];
@@ -644,15 +491,6 @@ export default class Graph {
         this.anim++;
       });
     });
-  }
-
-  resetLinkStyles() {
-    d3.selectAll('#tree-container line').style('opacity', 1);
-  }
-
-  resetTextStyles() {
-    d3.selectAll('#tree-container text')
-      .style('opacity', 1);
   }
 
   testNodeCoverage() {
@@ -715,11 +553,11 @@ export default class Graph {
         .duration(this.animDuration)
         .delay(this.animDuration * this.anim)
         .style('stroke', 'orange')
-        .style('stroke-width', '6px')
+        .style('stroke-width', '5px')
         .on('end', () => {
-          d3.selectAll('line')
-            .style('stroke', 'white')
-            .style('stroke-width', '2px');
+          d3.selectAll('#tree-container line')
+            .style('stroke', 'black')
+            .style('stroke-width', '2.5px');
         });
 
 
@@ -771,6 +609,14 @@ export default class Graph {
       const jsonString = JSON.stringify(newJson);
       makeRequest('POST', '/compute', jsonString).then(() => resolve());
     });
+  }
+
+  highlightNodeColor(nodeId, color) {
+    d3.select(`#graph-node-${nodeId}`).style('fill', color);
+  }
+
+  resetNodeColors() {
+    d3.selectAll('#graph-container circle').style('fill', 'rgb(31, 119, 180)');
   }
 
   resetExercises() {
@@ -940,12 +786,13 @@ export default class Graph {
     const { nodes } = graph;
     const { links } = graph;
 
+    let componentCount = 1;
+
     if (nodes.length === 0) {
       componentCount = 0;
       return;
     }
 
-    let componentCount = 1;
     let cluster = 2;
 
     componentCount = 1;
@@ -1169,14 +1016,6 @@ export default class Graph {
       this.nodeSvg.on('mouseover', (d) => this.hoverEffect(d));
       this.nodeSvg.on('mouseout', this.resetNodeStyling);
     }
-  }
-
-  resetTreeDecompositionStyles() {
-    d3.selectAll('ellipse')
-      .style('fill', '#2ca02c')
-      .attr('rx', 35)
-      .attr('ry', 25)
-      .style('opacity', 1);
   }
 
   isConnected() {
@@ -1558,164 +1397,115 @@ export default class Graph {
     this.simulation = simulation;
   }
 
-  highlightNodeColor(nodeId, color) {
-    d3.select(`#graph-node-${nodeId}`).style('fill', color);
+  createSvg() {
+    this.svg = d3.select(`#${this.container}`)
+      .append('svg')
+      .attr('width', this.width)
+      .attr('height', this.height);
   }
 
-  resetNodeColors() {
-    d3.selectAll('#graph-container circle').style('fill', 'rgb(31, 119, 180)');
-  }
-
-  loadGraph(graph, type, graphOfTd) {
+  loadGraph(graph) {
     if (this.svg) this.clear();
-    this.graphOfTd = graphOfTd;
+    this.createSvg();
     this.graph = graph;
     this.nodes = graph.nodes;
     this.links = graph.links;
-    const w = document.getElementById(this.container).offsetWidth;
-    const h = document.getElementById(this.container).offsetHeight;
-    this.width = w;
-    this.height = h;
-    const svg = d3.select(`#${this.container}`).append('svg').attr('width', this.width).attr('height', this.height);
-
-    this.svg = svg;
-
-    this.svg
-      .append('defs')
-      .append('marker')
-      .attr('id', 'arrow')
-      .attr('viewBox', '0 -5 10 10')
-      .attr('refX', 5)
-      .attr('refY', 0)
-      .attr('markerWidth', 4)
-      .attr('markerHeight', 4)
-      .attr('oriten', 'auto')
-      .append('path')
-      .attr('d', 'M0,-5L10,0L0,5');
-
-    const path = svg.append('path')
-      .attr('fill', 'orange')
-      .attr('stroke', 'orange')
-      .attr('stroke-width', 16)
-      .attr('opacity', 0);
-
-    this.path = path;
-
-    this.path2 = this.svg.append('path')
-      .attr('fill', 'steelblue')
-      .attr('stroke', 'steelblue')
-      .attr('stroke-width', 16)
-      .attr('opacity', 0);
-
-    const linkSvg = svg.selectAll('line')
-      .data(graph.links)
-      .enter()
-      .append('line')
-      .attr('id', (d) => `link-${d.source.id}-${d.target.id}`)
-      .attr('class', 'graphLink');
-
-    this.linkSvg = linkSvg;
-
-    if (type === 'tree') {
-      const treeg = svg.selectAll('g')
-        .data(graph.nodes)
-        .enter()
-        .append('g')
-        .attr('class', 'td')
-        .call(d3.drag()
-          .on('start', (v) => {
-            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-            [v.fx, v.fy] = [v.x, v.y];
-          })
-          .on('drag', (v) => {
-            [v.fx, v.fy] = [d3.event.x, d3.event.y];
-          })
-          .on('end', (v) => {
-            if (!d3.event.active) simulation.alphaTarget(0);
-            [v.fx, v.fy] = [null, null];
-          }));
-
-      this.treeg = treeg;
-
-      this.nodeSvg = svg.selectAll('g')
-        .append('ellipse')
-        .attr('rx', (d) => d.label.length * 8)
-        .attr('ry', 25)
-        .style('fill', '#2ca02c');
-
-      svg.selectAll('g')
-        .append('text')
-        .attr('dy', -4)
-        .text((d) => {
-          if (type === 'tree') {
-            return d.label.substring(0, 2);
-          }
-          return d.id;
-        })
-        .style('letter-spacing', '6px')
-        .attr('class', 'graph-label');
-
-      svg.selectAll('g')
-        .append('text')
-        .attr('dy', 15)
-        .text((d) => d.label.substring(2))
-        .style('letter-spacing', '4px')
-        .attr('class', 'graph-label');
+    this.createSimulation();
+    this.createArrow();
+    this.createLinkSvg();
+    this.addHullPath();
+    if (this.type === 'tree') {
+      this.createGroupElementForTreeNodes();
+      this.createTreeDecompositionNodeSvgs();
+      this.createTreeDecompositionLabels();
+      this.createTreeDecompositionLabels2();
     } else {
-      this.nodeSvg = svg.selectAll('circle')
-        .data(graph.nodes)
-        .enter()
-        .append('circle')
-        .attr('id', (d) => `graph-node-${d.id}`)
-        .style('opacity', (d) => {
-          if (d.id === 0) return 0;
-        })
-        .attr('r', 18)
-        .style('fill', '#1f77b4')
-        .attr('class', 'nonhighlight')
-        .call(d3.drag()
-          .on('start', (v) => {
-            d3.selectAll('circle').style('cursor', 'grabbing');
-            this.svg.style('cursor', 'grabbing');
-            if (!d3.event.active) simulation.alphaTarget(0.3).restart();
-            [v.fx, v.fy] = [v.x, v.y];
-          })
-          .on('drag', (v) => [v.fx, v.fy] = [d3.event.x, d3.event.y])
-          .on('end', (v) => {
-            d3.selectAll('circle').style('cursor', 'grab');
-            this.svg.style('cursor', 'auto');
-            if (!d3.event.active) simulation.alphaTarget(0);
-            [v.fx, v.fy] = [null, null];
-          }));
-
-      svg.selectAll('text')
-        .data(graph.nodes)
-        .enter()
-        .append('text')
-        .style('opacity', (d) => {
-          if (d.id === 0) return 0;
-        })
-        .attr('dy', 4.5)
-        .text((d) => (d.label ? d.label : d.id))
-        .attr('class', 'graph-label');
+      this.createGraphNodeSvg();
+      this.createGraphLabels();
     }
+    this.simulation.force('link').links(this.links);
+    this.buildAdjacencyList();
+    this.setg();
+  }
 
+  createGroupElementForTreeNodes() {
+    this.svg.selectAll('g')
+      .data(this.nodes)
+      .enter()
+      .append('g')
+      .attr('class', 'td')
+      .call(d3.drag()
+        .on('start', (v) => {
+          if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
+          [v.fx, v.fy] = [v.x, v.y];
+        })
+        .on('drag', (v) => {
+          [v.fx, v.fy] = [d3.event.x, d3.event.y];
+        })
+        .on('end', (v) => {
+          if (!d3.event.active) this.simulation.alphaTarget(0);
+          [v.fx, v.fy] = [null, null];
+        }));
+  }
+
+  createGraphLabels() {
+    this.svg.selectAll('text')
+      .data(this.nodes)
+      .enter()
+      .append('text')
+      .style('opacity', (d) => {
+        if (d.id === 0) return 0;
+      })
+      .attr('dy', 4.5)
+      .text((d) => (d.label ? d.label : d.id))
+      .attr('class', 'graph-label');
+  }
+
+  createGraphNodeSvg() {
+    this.nodeSvg = this.svg.selectAll('circle')
+      .data(this.nodes)
+      .enter()
+      .append('circle')
+      .attr('id', (d) => `graph-node-${d.id}`)
+      .style('opacity', (d) => {
+        if (d.id === 0) return 0;
+      })
+      .attr('r', 18)
+      .style('fill', '#1f77b4')
+      .attr('class', 'nonhighlight')
+      .call(d3.drag()
+        .on('start', (v) => {
+          d3.selectAll('circle').style('cursor', 'grabbing');
+          this.svg.style('cursor', 'grabbing');
+          if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
+          [v.fx, v.fy] = [v.x, v.y];
+        })
+        .on('drag', (v) => [v.fx, v.fy] = [d3.event.x, d3.event.y])
+        .on('end', (v) => {
+          d3.selectAll('circle').style('cursor', 'grab');
+          this.svg.style('cursor', 'auto');
+          if (!d3.event.active) this.simulation.alphaTarget(0);
+          [v.fx, v.fy] = [null, null];
+        }));
+  }
+
+  createSimulation() {
     const line = d3.line().curve(d3.curveBasisClosed);
 
-    const simulation = d3.forceSimulation()
-      .force('center', d3.forceCenter(w / 2, h / 2))
-      .force('x', d3.forceX(w / 2).strength(0.1))
-      .force('y', d3.forceY(h / 2).strength(0.1))
-      .nodes(graph.nodes)
+    this.simulation = d3.forceSimulation()
+      .force('center', d3.forceCenter(this.width / 2, this.height / 2))
+      .force('x', d3.forceX(this.width / 2).strength(0.1))
+      .force('y', d3.forceY(this.height / 2).strength(0.1))
+      .nodes(this.nodes)
       .force('charge', d3.forceManyBody().strength(-900))
-      .force('link', d3.forceLink(graph.links).id((d) => d.id).distance(() => {
-        if (type === 'tree') {
+      .force('link', d3.forceLink(this.links).id((d) => d.id).distance(() => {
+        if (this.type === 'tree') {
           return 100;
         }
         return 50;
       }).strength(0.9))
       .force('collision', d3.forceCollide().radius((d) => {
-        if (type === 'tree') {
+        if (this.type === 'tree') {
           return 50;
         }
         return d.r + 10;
@@ -1747,30 +1537,65 @@ export default class Graph {
           if (pointArr.length === 0) return;
           this.path.attr('d', line(hull(pointArr)));
         }
-
-        if (this.separatorNodes2) {
-          let pointArr = [];
-          const padding = 3.5;
-
-          for (let i = 0; i < this.separatorNodes2.length; i++) {
-            const node = this.separatorNodes2[i];
-            const pad = 17 + padding;
-            pointArr = pointArr.concat([
-              [node.x - pad, node.y - pad],
-              [node.x - pad, node.y + pad],
-              [node.x + pad, node.y - pad],
-              [node.x + pad, node.y + pad],
-            ]);
-          }
-          if (pointArr.length === 0) return;
-          this.path2.attr('d', line(hull(pointArr)));
-        }
       });
+  }
 
-    simulation.force('link').links(graph.links);
-    this.buildAdjacencyList();
-    this.simulation = simulation;
-    this.setg();
+  createTreeDecompositionLabels2() {
+    this.svg.selectAll('g')
+      .append('text')
+      .attr('dy', 15)
+      .text((d) => d.label.substring(2))
+      .style('letter-spacing', '4px')
+      .attr('class', 'graph-label');
+  }
+
+  createTreeDecompositionLabels() {
+    this.svg.selectAll('g')
+      .append('text')
+      .attr('dy', -4)
+      .text((d) => d.label.substring(0, 2))
+      .style('letter-spacing', '6px')
+      .attr('class', 'graph-label');
+  }
+
+  createTreeDecompositionNodeSvgs() {
+    this.nodeSvg = this.svg.selectAll('g')
+      .append('ellipse')
+      .attr('rx', (d) => d.label.length * 8)
+      .attr('ry', 25)
+      .style('fill', '#2ca02c');
+  }
+
+  createLinkSvg() {
+    this.svg.selectAll('line')
+      .data(this.links)
+      .enter()
+      .append('line')
+      .attr('id', (d) => `link-${d.source.id}-${d.target.id}`)
+      .attr('class', 'graphLink');
+  }
+
+  addHullPath() {
+    this.path = this.svg.append('path')
+      .attr('fill', 'orange')
+      .attr('stroke', 'orange')
+      .attr('stroke-width', 16)
+      .attr('opacity', 0);
+  }
+
+  createArrow() {
+    this.svg
+      .append('defs')
+      .append('marker')
+      .attr('id', 'arrow')
+      .attr('viewBox', '0 -5 10 10')
+      .attr('refX', 5)
+      .attr('refY', 0)
+      .attr('markerWidth', 4)
+      .attr('markerHeight', 4)
+      .attr('oriten', 'auto')
+      .append('path')
+      .attr('d', 'M0,-5L10,0L0,5');
   }
 
   randomGraph(vertices, edges) {

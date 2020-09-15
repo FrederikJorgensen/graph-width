@@ -44,13 +44,6 @@ export async function readLocalFile(file) {
   window.n = text.split('\n');
 }
 
-export const getAllSubsets = (theArray) => theArray.reduce(
-  (subsets, value) => subsets.concat(
-    subsets.map((set) => [value, ...set]),
-  ),
-  [[]],
-);
-
 export function deepClone(obj) {
   if (!obj || obj == true) // this also handles boolean as true and false
   { return obj; }
@@ -95,8 +88,21 @@ export function sumObjectsByKey(...objs) {
   }, {});
 }
 
+export function getKeysAsInts(obj) {
+  const keys = Object.keys(obj);
+
+  const intArray = [];
+
+  keys.forEach((key) => {
+    const int = parseInt(key, 10);
+    intArray.push(int);
+  });
+
+  return intArray;
+}
+
 export function setNavbarHeight() {
-  d3.select('.nav-wrapper').style('height', '4%');
+  d3.select('.nav-wrapper').style('height', '5%');
   d3.select('.nav-wrapper').style('visibility', 'visible');
-  d3.select('#main').style('height', '96%');
+  d3.select('#main').style('height', '95%');
 }

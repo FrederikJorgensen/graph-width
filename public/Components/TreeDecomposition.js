@@ -1,5 +1,16 @@
 import { contextMenu as menu } from '../Utilities/ContextMenu.js';
 
+function errorSvg() {
+  return `<svg class="exercise-icon incorrect-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
+}
+
+function checkmarkSvg() {
+  return `<svg class="exercise-icon correct-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+  </svg>`;
+}
+
 export default class TreeDecomposition {
   constructor(container, graph) {
     this.container = container;
@@ -177,7 +188,6 @@ export default class TreeDecomposition {
 
       const tempLinks = this.links.filter((link) => tempNodes.includes(link.source) && tempNodes.includes(link.target));
       const obj = this.checkConnectivity(tempNodes, tempLinks);
-      console.log(obj);
       if (obj.isDisconnected) return false;
     }
     return true;
@@ -188,47 +198,40 @@ export default class TreeDecomposition {
     let nodeCoverageString;
     let edgeCoverageString;
     let coherenceString;
-    let validString;
 
     if (this.isTree()) {
-      treeString = 'Tree decomposition is a tree  <span class="material-icons correct-answer">check</span>';
+      treeString = `${checkmarkSvg()} Is a tree`;
     } else {
-      treeString = 'Tree decomposition must be a tree. <span class="material-icons wrong-answer">clear</span>';
+      treeString = `${errorSvg()} Is a tree`;
     }
 
     /* Check node coverage */
     if (this.areNodesInTree()) {
-      nodeCoverageString = 'Node coverage  <span class="material-icons correct-answer">check</span>';
+      nodeCoverageString = `${checkmarkSvg()} Node coverage`;
     } else {
-      nodeCoverageString = 'Node coverage <span class="material-icons wrong-answer">clear</span>';
+      nodeCoverageString = `${errorSvg()} Node coverage`;
     }
 
     /* Check edge coverage */
     if (this.isEveryGraphLinkInTree()) {
-      edgeCoverageString = 'Edge coverage <span class="material-icons correct-answer">check</span>';
+      edgeCoverageString = `${checkmarkSvg()} Edge coverage`;
     } else {
-      edgeCoverageString = 'Edge coverage <span class="material-icons wrong-answer">clear</span>';
+      edgeCoverageString = `${errorSvg()} Edge coverage`;
     }
 
     /* Check coherence property */
     if (this.checkCoherence()) {
-      coherenceString = 'Coherence <span class="material-icons correct-answer">check</span>';
+      coherenceString = `${checkmarkSvg()} Coherence`;
     } else {
-      coherenceString = 'Coherence <span class="material-icons wrong-answer">clear</span>';
+      coherenceString = `${errorSvg()} Coherence`;
     }
 
-    if (this.isTree() && this.areNodesInTree() && this.isEveryGraphLinkInTree() && this.checkCoherence()) {
-      validString = 'This is a valid tree decomposition <span class="material-icons correct-answer">check</span>';
-    } else {
-      validString = 'This is not a valid tree decomposition <span class="material-icons wrong-answer">clear</span>';
-    }
-
-    d3.select('#output').html(`
-      <div>${treeString}</div>
-      <div>${nodeCoverageString}</div>
-      <div>${edgeCoverageString}</div>
-      <div>${coherenceString}</div>
-      <div>${validString}</div>
+    d3.select('.valid-td')
+      .html(`
+        <span>${treeString}</span>
+        <span>${nodeCoverageString}</span>
+        <span>${edgeCoverageString}</span>
+        <span>${coherenceString}</span>
     `);
   }
 
@@ -408,6 +411,7 @@ export default class TreeDecomposition {
 
   enableDrawing() {
     if (this.svg) this.clear();
+    d3.select('#output-surface').append('div').attr('class', 'valid-td');
     const w = document.getElementById(this.container).offsetWidth;
     const h = document.getElementById(this.container).offsetHeight;
     this.width = w;

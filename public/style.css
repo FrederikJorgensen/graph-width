@@ -11,6 +11,7 @@
   --algorithm-description: #faf7f7;
   --icon-color: #7a7a7a;
   --icon-background: lightgray;
+  --highlighted-color: orange;
 }
 
 [data-theme='dark'] {
@@ -27,6 +28,7 @@
   --link-color: gray;
   --algorithm-description: #1e1e1e;
   --icon-color: #7a7a7a;
+  --highlighted-color: orange;
 }
 
 html {
@@ -189,6 +191,19 @@ body {
   position: relative;
   width: 70%;
   height: 100%;
+}
+
+.valid-td {
+  width: 70%;
+  height: 100%;
+  justify-content: space-between;
+  display: flex;
+  align-items: center;
+}
+
+.valid-td span {
+  display: flex;
+  align-items: center;
 }
 
 #container {
@@ -508,22 +523,25 @@ svg {
   display: none;
   background-color: #f2f2f2;
   border-radius: 4px;
-  font-family: Arial, sans-serif;
-  font-size: 14px;
   min-width: 150px;
   border: 1px solid #d4d4d4;
   z-index: 1200;
 }
 
 .d3-context-menu ul {
-  list-style-type: none;
-  margin: 4px 0px;
+  display: flex;
+  flex-direction: column;
+  margin: 4px 0;
   padding: 0px;
+  list-style-type: none;
   cursor: default;
 }
 
 .d3-context-menu ul li {
-  padding: 4px 16px;
+  cursor: pointer;
+  margin: 0.2rem 0;
+  width: 100%;
+  color: var(--text-color);
 }
 
 .d3-context-menu ul li:hover {
@@ -554,15 +572,6 @@ svg {
   fill: rgb(238, 238, 238);
   stroke: rgb(51, 51, 51);
   stroke-width: 3.5;
-}
-
-.tree-node {
-  fill: #2ca02c;
-}
-
-.tree-link {
-  stroke: var(--link-color);
-  stroke-width: 2.5px;
 }
 
 .label {
@@ -605,7 +614,6 @@ svg {
 
 #tooltip-arrow {
   marker-end: url(#triangle);
-  opacity: 1;
   stroke: rgb(51, 51, 51);
   stroke-width: 3.5px;
   position: absolute;
@@ -902,23 +910,12 @@ hr.new4 {
 .nav {
   display: flex;
   height: 100%;
+  width: 100%;
   align-items: center;
 }
 
 .nav svg {
   padding: 0 1rem 0 1rem;
-}
-
-@media (min-width: 1800px) {
-  .nav {
-    width: 80%;
-  }
-}
-
-@media (max-width: 1800px) {
-  .nav {
-    width: 100%;
-  }
 }
 
 ul {
@@ -968,17 +965,24 @@ ul li ul li {
   width: 100%;
 }
 
+.table-wrapper {
+  position: absolute;
+  z-index: 100000;
+  transform: translate(-100%);
+  max-height: 300px;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
 /* DP Table */
 .hamiltonianTable {
-  position: absolute;
-  font-size: inherit;
   background-color: white;
+  min-width: 200px;
   color: black;
   border-collapse: collapse;
   border-radius: 5px 5px 0 0;
   box-shadow: var(--shadow);
   border: 1px solid lightgray;
-  z-index: 10000000000;
 }
 
 th {
@@ -1009,15 +1013,6 @@ th {
 
 .hamiltonianTable tbody tr:last-of-type {
   border-bottom: 4px solid var(--table-color);
-}
-
-.table-wrapper {
-  position: absolute;
-  z-index: 10;
-  width: 30%;
-  height: 30%;
-  overflow: auto;
-  transform: translate(100%, 2px);
 }
 
 .tableVisible {
@@ -1181,3 +1176,17 @@ th {
   flex-direction: column;
 }
 
+/* Tree decomposition */
+.tree-node {
+  fill: #2ca02c;
+}
+
+.tree-link {
+  stroke: black;
+  stroke-width: 2.5px;
+}
+
+.highlighted-link {
+  stroke: var(--highlighted-color);
+  stroke-width: 5px;
+}

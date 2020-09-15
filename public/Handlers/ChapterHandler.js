@@ -10,16 +10,20 @@ import Sidebar from '../Components/Sidebar.js';
 import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
 import SectionHandler from './SectionHandler.js';
-import { getAllSubsets, setNavbarHeight } from '../Utilities/helpers.js';
+import { setNavbarHeight } from '../Utilities/helpers.js';
 
 function removeEverythingExceptLoader() {
   d3.select('#main').selectAll('*:not(#overlay):not(#loader)').remove();
 }
 
 function createOutputContainer() {
-  const lol = d3.select('#app-area')
+  d3.select('#app-area')
     .append('div')
     .attr('id', 'output');
+}
+
+function createOutputSurface() {
+  d3.select('#output').append('div').attr('id', 'output-surface');
 }
 
 function createVisualContainer() {
@@ -282,7 +286,7 @@ export default class ChapterHandler {
     // const numberOfVertices = document.getElementById('vertices-number').value;
     // const numberOfEdges = document.getElementById('edges-number').value;
     if (this.treeDecomposition) this.treeDecomposition.clear();
-    if (this.niceTreeDecomposition) this.niceTreeDecomposition.clear();
+    if (this.niceTreeDecomposition) this.niceTreeDecomposition.removeSvg();
     const numberOfVertices = 10;
     const numberOfEdges = 10;
     this.graph.randomGraph(numberOfVertices, numberOfEdges);
@@ -418,13 +422,14 @@ export default class ChapterHandler {
     const params = new URLSearchParams(location.search);
     const currentSectionIndex = params.get('section') - 1;
     const chapterNumber = this.chapters.indexOf(this.currentChapter) + 1;
+    window.chapterNumber = chapterNumber;
+    window.sectionNumber = currentSectionIndex + 1;
 
-    if (chapterNumber !== 2) {
+    if (chapterNumber === 2 && currentSectionIndex + 1 !== 15) {
+      d3.select('#container').style('height', '100%');
+    } else {
       createOutputContainer();
       createOutputSurface();
-      // console.log('he');
-    } else {
-      d3.select('#container').style('height', '100%');
     }
 
     const chapterNumberString = `chapter${chapterNumber}`;
@@ -444,8 +449,4 @@ export default class ChapterHandler {
     this.chapters.map((c) => (c.isActive = false));
     this.currentChapter.isActive = true;
   }
-}
-
-function createOutputSurface() {
-  d3.select('#output').append('div').attr('id', 'output-surface');
 }
