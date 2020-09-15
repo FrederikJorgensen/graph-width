@@ -612,13 +612,6 @@ svg {
   margin-top: 1rem;
 }
 
-#tooltip-arrow {
-  marker-end: url(#triangle);
-  stroke: rgb(51, 51, 51);
-  stroke-width: 3.5px;
-  position: absolute;
-}
-
 #graph-tooltip {
   position: absolute;
   border: 1.5px solid lightgray;
@@ -915,18 +908,24 @@ hr.new4 {
 }
 
 .nav svg {
-  padding: 0 1rem 0 1rem;
+  padding: 1rem;
+  max-width: 40px;
+  max-height: 40px;
+}
+
+@media (max-height: 1000px) {
+  .nav svg {
+    height: 20px;
+    width: 20px;
+  }
 }
 
 ul {
-  background: var(--dropdown-item);
   list-style: none;
-  margin: 0;
   padding-left: 0;
 }
 
 li {
-  color: #fff;
   background: var(--dropdown-item);
   display: block;
   float: left;
@@ -942,10 +941,12 @@ li a:hover {
 }
 
 ul li ul {
+  padding: 0;
+  margin: 0;
   background: var(--dropdown-item);
   visibility: hidden;
   opacity: 0;
-  min-width: 5rem;
+  min-width: 10rem;
   position: absolute;
   transition: all 0.5s ease;
   left: 0;
@@ -960,29 +961,33 @@ ul li ul:hover {
 }
 
 ul li ul li {
-  margin: 1rem;
+  margin: 0.5rem;
   clear: both;
-  width: 100%;
-}
-
-.table-wrapper {
-  position: absolute;
-  z-index: 100000;
-  transform: translate(-100%);
-  max-height: 300px;
-  overflow-y: auto;
-  overflow-x: hidden;
 }
 
 /* DP Table */
-.hamiltonianTable {
-  background-color: white;
-  min-width: 200px;
-  color: black;
-  border-collapse: collapse;
+.table-wrapper {
+  position: absolute;
+  z-index: 100000;
+  transform: translate(-98%, -2px);
+  overflow-y: overlay;
   border-radius: 5px 5px 0 0;
   box-shadow: var(--shadow);
-  border: 1px solid lightgray;
+}
+
+.hamiltonianTable {
+  min-width: 200px;
+  background-color: white;
+  color: black;
+  border-collapse: collapse;
+}
+
+#tooltip-arrow {
+  z-index: 9999999999;
+  marker-end: url(#triangle);
+  stroke: #15314b;
+  stroke-width: 3.5px;
+  position: absolute;
 }
 
 th {
@@ -1182,7 +1187,7 @@ th {
 }
 
 .tree-link {
-  stroke: black;
+  stroke: lightgray;
   stroke-width: 2.5px;
 }
 

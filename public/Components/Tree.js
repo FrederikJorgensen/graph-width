@@ -147,12 +147,23 @@ export default class Tree {
     const nodeSvg = d3.select(`#treeNode-${node.id}`);
     const x = parseInt(nodeSvg.attr('x'), 10);
     let y = parseInt(nodeSvg.attr('y'), 10);
+    const w = parseInt(nodeSvg.attr('width'), 10);
 
+    const el = document.getElementById(`treeNode-${node.id}`);
+
+    function getPos(ele) {
+      const rect = ele.getBoundingClientRect();
+      return rect.top;
+    }
+
+    const ny = getPos(el);
+    const maxHeight = this.height - ny;
+    d3.select('#tableX').style('max-height', `${maxHeight}px`);
     y += 12.5;
 
     d3.select('#tooltip-arrow')
       .style('opacity', '1')
-      .attr('x1', x - 50)
+      .attr('x1', x - 45)
       .attr('y1', y)
       .attr('x2', x)
       .attr('y2', y)
@@ -235,7 +246,7 @@ export default class Tree {
     const root = d3.hierarchy(treeData);
     this.root = root;
     const treeLayout = d3.tree();
-    treeLayout.size([this.width, this.height - 80]);
+    treeLayout.size([this.width, this.height - 180]);
     treeLayout(root);
     this.createArrowMarker();
     this.createTreeLinks();
@@ -319,10 +330,11 @@ export default class Tree {
   }
 
   createSvg() {
+    console.log('this.height', this.height);
     this.svg = d3
       .select(`#${this.container}`)
       .append('svg')
       .attr('width', this.width)
-      .attr('height', this.height);
+      .attr('height', '100%');
   }
 }
