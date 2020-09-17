@@ -703,12 +703,12 @@ export default class Graph {
   }
 
   setBalancedSeparatorExerciseTextCorrect() {
-    d3.select('#separator-output').html(`${checkmarkSvg()} \\( S = \\{ ${this.selectedNodes} \\} \\) is a balanced separator`);
+    d3.select('#separator-output').html(`${checkmarkSvg()} $S = \\{ ${this.selectedNodes} \\}$ is a balanced separator`);
     renderMathInElement(document.body);
   }
 
   setBalancedSeparatorExerciseTextWrong() {
-    d3.select('#separator-output').html(`${errorSvg()} \\( S = \\{ ${this.selectedNodes} \\} \\) is not a balanced separator`);
+    d3.select('#separator-output').html(`${errorSvg()} $S = \\{ ${this.selectedNodes} \\}$ is not a balanced separator`);
     renderMathInElement(document.body);
   }
 
@@ -746,12 +746,12 @@ export default class Graph {
   }
 
   setMinimalSeparatorExerciseTextCorrect() {
-    d3.select('#separator-output').html(`${checkmarkSvg()} \\( S = \\{ ${this.selectedNodes} \\} \\) is a minimal separator`);
+    d3.select('#separator-output').html(`${checkmarkSvg()} $S = \\{ ${this.selectedNodes} \\}$ is a minimal separator`);
     renderMathInElement(document.body);
   }
 
   setMinimalSeparatorExerciseTextIncorrect() {
-    d3.select('#separator-output').html(`${errorSvg()} \\( S = \\{ ${this.selectedNodes} \\} \\) is not a minimal separator`);
+    d3.select('#separator-output').html(`${errorSvg()} $S = \\{ ${this.selectedNodes} \\}$ is not a minimal separator`);
     renderMathInElement(document.body);
   }
 
@@ -925,7 +925,7 @@ export default class Graph {
     <svg class="exercise-icon incorrect-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-    <span>\\( S = \\{ ${this.selectedNodes} \\} \\) is not a separator in the graph</span>
+    <span>$S = \\{ ${this.selectedNodes} \\}$ is not a separator in the graph</span>
     `);
     renderMathInElement(document.body);
   }
@@ -935,7 +935,7 @@ export default class Graph {
     <svg class="exercise-icon correct-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-    <p>\\( S = \\{ ${this.selectedNodes} \\} \\) is a separator in the graph</p>
+    <p>$S = \\{ ${this.selectedNodes} \\}$ is a separator in the graph</p>
     `);
     renderMathInElement(document.body);
   }

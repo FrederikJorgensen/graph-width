@@ -287,7 +287,10 @@ export default class SectionHandler {
           'It satisfies all the properties of a tree decomposition thus it is valid.',
         );
         const treeDecomposition = new Graph('tree-container', 'tree');
-        treeDecomposition.loadGraph(validTreeDecomposition);
+        await graph.computeTreeDecomposition();
+        await graph.readTreeDecomposition();
+        const td = graph.getTreeDecomposition();
+        treeDecomposition.loadGraph(td);
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
@@ -514,7 +517,7 @@ export default class SectionHandler {
       new Section(async () => {
         this.sidebar.addContent(`
            <p>As you can tell by the graph and its tree decomposition a clique has a large treewidth. An optimal tree decomposition of a clique is the trivial decomposition.</p>
-           <p class="fact"><span class="fact-title">Fact:</span> The treewidth of clique \\( k \\) is \\( k - 1\\)</p>
+           <p class="fact"><span class="fact-title">Fact:</span> The treewidth of clique $k$ is $k - 1$</p>
           `);
         this.sidebar.setTitle('Treewidth of cliques');
         const graph = new Graph('graph-container');
@@ -527,7 +530,7 @@ export default class SectionHandler {
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
-           <p>Outerplanar graphs have treewidth \\( 2 \\).</p>
+           <p>Outerplanar graphs have treewidth 2.</p>
           `);
         this.sidebar.setTitle('Treewidth of outerplanar graphs');
         const graph = new Graph('graph-container');
@@ -611,7 +614,7 @@ export default class SectionHandler {
           </svg>
            <strong>Introduce node:</strong>
            <br />
-           $n$ has a child $c$ then $B_n = B_c \\cup v $ where $v \\in B_c$
+           $n$ has a child $c$ then $B_n = B_c \\cup v $ where $v \\notin B_c$
          </p>
 
          <p>
