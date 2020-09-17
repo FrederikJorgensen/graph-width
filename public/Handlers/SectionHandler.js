@@ -14,7 +14,6 @@ import {
   gridGraph,
   treeExampleForDynamicProgramming,
   nonValidTreeDecomposition,
-  validTreeDecomposition,
 } from '../Utilities/graphs.js';
 import { addOverlay } from '../controller.js';
 
@@ -149,11 +148,9 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
-        this.treeDecomposition = treeDecomposition;
       }, 'chapter2'),
       new Section(async () => {
         this.sidebar.addContent(`
@@ -167,7 +164,7 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
@@ -183,7 +180,7 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
@@ -199,7 +196,7 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
@@ -216,7 +213,7 @@ export default class SectionHandler {
         graph.loadGraph(graph1);
         this.sidebar.setTitle('Coherence');
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
@@ -288,7 +285,7 @@ export default class SectionHandler {
         );
         const treeDecomposition = new Graph('tree-container', 'tree');
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td = graph.getTreeDecomposition();
         treeDecomposition.loadGraph(td);
       }, 'chapter2'),
@@ -306,7 +303,7 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree');
         treeDecomposition.loadGraph(td1);
@@ -317,7 +314,6 @@ export default class SectionHandler {
         function timeout(ms) {
           return new Promise((resolve) => setTimeout(resolve, ms));
         }
-        console.log('should be first');
         await timeout(1500);
         this.sidebar.addSolution(
           'The treewidth of a tree decomposition is the size of the largest bag - 1.',
@@ -391,7 +387,7 @@ export default class SectionHandler {
         graph.loadGraph(graph1);
         setupContainersForTreeDecompositions();
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
 
         const td3 = {
@@ -453,7 +449,7 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
@@ -490,7 +486,7 @@ export default class SectionHandler {
         graph.loadGraph(gridGraph);
 
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
@@ -509,7 +505,7 @@ export default class SectionHandler {
         graph.loadGraph(treeGraph);
 
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
@@ -523,7 +519,7 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         graph.loadGraph(cliqueGraph);
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
@@ -536,7 +532,7 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
@@ -570,7 +566,7 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
-        await graph.readTreeDecomposition();
+
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
@@ -637,17 +633,13 @@ export default class SectionHandler {
           `);
         this.sidebar.setTitle('Nice Tree Decompositions');
         const graph = new Graph('graph-container');
-        this.graph = graph;
-        this.graph.randomGraph();
-
-        await this.graph.computeTreeDecomposition();
-        await this.graph.readNiceTreeDecomposition();
-        const niceTreeDecompositionData = this.graph.getNiceTreeDecomposition();
-
+        graph.randomGraph();
+        await graph.computeTreeDecomposition();
+        const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
+        console.log(niceTreeDecompositionData);
         const niceTreeDecomposition = new Tree('tree-container');
-        this.treeDecomposition = niceTreeDecomposition;
-        this.treeDecomposition.load(niceTreeDecompositionData);
-        this.treeDecomposition.setGraph(this.graph);
+        niceTreeDecomposition.load(niceTreeDecompositionData);
+        niceTreeDecomposition.setGraph(this.graph);
       }, 'chapter3'),
       new Section(async () => {
         d3.select('#graph-container').remove();
@@ -784,7 +776,7 @@ export default class SectionHandler {
         window.niceTreeDecomposition = niceTreeDecomposition;
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
-        await graph.readNiceTreeDecomposition();
+
         const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
         niceTreeDecomposition.load(niceTreeDecompositionData);
         niceTreeDecomposition.setGraph(graph);
@@ -875,7 +867,7 @@ export default class SectionHandler {
         window.niceTreeDecomposition = niceTreeDecomposition;
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
-        await graph.readNiceTreeDecomposition();
+
         const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
         niceTreeDecomposition.load(niceTreeDecompositionData);
         niceTreeDecomposition.setGraph(graph);
@@ -1024,7 +1016,7 @@ export default class SectionHandler {
         window.niceTreeDecomposition = niceTreeDecomposition;
         graph.loadGraph(cycleGraph);
         await graph.computeTreeDecomposition();
-        await graph.readNiceTreeDecomposition();
+
         const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
         niceTreeDecomposition.load(niceTreeDecompositionData);
         niceTreeDecomposition.setGraph(graph);
@@ -1162,11 +1154,7 @@ export default class SectionHandler {
   }
 
   async goPreviousSection() {
-    if (window.isSectionLoaded === false) {
-      console.log('here');
-      return;
-    }
-    if (!window.isSectionLoaded) return;
+    if (window.isSectionLoaded === false) return;
     if (this.currentSectionIndex === 0) return;
     this.currentSectionIndex--;
     this.currentSection = this.sections[this.currentSectionIndex];
@@ -1174,11 +1162,7 @@ export default class SectionHandler {
   }
 
   async goNextSection() {
-    if (window.isSectionLoaded === false) {
-      console.log('here');
-      return;
-    }
-
+    if (window.isSectionLoaded === false) return;
     if (this.currentSectionIndex === this.sections.length - 1) return;
     this.currentSectionIndex++;
     this.currentSection = this.sections[this.currentSectionIndex];

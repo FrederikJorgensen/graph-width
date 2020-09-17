@@ -1,4 +1,3 @@
-import * as readTree from '../Utilities/readTree.js';
 import { contextMenu as menu } from '../Utilities/ContextMenu.js';
 import generateRandomGraph from '../Utilities/helpers.js';
 
@@ -578,36 +577,24 @@ export default class Graph {
   }
 
   getTreeDecomposition() {
-    return readTree.readTreeDecomposition(this.td);
+    return this.td;
   }
 
   getNiceTreeDecomposition() {
-    return readTree.readNiceTreeDecomposition(this.nicetd);
-  }
-
-  async readNiceTreeDecomposition() {
-    return new Promise(async (resolve) => {
-      const response = await fetch('../../tree-decomposition-files/nicetd.td');
-      const text = await response.text();
-      this.nicetd = text.split('\n');
-      resolve();
-    });
-  }
-
-  async readTreeDecomposition() {
-    return new Promise(async (resolve) => {
-      const response = await fetch('../../tree-decomposition-files/td.td');
-      const text = await response.text();
-      this.td = text.split('\n');
-      resolve();
-    });
+    return this.niceTreeDecomposition;
   }
 
   async computeTreeDecomposition() {
     return new Promise((resolve) => {
       const newJson = { edges: this.getAllEdges(), largestNode: this.getLargestNode() - 1 };
       const jsonString = JSON.stringify(newJson);
-      makeRequest('POST', '/compute', jsonString).then(() => resolve());
+      makeRequest('POST', '/compute', jsonString).then((data) => {
+        const parsed = JSON.parse(data);
+        this.td = parsed.td;
+        console.log(parsed.niceTreeDecomposition);
+        this.niceTreeDecomposition = parsed.niceTreeDecomposition;
+        resolve();
+      });
     });
   }
 

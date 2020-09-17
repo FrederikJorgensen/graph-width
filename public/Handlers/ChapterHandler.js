@@ -185,7 +185,7 @@ export default class ChapterHandler {
         niceTreeDecomposition.setGraph(graph);
         window.niceTreeDecomposition = niceTreeDecomposition;
         await graph.computeTreeDecomposition();
-        await graph.readNiceTreeDecomposition();
+
         const niceTdData = graph.getNiceTreeDecomposition();
         niceTreeDecomposition.load(niceTdData);
         niceTreeDecomposition.addArrow();
@@ -320,7 +320,6 @@ export default class ChapterHandler {
 
   async handleComputeNiceTreeDecomposition() {
     if (!this.treeDecompositionLoaded) return;
-    await this.graph.readNiceTreeDecomposition();
     const niceTreeDecompositionData = this.graph.getNiceTreeDecomposition();
     this.niceTreeDecomposition.load(niceTreeDecompositionData);
   }
@@ -337,7 +336,6 @@ export default class ChapterHandler {
   async handleComputeTreeDecomposition() {
     if (!this.graphLoaded) return;
     await this.graph.computeTreeDecomposition();
-    await this.graph.readTreeDecomposition();
     const treeDecompositionData = this.graph.getTreeDecomposition();
     this.treeDecomposition.loadGraph(treeDecompositionData, 'tree');
     this.treeDecompositionLoaded = true;

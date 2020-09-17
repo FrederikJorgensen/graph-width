@@ -1,6 +1,6 @@
-const fs = require('fs');
+import fs from 'fs';
 
-function writeGraphFile(graph) {
+export default function writeGraphFile(graph) {
   const trimmedGraph = graph
     .replace('edges', '')
     .replace('{', '')
@@ -27,7 +27,3 @@ function writeGraphFile(graph) {
     if (err) return console.log(err);
   });
 }
-
-module.exports = {
-  writeGraphFile,
-};
