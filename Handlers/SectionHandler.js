@@ -131,10 +131,9 @@ export default class SectionHandler {
           <p>A tree decomposition of a graph is a mapping of that graph into a tree adhering to certain properties.</p>
           <p>On the right you see a graph $G$ and one of its tree decompositions $T$.
           `);
-
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
-        console.log(await graph.computeTreeDecomposition());
+        await graph.computeTreeDecomposition();
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);
@@ -151,7 +150,6 @@ export default class SectionHandler {
         const graph = new Graph('graph-container');
         graph.loadGraph(graph1);
         await graph.computeTreeDecomposition();
-
         const td1 = graph.getTreeDecomposition();
         const treeDecomposition = new Graph('tree-container', 'tree', graph);
         treeDecomposition.loadGraph(td1);

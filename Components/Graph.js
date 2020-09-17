@@ -631,58 +631,24 @@ export default class Graph {
   }
 
   async computeTreeDecomposition() {
-    const newJson = {
-      edges: this.getAllEdges(),
-      largestNode: this.getLargestNode() - 1,
-    };
-    const jsonString = JSON.stringify(newJson);
-    const url = 'https://tree-decomposition-api.herokuapp.com/compute';
-    // Default options are marked with *
-    const response = await fetch(url, {
-      method: 'POST', // *GET, POST, PUT, DELETE, etc.
-      mode: 'cors', // no-cors, *cors, same-origin
-      cache: 'no-cache', // *default, no-cache, reload, force-cache, only-if-cached
-      credentials: 'same-origin', // include, *same-origin, omit
-      headers: {
-        'Content-Type': 'application/json',
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      redirect: 'follow', // manual, *follow, error
-      referrerPolicy: 'no-referrer', // no-referrer, *no-referrer-when-downgrade, origin, origin-when-cross-origin, same-origin, strict-origin, strict-origin-when-cross-origin, unsafe-url
-      body: JSON.stringify(newJson), // body data type must match "Content-Type" header
-    });
-    console.log(response);
-    return response.json(); // parses JSON response into native JavaScript objects
-  }
-
-  /*   async computeTreeDecomposition() {
     return new Promise((resolve) => {
       const newJson = {
         edges: this.getAllEdges(),
         largestNode: this.getLargestNode() - 1,
       };
       const jsonString = JSON.stringify(newJson);
-      const url = 'https://tree-decomposition-api.herokuapp.com/compute';
-
-      fetch(url, {
-        method: 'POST',
-        data: jsonString,
-      })
-        .then(function (response) {
-          if (response.ok) {
-            resolve();
-            return response.json();
-          }
-          return Promise.reject(response);
-        })
-        .then(function (data) {
-          console.log(data);
-        })
-        .catch(function (error) {
-          console.warn('Something went wrong.', error);
-        });
+      makeRequest(
+        'POST',
+        'https://tree-decomposition-api.herokuapp.com/compute',
+        jsonString
+      ).then((data) => {
+        const parsed = JSON.parse(data);
+        this.td = parsed.td;
+        this.niceTreeDecomposition = parsed.niceTreeDecomposition;
+        resolve();
+      });
     });
-  } */
+  }
 
   highlightNodeColor(nodeId, color) {
     d3.select(`#graph-node-${nodeId}`).style('fill', color);
