@@ -1,6 +1,3 @@
-/* eslint-disable func-names */
-/* eslint-disable max-len */
-/* eslint-disable no-restricted-globals */
 import ChapterHandler from './Handlers/ChapterHandler.js';
 import generateRandomGraph from './Utilities/helpers.js';
 
