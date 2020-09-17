@@ -15,7 +15,7 @@ import {
   treeExampleForDynamicProgramming,
   nonValidTreeDecomposition,
 } from '../Utilities/graphs.js';
-import { addOverlay } from '../controller.js';
+import { addOverlay } from '../../controller.js';
 
 function createOutputContainer() {
   d3.select('#app-area').append('div').attr('id', 'output');

@@ -1,5 +1,5 @@
-import ChapterHandler from './Handlers/ChapterHandler.js';
-import generateRandomGraph from './Utilities/helpers.js';
+import ChapterHandler from './public/Handlers/ChapterHandler.js';
+import generateRandomGraph from './public/Utilities/helpers.js';
 
 const chapterHandler = new ChapterHandler();
 window.chapterHandler = chapterHandler;
