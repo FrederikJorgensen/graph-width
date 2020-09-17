@@ -17,27 +17,12 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@babel/polyfill": "^7.10.4",
     "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.1.0",
-    "eslint-plugin-import": "^2.20.2",
-    "parcel-bundler": "^1.12.4",
-    "prettier-eslint-cli": "^5.0.0",
-    "prettier-stylelint": "^0.4.2",
-    "webpack": "^4.43.0"
+    "eslint-config-airbnb-base": "^14.1.0"
   },
   "dependencies": {
-    "@jsbits/deep-clone": "^1.1.1",
     "body-parser": "^1.19.0",
-    "d3-context-menu": "^1.1.2",
-    "deepcopy": "^2.0.0",
-    "ejs": "^3.1.2",
     "express": "^4.17.1",
-    "express-fileupload": "^1.1.7-alpha.3",
-    "fs": "0.0.1-security",
-    "g": "^2.0.1",
-    "nodemon": "^2.0.3",
-    "prettier-eslint": "^11.0.0",
-    "regenerator-runtime": "^0.13.5"
+    "fs": "0.0.1-security"
   }
 }

@@ -45,14 +45,24 @@ export async function readLocalFile(file) {
 }
 
 export function deepClone(obj) {
-  if (!obj || obj == true) // this also handles boolean as true and false
-  { return obj; }
-  const objType = typeof (obj);
-  if (objType == 'number' || objType == 'string') // add your immutables here
-  { return obj; }
-  const result = Array.isArray(obj) ? [] : !obj.constructor ? {} : new obj.constructor();
-  if (obj instanceof Map) for (var key of obj.keys()) result.set(key, deepClone(obj.get(key)));
-  for (var key in obj) if (obj.hasOwnProperty(key)) result[key] = deepClone(obj[key]);
+  if (!obj || obj == true) {
+    // this also handles boolean as true and false
+    return obj;
+  }
+  const objType = typeof obj;
+  if (objType == 'number' || objType == 'string') {
+    // add your immutables here
+    return obj;
+  }
+  const result = Array.isArray(obj)
+    ? []
+    : !obj.constructor
+    ? {}
+    : new obj.constructor();
+  if (obj instanceof Map)
+    for (var key of obj.keys()) result.set(key, deepClone(obj.get(key)));
+  for (var key in obj)
+    if (obj.hasOwnProperty(key)) result[key] = deepClone(obj[key]);
   return result;
 }
 

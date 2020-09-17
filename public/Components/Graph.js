@@ -591,7 +591,6 @@ export default class Graph {
       makeRequest('POST', '/compute', jsonString).then((data) => {
         const parsed = JSON.parse(data);
         this.td = parsed.td;
-        console.log(parsed.niceTreeDecomposition);
         this.niceTreeDecomposition = parsed.niceTreeDecomposition;
         resolve();
       });
