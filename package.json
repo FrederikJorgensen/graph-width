@@ -1,14 +1,8 @@
 {
-  "name": "graph-width-visualizer",
+  "name": "graph-width",
   "version": "1.0.0",
   "description": "",
-  "main": "src/app.js",
   "type": "module",
-  "scripts": {
-    "start": "node src/app.js",
-    "lint": "npx eslint public/js/td.js",
-    "dev": "node src/app.js"
-  },
   "repository": {
     "type": "git",
     "url": "https://github.com/FrederikJorgensen/graph-width-visualizer.git"
@@ -21,8 +15,6 @@
     "eslint-config-airbnb-base": "^14.1.0"
   },
   "dependencies": {
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1",
-    "fs": "0.0.1-security"
+    "http-server": "^0.12.3"
   }
 }

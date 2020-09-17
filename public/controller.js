@@ -27,8 +27,17 @@ d3.select(window).on('load', async () => {
   const isCustomAlgorithmPage = params.has('custom');
 
   if (params.toString() === '') d3.select('#overlay').remove();
-  if (isSandboxPage) chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], isSandboxPage);
-  if (isCustomAlgorithmPage)chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 2], isSandboxPage, isCustomAlgorithmPage);
+  if (isSandboxPage)
+    chapterHandler.goToChapter(
+      chapterHandler.chapters[chapterHandler.chapters.length - 1],
+      isSandboxPage
+    );
+  if (isCustomAlgorithmPage)
+    chapterHandler.goToChapter(
+      chapterHandler.chapters[chapterHandler.chapters.length - 2],
+      isSandboxPage,
+      isCustomAlgorithmPage
+    );
   if (isChapter && chapterIndex < chapterHandler.chapters.length) {
     const currentChapter = chapterHandler.chapters[chapterIndex];
     chapterHandler.goToChapter(currentChapter, false);
@@ -38,7 +47,8 @@ d3.select(window).on('load', async () => {
 export const width = document.getElementById('main').offsetWidth;
 export const height = document.getElementById('main').offsetHeight;
 const colors = d3.scaleOrdinal(d3.schemeCategory10);
-const logoContainer = d3.select('#main')
+const logoContainer = d3
+  .select('#main')
   .append('div')
   .attr('class', 'logo-container');
 
@@ -53,40 +63,58 @@ logoContainer
   .text('An interactive way to learn graph width measures.')
   .attr('class', 'homepage-subtitle');
 
-logoContainer.append('button')
+logoContainer
+  .append('button')
   .text('Start Learning')
   .attr('class', 'button')
   .on('click', () => chapterHandler.startFirstLevel());
 
-
-const svg = d3.select('#main').append('svg').attr('width', width).attr('height', height);
+const svg = d3
+  .select('#main')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height);
 const graph = generateRandomGraph(30, 20);
 
-svg.selectAll('line')
+svg
+  .selectAll('line')
   .data(graph.links)
   .enter()
   .append('line')
   .style('stroke', 'lightgrey')
   .style('stroke-width', '2.5px');
 
-svg.selectAll('circle')
+svg
+  .selectAll('circle')
   .data(graph.nodes)
   .enter()
   .append('circle')
   .style('fill', (d) => colors(d.id))
   .attr('r', 20);
 
-const simulation = d3.forceSimulation()
+const simulation = d3
+  .forceSimulation()
   .force('x', d3.forceX(width / 2).strength(0.1))
   .force('y', d3.forceY(height / 2).strength(0.1))
   .force('center', d3.forceCenter(width / 2, height / 2))
   .nodes(graph.nodes)
   .force('charge', d3.forceManyBody().strength(-1100))
-  .force('link', d3.forceLink(graph.links).id((d) => d.id).strength(0.5))
+  .force(
+    'link',
+    d3
+      .forceLink(graph.links)
+      .id((d) => d.id)
+      .strength(0.5)
+  )
   .on('tick', () => {
-    svg.selectAll('circle').attr('cx', (d) => d.x).attr('cy', (d) => d.y);
+    svg
+      .selectAll('circle')
+      .attr('cx', (d) => d.x)
+      .attr('cy', (d) => d.y);
 
-    svg.selectAll('line').attr('x1', (d) => d.source.x)
+    svg
+      .selectAll('line')
+      .attr('x1', (d) => d.source.x)
       .attr('y1', (d) => d.source.y)
       .attr('x2', (d) => d.target.x)
       .attr('y2', (d) => d.target.y);
@@ -94,8 +122,12 @@ const simulation = d3.forceSimulation()
 
 simulation.force('link').links(graph.links);
 
-const currentTheme = localStorage.getItem('theme') ? localStorage.getItem('theme') : null;
-const toggleSwitch = document.querySelector('.theme-switch input[type="checkbox"]');
+const currentTheme = localStorage.getItem('theme')
+  ? localStorage.getItem('theme')
+  : null;
+const toggleSwitch = document.querySelector(
+  '.theme-switch input[type="checkbox"]'
+);
 
 if (currentTheme) {
   document.documentElement.setAttribute('data-theme', currentTheme);
@@ -107,7 +139,10 @@ if (currentTheme) {
 
 function setNavButtons() {
   d3.select('#sandbox-button').on('click', () => {
-    chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 1], true);
+    chapterHandler.goToChapter(
+      chapterHandler.chapters[chapterHandler.chapters.length - 1],
+      true
+    );
   });
 
   d3.select('#graph-separator-link').on('click', () => {
@@ -123,7 +158,11 @@ function setNavButtons() {
   });
 
   d3.select('#custom-algorithm-button').on('click', () => {
-    chapterHandler.goToChapter(chapterHandler.chapters[chapterHandler.chapters.length - 2], false, true);
+    chapterHandler.goToChapter(
+      chapterHandler.chapters[chapterHandler.chapters.length - 2],
+      false,
+      true
+    );
   });
 }
 
@@ -149,9 +188,13 @@ d3.select('body').on('keydown', () => {
       if (window.sectionHandler) window.sectionHandler.goNextSection();
       break;
     case 'ArrowUp':
-      d3.select('#arrow-up').style('animation', 'animation: pulse-animation 0.5s');
+      d3.select('#arrow-up').style(
+        'animation',
+        'animation: pulse-animation 0.5s'
+      );
       // d3.select('#arrow-up').classed('pulse', false);
-      if (window.niceTreeDecomposition) window.niceTreeDecomposition.nextDPStep();
+      if (window.niceTreeDecomposition)
+        window.niceTreeDecomposition.nextDPStep();
       if (window.isCustomAlgorithm) {
         const N = window.root.descendants().length;
         window.current++;
@@ -160,7 +203,8 @@ d3.select('body').on('keydown', () => {
       }
       break;
     case 'ArrowDown':
-      if (window.niceTreeDecomposition) window.niceTreeDecomposition.previousDPStep();
+      if (window.niceTreeDecomposition)
+        window.niceTreeDecomposition.previousDPStep();
       if (window.isCustomAlgorithm) {
         if (window.current === 0) return;
         const N = window.root.descendants().length;
@@ -173,10 +217,12 @@ d3.select('body').on('keydown', () => {
       if (chapterHandler.graph) chapterHandler.handleCreateNewGraph();
       break;
     case 't':
-      if (chapterHandler.treeDecomposition) chapterHandler.handleComputeTreeDecomposition();
+      if (chapterHandler.treeDecomposition)
+        chapterHandler.handleComputeTreeDecomposition();
       break;
     case 'n':
-      if (chapterHandler.niceTreeDecomposition) chapterHandler.handleComputeNiceTreeDecomposition();
+      if (chapterHandler.niceTreeDecomposition)
+        chapterHandler.handleComputeNiceTreeDecomposition();
       break;
     default:
   }
