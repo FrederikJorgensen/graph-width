@@ -1,6 +1,3 @@
-/* eslint-disable class-methods-use-this */
-/* eslint-disable no-return-assign */
-/* eslint-disable no-restricted-globals */
 import Section from '../Components/Section.js';
 import Graph from '../Components/Graph.js';
 import Tree from '../Components/Tree.js';
@@ -15,7 +12,7 @@ import {
   treeExampleForDynamicProgramming,
   nonValidTreeDecomposition,
 } from '../Utilities/graphs.js';
-import { addOverlay } from '../../controller.js';
+import { addOverlay } from '../controller.js';
 
 function createOutputContainer() {
   d3.select('#app-area').append('div').attr('id', 'output');
@@ -635,72 +632,9 @@ export default class SectionHandler {
         graph.randomGraph();
         await graph.computeTreeDecomposition();
         const niceTreeDecompositionData = graph.getNiceTreeDecomposition();
-        console.log(niceTreeDecompositionData);
         const niceTreeDecomposition = new Tree('tree-container');
         niceTreeDecomposition.load(niceTreeDecompositionData);
         niceTreeDecomposition.setGraph(this.graph);
-      }, 'chapter3'),
-      new Section(async () => {
-        d3.select('#graph-container').remove();
-        d3.select('#tree-container').remove();
-        window.graphContainer = null;
-        window.treeContainer = null;
-        const tree = new Tree('container', 'normal-tree');
-        window.niceTreeDecomposition = tree;
-        tree.setMisNormalTree();
-        tree.load(treeExampleForDynamicProgramming, 'normal-tree');
-        tree.addArrow();
-
-        this.sidebar.addContent(`
-        <p class="warning"><i>This is not the best introduction to dynamic programming on tree decompositions since it makes use of grandchildren.
-        Dániel Marx provides a better example <a href="https://www.youtube.com/watch?v=RV5iQji_icQ&t=135" target="_blank">in this video @ 1:35</a></i>.</p>
-        <p>Most algorithms that exploit <i>tree decompositions</i> use dynammic programming. For this reason we will present a brief reminder on how dynammic programming works on general trees.</p>
-        <p>Let's now look at how the <i>maximum independent set</i> problem works on a tree.</p>
-        <div class="algorithm-description">
-        <p>
-          <strong>Input:</strong> A tree.
-          <br>
-          <strong>Output:</strong> The <i>maximum independent set</i> of the tree.
-        </p>
-          <div>
-            <p class="algorithm-description-step">Step 1:</p>
-            <hr />
-            Perform a post-order (bottom-up) traversal of the tree.
-          </div>
-
-          <div>
-            <p class="algorithm-description-step">Step 2:</p>
-            <hr />
-            At each node $n$ we compute a dynamic programming table $C_n$ with two rows.</p>
-            <p>
-              If $n$ is a leaf:
-              <br />
-              Set both rows to 1.
-            </p>
-            <p>
-              If $n$ is not a leaf or a root node we calculate 2 rows:
-              <br />
-              <i>Max set incl.</i> we include $n$ and its grandchildren.
-              <br />
-              <i>Max set excl.</i> we do not include $n$ but we do include the children of $n$.
-            </p>
-            <p>Store the bigger of the 2.</p>
-          </div>
-    
-          <div>
-            <p class="algorithm-description-step">Step 3:</p>
-            <hr />
-            Retrieve the largest entry in the root table $C_r$ to get the <i>maximum independent set</i> of the tree.</p>
-          </div>
-          </div>
-        
-      `);
-        this.sidebar.setTitle('Dynamic Programming on Trees');
-        tree.setAllNodes();
-        this.addAlgorithmControls(
-          () => tree.previousStep(),
-          () => tree.nextStep()
-        );
       }, 'chapter3'),
       new Section(async () => {
         if (!window.graphContainer && !window.treeContainer)

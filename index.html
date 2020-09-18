@@ -4,6 +4,10 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>GraphWidth - An interactive way to learn graph width measures</title>
+
+    <!-- Custom scripts -->
+    <script src="controller.js"></script>
+    <script defer src="Utilities/d3-context-menu.js"></script>
     <link
       rel="shortcut icon"
       type="image/x-icon"
@@ -111,7 +115,6 @@
     </div>
 
     <div class="main" id="main"></div>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <!-- Codemirror -->
     <script defer src="Utilities/codemirror/lib/codemirror.js"></script>
     <script
@@ -137,10 +140,6 @@
       src="https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.11.0/beautify-html.js"
     ></script>
 
-    <!-- Custom scripts -->
-    <script type="module" src="controller.js"></script>
-    <script defer type="module" src="Utilities/d3-context-menu.js"></script>
-
     <!-- Katex -->
     <script
       defer
@@ -155,17 +154,6 @@
       crossorigin="anonymous"
       onload="renderMathInElement(document.body);"
     ></script>
-
-    <script>
-      document.addEventListener('DOMContentLoaded', () => {
-        renderMathInElement(document.body, {
-          delimiters: [
-            { left: '$$', right: '$$', display: true },
-            { left: '$', right: '$', display: true },
-          ],
-        });
-      });
-    </script>
 
     <!-- D3 -->
     <script src="https://d3js.org/d3.v5.min.js"></script>
