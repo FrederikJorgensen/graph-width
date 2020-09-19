@@ -8,25 +8,25 @@ export const contextMenu = function (d) {
   return [
     {
       title: 'Set Value',
-      action(elm, d, i) {
-        const number = prompt('Value:');
-        d.label = number;
+      action (elm, d, i) {
+        const number = prompt('Value:')
+        d.label = number
 
-        const splitted = number.split(',');
-        const temp = [];
+        const splitted = number.split(',')
+        const temp = []
         splitted.forEach((vertix) => {
-          const v = parseInt(vertix, 10);
-          temp.push(v);
-        });
-        d.vertices = temp;
-        d.graph.restart();
-      },
+          const v = parseInt(vertix, 10)
+          temp.push(v)
+        })
+        d.vertices = temp
+        d.graph.restart()
+      }
     },
     {
       title: 'Delete Node',
-      action(elm, d, i) {
-        d.graph.removeNode(d);
-      },
-    },
-  ];
-};
+      action (elm, d, i) {
+        d.graph.removeNode(d)
+      }
+    }
+  ]
+}

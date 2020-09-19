@@ -38,31 +38,27 @@ export function hull(points) {
   return d3.polygonHull(points);
 }
 
-export async function readLocalFile(file) {
-  const response = await fetch(file);
-  const text = await response.text();
-  window.n = text.split('\n');
-}
-
 export function deepClone(obj) {
-  if (!obj || obj == true) {
+  if (!obj || obj === true) {
     // this also handles boolean as true and false
     return obj;
   }
   const objType = typeof obj;
-  if (objType == 'number' || objType == 'string') {
+  if (objType === 'number' || objType === 'string') {
     // add your immutables here
     return obj;
   }
   const result = Array.isArray(obj)
     ? []
     : !obj.constructor
-    ? {}
-    : new obj.constructor();
-  if (obj instanceof Map)
+      ? {}
+      : new obj.constructor();
+  if (obj instanceof Map) {
     for (var key of obj.keys()) result.set(key, deepClone(obj.get(key)));
-  for (var key in obj)
+  }
+  for (var key in obj) {
     if (obj.hasOwnProperty(key)) result[key] = deepClone(obj[key]);
+  }
   return result;
 }
 
@@ -115,4 +111,29 @@ export function setNavbarHeight() {
   d3.select('.nav-wrapper').style('height', '5%');
   d3.select('.nav-wrapper').style('visibility', 'visible');
   d3.select('#main').style('height', '95%');
+}
+
+export function makeRequest(method, url, data) {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, url);
+    xhr.setRequestHeader('Content-Type', 'application/json');
+    xhr.onload = function () {
+      if (this.status >= 200 && this.status < 300) {
+        resolve(xhr.response);
+      } else {
+        reject({
+          status: this.status,
+          statusText: xhr.statusText,
+        });
+      }
+    };
+    xhr.onerror = function () {
+      reject({
+        status: this.status,
+        statusText: xhr.statusText,
+      });
+    };
+    xhr.send(data);
+  });
 }

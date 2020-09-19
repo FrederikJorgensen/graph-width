@@ -5,74 +5,74 @@
 /* eslint-disable import/prefer-default-export */
 // eslint-disable-next-line no-unused-vars
 
-import Chapter from '../Components/Chapter.js';
-import Sidebar from '../Components/Sidebar.js';
-import Graph from '../Components/Graph.js';
-import Tree from '../Components/Tree.js';
-import SectionHandler from './SectionHandler.js';
-import { setNavbarHeight } from '../Utilities/helpers.js';
+import Chapter from '../Components/Chapter.js'
+import Sidebar from '../Components/Sidebar.js'
+import Graph from '../Components/Graph.js'
+import Tree from '../Components/Tree.js'
+import SectionHandler from './SectionHandler.js'
+import { setNavbarHeight } from '../Utilities/helpers.js'
 
-function removeEverythingExceptLoader() {
-  d3.select('#main').selectAll('*:not(#overlay):not(#loader)').remove();
+function removeEverythingExceptLoader () {
+  d3.select('#main').selectAll('*:not(#overlay):not(#loader)').remove()
 }
 
-function createOutputContainer() {
+function createOutputContainer () {
   d3.select('#app-area')
     .append('div')
-    .attr('id', 'output');
+    .attr('id', 'output')
 }
 
-function createOutputSurface() {
-  d3.select('#output').append('div').attr('id', 'output-surface');
+function createOutputSurface () {
+  d3.select('#output').append('div').attr('id', 'output-surface')
 }
 
-function createVisualContainer() {
-  d3.select('#app-area').append('div').attr('id', 'container');
+function createVisualContainer () {
+  d3.select('#app-area').append('div').attr('id', 'container')
 }
 
-function createAppAreaContainer() {
-  d3.select('#center-container').append('div').attr('id', 'app-area');
+function createAppAreaContainer () {
+  d3.select('#center-container').append('div').attr('id', 'app-area')
 }
 
-function createCenterContainer() {
-  d3.select('#main').append('div').attr('id', 'center-container');
+function createCenterContainer () {
+  d3.select('#main').append('div').attr('id', 'center-container')
 }
 
-function createSandboxGrid() {
+function createSandboxGrid () {
   d3.select('#main')
     .append('div')
-    .attr('class', 'sandbox-grid');
+    .attr('class', 'sandbox-grid')
 }
 
-function createNiceTreeDecompositionContainer() {
+function createNiceTreeDecompositionContainer () {
   d3.select('.sandbox-grid')
     .append('div')
     .attr('class', 'card card-tall')
-    .attr('id', 'nice-tree-decomposition-container');
+    .attr('id', 'nice-tree-decomposition-container')
 }
 
-function createTreeDecompositionContainer() {
+function createTreeDecompositionContainer () {
   d3.select('.sandbox-grid')
 
     .append('div')
     .attr('class', 'card')
-    .attr('id', 'tree-decomposition-container');
+    .attr('id', 'tree-decomposition-container')
 }
 
-function createGraphContainer() {
+function createGraphContainer () {
   d3.select('.sandbox-grid')
     .append('div')
     .attr('class', 'card')
-    .attr('id', 'sandbox-graph-container');
+    .attr('id', 'sandbox-graph-container')
 }
 
-function createGraphButtonContainer() {
+function createGraphButtonContainer () {
   d3.select('#sandbox-graph-container')
     .append('div')
-    .attr('class', 'graph-buttons-container');
+    .attr('class', 'graph-buttons-container')
 }
 
-function createDefaultCodeEditorString() {
+function createDefaultCodeEditorString () {
   return `
   switch(type){
     case "leaf":
@@ -97,75 +97,74 @@ function createDefaultCodeEditorString() {
     Will show the table with '{1,2}' in the first column
     and 'true' in the second column
   */
-  `;
+  `
 }
 
-function createCustomAlgorithmNiceTreeDecompositionContainer() {
+function createCustomAlgorithmNiceTreeDecompositionContainer () {
   d3.select('.custom-algorithm-grid')
     .append('div')
     .attr('class', 'card card-tall')
-    .attr('id', 'nice-tree-decomposition-container');
+    .attr('id', 'nice-tree-decomposition-container')
 }
 
-function createCustomAlgorithmCodeEditorContainer() {
+function createCustomAlgorithmCodeEditorContainer () {
   const neww = d3.select('.custom-algorithm-grid')
     .append('div')
-    .attr('class', 'card code-card');
+    .attr('class', 'card code-card')
 
   const realContainer = neww
     .append('div')
-    .attr('class', 'real-container');
+    .attr('class', 'real-container')
 
   realContainer.append('div')
-    .attr('class', 'code-header');
+    .attr('class', 'code-header')
 
   realContainer.append('div')
     .attr('class', 'code-container')
-    .attr('id', 'code-editor');
+    .attr('id', 'code-editor')
 }
 
-function createCustomAlgorithmGraphContainer() {
+function createCustomAlgorithmGraphContainer () {
   d3.select('.custom-algorithm-grid')
     .append('div')
     .attr('class', 'card')
-    .attr('id', 'custom-graph');
+    .attr('id', 'custom-graph')
 }
 
-function createCustomAlgorithmGrid() {
-  d3.select('#main').append('div').attr('class', 'custom-algorithm-grid');
+function createCustomAlgorithmGrid () {
+  d3.select('#main').append('div').attr('class', 'custom-algorithm-grid')
 }
 
-function createCodeEditor(formattedDeaultCodeEditorString) {
+function createCodeEditor (formattedDeaultCodeEditorString) {
   d3.select('#code-editor')
     .append('textarea')
     .attr('id', 'editor')
-    .text(formattedDeaultCodeEditorString);
+    .text(formattedDeaultCodeEditorString)
 }
 
-
 export default class ChapterHandler {
-  constructor() {
-    this.currentChapter = 1;
+  constructor () {
+    this.currentChapter = 1
     this.chapters = [
       new Chapter(async () => {}, 'Graph Separators', false),
       new Chapter(
         async () => {
-          d3.select('#container').append('div').attr('id', 'graph-container');
-          d3.select('#container').append('div').attr('id', 'tree-container');
+          d3.select('#container').append('div').attr('id', 'graph-container')
+          d3.select('#container').append('div').attr('id', 'tree-container')
         },
         'Treewidth & Tree Decompositions',
-        false,
+        false
       ),
       new Chapter(async () => {}, 'Algorithms on Tree Decompositions', false),
       new Chapter(async () => {
-        window.isCustomAlgorithm = true;
-        createCustomAlgorithmGrid();
-        createCustomAlgorithmCodeEditorContainer();
-        createCustomAlgorithmGraphContainer();
-        createCustomAlgorithmNiceTreeDecompositionContainer();
-        const defaultCodeEditorString = createDefaultCodeEditorString();
-        const formattedDeaultCodeEditorString = js_beautify(defaultCodeEditorString, { indent_size: 2 });
-        createCodeEditor(formattedDeaultCodeEditorString);
+        window.isCustomAlgorithm = true
+        createCustomAlgorithmGrid()
+        createCustomAlgorithmCodeEditorContainer()
+        createCustomAlgorithmGraphContainer()
+        createCustomAlgorithmNiceTreeDecompositionContainer()
+        const defaultCodeEditorString = createDefaultCodeEditorString()
+        const formattedDeaultCodeEditorString = js_beautify(defaultCodeEditorString, { indent_size: 2 })
+        createCodeEditor(formattedDeaultCodeEditorString)
 
         const codeEditor = CodeMirror.fromTextArea(
           document.getElementById('editor'),
@@ -173,31 +172,31 @@ export default class ChapterHandler {
             mode: 'javascript',
             theme: 'material-palenight',
             lineNumbers: true,
-            autoCloseBrackets: true,
-          },
-        );
+            autoCloseBrackets: true
+          }
+        )
 
-        codeEditor.setSize('100%', '100%');
+        codeEditor.setSize('100%', '100%')
 
-        const graph = new Graph('custom-graph');
-        graph.randomGraph();
-        const niceTreeDecomposition = new Tree('nice-tree-decomposition-container');
-        niceTreeDecomposition.setGraph(graph);
-        window.niceTreeDecomposition = niceTreeDecomposition;
-        await graph.computeTreeDecomposition();
+        const graph = new Graph('custom-graph')
+        graph.randomGraph()
+        const niceTreeDecomposition = new Tree('nice-tree-decomposition-container')
+        niceTreeDecomposition.setGraph(graph)
+        window.niceTreeDecomposition = niceTreeDecomposition
+        await graph.computeTreeDecomposition()
 
-        const niceTdData = graph.getNiceTreeDecomposition();
-        niceTreeDecomposition.load(niceTdData);
-        niceTreeDecomposition.addArrow();
+        const niceTdData = graph.getNiceTreeDecomposition()
+        niceTreeDecomposition.load(niceTdData)
+        niceTreeDecomposition.addArrow()
 
-        const root = niceTreeDecomposition.getRoot();
-        window.root = root;
+        const root = niceTreeDecomposition.getRoot()
+        window.root = root
 
-        window.current = 0;
+        window.current = 0
 
-        let customFunction = '';
+        let customFunction = ''
         codeEditor.on('change', () => {
-          const userInput = codeEditor.getValue();
+          const userInput = codeEditor.getValue()
 
           customFunction = `
             let i = 0;
@@ -222,10 +221,10 @@ export default class ChapterHandler {
               const htmlString = niceTreeDecomposition.createCustomAlgorithmHtmlTableString(node.table);
               niceTreeDecomposition.moveTableArrow(node);
               niceTreeDecomposition.moveTable(htmlString);
-             })`;
+             })`
 
-          window.customFunction = customFunction;
-        });
+          window.customFunction = customFunction
+        })
 
         d3.select('#nice-tree-decomposition-container')
           .append('span')
@@ -233,68 +232,68 @@ export default class ChapterHandler {
           .attr('class', 'material-icons pagination-arrows')
           .attr('id', 'test')
           .on('click', () => {
-            const N = root.descendants().length;
-            window.current++;
-            if (window.current !== N) window.current %= N;
-            eval(customFunction);
-          });
+            const N = root.descendants().length
+            window.current++
+            if (window.current !== N) window.current %= N
+            eval(customFunction)
+          })
       }, 'Create Custom Algorithm', false),
       new Chapter(
         async () => {
-          createSandboxGrid();
-          createGraphContainer();
-          createTreeDecompositionContainer();
-          createNiceTreeDecompositionContainer();
+          createSandboxGrid()
+          createGraphContainer()
+          createTreeDecompositionContainer()
+          createNiceTreeDecompositionContainer()
 
-          const graph = new Graph('sandbox-graph-container');
-          this.graph = graph;
+          const graph = new Graph('sandbox-graph-container')
+          this.graph = graph
 
-          const treeDecomposition = new Graph('tree-decomposition-container', 'tree');
-          this.treeDecomposition = treeDecomposition;
+          const treeDecomposition = new Graph('tree-decomposition-container', 'tree')
+          this.treeDecomposition = treeDecomposition
 
-          const niceTreeDecomposition = new Tree('nice-tree-decomposition-container');
-          this.niceTreeDecomposition = niceTreeDecomposition;
+          const niceTreeDecomposition = new Tree('nice-tree-decomposition-container')
+          this.niceTreeDecomposition = niceTreeDecomposition
 
           // createInputForVertices();
           // createInputForEdges();
           // this.createClearAllButton(sandboxSidebar, graph, td, treeDecomposition, niceTreeDecomposition);
-          this.createGraphButtons();
-          this.createComputeTreeDecompositionButton();
-          this.createComputeNiceTreeDecompositionButton();
+          this.createGraphButtons()
+          this.createComputeTreeDecompositionButton()
+          this.createComputeNiceTreeDecompositionButton()
         },
 
-        '6. Sandbox',
-      ),
-    ];
+        '6. Sandbox'
+      )
+    ]
   }
 
-  createGraphButtons() {
-    createGraphButtonContainer();
-    this.createReloadGraphButton();
-    this.createDrawGraphButton();
+  createGraphButtons () {
+    createGraphButtonContainer()
+    this.createReloadGraphButton()
+    this.createDrawGraphButton()
   }
 
-  createReloadGraphButton() {
+  createReloadGraphButton () {
     d3.select('.graph-buttons-container')
       .append('span')
       .text('replay')
       .attr('class', 'material-icons md-48 custom-button')
-      .on('click', () => this.handleCreateNewGraph());
+      .on('click', () => this.handleCreateNewGraph())
   }
 
-  handleCreateNewGraph() {
+  handleCreateNewGraph () {
     // const numberOfVertices = document.getElementById('vertices-number').value;
     // const numberOfEdges = document.getElementById('edges-number').value;
-    if (this.treeDecomposition) this.treeDecomposition.removeSvg();
-    if (this.niceTreeDecomposition) this.niceTreeDecomposition.removeSvg();
-    const numberOfVertices = 10;
-    const numberOfEdges = 10;
-    this.graph.randomGraph(numberOfVertices, numberOfEdges);
-    this.treeDecompositionLoaded = false;
-    this.graphLoaded = true;
+    if (this.treeDecomposition) this.treeDecomposition.removeSvg()
+    if (this.niceTreeDecomposition) this.niceTreeDecomposition.removeSvg()
+    const numberOfVertices = 10
+    const numberOfEdges = 10
+    this.graph.randomGraph(numberOfVertices, numberOfEdges)
+    this.treeDecompositionLoaded = false
+    this.graphLoaded = true
   }
 
-  createClearAllButton(sandboxSidebar, graph, td, treeDecomposition, niceTreeDecomposition) {
+  createClearAllButton (sandboxSidebar, graph, td, treeDecomposition, niceTreeDecomposition) {
     sandboxSidebar
       .append('div')
       .attr('data-tooltip', 'Clear all')
@@ -305,146 +304,146 @@ export default class ChapterHandler {
       .on('click', async () => {
         this.graph = d3
           .select('#algo-text')
-          .text('Current Algorithm = None Selected');
-        if (graph.svg) graph.removeSvg();
-        if (td) td.removeSvg();
-        d3.select('#output').html(null);
-        if (treeDecomposition.svg) treeDecomposition.clear();
-        if (niceTreeDecomposition.svg) niceTreeDecomposition.clear();
-        if (niceTreeDecomposition.colorTable) niceTreeDecomposition.removeColorTable();
-        if (niceTreeDecomposition.tooltip) niceTreeDecomposition.removeMisTable();
-        this.graphLoaded = false;
-        this.treeDecompositionLoaded = false;
-      });
+          .text('Current Algorithm = None Selected')
+        if (graph.svg) graph.removeSvg()
+        if (td) td.removeSvg()
+        d3.select('#output').html(null)
+        if (treeDecomposition.svg) treeDecomposition.clear()
+        if (niceTreeDecomposition.svg) niceTreeDecomposition.clear()
+        if (niceTreeDecomposition.colorTable) niceTreeDecomposition.removeColorTable()
+        if (niceTreeDecomposition.tooltip) niceTreeDecomposition.removeMisTable()
+        this.graphLoaded = false
+        this.treeDecompositionLoaded = false
+      })
   }
 
-  async handleComputeNiceTreeDecomposition() {
-    if (!this.treeDecompositionLoaded) return;
-    const niceTreeDecompositionData = this.graph.getNiceTreeDecomposition();
-    this.niceTreeDecomposition.load(niceTreeDecompositionData);
+  async handleComputeNiceTreeDecomposition () {
+    if (!this.treeDecompositionLoaded) return
+    const niceTreeDecompositionData = this.graph.getNiceTreeDecomposition()
+    this.niceTreeDecomposition.load(niceTreeDecompositionData)
   }
 
-  createComputeNiceTreeDecompositionButton() {
+  createComputeNiceTreeDecompositionButton () {
     d3.select('#nice-tree-decomposition-container')
       .append('span')
       .text('timeline')
       .attr('id', 'compute-nicetd-button')
       .attr('class', 'material-icons md-48 draw-graph-button custom-button')
-      .on('click', async () => this.handleComputeNiceTreeDecomposition());
+      .on('click', async () => this.handleComputeNiceTreeDecomposition())
   }
 
-  async handleComputeTreeDecomposition() {
-    if (!this.graphLoaded) return;
-    await this.graph.computeTreeDecomposition();
-    const treeDecompositionData = this.graph.getTreeDecomposition();
-    this.treeDecomposition.loadGraph(treeDecompositionData, 'tree');
-    this.treeDecompositionLoaded = true;
+  async handleComputeTreeDecomposition () {
+    if (!this.graphLoaded) return
+    await this.graph.computeTreeDecomposition()
+    const treeDecompositionData = this.graph.getTreeDecomposition()
+    this.treeDecomposition.loadGraph(treeDecompositionData, 'tree')
+    this.treeDecompositionLoaded = true
   }
 
-  createComputeTreeDecompositionButton() {
+  createComputeTreeDecompositionButton () {
     d3.select('#tree-decomposition-container')
       .append('span')
       .text('device_hub')
       .attr('id', 'compute-td-button')
       .attr('class', 'material-icons md-48 draw-graph-button custom-button')
-      .on('click', async () => this.handleComputeTreeDecomposition());
+      .on('click', async () => this.handleComputeTreeDecomposition())
   }
 
-  createDrawGraphButton() {
+  createDrawGraphButton () {
     d3.select('.graph-buttons-container')
       .append('span')
       .text('palette')
       .attr('class', 'material-icons md-48 custom-button')
-      .on('click', () => this.handleDrawGraph());
+      .on('click', () => this.handleDrawGraph())
   }
 
-  handleDrawGraph() {
-    if (this.treeDecomposition) this.treeDecomposition.removeSvg();
-    if (this.niceTreeDecomposition) this.niceTreeDecomposition.removeSvg();
-    this.graph.enableDrawing();
-    this.graphLoaded = true;
+  handleDrawGraph () {
+    if (this.treeDecomposition) this.treeDecomposition.removeSvg()
+    if (this.niceTreeDecomposition) this.niceTreeDecomposition.removeSvg()
+    this.graph.enableDrawing()
+    this.graphLoaded = true
   }
 
-  startFirstLevel() {
-    setNavbarHeight();
-    this.currentChapter = this.chapters[0];
-    this.createChapter();
+  startFirstLevel () {
+    setNavbarHeight()
+    this.currentChapter = this.chapters[0]
+    this.createChapter()
   }
 
-  goToChapter(chapter, isSandbox, isCustom, navLink) {
+  goToChapter (chapter, isSandbox, isCustom, navLink) {
     if (isSandbox) {
-      setNavbarHeight();
-      window.history.replaceState({}, '', '?');
-      d3.select('#main').selectAll('*').remove();
-      d3.select('.nav-links').style('opacity', 1);
-      window.history.replaceState({}, '', '');
-      const params = new URLSearchParams(location.search);
-      params.set('sandbox', 'true');
-      window.history.replaceState({}, '', `?${params.toString()}`);
-      chapter.create();
-      return;
+      setNavbarHeight()
+      window.history.replaceState({}, '', '?')
+      d3.select('#main').selectAll('*').remove()
+      d3.select('.nav-links').style('opacity', 1)
+      window.history.replaceState({}, '', '')
+      const params = new URLSearchParams(location.search)
+      params.set('sandbox', 'true')
+      window.history.replaceState({}, '', `?${params.toString()}`)
+      chapter.create()
+      return
     }
 
     if (isCustom) {
-      setNavbarHeight();
-      d3.select('#main').selectAll('*').remove();
-      d3.select('.nav-links').style('opacity', 1);
-      window.history.replaceState({}, '', '?');
-      window.history.replaceState({}, '', '');
-      const params = new URLSearchParams(location.search);
-      params.set('custom', 'true');
-      window.history.replaceState({}, '', `?${params.toString()}`);
-      chapter.create();
-      return;
+      setNavbarHeight()
+      d3.select('#main').selectAll('*').remove()
+      d3.select('.nav-links').style('opacity', 1)
+      window.history.replaceState({}, '', '?')
+      window.history.replaceState({}, '', '')
+      const params = new URLSearchParams(location.search)
+      params.set('custom', 'true')
+      window.history.replaceState({}, '', `?${params.toString()}`)
+      chapter.create()
+      return
     }
 
     if (navLink) {
-      window.history.replaceState({}, '', '?');
-      window.history.replaceState({}, '', '');
+      window.history.replaceState({}, '', '?')
+      window.history.replaceState({}, '', '')
     }
 
-    this.currentChapter = chapter;
-    this.createChapter();
+    this.currentChapter = chapter
+    this.createChapter()
   }
 
-  createChapter() {
-    removeEverythingExceptLoader();
-    window.isCustomAlgorithm = false;
-    window.graphContainer = null;
-    window.treeContainer = null;
-    createCenterContainer();
-    const sidebar = new Sidebar(this.currentChapter.name);
-    createAppAreaContainer();
-    createVisualContainer();
-    this.currentChapter.create();
-    const params = new URLSearchParams(location.search);
-    const currentSectionIndex = params.get('section') - 1;
-    const chapterNumber = this.chapters.indexOf(this.currentChapter) + 1;
-    window.chapterNumber = chapterNumber;
-    window.sectionNumber = currentSectionIndex + 1;
+  createChapter () {
+    removeEverythingExceptLoader()
+    window.isCustomAlgorithm = false
+    window.graphContainer = null
+    window.treeContainer = null
+    createCenterContainer()
+    const sidebar = new Sidebar(this.currentChapter.name)
+    createAppAreaContainer()
+    createVisualContainer()
+    this.currentChapter.create()
+    const params = new URLSearchParams(location.search)
+    const currentSectionIndex = params.get('section') - 1
+    const chapterNumber = this.chapters.indexOf(this.currentChapter) + 1
+    window.chapterNumber = chapterNumber
+    window.sectionNumber = currentSectionIndex + 1
 
     if (chapterNumber === 2 && currentSectionIndex + 1 !== 15) {
-      d3.select('#container').style('height', '100%');
+      d3.select('#container').style('height', '100%')
     } else {
-      createOutputContainer();
-      createOutputSurface();
+      createOutputContainer()
+      createOutputSurface()
     }
 
-    const chapterNumberString = `chapter${chapterNumber}`;
-    const sectionHandler = new SectionHandler(sidebar, chapterNumberString);
-    this.sectionHandler = sectionHandler;
-    const currentSection = this.sectionHandler.sections[currentSectionIndex];
+    const chapterNumberString = `chapter${chapterNumber}`
+    const sectionHandler = new SectionHandler(sidebar, chapterNumberString)
+    this.sectionHandler = sectionHandler
+    const currentSection = this.sectionHandler.sections[currentSectionIndex]
     if (
-      params.get('section') > 0
-      && currentSectionIndex < sectionHandler.sections.length
+      params.get('section') > 0 &&
+      currentSectionIndex < sectionHandler.sections.length
     ) {
-      sectionHandler.goToSection(currentSection);
+      sectionHandler.goToSection(currentSection)
     } else {
-      sectionHandler.loadFirstSection();
+      sectionHandler.loadFirstSection()
     }
-    sidebar.addHandler(sectionHandler);
-    sidebar.addProgresBar();
-    this.chapters.map((c) => (c.isActive = false));
-    this.currentChapter.isActive = true;
+    sidebar.addHandler(sectionHandler)
+    sidebar.addProgresBar()
+    this.chapters.map((c) => (c.isActive = false))
+    this.currentChapter.isActive = true
   }
 }

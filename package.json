@@ -2,7 +2,6 @@
   "name": "graph-width",
   "version": "1.0.0",
   "description": "",
-  "type": "module",
   "repository": {
     "type": "git",
     "url": "https://github.com/FrederikJorgensen/graph-width.git"
@@ -11,7 +10,18 @@
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "eslint": "^6.8.0",
-    "eslint-config-airbnb-base": "^14.1.0"
+    "eslint": "^7.9.0",
+    "eslint-config-airbnb-base": "^14.2.0",
+    "eslint-plugin-import": "^2.22.0"
+  },
+  "standard": {
+    "ignore": [
+      "Utilities/codemirror/"
+    ],
+    "globals": [
+      "d3",
+      "localStorage",
+      "renderMathInElement"
+    ]
   }
 }
