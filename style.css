@@ -1,5 +1,5 @@
 :root {
-  --main-bg: #f5f5f3;
+  --main-bg: #e3e3e3;
   --surface: white;
   --text-color: black;
   --on-hover: orange;
@@ -14,23 +14,6 @@
   --highlighted-color: orange;
 }
 
-[data-theme='dark'] {
-  --table-color: #15314b;
-  --dark-mode-text: rgb(51, 51, 51);
-  --main-bg: #121212;
-  --surface: #1e1e1e;
-  --on-hover: #7a7a7a;
-  --text-color: #e0e0e0;
-  --border: 8px;
-  --dropdown-item: #1e1e1e;
-  --fact-text-color: black;
-  --shadow: 0 2px 6px 0 hsla(0, 0%, 0%, 0.2);
-  --link-color: gray;
-  --algorithm-description: #1e1e1e;
-  --icon-color: #7a7a7a;
-  --highlighted-color: orange;
-}
-
 html {
   height: 100%;
   width: 100%;
@@ -38,7 +21,6 @@ html {
   margin: 0;
   font-family: Calibri, Arial, sans-serif;
   color: var(--text-color);
-  user-select: none;
 }
 
 body {
@@ -104,6 +86,7 @@ body {
   text-align: center;
   text-decoration: none;
   font-size: 1rem;
+  outline: none;
 }
 
 .w {
@@ -236,7 +219,7 @@ body {
   border-radius: var(--border);
 }
 
-@media (min-width: 1800px) {
+@media (min-width: 2000px) {
   #center-container {
     display: flex;
     height: 98%;
@@ -244,7 +227,7 @@ body {
   }
 }
 
-@media (max-width: 1800px) {
+@media (max-width: 2000px) {
   #center-container {
     display: flex;
     height: 98%;
@@ -330,11 +313,6 @@ svg {
   width: 50%;
 }
 
-#tree-container {
-  height: 100%;
-  width: 50%;
-}
-
 .choices {
   display: flex;
   flex-direction: column;
@@ -410,49 +388,6 @@ svg {
   display: flex;
   justify-content: center;
   align-items: center;
-}
-
-.highlighted-node {
-  fill: orange !important;
-  stroke: orange !important;
-  cursor: pointer;
-}
-
-.highlighted-text {
-  fill: white;
-}
-
-.highlighted-stroke {
-  stroke: lightgreen !important;
-  stroke-width: 3.5px;
-}
-
-.graphLink {
-  stroke: var(--text-color);
-  opacity: 60%;
-  stroke-width: 2px;
-}
-
-.graphNode {
-  stroke: rgb(51, 51, 51);
-  stroke-width: 3.5px;
-}
-
-.highlighted-vertex {
-  fill: orange;
-  transition: fill 300ms;
-}
-
-.nonhighlight {
-  fill: #1f77b4;
-}
-
-.separating-node {
-  fill: #00e322;
-}
-
-.not-separating-node {
-  fill: red;
 }
 
 .logo-background {
@@ -584,16 +519,6 @@ svg {
   user-select: none;
 }
 
-.graph-label {
-  fill: #eee;
-  font-family: 'PT Sans', sans-serif;
-  font-size: 16px;
-  font-weight: bold;
-  text-anchor: middle;
-  pointer-events: none;
-  user-select: none;
-}
-
 .algorithm-description {
   background: var(--algorithm-description);
   border: 3.5px solid #f5eded;
@@ -689,13 +614,6 @@ svg {
   transition: color 150ms ease-in;
 }
 
-circle:hover {
-  cursor: grab;
-}
-
-ellipse:hover {
-  cursor: grab;
-}
 .separator-exercise-output {
   display: flex;
   font-size: 1.1rem;
@@ -715,65 +633,7 @@ ellipse:hover {
   color: red;
 }
 
-/*Simple css to style it like a toggle switch*/
-.theme-switch-wrapper {
-  margin-left: auto;
-  margin-right: 1rem;
-  display: flex;
-  align-items: center;
-}
-
-.theme-switch {
-  display: inline-block;
-  height: 1rem;
-  width: 2.5rem;
-  position: relative;
-}
-
-.theme-switch input {
-  display: none;
-}
-
-.slider {
-  background-color: #ccc;
-  bottom: 0;
-  cursor: pointer;
-  left: 0;
-  position: absolute;
-  right: 0;
-  top: 0;
-  transition: 0.4s;
-}
-
-.slider:before {
-  background-color: #fff;
-  bottom: 0.01rem;
-  content: '';
-  height: 1rem;
-  left: 0.05rem;
-  position: absolute;
-  transition: 0.4s;
-  width: 1rem;
-}
-
-input:checked + .slider {
-  background-color: #66bb6a;
-}
-
-input:checked + .slider:before {
-  transform: translateX(26px);
-}
-
-.slider.round {
-  border-radius: 34px;
-}
-
-.slider.round:before {
-  border-radius: 50%;
-}
-
 a {
-  /* text-decoration: none; */
   color: var(--text-color);
 }
 
@@ -793,6 +653,7 @@ a {
 .lo {
   margin-right: 0.5rem;
 }
+
 /*--------------------------------- Katex ---------------------------------*/
 .katex {
   margin: 0 0.2rem;
@@ -1194,4 +1055,85 @@ th {
 .highlighted-link {
   stroke: var(--highlighted-color);
   stroke-width: 5px;
+}
+
+/* Graph Stuff */
+.graph-node {
+  fill: #b3de69;
+  stroke: rgb(51, 51, 51);
+  stroke-width: 3px;
+}
+
+.graphLink {
+  fill: black;
+  stroke: rgb(51, 51, 51);
+  stroke-width: 3px;
+}
+
+.graph-label {
+  fill: rgb(51, 51, 51);
+  font-family: 'PT Sans', sans-serif;
+  font-size: 16px;
+  font-weight: bold;
+  text-anchor: middle;
+  pointer-events: none;
+  user-select: none;
+}
+
+circle:hover {
+  cursor: pointer;
+}
+
+ellipse:hover {
+  cursor: grab;
+}
+
+
+.highlighted-stroke {
+  stroke: lightgreen !important;
+  stroke-width: 3.5px;
+}
+
+
+/* Tree container */
+#tree-container {
+  position: relative;
+  height: 100%;
+  width: 50%;
+}
+
+.multi-tree-container {
+  flex: 0.33;
+  overflow: hidden;
+}
+
+svg {
+  overflow: hidden;
+}
+
+.highlighted-node {
+  fill: orange !important;
+  stroke: orange !important;
+  cursor: pointer;
+}
+
+.highlighted-text {
+  fill: white;
+}
+
+.highlighted-vertex {
+  fill: orange;
+  transition: fill 300ms;
+}
+
+.nonhighlight {
+  /* fill: #1f77b4; */
+}
+
+.separating-node {
+  fill: #00e322;
+}
+
+.not-separating-node {
+  fill: red;
 }

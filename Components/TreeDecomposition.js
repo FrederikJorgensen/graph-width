@@ -1,26 +1,31 @@
 import { contextMenu as menu } from '../Utilities/ContextMenu.js'
 
-function errorSvg () {
+function errorSvg() {
   return `<svg class="exercise-icon incorrect-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
 }
 
-function checkmarkSvg () {
+function checkmarkSvg() {
   return `<svg class="exercise-icon correct-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
   </svg>`
 }
 
 export default class TreeDecomposition {
-  constructor (container, graph) {
+  constructor(container) {
     this.container = container
     this.nodes = []
     this.links = []
     this.lastNodeId = 0
-    this.graphOfTd = graph
+    this.width = document.getElementById(this.container).offsetWidth;
+    this.height = document.getElementById(this.container).offsetHeight;
   }
 
-  isConnected () {
+  setGraph(graph) {
+    this.graph = graph
+  }
+
+  isConnected() {
     let componentCount = 1
     let cluster = 2
 
@@ -80,7 +85,7 @@ export default class TreeDecomposition {
     return isConnected
   }
 
-  isTree () {
+  isTree() {
     const isConnected = this.isConnected()
     if (isConnected && this.nodes.length - 1 === this.links.length) {
       return true
@@ -88,11 +93,11 @@ export default class TreeDecomposition {
     return false
   }
 
-  areNodesInTree () {
+  areNodesInTree() {
     return this.graphOfTd.nodes.every((node) => this.masterNodes.includes(node.id))
   }
 
-  isEveryGraphLinkInTree () {
+  isEveryGraphLinkInTree() {
     return this.graphOfTd.links.every((link) => {
       for (let i = 0; i < this.nodes.length; i++) {
         const currentBag = this.nodes[i]
@@ -103,7 +108,7 @@ export default class TreeDecomposition {
     })
   }
 
-  checkConnectivity (subGraphNodes, subGraphLinks) {
+  checkConnectivity(subGraphNodes, subGraphLinks) {
     let componentCount = 1
     let cluster = 2
 
@@ -161,7 +166,7 @@ export default class TreeDecomposition {
     return { subGraphNodes, subGraphLinks, isDisconnected }
   }
 
-  checkCoherence () {
+  checkCoherence() {
     /* Check if a node exists in multiple bags */
     for (let i = 0; i < this.graphOfTd.nodes.length; i++) {
       const currentNode = this.graphOfTd.nodes[i]
@@ -193,7 +198,7 @@ export default class TreeDecomposition {
     return true
   }
 
-  checkTreeDecomposition () {
+  checkTreeDecomposition() {
     let treeString
     let nodeCoverageString
     let edgeCoverageString
@@ -235,7 +240,7 @@ export default class TreeDecomposition {
     `)
   }
 
-  updateMasterList () {
+  updateMasterList() {
     let temp = []
     this.nodes.forEach((bag) => {
       if (bag.vertices) temp = temp.concat(bag.vertices)
@@ -245,13 +250,13 @@ export default class TreeDecomposition {
     this.masterNodes = tempSet
   }
 
-  removeEdge (d) {
+  removeEdge(d) {
     this.links.splice(this.links.indexOf(d), 1)
     d3.event.preventDefault()
     this.restart()
   }
 
-  restart () {
+  restart() {
     this.updateMasterList()
     /* Enter, update, remove link SVGs */
     this.svg.selectAll('line')
@@ -302,17 +307,17 @@ export default class TreeDecomposition {
     this.checkTreeDecomposition()
   }
 
-  setGraph (graph) {
+  setGraph(graph) {
     this.graph = graph
   }
 
-  setg () {
+  setg() {
     this.nodes.forEach((node) => {
       node.graph = this
     })
   }
 
-  addNode () {
+  addNode() {
     if (this.canAddNode === false) return
     const e = d3.event
     if (e.button === 0) {
@@ -326,15 +331,15 @@ export default class TreeDecomposition {
     }
   }
 
-  enableAddNode () {
+  enableAddNode() {
     this.canAddNode = true
   }
 
-  disableAddNode () {
+  disableAddNode() {
     this.canAddNode = false
   }
 
-  removeNode (d) {
+  removeNode(d) {
     d3.event.preventDefault()
     const linksToRemove = this.links.filter((l) => l.source === d || l.target === d)
     linksToRemove.map((l) => this.links.splice(this.links.indexOf(l), 1))
@@ -343,35 +348,31 @@ export default class TreeDecomposition {
     this.restart()
   }
 
-  leftCanvas () {
+  leftCanvas() {
     this.dragLine.classed('hidden', true)
     this.mousedownNode = null
   }
 
-  updateDragLine () {
+  updateDragLine() {
     if (!this.mousedownNode) return
     const coords = d3.mouse(d3.event.currentTarget)
     this.dragLine.attr(
       'd',
-      `M${
-        this.mousedownNode.x
-      },${
-        this.mousedownNode.y
-      }L${
-        coords[0]
-      },${
-        coords[1]}`
+      `M${this.mousedownNode.x
+      },${this.mousedownNode.y
+      }L${coords[0]
+      },${coords[1]}`
     )
   }
 
-  hideDragLine () {
+  hideDragLine() {
     this.svg.selectAll('ellipse').style('fill', '#2ca02c')
     this.dragLine.classed('hidden', true)
     this.mousedownNode = null
     this.restart()
   }
 
-  beginDrawLine (d) {
+  beginDrawLine(d) {
     this.svg.selectAll('ellipse').filter((node) => node === d).style('fill', 'orange')
     if (d3.event.ctrlKey) return
     d3.event.preventDefault()
@@ -380,18 +381,14 @@ export default class TreeDecomposition {
       .classed('hidden', false)
       .attr(
         'd',
-        `M${
-          this.mousedownNode.x
-        },${
-          this.mousedownNode.y
-        }L${
-          this.mousedownNode.x
-        },${
-          this.mousedownNode.y}`
+        `M${this.mousedownNode.x
+        },${this.mousedownNode.y
+        }L${this.mousedownNode.x
+        },${this.mousedownNode.y}`
       )
   }
 
-  stopDrawLine (d) {
+  stopDrawLine(d) {
     this.svg.selectAll('ellipse').style('fill', '#2ca02c')
     if (!this.mousedownNode || this.mousedownNode === d) return
     for (let i = 0; i < this.links.length; i++) {
@@ -407,14 +404,14 @@ export default class TreeDecomposition {
     this.links.push(newLink)
   }
 
-  clear () {
+  removeSvg() {
     if (this.svg) this.svg.remove()
     this.nodes = []
     this.links = []
   }
 
-  enableDrawing () {
-    if (this.svg) this.clear()
+  enableDrawing() {
+    if (this.svg) this.removeSvg()
     d3.select('#output-surface').append('div').attr('class', 'valid-td')
     const w = document.getElementById(this.container).offsetWidth
     const h = document.getElementById(this.container).offsetHeight
@@ -423,7 +420,6 @@ export default class TreeDecomposition {
     const svg = d3.select(`#${this.container}`).append('svg').attr('width', w).attr('height', h)
     this.svg = svg
     this.svg.style('cursor', 'crosshair')
-
     this.restartSimulation()
 
     this.svg
@@ -439,7 +435,7 @@ export default class TreeDecomposition {
       .attr('d', 'M0,0L0,0')
   }
 
-  restartSimulation () {
+  restartSimulation() {
     const simulation = d3.forceSimulation()
       .force('x', d3.forceX(this.width / 2).strength(0.1))
       .force('y', d3.forceY(this.height / 2).strength(0.1))
@@ -459,5 +455,122 @@ export default class TreeDecomposition {
 
     simulation.force('link').links(this.links)
     this.simulation = simulation
+  }
+
+  createGroupElementForTreeNodes() {
+    this.svg
+      .selectAll('g')
+      .data(this.nodes)
+      .enter()
+      .append('g')
+      .attr('class', 'td')
+      .call(
+        d3
+          .drag()
+          .on('start', (v) => {
+            if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
+            [v.fx, v.fy] = [v.x, v.y];
+          })
+          .on('drag', (v) => {
+            [v.fx, v.fy] = [d3.event.x, d3.event.y];
+          })
+          .on('end', (v) => {
+            if (!d3.event.active) this.simulation.alphaTarget(0);
+            [v.fx, v.fy] = [null, null];
+          })
+      );
+  }
+
+  createTreeDecompositionLabels2() {
+    this.svg
+      .selectAll('g')
+      .append('text')
+      .attr('dy', 15)
+      .text((d) => d.label.substring(2))
+      .style('letter-spacing', '4px')
+      .attr('class', 'graph-label');
+  }
+
+  createTreeDecompositionLabels() {
+    this.svg
+      .selectAll('g')
+      .append('text')
+      .attr('dy', -4)
+      .text((d) => d.label.substring(0, 2))
+      .style('letter-spacing', '6px')
+      .attr('class', 'graph-label');
+  }
+
+  createTreeDecompositionNodeSvgs() {
+    this.nodeSvg = this.svg
+      .selectAll('g')
+      .append('ellipse')
+      .attr('rx', (d) => d.label.length * 8)
+      .attr('ry', 25)
+      .style('fill', '#2ca02c');
+  }
+
+  createSvg() {
+    this.svg = d3
+      .select(`#${this.container}`)
+      .append('svg')
+      .attr('width', this.width)
+      .attr('height', this.height);
+  }
+
+  createLinkSvg() {
+    this.svg
+      .selectAll('line')
+      .data(this.links)
+      .enter()
+      .append('line')
+      .attr('id', (d) => `link-${d.source.id}-${d.target.id}`)
+      .attr('class', 'graphLink');
+  }
+
+  hoverEffect(d) {
+    d3.selectAll('#graph-container circle')
+      .filter((node) => d.vertices.includes(node.id))
+      .transition()
+      .duration(100)
+      .style('fill', 'orange');
+  }
+
+  disableHoverEffect() {
+    d3.selectAll('#graph-container circle')
+      .transition()
+      .duration(100)
+      .style('fill', 'rgb(31, 119, 180)');
+  }
+
+  toggleHoverEffect() {
+    if (this.isHoverEffect) {
+      this.isHoverEffect = false;
+      this.nodeSvg.on('mouseover', null);
+      this.nodeSvg.on('mouseout', null);
+    } else {
+      this.isHoverEffect = true;
+      this.nodeSvg.on('mouseover', (d) => this.hoverEffect(d));
+      this.nodeSvg.on('mouseout', this.disableHoverEffect);
+    }
+  }
+
+  toggleSeparator() {
+    this.nodeSvg.on('mouseover', (node) => this.graph.showSeparator(node.vertices));
+    this.nodeSvg.on('mouseout', () => this.graph.hideSeparator());
+  }
+
+  load(treeDecompositionData) {
+    if (this.svg) this.removeSvg();
+    this.nodes = treeDecompositionData.nodes;
+    this.links = treeDecompositionData.links;
+    this.createSvg();
+    this.restartSimulation();
+    this.createLinkSvg();
+    this.createGroupElementForTreeNodes();
+    this.createTreeDecompositionNodeSvgs();
+    this.createTreeDecompositionLabels();
+    this.createTreeDecompositionLabels2();
+    this.simulation.force('link').links(this.links);
   }
 }

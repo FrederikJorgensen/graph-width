@@ -1,5 +1,8 @@
 import { contextMenu as menu } from '../Utilities/ContextMenu.js';
 import generateRandomGraph, { makeRequest } from '../Utilities/helpers.js';
+import {
+  HIGHLIGHTED_LINK, NONHIGHLIGHTED_LINK, HIGHLIGHTED_NODE, NONHIGHLIGHTED_NODE,
+} from '../constants.js';
 
 const colors = d3.scaleOrdinal(d3.schemeCategory10);
 
@@ -34,7 +37,7 @@ function resetColorsInSubgraph(subGraph) {
 
 function resetSeparatorExerciseText() {
   d3.select('#separator-output').html(
-    'Click on a vertex to include it into the separator set.'
+    'Click on a vertex to include it into the separator set.',
   );
 }
 
@@ -60,11 +63,10 @@ function checkmarkSvg() {
 }
 
 /* https://stackoverflow.com/a/47147597/4169689 */
-const getAllSubsets = (theArray) =>
-  theArray.reduce(
-    (subsets, value) => subsets.concat(subsets.map((set) => [value, ...set])),
-    [[]]
-  );
+const getAllSubsets = (theArray) => theArray.reduce(
+  (subsets, value) => subsets.concat(subsets.map((set) => [value, ...set])),
+  [[]],
+);
 
 export function resetStyles() {
   d3.selectAll('circle')
@@ -98,12 +100,12 @@ function createLabelForNode(node) {
   return JSON.stringify(node).replace('[', '').replace(']', '');
 }
 
-const stopAllTransitions = () => {
+function stopAllTransitions() {
   d3.selectAll('circle').interrupt();
   d3.selectAll('line').interrupt();
   d3.selectAll('ellipse').interrupt();
   d3.selectAll('text').interrupt();
-};
+}
 
 export default class Graph {
   constructor(container, type, graphOfTd) {
@@ -113,6 +115,11 @@ export default class Graph {
     this.width = document.getElementById(this.container).offsetWidth;
     this.height = document.getElementById(this.container).offsetHeight;
     this.selectedNodes = [];
+    this.animationDuration = 1200;
+  }
+
+  setAnimationDuration(ms) {
+    this.animationDuration = ms;
   }
 
   async runCoherence() {
@@ -128,16 +135,14 @@ export default class Graph {
   }
 
   async runEdgeCoverage() {
-    this.anim = 0;
-    resetLinkStyles();
-    resetTreeDecompositionStyles();
     stopAllTransitions();
-    await this.edgeCoverage();
+    resetLinkStyles();
+    this.anim = 0;
+    this.highlightEdgeCoverage();
   }
 
   async runNodeCoverage() {
     stopAllTransitions();
-    resetTreeDecompositionStyles();
     this.anim = 0;
     await this.testNodeCoverage();
   }
@@ -170,9 +175,7 @@ export default class Graph {
   }
 
   showSeparator(vertices) {
-    this.separatorNodes = this.nodes.filter((node) =>
-      vertices.includes(node.id)
-    );
+    this.separatorNodes = this.nodes.filter((node) => vertices.includes(node.id));
     this.path.style('opacity', 0.3);
     const restNodes = this.nodes.filter((node) => !vertices.includes(node.id));
     const restLinks = this.links.filter((link) => {
@@ -232,28 +235,18 @@ export default class Graph {
           .forceLink(this.links)
           .id((d) => d.id)
           .distance(85)
-          .strength(0.8)
+          .strength(0.8),
       )
       .force('charge', d3.forceManyBody().strength(-600).distanceMin(15));
-
     this.simulation.alpha(0.1).restart();
-  }
-
-  toggleSeparator() {
-    d3.selectAll('ellipse').on('mouseover', (d) =>
-      this.graphOfTd.showSeparator(d.vertices)
-    );
-    d3.selectAll('ellipse').on('mouseout', () =>
-      this.graphOfTd.hideSeparator()
-    );
   }
 
   visitBag(bagId) {
     d3.selectAll('ellipse')
       .filter((treeNode) => treeNode.id === bagId)
       .transition()
-      .duration(this.animDuration)
-      .delay(this.animDuration * this.anim)
+      .duration(this.animationDuration)
+      .delay(this.animationDuration * this.anim)
       .style('fill', 'orange')
       .ease(d3.easeElastic)
       .attr('rx', 40)
@@ -263,7 +256,7 @@ export default class Graph {
         d3.selectAll('ellipse')
           .filter((treeNode) => treeNode.id === bagId)
           .transition()
-          .duration(this.animDuration)
+          .duration(this.animationDuration)
           .ease(d3.easeElastic)
           .attr('rx', 35)
           .attr('ry', 25);
@@ -275,8 +268,8 @@ export default class Graph {
 
     na.forEach((bag) => {
       if (
-        bag.vertices.includes(sourceNode) &&
-        bag.vertices.includes(targetNode)
+        bag.vertices.includes(sourceNode)
+        && bag.vertices.includes(targetNode)
       ) {
         this.visitBag(bag.id);
       }
@@ -323,7 +316,7 @@ export default class Graph {
     positionTracker,
     oldState,
     color,
-    subTree
+    subTree,
   ) {
     const subGraph = this.createSubgraph(subTree);
     subGraph.nodes.map((node) => (node.color = null));
@@ -355,13 +348,10 @@ export default class Graph {
       }
     });
 
-    const subGraphNodes = this.nodes.filter((currentNode) =>
-      subGraphNodeIds.includes(currentNode.id)
-    );
+    const subGraphNodes = this.nodes.filter((currentNode) => subGraphNodeIds.includes(currentNode.id));
     const subGraphLinks = this.links.filter(
-      (currentLink) =>
-        subGraphNodeIds.includes(currentLink.source.id) &&
-        subGraphNodeIds.includes(currentLink.target.id)
+      (currentLink) => subGraphNodeIds.includes(currentLink.source.id)
+        && subGraphNodeIds.includes(currentLink.target.id),
     );
 
     return { nodes: subGraphNodes, links: subGraphLinks };
@@ -453,43 +443,33 @@ export default class Graph {
     return { nodes, links: [] };
   }
 
-  edgeCoverage() {
-    return new Promise((resolve) => {
-      d3.selectAll('#graph-container line').style('fill', (edge) => {
-        const sourceNode = edge.source.id;
-        const targetNode = edge.target.id;
-        d3.select(`#link-${edge.source.id}-${edge.target.id}`)
-          .transition()
-          .duration(this.animDuration)
-          .delay(this.animDuration * this.anim)
-          .style('stroke', 'orange')
-          .style('stroke-width', '5px')
-          .on('end', (edge) => {
-            d3.selectAll('#graph-container line')
-              .style('stroke', 'rgb(51, 51, 51)')
-              .style('stroke-width', '3.5px');
-
-            const allEdges = d3.selectAll('#graph-container line').data();
-            if (edge === allEdges[allEdges.length - 1]) resolve();
-          });
-
-        d3.selectAll('#tree-container ellipse')
-          .filter(
-            (bag) =>
-              bag.vertices.includes(sourceNode) &&
-              bag.vertices.includes(targetNode)
-          )
-          .transition()
-          .duration(this.animDuration)
-          .delay(this.animDuration * this.anim)
-          .style('fill', 'orange')
-          .on('end', () => {
-            d3.selectAll('ellipse').style('fill', '#2ca02c');
-          });
-
-        this.anim++;
-      });
+  highlightEdgeCoverage() {
+    this.linkSvg.style('stroke', (link) => {
+      const sourceNode = link.source.id;
+      const targetNode = link.target.id;
+      this.colorGraphLinks(link);
+      this.colorTreeDecompositionNodes(sourceNode, targetNode);
+      this.anim++;
     });
+  }
+
+  colorGraphLinks(link) {
+    d3.select(`#link-${link.source.id}-${link.target.id}`)
+      .transition()
+      .duration(this.animationDuration)
+      .delay(this.animationDuration * this.anim)
+      .style('stroke', HIGHLIGHTED_LINK)
+      .on('end', () => this.linkSvg.style('stroke', NONHIGHLIGHTED_LINK));
+  }
+
+  colorTreeDecompositionNodes(sourceNode, targetNode) {
+    d3.selectAll('#tree-container ellipse')
+      .filter((bag) => bag.vertices.includes(sourceNode) && bag.vertices.includes(targetNode))
+      .transition()
+      .duration(this.animationDuration)
+      .delay(this.animationDuration * this.anim)
+      .style('fill', HIGHLIGHTED_NODE)
+      .on('end', () => d3.selectAll('ellipse').style('fill', '#2ca02c'));
   }
 
   testNodeCoverage() {
@@ -497,8 +477,8 @@ export default class Graph {
       d3.selectAll('#graph-container circle').style('fill', (node) => {
         d3.select(`#graph-node-${node.id}`)
           .transition()
-          .duration(this.animDuration)
-          .delay(this.animDuration * this.anim)
+          .duration(this.animationDuration)
+          .delay(this.animationDuration * this.anim)
           .style('fill', 'orange')
           .on('end', (node) => {
             d3.selectAll('#graph-container circle').style('fill', '#1f77b4');
@@ -509,8 +489,8 @@ export default class Graph {
         d3.selectAll('ellipse')
           .filter((bag) => bag.vertices.includes(node.id))
           .transition()
-          .duration(this.animDuration)
-          .delay(this.animDuration * this.anim)
+          .duration(this.animationDuration)
+          .delay(this.animationDuration * this.anim)
           .style('fill', 'orange')
           .on('end', () => {
             d3.selectAll('ellipse').style('fill', '#2ca02c');
@@ -523,49 +503,49 @@ export default class Graph {
 
   highlightCoherence() {
     this.anim = 0;
-    d3.selectAll('#graph-container circle').style('fill', (node) => {
-      d3.select(`#graph-node-${node.id}`)
-        .transition()
-        .duration(this.animDuration)
-        .delay(this.animDuration * this.anim)
-        .style('fill', 'orange')
-        .on('end', () =>
-          d3.selectAll('#graph-container circle').style('fill', '#1f77b4')
-        );
-
-      d3.selectAll('ellipse')
-        .filter((bag) => bag.vertices.includes(node.id))
-        .transition()
-        .duration(this.animDuration)
-        .delay(this.animDuration * this.anim)
-        .style('fill', 'orange')
-        .on('end', () => {
-          d3.selectAll('ellipse').style('fill', '#2ca02c');
-        });
-
-      const newBags = d3
-        .selectAll('ellipse')
-        .data()
-        .filter((bag) => bag.vertices.includes(node.id));
-
-      d3.selectAll('#tree-container line')
-        .filter(
-          (link) =>
-            newBags.includes(link.source) && newBags.includes(link.target)
-        )
-        .transition()
-        .duration(this.animDuration)
-        .delay(this.animDuration * this.anim)
-        .style('stroke', 'orange')
-        .style('stroke-width', '5px')
-        .on('end', () => {
-          d3.selectAll('#tree-container line')
-            .style('stroke', 'black')
-            .style('stroke-width', '2.5px');
-        });
-
+    this.nodeSvg.style('fill', (node) => {
+      this.colorNode(node);
+      this.highlighBagsWithNodesInIt(node);
+      const newBags = this.getAllBagsWhichIncludeCurrentNode(node);
+      this.highlightLinksOfSubtree(newBags);
       this.anim++;
     });
+  }
+
+  highlightLinksOfSubtree(newBags) {
+    d3.selectAll('#tree-container line')
+      .filter((link) => newBags.includes(link.source) && newBags.includes(link.target))
+      .transition()
+      .duration(this.animationDuration)
+      .delay(this.animationDuration * this.anim)
+      .style('stroke', HIGHLIGHTED_LINK)
+      .on('end', () => d3.selectAll('#tree-container line').style('stroke', 'black'));
+  }
+
+  getAllBagsWhichIncludeCurrentNode(node) {
+    return d3
+      .selectAll('ellipse')
+      .data()
+      .filter((bag) => bag.vertices.includes(node.id));
+  }
+
+  highlighBagsWithNodesInIt(node) {
+    d3.selectAll('ellipse')
+      .filter((bag) => bag.vertices.includes(node.id))
+      .transition()
+      .duration(this.animationDuration)
+      .delay(this.animationDuration * this.anim)
+      .style('fill', HIGHLIGHTED_NODE)
+      .on('end', () => d3.selectAll('ellipse').style('fill', '#2ca02c'));
+  }
+
+  colorNode(node) {
+    d3.select(`#graph-node-${node.id}`)
+      .transition()
+      .duration(this.animationDuration)
+      .delay(this.animationDuration * this.anim)
+      .style('fill', HIGHLIGHTED_NODE)
+      .on('end', () => this.nodeSvg.style('fill', NONHIGHLIGHTED_NODE));
   }
 
   getAllEdges() {
@@ -598,7 +578,7 @@ export default class Graph {
       makeRequest(
         'POST',
         'https://tree-decomposition-api.herokuapp.com/compute',
-        jsonString
+        jsonString,
       ).then((data) => {
         const parsed = JSON.parse(data);
         this.td = parsed.td;
@@ -650,8 +630,8 @@ export default class Graph {
     }
 
     if (
-      this.selectedNodes.length > 1 &&
-      this.isSeparatingNodesAdjacent() === false
+      this.selectedNodes.length > 1
+      && this.isSeparatingNodesAdjacent() === false
     ) {
       this.setBalancedSeparatorExerciseWrong();
       return;
@@ -703,20 +683,30 @@ export default class Graph {
 
   setBalancedSeparatorExerciseTextCorrect() {
     d3.select('#separator-output').html(
-      `${checkmarkSvg()} $S = \\{ ${
-        this.selectedNodes
-      } \\}$ is a balanced separator`
+      `${checkmarkSvg()} $S = \\{ ${this.selectedNodes.sort((a, b) => a - b)
+      } \\}$ is a balanced separator`,
     );
-    renderMathInElement(document.body);
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\\[', right: '\\]', display: true },
+      ],
+    });
   }
 
   setBalancedSeparatorExerciseTextWrong() {
     d3.select('#separator-output').html(
-      `${errorSvg()} $S = \\{ ${
-        this.selectedNodes
-      } \\}$ is not a balanced separator`
+      `${errorSvg()} $S = \\{ ${this.selectedNodes.sort((a, b) => a - b)
+      } \\}$ is not a balanced separator`,
     );
-    renderMathInElement(document.body);
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\\[', right: '\\]', display: true },
+      ],
+    });
   }
 
   setBalancedSeparatorExerciseWrong() {
@@ -756,27 +746,36 @@ export default class Graph {
 
   setMinimalSeparatorExerciseTextCorrect() {
     d3.select('#separator-output').html(
-      `${checkmarkSvg()} $S = \\{ ${
-        this.selectedNodes
-      } \\}$ is a minimal separator`
+      `${checkmarkSvg()} $S = \\{ ${this.selectedNodes.sort((a, b) => a - b)
+      } \\}$ is a minimal separator`,
     );
-    renderMathInElement(document.body);
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\\[', right: '\\]', display: true },
+      ],
+    });
   }
 
   setMinimalSeparatorExerciseTextIncorrect() {
     d3.select('#separator-output').html(
-      `${errorSvg()} $S = \\{ ${
-        this.selectedNodes
-      } \\}$ is not a minimal separator`
+      `${errorSvg()} $S = \\{ ${this.selectedNodes.sort((a, b) => a - b)
+      } \\}$ is not a minimal separator`,
     );
-    renderMathInElement(document.body);
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\\[', right: '\\]', display: true },
+      ],
+    });
   }
 
   getAllProperSubsets() {
     const allSubsets = getAllSubsets(this.selectedNodes);
     const allProperSubsets = allSubsets.filter(
-      (subset) =>
-        subset.length !== this.selectedNodes.length && subset.length !== 0
+      (subset) => subset.length !== this.selectedNodes.length && subset.length !== 0,
     );
     return allProperSubsets;
   }
@@ -884,15 +883,21 @@ export default class Graph {
     });
   }
 
-  isSetSeparating() {
+  refresh(node) {
+    this.removeNode(node);
+  }
+
+  isSetSeparating(node) {
+    this.refresh(node);
     const subGraph = this.createSubgraphFromSelectedNodes();
-    this.resetNodeStyling();
+    // console.log(subGraph);
+    // this.resetNodeStyling();
 
     if (this.isSubGraphDisconnected(subGraph)) {
-      this.colorCorrectNodes();
+      // this.colorCorrectNodes();
       this.setCorrectSeparatorExerciseOutput();
     } else {
-      this.colorIncorrectNodes();
+      // this.colorIncorrectNodes();
       this.setIncorrectSeparatorExerciseOutput();
     }
   }
@@ -900,8 +905,7 @@ export default class Graph {
   createSubgraphExcludingSet(separator) {
     const nodes = this.nodes.filter((node) => !separator.includes(node.id));
     const linksToRemove = this.links.filter(
-      (link) =>
-        separator.includes(link.target.id) || separator.includes(link.source.id)
+      (link) => separator.includes(link.target.id) || separator.includes(link.source.id),
     );
     const links = this.links.filter((link) => !linksToRemove.includes(link));
     return { nodes, links };
@@ -920,9 +924,7 @@ export default class Graph {
 
   enableBalanceSeparatorExercise() {
     this.resetSeparatorExerciseOutput();
-    d3.selectAll('circle').on('click', (node) =>
-      this.checkBalanceSeparator(node)
-    );
+    d3.selectAll('circle').on('click', (node) => this.checkBalanceSeparator(node));
   }
 
   enableMinimalSeparatorExercise() {
@@ -950,9 +952,15 @@ export default class Graph {
     <svg class="exercise-icon incorrect-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-    <span>$S = \\{ ${this.selectedNodes} \\}$ is not a separator in the graph</span>
+    <span>$S = \\{ ${this.selectedNodes.sort((a, b) => a - b)} \\}$ is not a separator in the graph</span>
     `);
-    renderMathInElement(document.body);
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\\[', right: '\\]', display: true },
+      ],
+    });
   }
 
   setCorrectSeparatorExerciseOutput() {
@@ -960,14 +968,20 @@ export default class Graph {
     <svg class="exercise-icon correct-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-    <p>$S = \\{ ${this.selectedNodes} \\}$ is a separator in the graph</p>
+    <p>$S = \\{ ${this.selectedNodes.sort((a, b) => a - b)} \\}$ is a separator in the graph</p>
     `);
-    renderMathInElement(document.body);
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\\[', right: '\\]', display: true },
+      ],
+    });
   }
 
   resetSeparatorExerciseOutput() {
     d3.select('#separator-output').html(
-      'Click on a vertex to include it into the separator set.'
+      'Click on a vertex to include it into the separator set.',
     );
     this.resetNodeStyling();
   }
@@ -979,7 +993,7 @@ export default class Graph {
 
   findLinksToRemove() {
     return this.links.filter(
-      (link) => this.selectedNodes.includes(link.target.id) || this.selectedNodes.includes(link.source.id)
+      (link) => this.selectedNodes.includes(link.target.id) || this.selectedNodes.includes(link.source.id),
     );
   }
 
@@ -1025,26 +1039,6 @@ export default class Graph {
     this.nodes = [];
     this.links = [];
     this.lastNodeId = 0;
-  }
-
-  hoverEffect(d) {
-    d3.selectAll('#graph-container circle')
-      .filter((node) => d.vertices.includes(node.id))
-      .transition()
-      .duration(100)
-      .style('fill', 'orange');
-  }
-
-  toggleHoverEffect() {
-    if (this.isHoverEffect) {
-      this.isHoverEffect = false;
-      this.nodeSvg.on('mouseover', null);
-      this.nodeSvg.on('mouseout', null);
-    } else {
-      this.isHoverEffect = true;
-      this.nodeSvg.on('mouseover', (d) => this.hoverEffect(d));
-      this.nodeSvg.on('mouseout', this.resetNodeStyling);
-    }
   }
 
   isConnected() {
@@ -1116,9 +1110,7 @@ export default class Graph {
   }
 
   areNodesInTree() {
-    return this.graphOfTd.nodes.every((node) =>
-      this.masterNodes.includes(node.id)
-    );
+    return this.graphOfTd.nodes.every((node) => this.masterNodes.includes(node.id));
   }
 
   isEveryGraphLinkInTree() {
@@ -1127,8 +1119,8 @@ export default class Graph {
         const currentBag = this.nodes[i];
         if (currentBag.vertices === undefined) continue;
         if (
-          currentBag.vertices.includes(link.source.id) &&
-          currentBag.vertices.includes(link.target.id)
+          currentBag.vertices.includes(link.source.id)
+          && currentBag.vertices.includes(link.target.id)
         ) {
           return true;
         }
@@ -1155,7 +1147,7 @@ export default class Graph {
     }
 
     const multipleNodes = this.graphOfTd.nodes.filter(
-      (node) => node.counter > 1
+      (node) => node.counter > 1,
     );
 
     for (let i = 0; i < multipleNodes.length; i++) {
@@ -1167,8 +1159,7 @@ export default class Graph {
       });
 
       const tempLinks = this.links.filter(
-        (link) =>
-          tempNodes.includes(link.source) && tempNodes.includes(link.target)
+        (link) => tempNodes.includes(link.source) && tempNodes.includes(link.target),
       );
       const obj = this.isSubGraphDisconnected(tempNodes, tempLinks);
       if (obj.isDisconnected) return false;
@@ -1184,51 +1175,41 @@ export default class Graph {
     let validString;
 
     if (this.isTree()) {
-      treeString =
-        "Tree decomposition is a tree  <span class='material-icons correct-answer'>check</span>";
+      treeString = "Tree decomposition is a tree  <span class='material-icons correct-answer'>check</span>";
     } else {
-      treeString =
-        'Tree decomposition must be a tree. <span class="material-icons wrong-answer">clear</span>';
+      treeString = 'Tree decomposition must be a tree. <span class="material-icons wrong-answer">clear</span>';
     }
 
     /* Check node coverage */
     if (this.areNodesInTree()) {
-      nodeCoverageString =
-        'Node coverage  <span class="material-icons correct-answer">check</span>';
+      nodeCoverageString = 'Node coverage  <span class="material-icons correct-answer">check</span>';
     } else {
-      nodeCoverageString =
-        'Node coverage <span class="material-icons wrong-answer">clear</span>';
+      nodeCoverageString = 'Node coverage <span class="material-icons wrong-answer">clear</span>';
     }
 
     /* Check edge coverage */
     if (this.isEveryGraphLinkInTree()) {
-      edgeCoverageString =
-        'Edge coverage <span class="material-icons correct-answer">check</span>';
+      edgeCoverageString = 'Edge coverage <span class="material-icons correct-answer">check</span>';
     } else {
-      edgeCoverageString =
-        'Edge coverage <span class="material-icons wrong-answer">clear</span>';
+      edgeCoverageString = 'Edge coverage <span class="material-icons wrong-answer">clear</span>';
     }
 
     /* Check coherence property */
     if (this.checkCoherence()) {
-      coherenceString =
-        'Coherence <span class="material-icons correct-answer">check</span>';
+      coherenceString = 'Coherence <span class="material-icons correct-answer">check</span>';
     } else {
-      coherenceString =
-        'Coherence <span class="material-icons wrong-answer">clear</span>';
+      coherenceString = 'Coherence <span class="material-icons wrong-answer">clear</span>';
     }
 
     if (
-      this.isTree() &&
-      this.areNodesInTree() &&
-      this.isEveryGraphLinkInTree() &&
-      this.checkCoherence()
+      this.isTree()
+      && this.areNodesInTree()
+      && this.isEveryGraphLinkInTree()
+      && this.checkCoherence()
     ) {
-      validString =
-        'This is a valid tree decomposition <span class="material-icons correct-answer">check</span>';
+      validString = 'This is a valid tree decomposition <span class="material-icons correct-answer">check</span>';
     } else {
-      validString =
-        'This is not a valid tree decomposition <span class="material-icons wrong-answer">clear</span>';
+      validString = 'This is not a valid tree decomposition <span class="material-icons wrong-answer">clear</span>';
     }
 
     d3.select('#output').html(`
@@ -1263,14 +1244,13 @@ export default class Graph {
       .selectAll('line')
       .data(this.links, (d) => `v${d.source.id}-v${d.target.id}`)
       .join(
-        (enter) =>
-          enter
-            .append('line')
-            .lower()
-            .attr('class', 'graphLink')
-            .on('contextmenu', (d) => this.removeEdge(d)),
+        (enter) => enter
+          .append('line')
+          .lower()
+          .attr('class', 'graphLink')
+          .on('contextmenu', (d) => this.removeEdge(d)),
         (update) => update,
-        (exit) => exit.remove()
+        (exit) => exit.remove(),
       );
 
     /* Enter, update, remove ellipse SVGs */
@@ -1290,21 +1270,20 @@ export default class Graph {
             .on('contextmenu', d3.contextMenu(menu));
         },
         (update) => update,
-        (exit) => exit.remove()
+        (exit) => exit.remove(),
       );
 
     this.svg
       .selectAll('text')
       .data(this.nodes, (d) => d.id)
       .join(
-        (enter) =>
-          enter
-            .append('text')
-            .attr('dy', 4.5)
-            .text((d) => d.id)
-            .attr('class', 'graph-label'),
+        (enter) => enter
+          .append('text')
+          .attr('dy', 4.5)
+          .text((d) => d.id)
+          .attr('class', 'graph-label'),
         (update) => update,
-        (exit) => exit.remove()
+        (exit) => exit.remove(),
       );
 
     this.simulation.force('link').links(this.links);
@@ -1339,7 +1318,7 @@ export default class Graph {
   removeNode(d) {
     d3.event.preventDefault();
     const linksToRemove = this.links.filter(
-      (l) => l.source === d || l.target === d
+      (l) => l.source === d || l.target === d,
     );
     linksToRemove.map((l) => this.links.splice(this.links.indexOf(l), 1));
     const indexOfNode = this.nodes.indexOf(d);
@@ -1357,7 +1336,7 @@ export default class Graph {
     const coords = d3.mouse(d3.event.currentTarget);
     this.dragLine.attr(
       'd',
-      `M${this.mousedownNode.x},${this.mousedownNode.y}L${coords[0]},${coords[1]}`
+      `M${this.mousedownNode.x},${this.mousedownNode.y}L${coords[0]},${coords[1]}`,
     );
   }
 
@@ -1380,7 +1359,7 @@ export default class Graph {
       .classed('hidden', false)
       .attr(
         'd',
-        `M${this.mousedownNode.x},${this.mousedownNode.y}L${this.mousedownNode.x},${this.mousedownNode.y}`
+        `M${this.mousedownNode.x},${this.mousedownNode.y}L${this.mousedownNode.x},${this.mousedownNode.y}`,
       );
   }
 
@@ -1390,8 +1369,8 @@ export default class Graph {
     for (let i = 0; i < this.links.length; i++) {
       const l = this.links[i];
       if (
-        (l.source === this.mousedownNode && l.target === d) ||
-        (l.source === d && l.target === this.mousedownNode)
+        (l.source === this.mousedownNode && l.target === d)
+        || (l.source === d && l.target === this.mousedownNode)
       ) {
         return;
       }
@@ -1448,7 +1427,7 @@ export default class Graph {
           .forceLink(this.links)
           .id((d) => d.id)
           .distance(70)
-          .strength(0.5)
+          .strength(0.5),
       )
       .force('collision', d3.forceCollide().radius(20))
       .on('tick', () => {
@@ -1481,55 +1460,24 @@ export default class Graph {
       .attr('height', this.height);
   }
 
-  loadGraph(graph) {
+  load(graph) {
     if (this.svg) this.removeSvg();
     this.createSvg();
     this.graph = graph;
     this.nodes = graph.nodes;
     this.links = graph.links;
-    this.createSimulation();
-    this.createArrow();
     this.createLinkSvg();
     this.addHullPath();
-    if (this.type === 'tree') {
-      this.createGroupElementForTreeNodes();
-      this.createTreeDecompositionNodeSvgs();
-      this.createTreeDecompositionLabels();
-      this.createTreeDecompositionLabels2();
-    } else {
-      this.createGraphNodeSvg();
-      this.createGraphLabels();
-    }
+    this.createSimulation();
+    this.createArrow();
+    this.createNodeSvg();
+    this.createLabels();
     this.simulation.force('link').links(this.links);
     this.buildAdjacencyList();
     this.setg();
   }
 
-  createGroupElementForTreeNodes() {
-    this.svg
-      .selectAll('g')
-      .data(this.nodes)
-      .enter()
-      .append('g')
-      .attr('class', 'td')
-      .call(
-        d3
-          .drag()
-          .on('start', (v) => {
-            if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
-            [v.fx, v.fy] = [v.x, v.y];
-          })
-          .on('drag', (v) => {
-            [v.fx, v.fy] = [d3.event.x, d3.event.y];
-          })
-          .on('end', (v) => {
-            if (!d3.event.active) this.simulation.alphaTarget(0);
-            [v.fx, v.fy] = [null, null];
-          })
-      );
-  }
-
-  createGraphLabels() {
+  createLabels() {
     this.svg
       .selectAll('text')
       .data(this.nodes)
@@ -1543,36 +1491,15 @@ export default class Graph {
       .attr('class', 'graph-label');
   }
 
-  createGraphNodeSvg() {
+  createNodeSvg() {
     this.nodeSvg = this.svg
       .selectAll('circle')
       .data(this.nodes)
       .enter()
       .append('circle')
       .attr('id', (d) => `graph-node-${d.id}`)
-      .style('opacity', (d) => {
-        if (d.id === 0) return 0;
-      })
-      .attr('r', 18)
-      .style('fill', '#1f77b4')
-      .attr('class', 'nonhighlight')
-      .call(
-        d3
-          .drag()
-          .on('start', (v) => {
-            d3.selectAll('circle').style('cursor', 'grabbing');
-            this.svg.style('cursor', 'grabbing');
-            if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
-            [v.fx, v.fy] = [v.x, v.y];
-          })
-          .on('drag', (v) => ([v.fx, v.fy] = [d3.event.x, d3.event.y]))
-          .on('end', (v) => {
-            d3.selectAll('circle').style('cursor', 'grab');
-            this.svg.style('cursor', 'auto');
-            if (!d3.event.active) this.simulation.alphaTarget(0);
-            [v.fx, v.fy] = [null, null];
-          })
-      );
+      .attr('r', 20)
+      .attr('class', 'graph-node');
   }
 
   createSimulation() {
@@ -1596,7 +1523,7 @@ export default class Graph {
             }
             return 50;
           })
-          .strength(0.9)
+          .strength(0.9),
       )
       .force(
         'collision',
@@ -1605,7 +1532,7 @@ export default class Graph {
             return 50;
           }
           return d.r + 10;
-        })
+        }),
       )
       .on('tick', () => {
         this.svg
@@ -1647,37 +1574,8 @@ export default class Graph {
       });
   }
 
-  createTreeDecompositionLabels2() {
-    this.svg
-      .selectAll('g')
-      .append('text')
-      .attr('dy', 15)
-      .text((d) => d.label.substring(2))
-      .style('letter-spacing', '4px')
-      .attr('class', 'graph-label');
-  }
-
-  createTreeDecompositionLabels() {
-    this.svg
-      .selectAll('g')
-      .append('text')
-      .attr('dy', -4)
-      .text((d) => d.label.substring(0, 2))
-      .style('letter-spacing', '6px')
-      .attr('class', 'graph-label');
-  }
-
-  createTreeDecompositionNodeSvgs() {
-    this.nodeSvg = this.svg
-      .selectAll('g')
-      .append('ellipse')
-      .attr('rx', (d) => d.label.length * 8)
-      .attr('ry', 25)
-      .style('fill', '#2ca02c');
-  }
-
   createLinkSvg() {
-    this.svg
+    this.linkSvg = this.svg
       .selectAll('line')
       .data(this.links)
       .enter()
@@ -1716,6 +1614,6 @@ export default class Graph {
     if (vertices === undefined && edges === undefined) {
       randomGraph = generateRandomGraph(10, 10);
     } else randomGraph = generateRandomGraph(vertices, edges);
-    this.loadGraph(randomGraph, this.container, 'graph');
+    this.load(randomGraph, this.container, 'graph');
   }
 }

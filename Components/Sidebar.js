@@ -1,11 +1,6 @@
 export default class Sidebar {
-  constructor(title) {
+  setTitle(title) {
     this.title = title;
-    this.draw();
-    this.addTitleContainer();
-    this.addTitle(this.title);
-    this.addHorizontalLine();
-    this.addContentArea();
   }
 
   clear() {
@@ -177,22 +172,21 @@ export default class Sidebar {
     this.sectionHandler = handler;
   }
 
-  draw() {
+  async draw() {
     const sidebarContainer = d3.select('#center-container')
       .append('div')
       .attr('class', 'sidebar');
-
     this.sidebarContainer = sidebarContainer;
+    this.addTitleContainer();
+    this.addTitle(this.title);
+    this.addHorizontalLine();
+    this.addContentArea();
   }
 
   addProgresBar() {
-    const { sections } = this.sectionHandler;
-    this.sections = sections;
-    const width = 100 / sections.length;
-
     this.addProgressBarContainer();
     this.addLeftPaginationArrow();
-    this.addPaginationRectangles(sections, width);
+    this.addPaginationRectangles();
     this.addRightPaginationArrow();
   }
 
@@ -210,19 +204,28 @@ export default class Sidebar {
       .on('click', () => this.sectionHandler.goNextSection());
   }
 
-  addPaginationRectangles(sections, width) {
+  addPaginationRectangles() {
+    const { sections } = window.sectionHandler;
+    const width = 100 / sections.length;
     this.progressBarContainer
       .selectAll('div')
       .data(sections)
       .join(
         (enter) => enter
           .append('div')
-          .attr('class', (d) => (d.isActive ? 'progress-item-active' : 'progress-item'))
+          .attr('class', 'progress-item')
           .style('width', `${width}%`)
-          .on('click', (section) => this.sectionHandler.goToSection(section)),
+          .on('click', (section) => this.handleClickOnSection(section)),
         (update) => update,
         (exit) => exit.remove(),
       );
+  }
+
+  handleClickOnSection(section) {
+    const { sections } = window.sectionHandler;
+    const sectionNumber = sections.indexOf(section) + 1;
+    console.log(sections);
+    window.sectionHandler.goToSection(window.currentChapterNumber, sectionNumber);
   }
 
   addLeftPaginationArrow() {
@@ -235,12 +238,14 @@ export default class Sidebar {
 
   updateProgressBar() {
     if (!this.progressBarContainer) return;
+    const { sections } = window.sectionHandler;
+
     this.progressBarContainer
       .selectAll('div')
-      .data(this.sections)
+      .data(sections)
       .join(
         (enter) => enter,
-        (update) => update.attr('class', (d) => (d.isActive ? 'progress-item-active' : 'progress-item')),
+        (update) => update.attr('class', (section) => (section.isActive ? 'progress-item-active' : 'progress-item')),
         (exit) => exit.remove(),
       );
   }
@@ -248,12 +253,11 @@ export default class Sidebar {
   addContentArea() {
     const contentContainer = this.sidebarContainer.append('div').attr('class', 'content-container');
     this.contentContainer = contentContainer;
-
     const content = this.contentContainer.append('div').attr('class', 'content');
     this.content = content;
   }
 
-  addContent(text) {
+  setContent(text) {
     this.content.html(text);
     renderMathInElement(document.body, {
       delimiters: [
