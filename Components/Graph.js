@@ -1491,6 +1491,22 @@ export default class Graph {
       .attr('class', 'graph-label');
   }
 
+  handleMouseOver(node) {
+    const circle = d3.select(`#graph-node-${node.id}`);
+    circle.transition()
+      .duration(1000)
+      .ease(d3.easeElastic)
+      .attr('r', 25);
+  }
+
+  handleMouseOut(node) {
+    const circle = d3.select(`#graph-node-${node.id}`);
+    circle.transition()
+      .duration(1000)
+      .ease(d3.easeElastic)
+      .attr('r', 20);
+  }
+
   createNodeSvg() {
     this.nodeSvg = this.svg
       .selectAll('circle')
@@ -1499,7 +1515,9 @@ export default class Graph {
       .append('circle')
       .attr('id', (d) => `graph-node-${d.id}`)
       .attr('r', 20)
-      .attr('class', 'graph-node');
+      .attr('class', 'graph-node')
+      .on('mouseover', (node) => this.handleMouseOver(node))
+      .on('mouseout', (node) => this.handleMouseOut(node));
   }
 
   createSimulation() {

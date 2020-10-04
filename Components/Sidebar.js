@@ -224,7 +224,6 @@ export default class Sidebar {
   handleClickOnSection(section) {
     const { sections } = window.sectionHandler;
     const sectionNumber = sections.indexOf(section) + 1;
-    console.log(sections);
     window.sectionHandler.goToSection(window.currentChapterNumber, sectionNumber);
   }
 

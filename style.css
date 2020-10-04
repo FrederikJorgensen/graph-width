@@ -1064,6 +1064,10 @@ th {
   stroke-width: 3px;
 }
 
+.graph-node:hover {
+  fill: orange;
+}
+
 .graphLink {
   fill: black;
   stroke: rgb(51, 51, 51);
