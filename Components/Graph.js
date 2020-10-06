@@ -1628,10 +1628,7 @@ export default class Graph {
 
   randomGraph(vertices, edges) {
     if (this.svg) this.removeSvg();
-    let randomGraph;
-    if (vertices === undefined && edges === undefined) {
-      randomGraph = generateRandomGraph(10, 10);
-    } else randomGraph = generateRandomGraph(vertices, edges);
+    const randomGraph = generateRandomGraph(vertices, edges);
     this.load(randomGraph, this.container, 'graph');
   }
 }
