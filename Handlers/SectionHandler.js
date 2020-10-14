@@ -1,46 +1,8 @@
-import { addOverlay } from '../controller.js';
 import data from '../data.js';
-
-function g() {
-  d3.select('#container').append('div').attr('id', 'graph-container');
-  d3.select('#container').append('div').attr('id', 'tree-container');
-}
-
-function removeElements() {
-  d3.select('#graph-container').selectAll('*').remove();
-  d3.select('#tree-container').selectAll('svg').remove();
-  d3.select('#container').selectAll('svg').remove();
-  d3.select('#dp-container').remove();
-  d3.select('#color-table').remove();
-  d3.select('#graph-tooltip').remove();
-  d3.select('#output-surface').selectAll('*').remove();
-  d3.select('#tooltip').remove();
-  d3.select('#tooltip-arrow').remove();
-  d3.select('#tree1').remove();
-  d3.select('#tree2').remove();
-  d3.select('#tree3').remove();
-  d3.select('#toggle-visibility-button').remove();
-  d3.select('#tableX').remove();
-}
-
-function removeEverythingExceptLoader() {
-  d3.select('#main').selectAll('*:not(#overlay):not(#loader)').remove();
-}
-
-function createVisualContainer() {
-  d3.select('#app-area').append('div').attr('id', 'container');
-}
-
-function createAppAreaContainer() {
-  d3.select('#center-container').append('div').attr('id', 'app-area');
-}
-
-function createCenterContainer() {
-  d3.select('#main').append('div').attr('id', 'center-container');
-}
 
 export default class SectionHandler {
   constructor() {
+    this.sections = data;
     window.sectionHandler = this;
   }
 
@@ -52,36 +14,72 @@ export default class SectionHandler {
     this.currentChapterNumber = chapterNumber;
   }
 
+  setContent(text) {
+    this.content.html(text);
+    renderMathInElement(document.body, {
+      delimiters: [
+        { left: '$$', right: '$$', display: true },
+        { left: '$', right: '$', display: false },
+        { left: '\\[', right: '\\]', display: true },
+      ],
+    });
+  }
+
+  createCenterContainer() {
+    this.centerContainer = d3
+      .select('#main')
+      .append('div')
+      .attr('id', 'center-container');
+  }
+
+  createVisualContainer() {
+    this.visualContainer = d3
+      .select('#app-area')
+      .append('div')
+      .attr('id', 'container');
+  }
+
+  createAppAreaContainer() {
+    this.appAreaContainer = d3
+      .select('#center-container')
+      .append('div')
+      .attr('id', 'app-area');
+  }
+
   setupContainers() {
-    createCenterContainer();
-    this.sidebar.draw();
-    createAppAreaContainer();
-    createVisualContainer();
+    this.createCenterContainer();
+    this.createContentContainer();
+    this.createContent();
+    this.createAppAreaContainer();
+    this.createVisualContainer();
+  }
+
+  createContentContainer() {
+    this.contentContainer = d3
+      .select('#center-container')
+      .append('div')
+      .attr('class', 'content-container');
+  }
+
+  createContent() {
+    this.content = this.contentContainer
+      .append('div');
+  }
+
+  removeContainers() {
+    if (this.content) this.content.remove();
+    if (this.appAreaContainer) this.appAreaContainer.remove();
+    if (this.visualContainer) this.visualContainer.remove();
+    if (this.centerContainer) this.centerContainer.remove();
   }
 
   async createSection() {
     this.currentSectionNumber = this.sections.indexOf(this.currentSection) + 1;
-    removeEverythingExceptLoader();
+    this.removeContainers();
     this.setupContainers();
-    this.sidebar.addProgresBar();
-    this.sections.map((section) => section.isActive = false);
-    addOverlay();
-    removeElements();
-    this.handleQueryString();
-    this.sidebar.setContent(this.currentSection.content);
-    this.sidebar.setTitle(this.currentSection.title);
+    this.setContent(this.currentSection.content);
     this.currentSection.isActive = true;
-    this.sidebar.updateProgressBar();
     await this.currentSection.create();
-  }
-
-  handleQueryString() {
-    window.history.replaceState({}, '', '?');
-    const params = new URLSearchParams(location.search);
-    params.set('chapter', this.currentChapterNumber);
-    params.set('section', this.currentSectionNumber);
-    params.toString();
-    window.history.replaceState({}, '', `?${params.toString()}`);
   }
 
   async goPreviousSection() {
@@ -98,11 +96,8 @@ export default class SectionHandler {
     await this.createSection();
   }
 
-  goToSection(chapterNumber, sectionNumber) {
-    this.sections = data.filter((section) => section.chapterNumber === chapterNumber);
+  goToSection(sectionNumber) {
     const section = this.sections[sectionNumber - 1];
-    this.currentChapterNumber = section.chapterNumber;
-    window.currentChapterNumber = this.currentChapterNumber;
     this.currentSection = section;
     this.createSection();
   }

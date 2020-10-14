@@ -6,14 +6,6 @@ import {
 
 const colors = d3.scaleOrdinal(d3.schemeCategory10);
 
-function resetTreeDecompositionStyles() {
-  d3.selectAll('ellipse')
-    .style('fill', '#2ca02c')
-    .attr('rx', 35)
-    .attr('ry', 25)
-    .style('opacity', 1);
-}
-
 function returnAdj(links) {
   const adjacencyList = [];
   links.forEach((d) => {
@@ -45,10 +37,6 @@ function hull(points) {
   if (points.length < 2) return;
   if (points.length < 3) return d3.polygonHull([points[0], ...points]);
   return d3.polygonHull(points);
-}
-
-function timeout(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 function errorSvg() {
@@ -108,13 +96,10 @@ function stopAllTransitions() {
 }
 
 export default class Graph {
-  constructor(container, type, graphOfTd) {
+  constructor(container) {
     this.container = container;
-    this.type = type;
-    this.graphOfTd = graphOfTd;
     this.width = document.getElementById(this.container).offsetWidth;
     this.height = document.getElementById(this.container).offsetHeight;
-    this.selectedNodes = [];
     this.animationDuration = 1200;
   }
 
@@ -162,16 +147,16 @@ export default class Graph {
 
   isVertexAdjacent(subTree, array) {
     const subGraph = this.createSubgraph(subTree);
+    const verticesInSubGraph = this.getVerticesInSubGraph(subGraph);
+    const adjacencyList = returnAdj(subGraph.links);
+    if (this.isNeighborInSet(array, adjacencyList)) return true;
+    return false;
+  }
 
-    const verticesInSubGraph = [];
+  getVerticesInSubGraph(subGraph, verticesInSubGraph) {
     subGraph.nodes.forEach((node) => {
       verticesInSubGraph.push(node.id);
     });
-
-    const adjacencyList = returnAdj(subGraph.links);
-
-    if (this.isNeighborInSet(array, adjacencyList)) return true;
-    return false;
   }
 
   showSeparator(vertices) {
@@ -241,28 +226,6 @@ export default class Graph {
     this.simulation.alpha(0.1).restart();
   }
 
-  visitBag(bagId) {
-    d3.selectAll('ellipse')
-      .filter((treeNode) => treeNode.id === bagId)
-      .transition()
-      .duration(this.animationDuration)
-      .delay(this.animationDuration * this.anim)
-      .style('fill', 'orange')
-      .ease(d3.easeElastic)
-      .attr('rx', 40)
-      .attr('ry', 30)
-      .on('end', () => {
-        d3.selectAll('ellipse').style('fill', '#2ca02c');
-        d3.selectAll('ellipse')
-          .filter((treeNode) => treeNode.id === bagId)
-          .transition()
-          .duration(this.animationDuration)
-          .ease(d3.easeElastic)
-          .attr('rx', 35)
-          .attr('ry', 25);
-      });
-  }
-
   isEdgeInTreeDecomposition(sourceNode, targetNode) {
     const na = d3.selectAll('#tree-container ellipse').data();
 
@@ -279,14 +242,13 @@ export default class Graph {
   }
 
   isNodeInTreeDecomposition(node) {
-    const na = d3.selectAll('#tree-container ellipse').data();
+    const nodesInTreeDecomposition = d3.selectAll('#tree-container ellipse').data();
 
-    na.forEach((bag) => {
-      if (bag.vertices.includes(node.id)) {
-        this.visitBag(bag.id);
-      }
+    nodesInTreeDecomposition.forEach((bag) => {
+      if (bag.vertices.includes(node.id)) this.visitBag(bag.id);
       return false;
     });
+
     return true;
   }
 
@@ -340,21 +302,27 @@ export default class Graph {
   }
 
   createSubgraph(subTree) {
-    const subGraphNodeIds = [];
-
-    subTree.forEach((node) => {
-      for (const v of node.data.vertices) {
-        if (!subGraphNodeIds.includes(v)) subGraphNodeIds.push(v);
-      }
-    });
-
-    const subGraphNodes = this.nodes.filter((currentNode) => subGraphNodeIds.includes(currentNode.id));
-    const subGraphLinks = this.links.filter(
-      (currentLink) => subGraphNodeIds.includes(currentLink.source.id)
-        && subGraphNodeIds.includes(currentLink.target.id),
-    );
-
+    const subGraphNodes = this.getSubGraphNodes(subTree);
+    const subGraphLinks = this.getSubGraphLinks();
     return { nodes: subGraphNodes, links: subGraphLinks };
+  }
+
+  getSubGraphLinks() {
+    return this.links.filter(
+      (currentLink) => {
+        subGraphNodeIds.includes(currentLink.source.id)
+        && subGraphNodeIds.includes(currentLink.target.id);
+      },
+    );
+  }
+
+  getSubGraphNodes(subTree) {
+    const subGraphNodeIds = [];
+    subTree.forEach((node) => {
+      const { vertices } = node.data;
+      vertices.forEach((v) => subGraphNodeIds.push(v));
+    });
+    return this.nodes.filter((currentNode) => subGraphNodeIds.includes(currentNode.id));
   }
 
   highlightSubGraph(subGraph) {
@@ -890,14 +858,9 @@ export default class Graph {
   isSetSeparating(node) {
     this.refresh(node);
     const subGraph = this.createSubgraphFromSelectedNodes();
-    // console.log(subGraph);
-    // this.resetNodeStyling();
-
     if (this.isSubGraphDisconnected(subGraph)) {
-      // this.colorCorrectNodes();
       this.setCorrectSeparatorExerciseOutput();
     } else {
-      // this.colorIncorrectNodes();
       this.setIncorrectSeparatorExerciseOutput();
     }
   }
@@ -1001,14 +964,6 @@ export default class Graph {
     return this.nodes.filter((node) => !this.selectedNodes.includes(node.id));
   }
 
-  toggleMaxStop() {
-    if (this.maxStop) {
-      this.maxStop = false;
-    } else {
-      this.maxStop = true;
-    }
-  }
-
   buildAdjacencyList() {
     const adjacencyList = [];
     this.links.forEach((d) => {
@@ -1018,27 +973,8 @@ export default class Graph {
     this.adjacencyList = adjacencyList;
   }
 
-  async runMaximumIndependentSet() {
-    if (this.isMisRunning === true) {
-      this.animationSpeed = 0;
-      await timeout(1500);
-      d3.select('#max-output').html(null);
-      d3.selectAll('circle').interrupt();
-      d3.selectAll('circle').style('fill', '#1f77b4');
-      this.animationSpeed = 500;
-      this.maximumIndependentSet();
-    } else {
-      this.animationSoeed = 500;
-      this.isMisRunning = true;
-      this.maximumIndependentSet();
-    }
-  }
-
   removeSvg() {
     if (this.svg) this.svg.remove();
-    this.nodes = [];
-    this.links = [];
-    this.lastNodeId = 0;
   }
 
   isConnected() {
@@ -1102,10 +1038,7 @@ export default class Graph {
   }
 
   isTree() {
-    const isConnected = this.isConnected();
-    if (isConnected && this.nodes.length - 1 === this.links.length) {
-      return true;
-    }
+    if (this.isConnected() && this.nodes.length - 1 === this.links.length) return true;
     return false;
   }
 
@@ -1169,7 +1102,6 @@ export default class Graph {
 
   checkTreeDecomposition() {
     let treeString;
-    let nodeCoverageString;
     let edgeCoverageString;
     let coherenceString;
     let validString;
@@ -1180,12 +1112,7 @@ export default class Graph {
       treeString = 'Tree decomposition must be a tree. <span class="material-icons wrong-answer">clear</span>';
     }
 
-    /* Check node coverage */
-    if (this.areNodesInTree()) {
-      nodeCoverageString = 'Node coverage  <span class="material-icons correct-answer">check</span>';
-    } else {
-      nodeCoverageString = 'Node coverage <span class="material-icons wrong-answer">clear</span>';
-    }
+    const nodeCoverageString = this.checkNodeCoverage();
 
     /* Check edge coverage */
     if (this.isEveryGraphLinkInTree()) {
@@ -1221,6 +1148,16 @@ export default class Graph {
     `);
   }
 
+  checkNodeCoverage() {
+    let nodeCoverageString = '';
+    if (this.areNodesInTree()) {
+      nodeCoverageString = 'Node coverage  <span class="material-icons correct-answer">check</span>';
+    } else {
+      nodeCoverageString = 'Node coverage <span class="material-icons wrong-answer">clear</span>';
+    }
+    return nodeCoverageString;
+  }
+
   updateMasterList() {
     let temp = [];
     this.nodes.forEach((bag) => {
@@ -1239,21 +1176,34 @@ export default class Graph {
 
   restart() {
     this.updateMasterList();
-    /* Enter, update, remove link SVGs */
+    this.enterUpdateRemoveLinks();
+    this.enterUpdateRemoveNodes();
+    this.enterUpdateRemoveLabels();
+    this.restartSimulation();
+  }
+
+  restartSimulation() {
+    this.simulation.force('link').links(this.links);
+    this.simulation.nodes(this.nodes);
+    this.simulation.alpha(0.5).restart();
+  }
+
+  enterUpdateRemoveLabels() {
     this.svg
-      .selectAll('line')
-      .data(this.links, (d) => `v${d.source.id}-v${d.target.id}`)
+      .selectAll('text')
+      .data(this.nodes, (d) => d.id)
       .join(
         (enter) => enter
-          .append('line')
-          .lower()
-          .attr('class', 'graphLink')
-          .on('contextmenu', (d) => this.removeEdge(d)),
+          .append('text')
+          .attr('dy', 4.5)
+          .text((d) => d.id)
+          .attr('class', 'graph-label'),
         (update) => update,
         (exit) => exit.remove(),
       );
+  }
 
-    /* Enter, update, remove ellipse SVGs */
+  enterUpdateRemoveNodes() {
     this.svg
       .selectAll('circle')
       .data(this.nodes, (d) => d.id)
@@ -1272,23 +1222,21 @@ export default class Graph {
         (update) => update,
         (exit) => exit.remove(),
       );
+  }
 
+  enterUpdateRemoveLinks() {
     this.svg
-      .selectAll('text')
-      .data(this.nodes, (d) => d.id)
+      .selectAll('line')
+      .data(this.links, (d) => `v${d.source.id}-v${d.target.id}`)
       .join(
         (enter) => enter
-          .append('text')
-          .attr('dy', 4.5)
-          .text((d) => d.id)
-          .attr('class', 'graph-label'),
+          .append('line')
+          .lower()
+          .attr('class', 'graphLink')
+          .on('contextmenu', (d) => this.removeEdge(d)),
         (update) => update,
         (exit) => exit.remove(),
       );
-
-    this.simulation.force('link').links(this.links);
-    this.simulation.nodes(this.nodes);
-    this.simulation.alpha(0.5).restart();
   }
 
   addNode() {
@@ -1302,7 +1250,6 @@ export default class Graph {
         id: ++this.lastNodeId,
       };
       this.nodes.push(newNode);
-      this.setg();
       this.restart();
     }
   }
@@ -1368,12 +1315,7 @@ export default class Graph {
     if (!this.mousedownNode || this.mousedownNode === d) return;
     for (let i = 0; i < this.links.length; i++) {
       const l = this.links[i];
-      if (
-        (l.source === this.mousedownNode && l.target === d)
-        || (l.source === d && l.target === this.mousedownNode)
-      ) {
-        return;
-      }
+      if ((l.source === this.mousedownNode && l.target === d) || (l.source === d && l.target === this.mousedownNode)) return;
     }
     const newLink = { source: this.mousedownNode, target: d };
     this.links.push(newLink);
@@ -1381,75 +1323,38 @@ export default class Graph {
 
   enableDrawing() {
     if (this.svg) this.removeSvg();
-    const w = document.getElementById(this.container).offsetWidth;
-    const h = document.getElementById(this.container).offsetHeight;
-    this.width = w;
-    this.height = h;
-    const svg = d3
-      .select(`#${this.container}`)
-      .append('svg')
-      .attr('width', w)
-      .attr('height', h);
+    this.width = document.getElementById(this.container).offsetWidth;
+    this.height = document.getElementById(this.container).offsetHeight;
+    const svg = this.appendSvg();
     this.svg = svg;
     this.svg.style('cursor', 'crosshair');
+    this.createSimulation();
+    this.addMouseButtonEventListeners();
+    this.addDragLine();
+  }
 
-    this.restartSimulation();
+  appendSvg() {
+    return d3
+      .select(`#${this.container}`)
+      .append('svg')
+      .attr('width', this.width)
+      .attr('height', this.height);
+  }
 
+  addMouseButtonEventListeners() {
     this.svg
       .on('mousedown', () => this.addNode())
       .on('contextmenu', () => d3.event.preventDefault())
       .on('mousemove', () => this.updateDragLine())
       .on('mouseup', () => this.hideDragLine())
       .on('mouseleave', () => this.leftCanvas());
+  }
 
+  addDragLine() {
     this.dragLine = this.svg
       .append('path')
       .attr('class', 'dragLine hidden')
       .attr('d', 'M0,0L0,0');
-  }
-
-  setg() {
-    this.nodes.forEach((node) => {
-      node.graph = this;
-    });
-  }
-
-  restartSimulation() {
-    const simulation = d3
-      .forceSimulation()
-      .force('x', d3.forceX(this.width / 2).strength(0.1))
-      .force('y', d3.forceY(this.height / 2).strength(0.1))
-      .nodes(this.nodes)
-      .force('charge', d3.forceManyBody().strength(-500))
-      .force(
-        'link',
-        d3
-          .forceLink(this.links)
-          .id((d) => d.id)
-          .distance(70)
-          .strength(0.5),
-      )
-      .force('collision', d3.forceCollide().radius(20))
-      .on('tick', () => {
-        this.svg
-          .selectAll('circle')
-          .attr('cx', (d) => d.x)
-          .attr('cy', (d) => d.y);
-        this.svg
-          .selectAll('text')
-          .attr('x', (d) => d.x)
-          .attr('y', (d) => d.y);
-
-        this.svg
-          .selectAll('line')
-          .attr('x1', (d) => d.source.x)
-          .attr('y1', (d) => d.source.y)
-          .attr('x2', (d) => d.target.x)
-          .attr('y2', (d) => d.target.y);
-      });
-
-    simulation.force('link').links(this.links);
-    this.simulation = simulation;
   }
 
   createSvg() {
@@ -1474,7 +1379,6 @@ export default class Graph {
     this.createLabels();
     this.simulation.force('link').links(this.links);
     this.buildAdjacencyList();
-    this.setg();
   }
 
   createLabels() {
@@ -1483,9 +1387,6 @@ export default class Graph {
       .data(this.nodes)
       .enter()
       .append('text')
-      .style('opacity', (d) => {
-        if (d.id === 0) return 0;
-      })
       .attr('dy', 4.5)
       .text((d) => (d.label ? d.label : d.id))
       .attr('class', 'graph-label');
@@ -1521,8 +1422,6 @@ export default class Graph {
   }
 
   createSimulation() {
-    const line = d3.line().curve(d3.curveBasisClosed);
-
     this.simulation = d3
       .forceSimulation()
       .force('center', d3.forceCenter(this.width / 2, this.height / 2))
@@ -1530,66 +1429,63 @@ export default class Graph {
       .force('y', d3.forceY(this.height / 2).strength(0.1))
       .nodes(this.nodes)
       .force('charge', d3.forceManyBody().strength(-900))
-      .force(
-        'link',
-        d3
-          .forceLink(this.links)
-          .id((d) => d.id)
-          .distance(() => {
-            if (this.type === 'tree') {
-              return 100;
-            }
-            return 50;
-          })
-          .strength(0.9),
-      )
-      .force(
-        'collision',
-        d3.forceCollide().radius((d) => {
-          if (this.type === 'tree') {
-            return 50;
-          }
-          return d.r + 10;
-        }),
-      )
-      .on('tick', () => {
-        this.svg
-          .selectAll('circle')
-          .attr('cx', (d) => d.x)
-          .attr('cy', (d) => d.y);
-        this.svg
-          .selectAll('ellipse')
-          .attr('transform', (d) => `translate(${d.x},${d.y})`);
-        this.svg
-          .selectAll('text')
-          .attr('x', (d) => d.x)
-          .attr('y', (d) => d.y);
+      .force('link', this.linkDis())
+      .on('tick', () => this.handleOnTick());
+  }
 
-        this.svg
-          .selectAll('line.graphLink')
-          .attr('x1', (d) => d.source.x)
-          .attr('y1', (d) => d.source.y)
-          .attr('x2', (d) => d.target.x)
-          .attr('y2', (d) => d.target.y);
+  linkDis() {
+    return d3
+      .forceLink(this.links)
+      .id((d) => d.id)
+      .distance(() => 50)
+      .strength(0.9);
+  }
 
-        if (this.separatorNodes) {
-          let pointArr = [];
-          const padding = 3.5;
+  highlightSeparatingNodes() {
+    const line = d3.line().curve(d3.curveBasisClosed);
+    let pointArr = [];
+    const pad = 20;
 
-          for (let i = 0; i < this.separatorNodes.length; i++) {
-            const node = this.separatorNodes[i];
-            const pad = 17 + padding;
-            pointArr = pointArr.concat([
-              [node.x - pad, node.y - pad],
-              [node.x - pad, node.y + pad],
-              [node.x + pad, node.y - pad],
-              [node.x + pad, node.y + pad],
-            ]);
-          }
-          if (pointArr.length === 0) return;
-          this.path.attr('d', line(hull(pointArr)));
-        }
-      });
+    for (const node of this.separatorNodes) {
+      pointArr = pointArr.concat([
+        [node.x - pad, node.y - pad],
+        [node.x - pad, node.y + pad],
+        [node.x + pad, node.y - pad],
+        [node.x + pad, node.y + pad],
+      ]);
+    }
+
+    this.path.attr('d', line(hull(pointArr)));
+  }
+
+  handleOnTick() {
+    this.moveCircle();
+    this.moveLabel();
+    this.moveLinks();
+    if (this.separatorNodes) this.highlightSeparatingNodes();
+  }
+
+  moveLinks() {
+    this.svg
+      .selectAll('line.graphLink')
+      .attr('x1', (d) => d.source.x)
+      .attr('y1', (d) => d.source.y)
+      .attr('x2', (d) => d.target.x)
+      .attr('y2', (d) => d.target.y);
+  }
+
+  moveLabel() {
+    this.svg
+      .selectAll('text')
+      .attr('x', (d) => d.x)
+      .attr('y', (d) => d.y);
+  }
+
+  moveCircle() {
+    this.svg
+      .selectAll('circle')
+      .attr('cx', (d) => d.x)
+      .attr('cy', (d) => d.y);
   }
 
   createLinkSvg() {
@@ -1627,8 +1523,7 @@ export default class Graph {
   }
 
   randomGraph(vertices, edges) {
-    if (this.svg) this.removeSvg();
     const randomGraph = generateRandomGraph(vertices, edges);
-    this.load(randomGraph, this.container, 'graph');
+    this.load(randomGraph);
   }
 }

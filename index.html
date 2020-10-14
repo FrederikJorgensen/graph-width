@@ -14,68 +14,17 @@
 </head>
 
 <body id="body">
-  <div class="nav-wrapper">
-    <nav class="nav">
-      <a href="/">
-        <svg width="35" height="40" viewBox="0 0 35 40" fill="none" xmlns="http://www.w3.org/2000/svg">
-          <path d="M17 25L11 33" stroke="#69B3A2" stroke-width="3" />
-          <path d="M29 8L23 16" stroke="#0CF0E9" stroke-width="3" />
-          <path d="M16 17L8 11" stroke="#D157D7" stroke-width="3" />
-          <path
-            d="M9.7859 39.8112C12.1669 39.1011 13.5213 36.595 12.8111 34.2139C12.1009 31.8331 9.59504 30.4787 7.21409 31.1889C4.83313 31.8991 3.4787 34.405 4.18886 36.7858C4.89907 39.1669 7.40494 40.5213 9.7859 39.8112Z"
-            fill="#69B3A2" />
-          <path
-            d="M5.7859 12.8111C8.16689 12.1009 9.52132 9.59504 8.81112 7.21409C8.10092 4.83313 5.59504 3.4787 3.21409 4.18886C0.833117 4.89907 -0.521315 7.40494 0.188876 9.7859C0.899066 12.1669 3.40495 13.5213 5.7859 12.8111Z"
-            fill="#D157D7" />
-          <path
-            d="M21.7145 25.7482C24.8892 24.8012 26.6951 21.4601 25.7482 18.2854C24.8012 15.1108 21.4601 13.3049 18.2854 14.2518C15.1108 15.1988 13.3049 18.5399 14.2518 21.7146C15.1988 24.8892 18.5399 26.6951 21.7145 25.7482Z"
-            fill="#4682B4" />
-          <path
-            d="M31.7859 8.81112C34.1669 8.10092 35.5212 5.59504 34.8112 3.21409C34.1007 0.833117 31.595 -0.521315 29.2141 0.188876C26.8331 0.89907 25.4787 3.40495 26.1889 5.7859C26.8991 8.16689 29.4049 9.52132 31.7859 8.81112Z"
-            fill="#0CF0E9" />
-        </svg>
-      </a>
-
-      <ul>
-        <li>
-          <a>Chapters</a>
-          <ul class="dropdown">
-            <li>
-              <a id="graph-separator-link"><strong>1.</strong> Graph Separators</a>
-            </li>
-            <li>
-              <a id="treewidth-link"><strong>2.</strong> Treewidth & Tree Decompositions</a>
-            </li>
-            <li>
-              <a id="algo-link"><strong>3.</strong> Algorithms on Tree Decompositions</a>
-            </li>
-          </ul>
-        </li>
-        <li>
-          <a id="sandbox-button">Sandbox</a>
-        </li>
-      </ul>
-    </nav>
-  </div>
   <div class="main" id="main"></div>
-
-  <!-- Katex -->
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/katex.min.js"
-    integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz"
-    crossorigin="anonymous"></script>
+    integrity="sha384-y23I5Q6l+B6vatafAwxRu/0oK/79VlbSz7Q9aiSZUvyWYIYsd+qj+o24G5ZU2zJz" crossorigin="anonymous">
+    </script>
   <script defer src="https://cdn.jsdelivr.net/npm/katex@0.11.1/dist/contrib/auto-render.min.js"
-    integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous"
-    onload="renderMathInElement(document.body);"></script>
-
-  <!-- D3 -->
+    integrity="sha384-kWPLUVMOks5AQFrykwIup5lo0m3iMkkHrD0uJ4H5cjeGihAutqP0yW0J6dpFiVkI" crossorigin="anonymous">
+    </script>
   <script src="https://d3js.org/d3.v5.min.js"></script>
   <script type="text/javascript" src="https://unpkg.com/force-in-a-box/dist/forceInABox.js"></script>
   <script src="https://d3js.org/d3-ease.v1.min.js"></script>
-
-  <!-- Deepcopy helper library -->
   <script defer src="https://cdn.jsdelivr.net/npm/deepcopy@2.0.0/umd/deepcopy.min.js"></script>
-
-  <!-- Custom scripts -->
   <script type="module" src="controller.js"></script>
   <script defer src="Utilities/d3-context-menu.js"></script>
 </body>

@@ -107,12 +107,6 @@ export function getKeysAsInts(obj) {
   return intArray;
 }
 
-export function setNavbarHeight() {
-  d3.select('.nav-wrapper').style('height', '5%');
-  d3.select('.nav-wrapper').style('visibility', 'visible');
-  d3.select('#main').style('height', '95%');
-}
-
 export function makeRequest(method, url, data) {
   return new Promise((resolve, reject) => {
     const xhr = new XMLHttpRequest();

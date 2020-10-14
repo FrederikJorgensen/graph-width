@@ -33,7 +33,6 @@ body {
 
 .main {
   display: flex;
-  background-color: var(--main-bg);
   justify-content: center;
   align-items: center;
   height: 100%;
@@ -73,20 +72,6 @@ body {
   position: absolute;
   top: 10px;
   left: 10px;
-}
-
-.button {
-  display: flex;
-  align-items: center;
-  background-color: #4299e1;
-  border: none;
-  border-radius: 9px;
-  color: white;
-  padding: 10px 15px;
-  text-align: center;
-  text-decoration: none;
-  font-size: 1rem;
-  outline: none;
 }
 
 .w {
@@ -171,8 +156,7 @@ body {
 }
 
 #app-area {
-  position: relative;
-  width: 70%;
+  width: 50%;
   height: 100%;
 }
 
@@ -191,48 +175,16 @@ body {
 
 #container {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 93%;
-  background-color: var(--surface);
-  border-radius: var(--border);
-  box-shadow: 0 2px 6px 0 hsla(0, 0%, 0%, 0.2);
-}
-
-#output {
-  width: 100%;
-  height: 7%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-#output-surface {
-  display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  height: 85%;
-  width: 100%;
-  background: var(--surface);
-  box-shadow: var(--shadow);
-  border-radius: var(--border);
+  justify-content: center;
+  height: 100%;
 }
 
-@media (min-width: 2000px) {
-  #center-container {
-    display: flex;
-    height: 98%;
-    width: 80%;
-  }
-}
-
-@media (max-width: 2000px) {
-  #center-container {
-    display: flex;
-    height: 98%;
-    width: 98%;
-  }
+#center-container {
+  display: flex;
+  height: 50%;
+  width: 50%;
 }
 
 .dragLine.hidden {
@@ -242,53 +194,6 @@ body {
 .dragLine {
   stroke: #333;
   stroke-width: 3px;
-}
-
-.graph-classes {
-  display: flex;
-  flex-direction: column;
-}
-
-.red {
-  color: red;
-}
-
-.green {
-  color: green;
-}
-
-.blue {
-  color: blue;
-}
-
-.exercise-box {
-  background-color: #d9e8ff;
-  color: var(--dark-mode-text);
-  border-radius: var(--border);
-  padding: 1rem;
-  line-height: 22px;
-  font-size: 1rem;
-  margin: 1rem 0;
-}
-
-.exercise-title {
-  color: #738199;
-  font-weight: bold;
-}
-
-.fact {
-  color: var(--fact-text-color);
-  background-color: #dfd;
-  border-radius: 10px;
-  padding: 12.5px;
-}
-
-.fact span {
-  background-color: #dfd;
-}
-
-.fact-title {
-  color: #2ca02c;
 }
 
 svg {
@@ -309,128 +214,8 @@ svg {
 }
 
 #graph-container {
-  height: 100%;
-  width: 50%;
-}
-
-.choices {
-  display: flex;
-  flex-direction: column;
-  margin: 20px 0 20px 0;
-  background-color: #2e2e2e;
-  border-radius: var(--border);
-}
-
-.choice {
-  flex: 0.1;
-  padding: 0 0 0 30px;
-  position: relative;
-  display: flex;
-  align-items: center;
-  min-height: 50px;
-  color: white;
-  line-height: 1.2em;
-  text-align: left;
-}
-
-.choice-text {
-  margin-left: 20px;
-}
-
-.choice:hover {
-  background-color: lightgray;
-  cursor: pointer;
-}
-
-.choice:first-child {
-  border-top-left-radius: var(--border);
-  border-top-right-radius: var(--border);
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 0;
-}
-
-.choice:last-child:hover {
-  background-color: lightgray;
-  cursor: pointer;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-  border-bottom-left-radius: var(--border);
-  border-bottom-right-radius: var(--border);
-}
-
-.submit-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  flex: 0.1;
-  min-height: 50px;
-}
-
-.solution-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 50px;
-  flex: 0.1;
-  min-height: 50px;
-}
-
-.correctness {
-  font-size: 16px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.solution-text {
-  margin-top: 10px;
-  padding: 25px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.logo-background {
-  position: absolute;
-  font-size: 25px;
-  font-weight: bold;
-}
-
-.logo-subheading {
-  color: black;
-  font-size: 20px;
-  opacity: 60%;
-}
-
-.chapter-title {
-  text-align: center;
-  color: var(--text-color);
-}
-
-.overlay {
-  position: fixed;
-  z-index: 20000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  background-color: lightgray;
-}
-
-.home-link {
-  z-index: 1000;
-  stroke: rgb(51, 51, 51);
-  opacity: 0.9;
-  stroke-width: 5px;
-}
-
-.exercise-container {
-  background-color: lightblue;
-  padding: 15px;
-  margin-top: 20px;
-}
-
-.bag-nonhighlight {
-  color: green;
+  height: 50%;
+  width: 100%;
 }
 
 .random-container {
@@ -439,9 +224,11 @@ svg {
 }
 
 .content-container {
-  flex: 0 1 1000px;
-  padding: 0 25px 0 25px;
-  overflow-y: auto;
+  height: 100%;
+  flex-direction: column;
+  width: 50%;
+  display: flex;
+  justify-content: center;
 }
 
 .content {
@@ -598,12 +385,6 @@ svg {
   height: 10%;
 }
 
-.container-text {
-  font-size: 20px;
-  font-weight: bold;
-  opacity: 50%;
-}
-
 .material-icons.md-48 {
   font-size: 35px;
 }
@@ -629,10 +410,6 @@ svg {
   color: greenyellow;
 }
 
-.incorrect-answer-icon {
-  color: red;
-}
-
 a {
   color: var(--text-color);
 }
@@ -656,7 +433,6 @@ a {
 
 /*--------------------------------- Katex ---------------------------------*/
 .katex {
-  margin: 0 0.2rem;
   font-size: 1em !important;
 }
 
@@ -720,12 +496,6 @@ a {
   clear: both;
 }
 
-/* Thick red border */
-hr.new4 {
-  border: 0.1px solid lightgray;
-  opacity: 50%;
-}
-
 .sidebar-pagination-buttons {
   display: flex;
   text-align: center;
@@ -747,38 +517,6 @@ hr.new4 {
 .overlay {
   width: 100%;
   height: 100%;
-}
-
-/*--------------------------------- Navbar Stuff Only ---------------------------------*/
-.nav-wrapper {
-  display: flex;
-  justify-content: center;
-  box-shadow: 0 2px 6px 0 hsla(0, 0%, 0%, 0.2);
-  position: relative;
-  z-index: 10000000;
-  height: 0%;
-  visibility: hidden;
-  background-color: var(--surface);
-}
-
-.nav {
-  display: flex;
-  height: 100%;
-  width: 100%;
-  align-items: center;
-}
-
-.nav svg {
-  padding: 1rem;
-  max-width: 40px;
-  max-height: 40px;
-}
-
-@media (max-height: 1000px) {
-  .nav svg {
-    height: 20px;
-    width: 20px;
-  }
 }
 
 ul {
@@ -1092,18 +830,27 @@ ellipse:hover {
   cursor: grab;
 }
 
-
 .highlighted-stroke {
   stroke: lightgreen !important;
   stroke-width: 3.5px;
 }
 
+/* Tree decomposition */
+.tree-decomposition-node {
+  fill: lightgreen;
+  stroke: rgb(51, 51, 51);
+  stroke-width: 3px;
+}
 
-/* Tree container */
+.tree-decomposition-node:hover {
+  fill: orange;
+  cursor: pointer;
+}
+
+
 #tree-container {
-  position: relative;
-  height: 100%;
-  width: 50%;
+  height: 50%;
+  width: 100%;
 }
 
 .multi-tree-container {
@@ -1128,16 +875,4 @@ svg {
 .highlighted-vertex {
   fill: orange;
   transition: fill 300ms;
-}
-
-.nonhighlight {
-  /* fill: #1f77b4; */
-}
-
-.separating-node {
-  fill: #00e322;
-}
-
-.not-separating-node {
-  fill: red;
 }

@@ -1,234 +1,235 @@
-import { contextMenu as menu } from '../Utilities/ContextMenu.js'
+import { contextMenu as menu } from '../Utilities/ContextMenu.js';
+import { HIGHLIGHTED_NODE, NONHIGHLIGHTED_NODE } from '../constants.js';
 
 function errorSvg() {
   return `<svg class="exercise-icon incorrect-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`
+  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`;
 }
 
 function checkmarkSvg() {
   return `<svg class="exercise-icon correct-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-  </svg>`
+  </svg>`;
 }
 
 export default class TreeDecomposition {
   constructor(container) {
-    this.container = container
-    this.nodes = []
-    this.links = []
-    this.lastNodeId = 0
+    this.container = container;
+    this.nodes = [];
+    this.links = [];
+    this.lastNodeId = 0;
     this.width = document.getElementById(this.container).offsetWidth;
     this.height = document.getElementById(this.container).offsetHeight;
   }
 
   setGraph(graph) {
-    this.graph = graph
+    this.graph = graph;
   }
 
   isConnected() {
-    let componentCount = 1
-    let cluster = 2
+    let componentCount = 1;
+    let cluster = 2;
 
     if (this.nodes.length === 0) {
-      componentCount = 0
-      return
+      componentCount = 0;
+      return;
     }
 
-    componentCount = 1
+    componentCount = 1;
     this.nodes.forEach((v) => {
-      v.visited = false
-    })
+      v.visited = false;
+    });
 
-    const adjList = {}
+    const adjList = {};
     this.nodes.forEach((v) => {
-      adjList[v.id] = []
-    })
+      adjList[v.id] = [];
+    });
 
     this.links.forEach((e) => {
-      adjList[e.source.id].push(e.target)
-      adjList[e.target.id].push(e.source)
-    })
+      adjList[e.source.id].push(e.target);
+      adjList[e.target.id].push(e.source);
+    });
 
-    const q = []
-    q.push(this.nodes[0])
+    const q = [];
+    q.push(this.nodes[0]);
 
     while (q.length > 0) {
-      const v1 = q.shift()
-      const adj = adjList[v1.id]
+      const v1 = q.shift();
+      const adj = adjList[v1.id];
 
       for (let i = 0; i < adj.length; i++) {
-        const v2 = adj[i]
+        const v2 = adj[i];
         if (v2.visited) {
-          continue
+          continue;
         }
-        q.push(v2)
+        q.push(v2);
       }
 
-      v1.visited = true
-      v1.cluster = cluster.toString()
+      v1.visited = true;
+      v1.cluster = cluster.toString();
       if (q.length === 0) {
         for (let i = 0; i < this.nodes.length; i++) {
           if (!this.nodes[i].visited) {
-            q.push(this.nodes[i])
-            componentCount++
-            cluster++
-            break
+            q.push(this.nodes[i]);
+            componentCount++;
+            cluster++;
+            break;
           }
         }
       }
     }
 
-    this.componentCount = componentCount
+    this.componentCount = componentCount;
 
-    const isConnected = componentCount === 1
+    const isConnected = componentCount === 1;
 
-    return isConnected
+    return isConnected;
   }
 
   isTree() {
-    const isConnected = this.isConnected()
+    const isConnected = this.isConnected();
     if (isConnected && this.nodes.length - 1 === this.links.length) {
-      return true
+      return true;
     }
-    return false
+    return false;
   }
 
   areNodesInTree() {
-    return this.graphOfTd.nodes.every((node) => this.masterNodes.includes(node.id))
+    return this.graphOfTd.nodes.every((node) => this.masterNodes.includes(node.id));
   }
 
   isEveryGraphLinkInTree() {
     return this.graphOfTd.links.every((link) => {
       for (let i = 0; i < this.nodes.length; i++) {
-        const currentBag = this.nodes[i]
-        if (currentBag.vertices === undefined) continue
-        if (currentBag.vertices.includes(link.source.id) && currentBag.vertices.includes(link.target.id)) return true
+        const currentBag = this.nodes[i];
+        if (currentBag.vertices === undefined) continue;
+        if (currentBag.vertices.includes(link.source.id) && currentBag.vertices.includes(link.target.id)) return true;
       }
-      return false
-    })
+      return false;
+    });
   }
 
   checkConnectivity(subGraphNodes, subGraphLinks) {
-    let componentCount = 1
-    let cluster = 2
+    let componentCount = 1;
+    let cluster = 2;
 
     if (subGraphNodes.length === 0) {
-      componentCount = 0
-      return
+      componentCount = 0;
+      return;
     }
 
-    componentCount = 1
+    componentCount = 1;
     subGraphNodes.forEach((v) => {
-      v.visited = false
-    })
+      v.visited = false;
+    });
 
-    const adjList = {}
+    const adjList = {};
     subGraphNodes.forEach((v) => {
-      adjList[v.id] = []
-    })
+      adjList[v.id] = [];
+    });
 
     subGraphLinks.forEach((e) => {
-      adjList[e.source.id].push(e.target)
-      adjList[e.target.id].push(e.source)
-    })
+      adjList[e.source.id].push(e.target);
+      adjList[e.target.id].push(e.source);
+    });
 
-    const q = []
-    q.push(subGraphNodes[0])
+    const q = [];
+    q.push(subGraphNodes[0]);
 
     while (q.length > 0) {
-      const v1 = q.shift()
-      const adj = adjList[v1.id]
+      const v1 = q.shift();
+      const adj = adjList[v1.id];
 
       for (let i = 0; i < adj.length; i++) {
-        const v2 = adj[i]
-        if (v2.visited) continue
-        q.push(v2)
+        const v2 = adj[i];
+        if (v2.visited) continue;
+        q.push(v2);
       }
 
-      v1.visited = true
-      v1.cluster = cluster.toString()
+      v1.visited = true;
+      v1.cluster = cluster.toString();
       if (q.length === 0) {
         for (let i = 0; i < subGraphNodes.length; i++) {
           if (!subGraphNodes[i].visited) {
-            q.push(subGraphNodes[i])
-            componentCount++
-            cluster++
-            break
+            q.push(subGraphNodes[i]);
+            componentCount++;
+            cluster++;
+            break;
           }
         }
       }
     }
 
-    this.componentCount = componentCount
+    this.componentCount = componentCount;
 
-    const isDisconnected = componentCount > 1
+    const isDisconnected = componentCount > 1;
 
-    return { subGraphNodes, subGraphLinks, isDisconnected }
+    return { subGraphNodes, subGraphLinks, isDisconnected };
   }
 
   checkCoherence() {
     /* Check if a node exists in multiple bags */
     for (let i = 0; i < this.graphOfTd.nodes.length; i++) {
-      const currentNode = this.graphOfTd.nodes[i]
-      currentNode.counter = 0
+      const currentNode = this.graphOfTd.nodes[i];
+      currentNode.counter = 0;
 
       for (let j = 0; j < this.nodes.length; j++) {
-        const currentBag = this.nodes[j]
-        if (currentBag.vertices === undefined) continue
+        const currentBag = this.nodes[j];
+        if (currentBag.vertices === undefined) continue;
         if (currentBag.vertices.includes(currentNode.id)) {
-          currentNode.counter++
+          currentNode.counter++;
         }
       }
     }
 
-    const multipleNodes = this.graphOfTd.nodes.filter((node) => node.counter > 1)
+    const multipleNodes = this.graphOfTd.nodes.filter((node) => node.counter > 1);
 
     for (let i = 0; i < multipleNodes.length; i++) {
-      const node = multipleNodes[i]
+      const node = multipleNodes[i];
       /* find all bags with this node */
 
       const tempNodes = this.nodes.filter((bag) => {
-        if (bag.vertices) return bag.vertices.includes(node.id)
-      })
+        if (bag.vertices) return bag.vertices.includes(node.id);
+      });
 
-      const tempLinks = this.links.filter((link) => tempNodes.includes(link.source) && tempNodes.includes(link.target))
-      const obj = this.checkConnectivity(tempNodes, tempLinks)
-      if (obj.isDisconnected) return false
+      const tempLinks = this.links.filter((link) => tempNodes.includes(link.source) && tempNodes.includes(link.target));
+      const obj = this.checkConnectivity(tempNodes, tempLinks);
+      if (obj.isDisconnected) return false;
     }
-    return true
+    return true;
   }
 
   checkTreeDecomposition() {
-    let treeString
-    let nodeCoverageString
-    let edgeCoverageString
-    let coherenceString
+    let treeString;
+    let nodeCoverageString;
+    let edgeCoverageString;
+    let coherenceString;
 
     if (this.isTree()) {
-      treeString = `${checkmarkSvg()} Is a tree`
+      treeString = `${checkmarkSvg()} Is a tree`;
     } else {
-      treeString = `${errorSvg()} Is a tree`
+      treeString = `${errorSvg()} Is a tree`;
     }
 
     /* Check node coverage */
     if (this.areNodesInTree()) {
-      nodeCoverageString = `${checkmarkSvg()} Node coverage`
+      nodeCoverageString = `${checkmarkSvg()} Node coverage`;
     } else {
-      nodeCoverageString = `${errorSvg()} Node coverage`
+      nodeCoverageString = `${errorSvg()} Node coverage`;
     }
 
     /* Check edge coverage */
     if (this.isEveryGraphLinkInTree()) {
-      edgeCoverageString = `${checkmarkSvg()} Edge coverage`
+      edgeCoverageString = `${checkmarkSvg()} Edge coverage`;
     } else {
-      edgeCoverageString = `${errorSvg()} Edge coverage`
+      edgeCoverageString = `${errorSvg()} Edge coverage`;
     }
 
     /* Check coherence property */
     if (this.checkCoherence()) {
-      coherenceString = `${checkmarkSvg()} Coherence`
+      coherenceString = `${checkmarkSvg()} Coherence`;
     } else {
-      coherenceString = `${errorSvg()} Coherence`
+      coherenceString = `${errorSvg()} Coherence`;
     }
 
     d3.select('.valid-td')
@@ -237,27 +238,27 @@ export default class TreeDecomposition {
         <span>${nodeCoverageString}</span>
         <span>${edgeCoverageString}</span>
         <span>${coherenceString}</span>
-    `)
+    `);
   }
 
   updateMasterList() {
-    let temp = []
+    let temp = [];
     this.nodes.forEach((bag) => {
-      if (bag.vertices) temp = temp.concat(bag.vertices)
-    })
+      if (bag.vertices) temp = temp.concat(bag.vertices);
+    });
 
-    const tempSet = [...new Set(temp)]
-    this.masterNodes = tempSet
+    const tempSet = [...new Set(temp)];
+    this.masterNodes = tempSet;
   }
 
   removeEdge(d) {
-    this.links.splice(this.links.indexOf(d), 1)
-    d3.event.preventDefault()
-    this.restart()
+    this.links.splice(this.links.indexOf(d), 1);
+    d3.event.preventDefault();
+    this.restart();
   }
 
   restart() {
-    this.updateMasterList()
+    this.updateMasterList();
     /* Enter, update, remove link SVGs */
     this.svg.selectAll('line')
       .data(this.links, (d) => `v${d.source.id}-v${d.target.id}`)
@@ -268,8 +269,8 @@ export default class TreeDecomposition {
           .attr('class', 'tree-link')
           .on('contextmenu', (d) => this.removeEdge(d)),
         (update) => update,
-        (exit) => exit.remove()
-      )
+        (exit) => exit.remove(),
+      );
 
     /* Enter, update, remove ellipse SVGs */
     this.svg.selectAll('ellipse')
@@ -284,11 +285,11 @@ export default class TreeDecomposition {
             .on('mouseleave', () => this.enableAddNode())
             .on('mousedown', (d) => this.beginDrawLine(d))
             .on('mouseup', (d) => this.stopDrawLine(d))
-            .on('contextmenu', d3.contextMenu(menu))
+            .on('contextmenu', d3.contextMenu(menu));
         },
         (update) => update.attr('rx', (d) => (d.label && d.label.length > 2 ? d.label.length * 8 : 30)),
-        (exit) => exit.remove()
-      )
+        (exit) => exit.remove(),
+      );
 
     this.svg.selectAll('text')
       .data(this.nodes, (d) => d.id)
@@ -298,85 +299,85 @@ export default class TreeDecomposition {
           .text((d) => d.label)
           .attr('class', 'graph-label'),
         (update) => update.text((d) => d.label),
-        (exit) => exit.remove()
-      )
+        (exit) => exit.remove(),
+      );
 
-    this.simulation.force('link').links(this.links)
-    this.simulation.nodes(this.nodes)
-    this.simulation.alpha(0.5).restart()
-    this.checkTreeDecomposition()
+    this.simulation.force('link').links(this.links);
+    this.simulation.nodes(this.nodes);
+    this.simulation.alpha(0.5).restart();
+    this.checkTreeDecomposition();
   }
 
   setGraph(graph) {
-    this.graph = graph
+    this.graph = graph;
   }
 
   setg() {
     this.nodes.forEach((node) => {
-      node.graph = this
-    })
+      node.graph = this;
+    });
   }
 
   addNode() {
-    if (this.canAddNode === false) return
-    const e = d3.event
+    if (this.canAddNode === false) return;
+    const e = d3.event;
     if (e.button === 0) {
-      const coords = d3.mouse(e.currentTarget)
+      const coords = d3.mouse(e.currentTarget);
       const newNode = {
-        x: coords[0], y: coords[1], id: ++this.lastNodeId
-      }
-      this.nodes.push(newNode)
-      this.setg()
-      this.restart()
+        x: coords[0], y: coords[1], id: ++this.lastNodeId,
+      };
+      this.nodes.push(newNode);
+      this.setg();
+      this.restart();
     }
   }
 
   enableAddNode() {
-    this.canAddNode = true
+    this.canAddNode = true;
   }
 
   disableAddNode() {
-    this.canAddNode = false
+    this.canAddNode = false;
   }
 
   removeNode(d) {
-    d3.event.preventDefault()
-    const linksToRemove = this.links.filter((l) => l.source === d || l.target === d)
-    linksToRemove.map((l) => this.links.splice(this.links.indexOf(l), 1))
-    const indexOfNode = this.nodes.indexOf(d)
-    this.nodes.splice(indexOfNode, 1)
-    this.restart()
+    d3.event.preventDefault();
+    const linksToRemove = this.links.filter((l) => l.source === d || l.target === d);
+    linksToRemove.map((l) => this.links.splice(this.links.indexOf(l), 1));
+    const indexOfNode = this.nodes.indexOf(d);
+    this.nodes.splice(indexOfNode, 1);
+    this.restart();
   }
 
   leftCanvas() {
-    this.dragLine.classed('hidden', true)
-    this.mousedownNode = null
+    this.dragLine.classed('hidden', true);
+    this.mousedownNode = null;
   }
 
   updateDragLine() {
-    if (!this.mousedownNode) return
-    const coords = d3.mouse(d3.event.currentTarget)
+    if (!this.mousedownNode) return;
+    const coords = d3.mouse(d3.event.currentTarget);
     this.dragLine.attr(
       'd',
       `M${this.mousedownNode.x
       },${this.mousedownNode.y
       }L${coords[0]
-      },${coords[1]}`
-    )
+      },${coords[1]}`,
+    );
   }
 
   hideDragLine() {
-    this.svg.selectAll('ellipse').style('fill', '#2ca02c')
-    this.dragLine.classed('hidden', true)
-    this.mousedownNode = null
-    this.restart()
+    this.svg.selectAll('ellipse').style('fill', '#2ca02c');
+    this.dragLine.classed('hidden', true);
+    this.mousedownNode = null;
+    this.restart();
   }
 
   beginDrawLine(d) {
-    this.svg.selectAll('ellipse').filter((node) => node === d).style('fill', 'orange')
-    if (d3.event.ctrlKey) return
-    d3.event.preventDefault()
-    this.mousedownNode = d
+    this.svg.selectAll('ellipse').filter((node) => node === d).style('fill', 'orange');
+    if (d3.event.ctrlKey) return;
+    d3.event.preventDefault();
+    this.mousedownNode = d;
     this.dragLine
       .classed('hidden', false)
       .attr(
@@ -384,55 +385,55 @@ export default class TreeDecomposition {
         `M${this.mousedownNode.x
         },${this.mousedownNode.y
         }L${this.mousedownNode.x
-        },${this.mousedownNode.y}`
-      )
+        },${this.mousedownNode.y}`,
+      );
   }
 
   stopDrawLine(d) {
-    this.svg.selectAll('ellipse').style('fill', '#2ca02c')
-    if (!this.mousedownNode || this.mousedownNode === d) return
+    this.svg.selectAll('ellipse').style('fill', '#2ca02c');
+    if (!this.mousedownNode || this.mousedownNode === d) return;
     for (let i = 0; i < this.links.length; i++) {
-      const l = this.links[i]
+      const l = this.links[i];
       if (
-        (l.source === this.mousedownNode && l.target === d) ||
-        (l.source === d && l.target === this.mousedownNode)
+        (l.source === this.mousedownNode && l.target === d)
+        || (l.source === d && l.target === this.mousedownNode)
       ) {
-        return
+        return;
       }
     }
-    const newLink = { source: this.mousedownNode, target: d }
-    this.links.push(newLink)
+    const newLink = { source: this.mousedownNode, target: d };
+    this.links.push(newLink);
   }
 
   removeSvg() {
-    if (this.svg) this.svg.remove()
-    this.nodes = []
-    this.links = []
+    if (this.svg) this.svg.remove();
+    this.nodes = [];
+    this.links = [];
   }
 
   enableDrawing() {
-    if (this.svg) this.removeSvg()
-    d3.select('#output-surface').append('div').attr('class', 'valid-td')
-    const w = document.getElementById(this.container).offsetWidth
-    const h = document.getElementById(this.container).offsetHeight
-    this.width = w
-    this.height = h
-    const svg = d3.select(`#${this.container}`).append('svg').attr('width', w).attr('height', h)
-    this.svg = svg
-    this.svg.style('cursor', 'crosshair')
-    this.restartSimulation()
+    if (this.svg) this.removeSvg();
+    d3.select('#output-surface').append('div').attr('class', 'valid-td');
+    const w = document.getElementById(this.container).offsetWidth;
+    const h = document.getElementById(this.container).offsetHeight;
+    this.width = w;
+    this.height = h;
+    const svg = d3.select(`#${this.container}`).append('svg').attr('width', w).attr('height', h);
+    this.svg = svg;
+    this.svg.style('cursor', 'crosshair');
+    this.restartSimulation();
 
     this.svg
       .on('mousedown', () => this.addNode())
       .on('contextmenu', () => d3.event.preventDefault())
       .on('mousemove', () => this.updateDragLine())
       .on('mouseup', () => this.hideDragLine())
-      .on('mouseleave', () => this.leftCanvas())
+      .on('mouseleave', () => this.leftCanvas());
 
     this.dragLine = this.svg
       .append('path')
       .attr('class', 'dragLine hidden')
-      .attr('d', 'M0,0L0,0')
+      .attr('d', 'M0,0L0,0');
   }
 
   restartSimulation() {
@@ -444,17 +445,16 @@ export default class TreeDecomposition {
       .force('link', d3.forceLink(this.links).id((d) => d.id).distance(100).strength(0.05))
       .force('collision', d3.forceCollide().radius((d) => d.rx + 100))
       .on('tick', () => {
-        this.svg.selectAll('ellipse').attr('transform', (d) => `translate(${d.x},${d.y})`)
-        this.svg.selectAll('text').attr('x', (d) => d.x).attr('y', (d) => d.y)
-
+        this.svg.selectAll('ellipse').attr('transform', (d) => `translate(${d.x},${d.y})`);
+        this.svg.selectAll('text').attr('x', (d) => d.x).attr('y', (d) => d.y);
         this.svg.selectAll('line').attr('x1', (d) => d.source.x)
           .attr('y1', (d) => d.source.y)
           .attr('x2', (d) => d.target.x)
-          .attr('y2', (d) => d.target.y)
-      })
+          .attr('y2', (d) => d.target.y);
+      });
 
-    simulation.force('link').links(this.links)
-    this.simulation = simulation
+    simulation.force('link').links(this.links);
+    this.simulation = simulation;
   }
 
   createGroupElementForTreeNodes() {
@@ -464,21 +464,21 @@ export default class TreeDecomposition {
       .enter()
       .append('g')
       .attr('class', 'td')
-      .call(
-        d3
-          .drag()
-          .on('start', (v) => {
-            if (!d3.event.active) this.simulation.alphaTarget(0.3).restart();
-            [v.fx, v.fy] = [v.x, v.y];
-          })
-          .on('drag', (v) => {
-            [v.fx, v.fy] = [d3.event.x, d3.event.y];
-          })
-          .on('end', (v) => {
-            if (!d3.event.active) this.simulation.alphaTarget(0);
-            [v.fx, v.fy] = [null, null];
-          })
-      );
+      .on('mouseover', (node) => this.handleMouseOver(node))
+      .on('mouseout', (node) => this.handleMouseOut(node));
+  }
+
+  visitBag(bagId) {
+    d3.selectAll('ellipse')
+      .filter((treeNode) => treeNode.id === bagId)
+      .transition()
+      .duration(this.animationDuration)
+      .delay(this.animationDuration * this.anim)
+      .style('fill', 'orange')
+      .ease(d3.easeElastic)
+      .attr('rx', 40)
+      .attr('ry', 30)
+      .on('end', () => d3.selectAll('ellipse').style('fill', '#2ca02c'));
   }
 
   createTreeDecompositionLabels2() {
@@ -501,13 +501,37 @@ export default class TreeDecomposition {
       .attr('class', 'graph-label');
   }
 
+  handleMouseOver(node) {
+    const circle = d3.select(`#tree-node-${node.id}`);
+    let rx = parseInt(circle.attr('rx'), 10);
+    rx += 10;
+
+    circle.transition()
+      .duration(1000)
+      .ease(d3.easeElastic)
+      .attr('rx', rx)
+      .attr('ry', 30);
+  }
+
+  handleMouseOut(node) {
+    const circle = d3.select(`#tree-node-${node.id}`);
+    const rx = parseInt(circle.attr('original-rx'), 10);
+    circle.transition()
+      .duration(1000)
+      .ease(d3.easeElastic)
+      .attr('rx', rx)
+      .attr('ry', 25);
+  }
+
   createTreeDecompositionNodeSvgs() {
     this.nodeSvg = this.svg
       .selectAll('g')
       .append('ellipse')
-      .attr('rx', (d) => d.label.length * 8)
+      .attr('id', (node) => `tree-node-${node.id}`)
+      .attr('rx', (d) => d.label.length * 10)
+      .attr('original-rx', (d) => d.label.length * 10)
       .attr('ry', 25)
-      .style('fill', '#2ca02c');
+      .attr('class', 'tree-decomposition-node');
   }
 
   createSvg() {
@@ -533,14 +557,14 @@ export default class TreeDecomposition {
       .filter((node) => d.vertices.includes(node.id))
       .transition()
       .duration(100)
-      .style('fill', 'orange');
+      .style('fill', HIGHLIGHTED_NODE);
   }
 
   disableHoverEffect() {
     d3.selectAll('#graph-container circle')
       .transition()
       .duration(100)
-      .style('fill', 'rgb(31, 119, 180)');
+      .style('fill', NONHIGHLIGHTED_NODE);
   }
 
   toggleHoverEffect() {
