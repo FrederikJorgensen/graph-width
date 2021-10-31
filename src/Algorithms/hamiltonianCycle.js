@@ -134,7 +134,7 @@ function createSolutionTypeForDegreeOne(
   childVertices,
   verticesDegrees,
   matching,
-  tree,
+  tree
 ) {
   const solutionType = [];
   verticesDegrees[tree.introducedVertex] = 1;
@@ -149,7 +149,7 @@ function createSolutionTypeForDegreeOne(
           matching = updateMatching(
             matching,
             childVertex,
-            tree.introducedVertex,
+            tree.introducedVertex
           );
           solutionType.push(verticesDegrees, matching);
           return solutionType;
@@ -177,13 +177,15 @@ function createSolutionTypeForDegreeTwo(
   childVertices,
   verticesDegrees,
   matching,
-  tree,
+  tree
 ) {
   verticesDegrees[tree.introducedVertex] = 2;
 
   const solutionType = [];
   const neighbors = tree.graph.getNeighbors(tree.introducedVertex);
-  const neighborsInSubGraph = neighbors.filter((value) => childVertices.includes(value));
+  const neighborsInSubGraph = neighbors.filter((value) =>
+    childVertices.includes(value)
+  );
 
   if (neighborsInSubGraph.length === 2) {
     const neighborOne = neighborsInSubGraph[0];
@@ -199,8 +201,8 @@ function createSolutionTypeForDegreeTwo(
     matching = matching.filter((pair) => !pair.includes(neighborTwo));
 
     if (
-      verticesDegrees[neighborOne] === 1
-      && verticesDegrees[neighborTwo] === 1
+      verticesDegrees[neighborOne] === 1 &&
+      verticesDegrees[neighborTwo] === 1
     ) {
       const pair = [neighborOne, neighborTwo];
       matching.push(pair);
@@ -225,7 +227,7 @@ function createTableForIntroduceNode(partialSolutions, tree) {
           solutionType = createSolutionTypeForDegreeZero(
             verticesDegrees,
             matching,
-            tree,
+            tree
           );
           break;
         case 1:
@@ -233,7 +235,7 @@ function createTableForIntroduceNode(partialSolutions, tree) {
             childVertices,
             verticesDegrees,
             matching,
-            tree,
+            tree
           );
           break;
         case 2:
@@ -241,7 +243,7 @@ function createTableForIntroduceNode(partialSolutions, tree) {
             childVertices,
             verticesDegrees,
             matching,
-            tree,
+            tree
           );
           break;
         default:
@@ -284,7 +286,7 @@ export default function hamiltonianCycle(tree) {
         tree.graph.addNodeArrow(tree.introducedVertex, 'Introduced vertex');
         tree.graph.highlightNodeColor(
           tree.introducedVertex,
-          'rgb(128, 177, 211)',
+          'rgb(128, 177, 211)'
         );
         if (tree.child.vertices.length === 0) {
           node.table = createTableForNodeAboveLeaf(tree);
@@ -297,11 +299,11 @@ export default function hamiltonianCycle(tree) {
         tree.graph.addNodeArrow(tree.forgottenVertex, 'Forgotten vertex');
         tree.graph.highlightNodeColor(
           tree.forgottenVertex,
-          'rgb(251, 128, 114)',
+          'rgb(251, 128, 114)'
         );
         node.table = createTableForForgetNode(
           partialSolutions,
-          tree.forgottenVertex,
+          tree.forgottenVertex
         );
         break;
       case 'join':

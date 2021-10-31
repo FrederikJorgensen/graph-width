@@ -3,9 +3,7 @@ import Tree from './Components/Tree';
 import TreeDecomposition from './Components/TreeDecomposition';
 
 function createSandboxGrid() {
-  d3.select('#main')
-    .append('div')
-    .attr('class', 'sandbox-grid');
+  d3.select('#main').append('div').attr('class', 'sandbox-grid');
 }
 
 function createNiceTreeDecompositionContainer() {
@@ -48,7 +46,9 @@ export default class SandBoxPage {
     createNiceTreeDecompositionContainer();
     const graph = new Graph('sandbox-graph-container');
     this.graph = graph;
-    const treeDecomposition = new TreeDecomposition('tree-decomposition-container');
+    const treeDecomposition = new TreeDecomposition(
+      'tree-decomposition-container'
+    );
     this.treeDecomposition = treeDecomposition;
     const niceTreeDecomposition = new Tree('nice-tree-decomposition-container');
     this.niceTreeDecomposition = niceTreeDecomposition;
@@ -100,7 +100,7 @@ export default class SandBoxPage {
     if (this.niceTreeDecomposition) this.niceTreeDecomposition.removeSvg();
     const numberOfVertices = 10;
     const numberOfEdges = 10;
-    this.graph.randomGraph(numberOfVertices, numberOfEdges);
+    this.graph.generateRandomGraph(numberOfVertices, numberOfEdges);
     this.treeDecompositionLoaded = false;
     this.graphLoaded = true;
   }

@@ -95,7 +95,9 @@ export default class TreeDecomposition {
   }
 
   areNodesInTree() {
-    return this.graphOfTd.nodes.every((node) => this.masterNodes.includes(node.id));
+    return this.graphOfTd.nodes.every((node) =>
+      this.masterNodes.includes(node.id)
+    );
   }
 
   isEveryGraphLinkInTree() {
@@ -103,7 +105,11 @@ export default class TreeDecomposition {
       for (let i = 0; i < this.nodes.length; i++) {
         const currentBag = this.nodes[i];
         if (currentBag.vertices === undefined) continue;
-        if (currentBag.vertices.includes(link.source.id) && currentBag.vertices.includes(link.target.id)) return true;
+        if (
+          currentBag.vertices.includes(link.source.id) &&
+          currentBag.vertices.includes(link.target.id)
+        )
+          return true;
       }
       return false;
     });
@@ -182,7 +188,9 @@ export default class TreeDecomposition {
       }
     }
 
-    const multipleNodes = this.graphOfTd.nodes.filter((node) => node.counter > 1);
+    const multipleNodes = this.graphOfTd.nodes.filter(
+      (node) => node.counter > 1
+    );
 
     for (let i = 0; i < multipleNodes.length; i++) {
       const node = multipleNodes[i];
@@ -192,7 +200,10 @@ export default class TreeDecomposition {
         if (bag.vertices) return bag.vertices.includes(node.id);
       });
 
-      const tempLinks = this.links.filter((link) => tempNodes.includes(link.source) && tempNodes.includes(link.target));
+      const tempLinks = this.links.filter(
+        (link) =>
+          tempNodes.includes(link.source) && tempNodes.includes(link.target)
+      );
       const obj = this.checkConnectivity(tempNodes, tempLinks);
       if (obj.isDisconnected) return false;
     }
@@ -232,8 +243,7 @@ export default class TreeDecomposition {
       coherenceString = `${errorSvg()} Coherence`;
     }
 
-    d3.select('.valid-td')
-      .html(`
+    d3.select('.valid-td').html(`
         <span>${treeString}</span>
         <span>${nodeCoverageString}</span>
         <span>${edgeCoverageString}</span>
@@ -260,24 +270,28 @@ export default class TreeDecomposition {
   restart() {
     this.updateMasterList();
     /* Enter, update, remove link SVGs */
-    this.svg.selectAll('line')
+    this.svg
+      .selectAll('line')
       .data(this.links, (d) => `v${d.source.id}-v${d.target.id}`)
       .join(
-        (enter) => enter
-          .append('line')
-          .lower()
-          .attr('class', 'tree-link')
-          .on('contextmenu', (d) => this.removeEdge(d)),
+        (enter) =>
+          enter
+            .append('line')
+            .lower()
+            .attr('class', 'tree-link')
+            .on('contextmenu', (d) => this.removeEdge(d)),
         (update) => update,
-        (exit) => exit.remove(),
+        (exit) => exit.remove()
       );
 
     /* Enter, update, remove ellipse SVGs */
-    this.svg.selectAll('ellipse')
+    this.svg
+      .selectAll('ellipse')
       .data(this.nodes, (d) => d.id)
       .join(
         (enter) => {
-          enter.append('ellipse')
+          enter
+            .append('ellipse')
             .attr('rx', 30)
             .attr('ry', 25)
             .style('fill', '#2ca02c')
@@ -287,19 +301,25 @@ export default class TreeDecomposition {
             .on('mouseup', (d) => this.stopDrawLine(d))
             .on('contextmenu', d3.contextMenu(menu));
         },
-        (update) => update.attr('rx', (d) => (d.label && d.label.length > 2 ? d.label.length * 8 : 30)),
-        (exit) => exit.remove(),
+        (update) =>
+          update.attr('rx', (d) =>
+            d.label && d.label.length > 2 ? d.label.length * 8 : 30
+          ),
+        (exit) => exit.remove()
       );
 
-    this.svg.selectAll('text')
+    this.svg
+      .selectAll('text')
       .data(this.nodes, (d) => d.id)
       .join(
-        (enter) => enter.append('text')
-          .attr('dy', 4.5)
-          .text((d) => d.label)
-          .attr('class', 'graph-label'),
+        (enter) =>
+          enter
+            .append('text')
+            .attr('dy', 4.5)
+            .text((d) => d.label)
+            .attr('class', 'graph-label'),
         (update) => update.text((d) => d.label),
-        (exit) => exit.remove(),
+        (exit) => exit.remove()
       );
 
     this.simulation.force('link').links(this.links);
@@ -324,7 +344,9 @@ export default class TreeDecomposition {
     if (e.button === 0) {
       const coords = d3.mouse(e.currentTarget);
       const newNode = {
-        x: coords[0], y: coords[1], id: ++this.lastNodeId,
+        x: coords[0],
+        y: coords[1],
+        id: ++this.lastNodeId,
       };
       this.nodes.push(newNode);
       this.setg();
@@ -342,7 +364,9 @@ export default class TreeDecomposition {
 
   removeNode(d) {
     d3.event.preventDefault();
-    const linksToRemove = this.links.filter((l) => l.source === d || l.target === d);
+    const linksToRemove = this.links.filter(
+      (l) => l.source === d || l.target === d
+    );
     linksToRemove.map((l) => this.links.splice(this.links.indexOf(l), 1));
     const indexOfNode = this.nodes.indexOf(d);
     this.nodes.splice(indexOfNode, 1);
@@ -359,10 +383,7 @@ export default class TreeDecomposition {
     const coords = d3.mouse(d3.event.currentTarget);
     this.dragLine.attr(
       'd',
-      `M${this.mousedownNode.x
-      },${this.mousedownNode.y
-      }L${coords[0]
-      },${coords[1]}`,
+      `M${this.mousedownNode.x},${this.mousedownNode.y}L${coords[0]},${coords[1]}`
     );
   }
 
@@ -374,7 +395,10 @@ export default class TreeDecomposition {
   }
 
   beginDrawLine(d) {
-    this.svg.selectAll('ellipse').filter((node) => node === d).style('fill', 'orange');
+    this.svg
+      .selectAll('ellipse')
+      .filter((node) => node === d)
+      .style('fill', 'orange');
     if (d3.event.ctrlKey) return;
     d3.event.preventDefault();
     this.mousedownNode = d;
@@ -382,10 +406,7 @@ export default class TreeDecomposition {
       .classed('hidden', false)
       .attr(
         'd',
-        `M${this.mousedownNode.x
-        },${this.mousedownNode.y
-        }L${this.mousedownNode.x
-        },${this.mousedownNode.y}`,
+        `M${this.mousedownNode.x},${this.mousedownNode.y}L${this.mousedownNode.x},${this.mousedownNode.y}`
       );
   }
 
@@ -395,8 +416,8 @@ export default class TreeDecomposition {
     for (let i = 0; i < this.links.length; i++) {
       const l = this.links[i];
       if (
-        (l.source === this.mousedownNode && l.target === d)
-        || (l.source === d && l.target === this.mousedownNode)
+        (l.source === this.mousedownNode && l.target === d) ||
+        (l.source === d && l.target === this.mousedownNode)
       ) {
         return;
       }
@@ -418,7 +439,11 @@ export default class TreeDecomposition {
     const h = document.getElementById(this.container).offsetHeight;
     this.width = w;
     this.height = h;
-    const svg = d3.select(`#${this.container}`).append('svg').attr('width', w).attr('height', h);
+    const svg = d3
+      .select(`#${this.container}`)
+      .append('svg')
+      .attr('width', w)
+      .attr('height', h);
     this.svg = svg;
     this.svg.style('cursor', 'crosshair');
     this.restartSimulation();
@@ -437,17 +462,35 @@ export default class TreeDecomposition {
   }
 
   restartSimulation() {
-    const simulation = d3.forceSimulation()
+    const simulation = d3
+      .forceSimulation()
       .force('x', d3.forceX(this.width / 2).strength(0.1))
       .force('y', d3.forceY(this.height / 2).strength(0.1))
       .nodes(this.nodes)
       .force('charge', d3.forceManyBody().strength(-900))
-      .force('link', d3.forceLink(this.links).id((d) => d.id).distance(100).strength(0.05))
-      .force('collision', d3.forceCollide().radius((d) => d.rx + 100))
+      .force(
+        'link',
+        d3
+          .forceLink(this.links)
+          .id((d) => d.id)
+          .distance(100)
+          .strength(0.05)
+      )
+      .force(
+        'collision',
+        d3.forceCollide().radius((d) => d.rx + 100)
+      )
       .on('tick', () => {
-        this.svg.selectAll('ellipse').attr('transform', (d) => `translate(${d.x},${d.y})`);
-        this.svg.selectAll('text').attr('x', (d) => d.x).attr('y', (d) => d.y);
-        this.svg.selectAll('line').attr('x1', (d) => d.source.x)
+        this.svg
+          .selectAll('ellipse')
+          .attr('transform', (d) => `translate(${d.x},${d.y})`);
+        this.svg
+          .selectAll('text')
+          .attr('x', (d) => d.x)
+          .attr('y', (d) => d.y);
+        this.svg
+          .selectAll('line')
+          .attr('x1', (d) => d.source.x)
           .attr('y1', (d) => d.source.y)
           .attr('x2', (d) => d.target.x)
           .attr('y2', (d) => d.target.y);
@@ -506,7 +549,8 @@ export default class TreeDecomposition {
     let rx = parseInt(circle.attr('rx'), 10);
     rx += 10;
 
-    circle.transition()
+    circle
+      .transition()
       .duration(1000)
       .ease(d3.easeElastic)
       .attr('rx', rx)
@@ -516,7 +560,8 @@ export default class TreeDecomposition {
   handleMouseOut(node) {
     const circle = d3.select(`#tree-node-${node.id}`);
     const rx = parseInt(circle.attr('original-rx'), 10);
-    circle.transition()
+    circle
+      .transition()
       .duration(1000)
       .ease(d3.easeElastic)
       .attr('rx', rx)
@@ -580,7 +625,9 @@ export default class TreeDecomposition {
   }
 
   toggleSeparator() {
-    this.nodeSvg.on('mouseover', (node) => this.graph.showSeparator(node.vertices));
+    this.nodeSvg.on('mouseover', (node) =>
+      this.graph.showSeparator(node.vertices)
+    );
     this.nodeSvg.on('mouseout', () => this.graph.hideSeparator());
   }
 

@@ -1,4 +1,4 @@
-import data from '../data.js';
+// import data from '../data.js';
 
 export default class SectionHandler {
   constructor() {
@@ -62,8 +62,7 @@ export default class SectionHandler {
   }
 
   createContent() {
-    this.content = this.contentContainer
-      .append('div');
+    this.content = this.contentContainer.append('div');
   }
 
   removeContainers() {

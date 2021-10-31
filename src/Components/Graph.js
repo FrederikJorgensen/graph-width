@@ -1,7 +1,10 @@
 import { contextMenu as menu } from '../Utilities/ContextMenu.js';
 import generateRandomGraph, { makeRequest } from '../Utilities/helpers.js';
 import {
-  HIGHLIGHTED_LINK, NONHIGHLIGHTED_LINK, HIGHLIGHTED_NODE, NONHIGHLIGHTED_NODE,
+  HIGHLIGHTED_LINK,
+  NONHIGHLIGHTED_LINK,
+  HIGHLIGHTED_NODE,
+  NONHIGHLIGHTED_NODE,
 } from '../constants.js';
 
 const colors = d3.scaleOrdinal(d3.schemeCategory10);
@@ -29,7 +32,7 @@ function resetColorsInSubgraph(subGraph) {
 
 function resetSeparatorExerciseText() {
   d3.select('#separator-output').html(
-    'Click on a vertex to include it into the separator set.',
+    'Click on a vertex to include it into the separator set.'
   );
 }
 
@@ -51,10 +54,11 @@ function checkmarkSvg() {
 }
 
 /* https://stackoverflow.com/a/47147597/4169689 */
-const getAllSubsets = (theArray) => theArray.reduce(
-  (subsets, value) => subsets.concat(subsets.map((set) => [value, ...set])),
-  [[]],
-);
+const getAllSubsets = (theArray) =>
+  theArray.reduce(
+    (subsets, value) => subsets.concat(subsets.map((set) => [value, ...set])),
+    [[]]
+  );
 
 export function resetStyles() {
   d3.selectAll('circle')
@@ -160,7 +164,9 @@ export default class Graph {
   }
 
   showSeparator(vertices) {
-    this.separatorNodes = this.nodes.filter((node) => vertices.includes(node.id));
+    this.separatorNodes = this.nodes.filter((node) =>
+      vertices.includes(node.id)
+    );
     this.path.style('opacity', 0.3);
     const restNodes = this.nodes.filter((node) => !vertices.includes(node.id));
     const restLinks = this.links.filter((link) => {
@@ -220,7 +226,7 @@ export default class Graph {
           .forceLink(this.links)
           .id((d) => d.id)
           .distance(85)
-          .strength(0.8),
+          .strength(0.8)
       )
       .force('charge', d3.forceManyBody().strength(-600).distanceMin(15));
     this.simulation.alpha(0.1).restart();
@@ -231,8 +237,8 @@ export default class Graph {
 
     na.forEach((bag) => {
       if (
-        bag.vertices.includes(sourceNode)
-        && bag.vertices.includes(targetNode)
+        bag.vertices.includes(sourceNode) &&
+        bag.vertices.includes(targetNode)
       ) {
         this.visitBag(bag.id);
       }
@@ -242,7 +248,9 @@ export default class Graph {
   }
 
   isNodeInTreeDecomposition(node) {
-    const nodesInTreeDecomposition = d3.selectAll('#tree-container ellipse').data();
+    const nodesInTreeDecomposition = d3
+      .selectAll('#tree-container ellipse')
+      .data();
 
     nodesInTreeDecomposition.forEach((bag) => {
       if (bag.vertices.includes(node.id)) this.visitBag(bag.id);
@@ -278,7 +286,7 @@ export default class Graph {
     positionTracker,
     oldState,
     color,
-    subTree,
+    subTree
   ) {
     const subGraph = this.createSubgraph(subTree);
     subGraph.nodes.map((node) => (node.color = null));
@@ -308,12 +316,10 @@ export default class Graph {
   }
 
   getSubGraphLinks() {
-    return this.links.filter(
-      (currentLink) => {
-        subGraphNodeIds.includes(currentLink.source.id)
-        && subGraphNodeIds.includes(currentLink.target.id);
-      },
-    );
+    return this.links.filter((currentLink) => {
+      subGraphNodeIds.includes(currentLink.source.id) &&
+        subGraphNodeIds.includes(currentLink.target.id);
+    });
   }
 
   getSubGraphNodes(subTree) {
@@ -322,7 +328,9 @@ export default class Graph {
       const { vertices } = node.data;
       vertices.forEach((v) => subGraphNodeIds.push(v));
     });
-    return this.nodes.filter((currentNode) => subGraphNodeIds.includes(currentNode.id));
+    return this.nodes.filter((currentNode) =>
+      subGraphNodeIds.includes(currentNode.id)
+    );
   }
 
   highlightSubGraph(subGraph) {
@@ -404,8 +412,8 @@ export default class Graph {
   computeTrivialTreeDecomposition() {
     const bag = [];
     const nodes = [];
-    this.nodes.forEach((node) => node.id !== 0 && bag.push(node.id));
     const createLabel = createLabelForNode(bag);
+    this.nodes.forEach((node) => node.id !== 0 && bag.push(node.id));
     const singleNode = { id: 1, label: createLabel };
     nodes.push(singleNode);
     return { nodes, links: [] };
@@ -432,7 +440,10 @@ export default class Graph {
 
   colorTreeDecompositionNodes(sourceNode, targetNode) {
     d3.selectAll('#tree-container ellipse')
-      .filter((bag) => bag.vertices.includes(sourceNode) && bag.vertices.includes(targetNode))
+      .filter(
+        (bag) =>
+          bag.vertices.includes(sourceNode) && bag.vertices.includes(targetNode)
+      )
       .transition()
       .duration(this.animationDuration)
       .delay(this.animationDuration * this.anim)
@@ -482,12 +493,16 @@ export default class Graph {
 
   highlightLinksOfSubtree(newBags) {
     d3.selectAll('#tree-container line')
-      .filter((link) => newBags.includes(link.source) && newBags.includes(link.target))
+      .filter(
+        (link) => newBags.includes(link.source) && newBags.includes(link.target)
+      )
       .transition()
       .duration(this.animationDuration)
       .delay(this.animationDuration * this.anim)
       .style('stroke', HIGHLIGHTED_LINK)
-      .on('end', () => d3.selectAll('#tree-container line').style('stroke', 'black'));
+      .on('end', () =>
+        d3.selectAll('#tree-container line').style('stroke', 'black')
+      );
   }
 
   getAllBagsWhichIncludeCurrentNode(node) {
@@ -546,7 +561,7 @@ export default class Graph {
       makeRequest(
         'POST',
         'https://tree-decomposition-api.herokuapp.com/compute',
-        jsonString,
+        jsonString
       ).then((data) => {
         const parsed = JSON.parse(data);
         this.td = parsed.td;
@@ -598,8 +613,8 @@ export default class Graph {
     }
 
     if (
-      this.selectedNodes.length > 1
-      && this.isSeparatingNodesAdjacent() === false
+      this.selectedNodes.length > 1 &&
+      this.isSeparatingNodesAdjacent() === false
     ) {
       this.setBalancedSeparatorExerciseWrong();
       return;
@@ -651,30 +666,18 @@ export default class Graph {
 
   setBalancedSeparatorExerciseTextCorrect() {
     d3.select('#separator-output').html(
-      `${checkmarkSvg()} $S = \\{ ${this.selectedNodes.sort((a, b) => a - b)
-      } \\}$ is a balanced separator`,
+      `${checkmarkSvg()} $S = \\{ ${this.selectedNodes.sort(
+        (a, b) => a - b
+      )} \\}$ is a balanced separator`
     );
-    renderMathInElement(document.body, {
-      delimiters: [
-        { left: '$$', right: '$$', display: true },
-        { left: '$', right: '$', display: false },
-        { left: '\\[', right: '\\]', display: true },
-      ],
-    });
   }
 
   setBalancedSeparatorExerciseTextWrong() {
     d3.select('#separator-output').html(
-      `${errorSvg()} $S = \\{ ${this.selectedNodes.sort((a, b) => a - b)
-      } \\}$ is not a balanced separator`,
+      `${errorSvg()} $S = \\{ ${this.selectedNodes.sort(
+        (a, b) => a - b
+      )} \\}$ is not a balanced separator`
     );
-    renderMathInElement(document.body, {
-      delimiters: [
-        { left: '$$', right: '$$', display: true },
-        { left: '$', right: '$', display: false },
-        { left: '\\[', right: '\\]', display: true },
-      ],
-    });
   }
 
   setBalancedSeparatorExerciseWrong() {
@@ -714,8 +717,9 @@ export default class Graph {
 
   setMinimalSeparatorExerciseTextCorrect() {
     d3.select('#separator-output').html(
-      `${checkmarkSvg()} $S = \\{ ${this.selectedNodes.sort((a, b) => a - b)
-      } \\}$ is a minimal separator`,
+      `${checkmarkSvg()} $S = \\{ ${this.selectedNodes.sort(
+        (a, b) => a - b
+      )} \\}$ is a minimal separator`
     );
     renderMathInElement(document.body, {
       delimiters: [
@@ -728,8 +732,9 @@ export default class Graph {
 
   setMinimalSeparatorExerciseTextIncorrect() {
     d3.select('#separator-output').html(
-      `${errorSvg()} $S = \\{ ${this.selectedNodes.sort((a, b) => a - b)
-      } \\}$ is not a minimal separator`,
+      `${errorSvg()} $S = \\{ ${this.selectedNodes.sort(
+        (a, b) => a - b
+      )} \\}$ is not a minimal separator`
     );
     renderMathInElement(document.body, {
       delimiters: [
@@ -743,7 +748,8 @@ export default class Graph {
   getAllProperSubsets() {
     const allSubsets = getAllSubsets(this.selectedNodes);
     const allProperSubsets = allSubsets.filter(
-      (subset) => subset.length !== this.selectedNodes.length && subset.length !== 0,
+      (subset) =>
+        subset.length !== this.selectedNodes.length && subset.length !== 0
     );
     return allProperSubsets;
   }
@@ -868,7 +874,8 @@ export default class Graph {
   createSubgraphExcludingSet(separator) {
     const nodes = this.nodes.filter((node) => !separator.includes(node.id));
     const linksToRemove = this.links.filter(
-      (link) => separator.includes(link.target.id) || separator.includes(link.source.id),
+      (link) =>
+        separator.includes(link.target.id) || separator.includes(link.source.id)
     );
     const links = this.links.filter((link) => !linksToRemove.includes(link));
     return { nodes, links };
@@ -887,7 +894,9 @@ export default class Graph {
 
   enableBalanceSeparatorExercise() {
     this.resetSeparatorExerciseOutput();
-    d3.selectAll('circle').on('click', (node) => this.checkBalanceSeparator(node));
+    d3.selectAll('circle').on('click', (node) =>
+      this.checkBalanceSeparator(node)
+    );
   }
 
   enableMinimalSeparatorExercise() {
@@ -915,15 +924,10 @@ export default class Graph {
     <svg class="exercise-icon incorrect-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-    <span>$S = \\{ ${this.selectedNodes.sort((a, b) => a - b)} \\}$ is not a separator in the graph</span>
+    <span>$S = \\{ ${this.selectedNodes.sort(
+      (a, b) => a - b
+    )} \\}$ is not a separator in the graph</span>
     `);
-    renderMathInElement(document.body, {
-      delimiters: [
-        { left: '$$', right: '$$', display: true },
-        { left: '$', right: '$', display: false },
-        { left: '\\[', right: '\\]', display: true },
-      ],
-    });
   }
 
   setCorrectSeparatorExerciseOutput() {
@@ -931,20 +935,15 @@ export default class Graph {
     <svg class="exercise-icon correct-answer-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
     </svg>
-    <p>$S = \\{ ${this.selectedNodes.sort((a, b) => a - b)} \\}$ is a separator in the graph</p>
+    <p>$S = \\{ ${this.selectedNodes.sort(
+      (a, b) => a - b
+    )} \\}$ is a separator in the graph</p>
     `);
-    renderMathInElement(document.body, {
-      delimiters: [
-        { left: '$$', right: '$$', display: true },
-        { left: '$', right: '$', display: false },
-        { left: '\\[', right: '\\]', display: true },
-      ],
-    });
   }
 
   resetSeparatorExerciseOutput() {
     d3.select('#separator-output').html(
-      'Click on a vertex to include it into the separator set.',
+      'Click on a vertex to include it into the separator set.'
     );
     this.resetNodeStyling();
   }
@@ -956,7 +955,9 @@ export default class Graph {
 
   findLinksToRemove() {
     return this.links.filter(
-      (link) => this.selectedNodes.includes(link.target.id) || this.selectedNodes.includes(link.source.id),
+      (link) =>
+        this.selectedNodes.includes(link.target.id) ||
+        this.selectedNodes.includes(link.source.id)
     );
   }
 
@@ -1038,12 +1039,16 @@ export default class Graph {
   }
 
   isTree() {
-    if (this.isConnected() && this.nodes.length - 1 === this.links.length) return true;
+    if (this.isConnected() && this.nodes.length - 1 === this.links.length) {
+      return true;
+    }
     return false;
   }
 
   areNodesInTree() {
-    return this.graphOfTd.nodes.every((node) => this.masterNodes.includes(node.id));
+    return this.graphOfTd.nodes.every((node) =>
+      this.masterNodes.includes(node.id)
+    );
   }
 
   isEveryGraphLinkInTree() {
@@ -1052,8 +1057,8 @@ export default class Graph {
         const currentBag = this.nodes[i];
         if (currentBag.vertices === undefined) continue;
         if (
-          currentBag.vertices.includes(link.source.id)
-          && currentBag.vertices.includes(link.target.id)
+          currentBag.vertices.includes(link.source.id) &&
+          currentBag.vertices.includes(link.target.id)
         ) {
           return true;
         }
@@ -1080,7 +1085,7 @@ export default class Graph {
     }
 
     const multipleNodes = this.graphOfTd.nodes.filter(
-      (node) => node.counter > 1,
+      (node) => node.counter > 1
     );
 
     for (let i = 0; i < multipleNodes.length; i++) {
@@ -1092,7 +1097,8 @@ export default class Graph {
       });
 
       const tempLinks = this.links.filter(
-        (link) => tempNodes.includes(link.source) && tempNodes.includes(link.target),
+        (link) =>
+          tempNodes.includes(link.source) && tempNodes.includes(link.target)
       );
       const obj = this.isSubGraphDisconnected(tempNodes, tempLinks);
       if (obj.isDisconnected) return false;
@@ -1107,36 +1113,44 @@ export default class Graph {
     let validString;
 
     if (this.isTree()) {
-      treeString = "Tree decomposition is a tree  <span class='material-icons correct-answer'>check</span>";
+      treeString =
+        "Tree decomposition is a tree  <span class='material-icons correct-answer'>check</span>";
     } else {
-      treeString = 'Tree decomposition must be a tree. <span class="material-icons wrong-answer">clear</span>';
+      treeString =
+        'Tree decomposition must be a tree. <span class="material-icons wrong-answer">clear</span>';
     }
 
     const nodeCoverageString = this.checkNodeCoverage();
 
     /* Check edge coverage */
     if (this.isEveryGraphLinkInTree()) {
-      edgeCoverageString = 'Edge coverage <span class="material-icons correct-answer">check</span>';
+      edgeCoverageString =
+        'Edge coverage <span class="material-icons correct-answer">check</span>';
     } else {
-      edgeCoverageString = 'Edge coverage <span class="material-icons wrong-answer">clear</span>';
+      edgeCoverageString =
+        'Edge coverage <span class="material-icons wrong-answer">clear</span>';
     }
 
     /* Check coherence property */
     if (this.checkCoherence()) {
-      coherenceString = 'Coherence <span class="material-icons correct-answer">check</span>';
+      coherenceString =
+        'Coherence <span class="material-icons correct-answer">check</span>';
     } else {
-      coherenceString = 'Coherence <span class="material-icons wrong-answer">clear</span>';
+      coherenceString =
+        'Coherence <span class="material-icons wrong-answer">clear</span>';
     }
 
     if (
-      this.isTree()
-      && this.areNodesInTree()
-      && this.isEveryGraphLinkInTree()
-      && this.checkCoherence()
+      this.isTree() &&
+      this.areNodesInTree() &&
+      this.isEveryGraphLinkInTree() &&
+      this.checkCoherence()
     ) {
-      validString = 'This is a valid tree decomposition <span class="material-icons correct-answer">check</span>';
+      validString =
+        'This is a valid tree decomposition <span class="material-icons correct-answer">check</span>';
     } else {
-      validString = 'This is not a valid tree decomposition <span class="material-icons wrong-answer">clear</span>';
+      validString =
+        'This is not a valid tree decomposition <span class="material-icons wrong-answer">clear</span>';
     }
 
     d3.select('#output').html(`
@@ -1151,9 +1165,11 @@ export default class Graph {
   checkNodeCoverage() {
     let nodeCoverageString = '';
     if (this.areNodesInTree()) {
-      nodeCoverageString = 'Node coverage  <span class="material-icons correct-answer">check</span>';
+      nodeCoverageString =
+        'Node coverage  <span class="material-icons correct-answer">check</span>';
     } else {
-      nodeCoverageString = 'Node coverage <span class="material-icons wrong-answer">clear</span>';
+      nodeCoverageString =
+        'Node coverage <span class="material-icons wrong-answer">clear</span>';
     }
     return nodeCoverageString;
   }
@@ -1193,13 +1209,14 @@ export default class Graph {
       .selectAll('text')
       .data(this.nodes, (d) => d.id)
       .join(
-        (enter) => enter
-          .append('text')
-          .attr('dy', 4.5)
-          .text((d) => d.id)
-          .attr('class', 'graph-label'),
+        (enter) =>
+          enter
+            .append('text')
+            .attr('dy', 4.5)
+            .text((d) => d.id)
+            .attr('class', 'graph-label'),
         (update) => update,
-        (exit) => exit.remove(),
+        (exit) => exit.remove()
       );
   }
 
@@ -1220,7 +1237,7 @@ export default class Graph {
             .on('contextmenu', d3.contextMenu(menu));
         },
         (update) => update,
-        (exit) => exit.remove(),
+        (exit) => exit.remove()
       );
   }
 
@@ -1229,13 +1246,14 @@ export default class Graph {
       .selectAll('line')
       .data(this.links, (d) => `v${d.source.id}-v${d.target.id}`)
       .join(
-        (enter) => enter
-          .append('line')
-          .lower()
-          .attr('class', 'graphLink')
-          .on('contextmenu', (d) => this.removeEdge(d)),
+        (enter) =>
+          enter
+            .append('line')
+            .lower()
+            .attr('class', 'graphLink')
+            .on('contextmenu', (d) => this.removeEdge(d)),
         (update) => update,
-        (exit) => exit.remove(),
+        (exit) => exit.remove()
       );
   }
 
@@ -1265,7 +1283,7 @@ export default class Graph {
   removeNode(d) {
     d3.event.preventDefault();
     const linksToRemove = this.links.filter(
-      (l) => l.source === d || l.target === d,
+      (l) => l.source === d || l.target === d
     );
     linksToRemove.map((l) => this.links.splice(this.links.indexOf(l), 1));
     const indexOfNode = this.nodes.indexOf(d);
@@ -1283,7 +1301,7 @@ export default class Graph {
     const coords = d3.mouse(d3.event.currentTarget);
     this.dragLine.attr(
       'd',
-      `M${this.mousedownNode.x},${this.mousedownNode.y}L${coords[0]},${coords[1]}`,
+      `M${this.mousedownNode.x},${this.mousedownNode.y}L${coords[0]},${coords[1]}`
     );
   }
 
@@ -1306,7 +1324,7 @@ export default class Graph {
       .classed('hidden', false)
       .attr(
         'd',
-        `M${this.mousedownNode.x},${this.mousedownNode.y}L${this.mousedownNode.x},${this.mousedownNode.y}`,
+        `M${this.mousedownNode.x},${this.mousedownNode.y}L${this.mousedownNode.x},${this.mousedownNode.y}`
       );
   }
 
@@ -1315,7 +1333,12 @@ export default class Graph {
     if (!this.mousedownNode || this.mousedownNode === d) return;
     for (let i = 0; i < this.links.length; i++) {
       const l = this.links[i];
-      if ((l.source === this.mousedownNode && l.target === d) || (l.source === d && l.target === this.mousedownNode)) return;
+      if (
+        (l.source === this.mousedownNode && l.target === d) ||
+        (l.source === d && l.target === this.mousedownNode)
+      ) {
+        return;
+      }
     }
     const newLink = { source: this.mousedownNode, target: d };
     this.links.push(newLink);
@@ -1394,18 +1417,12 @@ export default class Graph {
 
   handleMouseOver(node) {
     const circle = d3.select(`#graph-node-${node.id}`);
-    circle.transition()
-      .duration(1000)
-      .ease(d3.easeElastic)
-      .attr('r', 25);
+    circle.transition().duration(1000).ease(d3.easeElastic).attr('r', 25);
   }
 
   handleMouseOut(node) {
     const circle = d3.select(`#graph-node-${node.id}`);
-    circle.transition()
-      .duration(1000)
-      .ease(d3.easeElastic)
-      .attr('r', 20);
+    circle.transition().duration(1000).ease(d3.easeElastic).attr('r', 20);
   }
 
   createNodeSvg() {
@@ -1522,7 +1539,7 @@ export default class Graph {
       .attr('d', 'M0,-5L10,0L0,5');
   }
 
-  randomGraph(vertices, edges) {
+  generateRandomGraph(vertices, edges) {
     const randomGraph = generateRandomGraph(vertices, edges);
     this.load(randomGraph);
   }
